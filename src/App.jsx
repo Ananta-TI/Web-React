@@ -1,15 +1,18 @@
-import Header from './components/header/header.jsx'
-import Hero from './components/hero/hero.jsx'
-import './App.css'
+import { ThemeProvider } from "./components/ThemeContext";
+import Header from "./components/header";
+import Hero from "./components/hero";
+import Hero2 from "./components/TextPressure";
+// import About from "./components/about";
 
-const App = () => {
+function App() {
   return (
-    <div>
+    <ThemeProvider>
       <Header />
       <Hero />
-    </div>
+      <Hero2 />
+      {/* <About /> */}
+    </ThemeProvider>
   );
-  
 }
 
-export default App
+export default App;
