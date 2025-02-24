@@ -2,7 +2,7 @@ import { ThemeProvider } from "./components/ThemeContext";
 import Header from "./components/header";
 import Hero from "./components/hero";
 import Hero2 from "./components/TextPressure";
-// import About from "./components/about";
+import About from "./components/about";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Header />
       <Hero />
       <Hero2 />
-      {/* <About /> */}
+      <About />
     </ThemeProvider>
   );
 }
