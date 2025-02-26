@@ -6,16 +6,12 @@ export function ThemeProvider({ children }) {
   const getSystemTheme = () =>
     window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Ambil dari localStorage atau fallback ke sistem
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === "dark");
-    } else { 
-      setIsDarkMode(getSystemTheme()); // Pakai tema sistem jika belum ada preferensi
-    }
-  }, []);
+    if (savedTheme !== null) return savedTheme === "dark";
+    return getSystemTheme();
+  });
 
   useEffect(() => {
     if (isDarkMode) {

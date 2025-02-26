@@ -25,9 +25,9 @@ export default function MinimalistSidebarRight() {
       <div className="fixed top-4 right-4 left-4 flex items-center justify-between z-60">
         <span className={`text-2xl font-bold p-10 ${isDarkMode ? "text-white" : "text-zinc-800"}`}>
         <img
-            src={isDarkMode ? "/public/img/logo1.png" : "/public/img/logo3.png"}
+            src={isDarkMode ? "/img/logo1.png" : "/img/logo3.png"}
             alt="Ananta Firdaus"
-            className="w-30 h-30 object-cover"
+            className="w-30 h-20 object-cover"
           />        </span>
         <button onClick={handleToggleSidebar} className="p-2 text-gray-600 focus:outline-none">
           <motion.div
@@ -62,13 +62,21 @@ export default function MinimalistSidebarRight() {
         <nav className="space-y-8 mb-1 mt-10">
   {[
     { name: "Home", link: "#home" },
-    { name: "About", link: "#About" },
+    { name: "About", link: "#About" }, // Ubah dari "#About" ke "#about" (harus konsisten)
     { name: "Projects", link: "#projects" },
     { name: "Contact", link: "#contact" },
   ].map((item) => (
     <motion.a
       key={item.name}
       href={item.link}
+      onClick={(e) => {
+        e.preventDefault(); // Hindari default jump langsung
+        const section = document.querySelector(item.link);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setIsOpen(false); // Tutup sidebar setelah klik
+      }}
       className="block text-4xl font-light relative"
       onMouseEnter={() => setHoveredLink(item.name)}
       onMouseLeave={() => setHoveredLink(null)}
