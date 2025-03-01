@@ -4,6 +4,7 @@ import DecryptedText from "./DecryptedText";
 import { ThemeContext } from "./ThemeContext";
 import { TextReveal } from "./TextReveal";
 import GithubGraph from "./GithubGraph";
+import "../index.css";
 
 
 const About = () => {
