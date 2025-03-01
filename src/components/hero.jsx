@@ -1,13 +1,12 @@
 import { useContext } from "react";
 import { ThemeContext } from "./ThemeContext";
 import { motion } from "framer-motion";
-import Particles from "./particles"; // Pakai Particles dari OGL
+import Particles from "./particles";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import Magnet from "./Magnet"; // Import komponen Magnet
 
 export default function Hero() {
   const { isDarkMode } = useContext(ThemeContext);
-  const [hovered, setHovered] = useState(false);
 
   return (
     <section
@@ -39,20 +38,16 @@ export default function Hero() {
         transition={{ duration: 1 }}
         className="relative z-10 flex flex-col items-center"
       >
-        {/* Foto dengan efek magnet */}
-        <motion.div
-          className="relative w-40 h-40 md:w-96 md:h-76 rounded-full overflow-hidden  cursor-pointer"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          animate={{ scale: hovered ? 1.1 : 1 }}
-          transition={{ type: "spring", stiffness: 300 }}
-        >
-          <img
-            src={isDarkMode ? "/public/img/logo1.png" : "/public/img/logo3.png"}
-            alt="Ananta Firdaus"
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
+        {/* Foto dengan Magnet Effect */}
+        <Magnet magnetStrength={6}>
+          <div className="relative w-40 h-40 md:w-96 md:h-76 rounded-full overflow-hidden cursor-pointer">
+            <img
+              src={isDarkMode ? "/public/img/logo1.png" : "/public/img/logo3.png"}
+              alt="Ananta Firdaus"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </Magnet>
 
         <h1 className="text-4xl md:text-6xl font-bold mt-6">Ananta Firdaus</h1>
         <p className="text-lg mt-4 max-w-2xl mx-auto opacity-80">
