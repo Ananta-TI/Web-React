@@ -56,5 +56,5 @@ Web-React adalah proyek website berbasis **React.js** yang dikembangkan dengan *
 ---
 
 ⭐ **Jangan lupa kasih bintang repo ini di GitHub!** 🚀  
-`;
+`; haha
 
