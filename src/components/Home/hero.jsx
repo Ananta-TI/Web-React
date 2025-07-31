@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ThemeContext } from "./ThemeContext";
+import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import Particles from "./particles";
 import { ChevronDown } from "lucide-react";
@@ -28,7 +28,7 @@ export default function Hero() {
         sizeRandomness={5.2}
         cameraDistance={25}
         disableRotation={false}
-        className="absolute inset-0 w-full h-full z-0"
+        className="absolute inset-0 z-20 w-full h-full"
       />
 
       {/* Hero Content */}
@@ -39,18 +39,18 @@ export default function Hero() {
         className="relative z-10 flex flex-col items-center"
       >
         {/* Foto dengan Magnet Effect */}
-        <Magnet magnetStrength={6}>
-          <div className="relative w-40 h-40 md:w-96 md:h-76 rounded-full overflow-hidden cursor-pointer">
+        <Magnet magnetStrength={4}>
+          <div className="relative w-40 h-40 overflow-hidden rounded-full cursor-pointer md:w-96 md:h-76">
             <img
-              src={isDarkMode ? "/public/img/logo1.png" : "/public/img/logo3.png"}
+              src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
               alt="Ananta Firdaus"
-              className="w-full h-full object-cover"
+              className="object-cover w-full h-full"
             />
           </div>
         </Magnet>
 
-        <h1 className="text-4xl md:text-6xl font-bold mt-6">Ananta Firdaus</h1>
-        <p className="text-lg mt-4 max-w-2xl mx-auto opacity-80">
+        <h1 className="mt-6 text-9xl font-cocaine md:text-9xl">Ananta Firdaus</h1>
+        <p className="max-w-2xl mx-auto mt-4 text-lg opacity-80">
           Passionate about web development, design, and technology.
         </p>
       </motion.div>
@@ -60,7 +60,7 @@ export default function Hero() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 10 }}
         transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
-        className="absolute bottom-10 z-10"
+        className="absolute z-10 bottom-10"
       >
         <ChevronDown size={32} />
       </motion.div>

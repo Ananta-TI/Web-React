@@ -1,33 +1,11 @@
+  @font-face {
+  font-family: 'AlphaLyrae';
+  src: url('../fonts/AlphaLyrae-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 @import "tailwindcss";
-@import "tailwindcss/typography";
-@import "tailwindcss/forms";
-@import "tailwindcss/line-clamp";
-@import "tailwindcss/aspect-ratio";
-@import "tailwindcss/animation";
-@import "tailwindcss/transform";
-@import "tailwindcss/transition";
-@import "tailwindcss/box-shadow";
-@import "tailwindcss/border-radius";
-@import "tailwindcss/opacity";
-@import "tailwindcss/rotate";
-@import "tailwindcss/scale";
-@import "tailwindcss/skew";
-@import "tailwindcss/translate";
-@import "tailwindcss/gradient";
-@import "tailwindcss/placeholder";
-@import "tailwindcss/interactivity";
-@import "tailwindcss/scroll-snap";
-@import "tailwindcss/scrollbar";
-@import "tailwindcss/tables";
-@import "tailwindcss/transforms";
-@import "tailwindcss/transition-property";
-@import "tailwindcss/transition-timing-function";
-@import "tailwindcss/transition-duration";
-@import "tailwindcss/transition-delay";
-@import "tailwindcss/animation";
-@import "tailwindcss/animation-name";
-@import "tailwindcss/animation-duration";
-@import "tailwindcss/animation-timing-function";
+
 
 @layer base {
   :root {
@@ -93,24 +71,6 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply text-foreground;
-  }
-  .centered-block {
-    --ideal-block-width: min(1200px, 85%);
-    @apply mx-auto w-[--ideal-block-width];
-  }
-}
-
-@layer utilities {
-  .bottom-clipped {
-    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-  }
-}
 
 @keyframes globeBounce {
   0% {
@@ -270,4 +230,7 @@
     min-width: 250px !important;
     max-height: 100px !important;
   }
+
+
+
 }

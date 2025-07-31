@@ -1,4 +1,4 @@
-import TextPressure from './TextPressure';
+import TextPressure from '../Shared/TextPressure';
 
 // Note:
 // Make sure the font you're using supports all the variable properties. 

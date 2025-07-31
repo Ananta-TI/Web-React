@@ -19,7 +19,7 @@ export default function GithubGraph({ username = "Ananta-TI" }) {
     <div className="p-6 flex justify-center">
       <motion.div
         className="bg-white text-white dark:bg-zinc-900 p-6 rounded-xl shadow-lg border-2 border-transparent 
-                   hover:border-indigo-500 dark:hover:border-purple-500 transition-all duration-300 
+                   hover:shadow-indigo-500 dark:hover:shadow-purple-500 transition-all duration-300 
                    backdrop-blur-lg bg-opacity-75 dark:bg-opacity-60"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

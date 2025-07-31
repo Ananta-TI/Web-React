@@ -1,11 +1,13 @@
-import { ThemeProvider } from "./components/ThemeContext";
-import Header from "./components/header";
-import Hero from "./components/hero";
-import Hero2 from "./components/TextPressure";
-import About from "./components/about";
-import CursorEffect from "./components/CursorEffect";
+import { ThemeProvider } from "./context/ThemeContext";
+import Header from "./layouts/header";
+import Footer from "./layouts/footer";
+import Hero from "./components/Home/hero";
+import Hero2 from "./components/Shared/TextPressure";
+import About from "./layouts/about";
+import CursorEffect from "./components/Shared/CursorEffect";
 import GithubGraph from "./components/GithubGraph";
 import './index.css';
+import './assets/tailwind.css';
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
       <Hero />
       <Hero2 />
       <About />
+      <Footer />
     </ThemeProvider>
   );
 }

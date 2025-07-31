@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { Menu, X, Moon, Globe } from "lucide-react";
 import { motion } from "framer-motion";
-import { ThemeContext } from "./ThemeContext"; // Pakai Context langsung
+import { ThemeContext } from "../context/ThemeContext"; // Pakai Context langsung
 
 export default function MinimalistSidebarRight() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,12 +22,12 @@ export default function MinimalistSidebarRight() {
 
   return (
     <div className="relative">
-      <div className="fixed top-4 right-4 left-4 flex items-center justify-between z-60">
-        <span className={`text-2xl font-bold p-10 ${isDarkMode ? "text-white" : "text-zinc-800"}`}>
+      <div className="fixed flex items-center justify-between right-4 left-4 z-60">
+        <span className={`text-2xl font-bold p-0 ${isDarkMode ? "text-white" : "text-zinc-800"}`}>
         <img
-            src={isDarkMode ? "/img/logo1.png" : "/img/logo3.png"}
+            src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
             alt="Ananta Firdaus"
-            className="w-30 h-20 object-cover"
+            className="object-cover h-20 w-30"
           />        </span>
         <button onClick={handleToggleSidebar} className="p-2 text-gray-600 focus:outline-none">
           <motion.div
@@ -37,29 +37,29 @@ export default function MinimalistSidebarRight() {
             className="p-2 rounded-full"
           >
             {isOpen ? (
-              <X className="w-10 h-10 p-2 rounded-full bg-zinc-800 text-white" />
+              <X className="w-13 h-13 p-2 text-white rounded-full  bg-zinc-800" />
             ) : (
-              <Menu className="w-10 h-10 p-2 rounded-full bg-zinc-800 text-white" />
+              <Menu className="w-13 h-13 p-2 text-white rounded-full bg-zinc-800" />
             )}
           </motion.div>
         </button>
       </div>
 
-      {isOpen && <div className="fixed inset-0 bg-black/20 z-40" onClick={handleToggleSidebar} />}
+      {isOpen && <div className="fixed inset-0 z-40 bg-black/20" onClick={handleToggleSidebar} />}
 
       <motion.div
-        className={`fixed top-0 right-0 h-full w-120 z-50 ${isDarkMode ? "bg-zinc-800 text-white" : "bg-gray-100 text-gray-900"} border-l border-gray-300 p-8 flex flex-col`}
+        className={`fixed top-0 right-0 h-full w-120 z-50 ${isDarkMode ? "bg-zinc-800 text-white" : "bg-gray-100 text-gray-900"}  p-8 flex flex-col`}
         initial={{ translateX: "100%" }}
         animate={{ translateX: isOpen ? "0%" : "100%" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        <div className="flex justify-between items-center mt-10 mb-5">
-          <span className="text-xl font-semibold uppercase tracking-wide">Navigation</span>
+        <div className="flex items-center justify-between mt-10 mb-5">
+          <span className="text-xl font-semibold tracking-wide uppercase">Navigation</span>
         </div>
 
         <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
-        <nav className="space-y-8 mb-1 mt-10">
+        <nav className="mt-10 mb-1 space-y-8">
   {[
     { name: "Home", link: "#home" },
     { name: "About", link: "#About" }, // Ubah dari "#About" ke "#about" (harus konsisten)
@@ -77,7 +77,7 @@ export default function MinimalistSidebarRight() {
         }
         setIsOpen(false); // Tutup sidebar setelah klik
       }}
-      className="block text-4xl font-light relative"
+      className="relative block text-4xl font-light"
       onMouseEnter={() => setHoveredLink(item.name)}
       onMouseLeave={() => setHoveredLink(null)}
       animate={hoveredLink === item.name ? {
@@ -93,7 +93,7 @@ export default function MinimalistSidebarRight() {
 
 
         <div className="mt-40">
-          <span className="text-sm font-bold uppercase tracking-wide block mb-2">Links</span>
+          <span className="block mb-2 text-sm font-bold tracking-wide uppercase">Links</span>
           <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
           <div className="flex flex-wrap gap-4 text-sm">
             {[
@@ -106,7 +106,7 @@ export default function MinimalistSidebarRight() {
               <motion.a
                 key={link}
                 href="#"
-                className="hover:underline relative"
+                className="relative "
                 onMouseEnter={() => setHoveredLink(link)}
                 onMouseLeave={() => setHoveredLink(null)}
                 animate={hoveredLink === link ? {
@@ -121,11 +121,11 @@ export default function MinimalistSidebarRight() {
           </div>
         </div>
 
-        <div className="mt-auto flex space-x-3">
+        <div className="flex mt-auto space-x-3">
           <button onClick={handleDarkModeToggle} className="p-2 border rounded">
             <Moon />
           </button>
-          <button className="p-2 rounded border border-gray-300 hover:bg-gray-200">
+          <button className="p-2 border border-gray-300 rounded hover:bg-gray-200">
             <Globe className="w-5 h-5" />
           </button>
         </div>

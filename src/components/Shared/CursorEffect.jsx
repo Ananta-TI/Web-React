@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { ThemeContext } from "./ThemeContext";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function CursorParticles({
   particleCount = 16,
@@ -72,7 +72,7 @@ export default function CursorParticles({
       {particles.map((particle, index) => (
         <div
           key={index}
-          className="pointer-events-none fixed top-0 left-0"
+          className="fixed top-0 left-0 pointer-events-none"
           style={{
             transform: `translate(${particle.x - particle.size / 2}px, ${particle.y - particle.size / 2}px) rotate(${particle.rotate}deg)`,
             width: `${particle.size}px`,

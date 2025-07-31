@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useContext } from "react";
-import { ThemeContext } from "./ThemeContext";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export const TextReveal = ({ text, className }) => {
   const targetRef = useRef(null);
@@ -19,7 +19,7 @@ export const TextReveal = ({ text, className }) => {
       ref={targetRef}
       className={`${className} relative w-full flex mb-[70px] justify-center transition-colors duration-500`}
     >
-      <div className="max-w-7xl py-16">
+      <div className="py-16 max-w-7xl">
       <p
   className={`flex flex-wrap font-bold transition-colors duration-500 ${
     isDarkMode ? "text-white " : "text-gray-900"
