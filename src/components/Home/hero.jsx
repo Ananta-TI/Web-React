@@ -44,7 +44,7 @@ export default function Hero() {
             <img
               src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
               alt="Ananta Firdaus"
-              className="object-cover w-full h-full"
+              className="object-cover w-full h-full "
             />
           </div>
         </Magnet>

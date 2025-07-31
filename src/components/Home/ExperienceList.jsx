@@ -87,17 +87,16 @@ export default function ExperienceList() {
 
   return (
     <div className="relative overflow-hidden transition-colors duration-500">
-      {/* Gradient kiri */}
     {/* Gradient kiri */}
 <div
-  className={`pointer-events-none absolute left-0 top-0 h-full w-20 z-30 bg-gradient-to-r to-transparent
+  className={`pointer-events-none  absolute left-0 top-0 h-full w-20 z-30 bg-gradient-to-r to-transparent
     ${isDarkMode ? "from-zinc-900" : "from-white"}
   `}
 />
 
 {/* Gradient kanan */}
 <div
-  className={`pointer-events-none absolute right-0 top-0 h-full w-20 z-30 bg-gradient-to-l to-transparent
+  className={`pointer-events-none  absolute right-0 top-0 h-full w-20 z-30 bg-gradient-to-l to-transparent
     ${isDarkMode ? "from-zinc-900" : "from-white"}
   `}
 />
@@ -106,7 +105,7 @@ export default function ExperienceList() {
       {/* Kontainer scroll */}
       <div
         ref={scrollRef}
-        className="flex gap-6 py-6 overflow-x-hidden px-2"
+        className="flex gap-6 py-6  overflow-x-hidden px-2"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{ scrollBehavior: "auto", willChange: "scroll-position" }}
@@ -114,16 +113,16 @@ export default function ExperienceList() {
         {repeatedExperiences.map((exp, index) => (
           <div
             key={`${exp.title}-${index}`}
-            className={`relative w-[300px] md:w-[400px] flex-shrink-0 rounded-2xl px-6 py-5 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer
-              ${isDarkMode ? "bg-zinc-900 hover:bg-zinc-800" : "bg-gray-100 hover:bg-gray-200"}
+            className={`relative w-[300px] cursor-target  md:w-[400px] flex-shrink-0 rounded-2xl px-6 py-5 transition-all duration-300 shadow-sm hover:shadow-xl 
+              ${isDarkMode ? "bg-zinc-800 hover:bg-zinc-700" : "bg-gray-100 hover:bg-gray-200"}
             `}
             title={exp.duration}
           >
             <blockquote>
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute rounded-2xl -left-0.5 -top-0.5 h-[calc(100%+4px)] w-[calc(100%+4px)] border
-                  ${isDarkMode ? "border-zinc-800" : "border-gray-300"}
+                className={`pointer-events-none absolute rounded-2xl -left-0.5 -top-0.5 h-[calc(100%+4px)] w-[calc(100%+4px)] border border-b-0
+                  ${isDarkMode ? "border-gray-600" : "border-gray-800"}
                 `}
               />
               <span
@@ -131,15 +130,16 @@ export default function ExperienceList() {
                   ${isDarkMode ? "text-gray-100" : "text-gray-800"}
                 `}
               >
-                {iconMap[exp.category]} {exp.title}
+                {iconMap[exp.category]} {exp.title} 
               </span>
               <div className="relative z-20 mt-4">
                 <span
-                  className={`text-xs font-normal leading-[1.6] transition-colors duration-500
+                  className={`text-xs  font-normal leading-[1.6] transition-colors duration-500
                     ${isDarkMode ? "text-gray-400" : "text-gray-600"}
                   `}
                 >
-                  {exp.duration}
+                  {exp.duration} <br />
+                  {exp.title}
                 </span>
               </div>
             </blockquote>

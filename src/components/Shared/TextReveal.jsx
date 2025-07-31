@@ -9,7 +9,7 @@ export const TextReveal = ({ text, className }) => {
   const { isDarkMode } = useContext(ThemeContext) || { isDarkMode: false };
   const { scrollYProgress } = useScroll({
     target: targetRef,
-    offset: ["start 75%", "end 90%"],
+    offset: ["start 55%", "end 60%"],
   });
 
   const words = text.split(" ");
@@ -19,7 +19,7 @@ export const TextReveal = ({ text, className }) => {
       ref={targetRef}
       className={`${className} relative w-full flex mb-[70px] justify-center transition-colors duration-500`}
     >
-      <div className="py-16 max-w-7xl">
+      <div className="py-16  max-w-7xl">
       <p
   className={`flex flex-wrap font-bold transition-colors duration-500 ${
     isDarkMode ? "text-white " : "text-gray-900"
