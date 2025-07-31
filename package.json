@@ -16,7 +16,7 @@
     "@heroicons/react": "^2.2.0",
     "@mui/material": "^7.2.0",
     "@tailwindcss/vite": "^4.0.6",
-    "framer-motion": "^12.4.7",
+    "framer-motion": "^12.23.12",
     "gsap": "^3.12.7",
     "lucide-react": "^0.475.0",
     "ogl": "^1.0.11",

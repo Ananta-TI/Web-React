@@ -5,6 +5,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { TextReveal } from "../components/Shared/TextReveal";
 import GithubGraph from "../components/GithubGraph";
 import GithubCard from "../components/GithubCard";
+import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
 import "../index.css";
 
@@ -61,7 +62,10 @@ const About = () => {
       <GithubCard username="Ananta-TI" />
       <GithubGraph />
       </div>
-    </section>
+ <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <AnimatedBeamDemo />
+    </div>
+        </section>
   );
 };
 
