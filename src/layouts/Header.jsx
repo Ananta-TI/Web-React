@@ -77,7 +77,7 @@ export default function MinimalistSidebarRight() {
         }
         setIsOpen(false); // Tutup sidebar setelah klik
       }}
-      className="relative cursor-target block text-4xl font-light"
+      className="relative cursor-none cursor-target block text-4xl font-light"
       onMouseEnter={() => setHoveredLink(item.name)}
       onMouseLeave={() => setHoveredLink(null)}
       animate={hoveredLink === item.name ? {
@@ -106,7 +106,7 @@ export default function MinimalistSidebarRight() {
               <motion.a
                 key={link}
                 href="#"
-                className="relative cursor-target "
+                className="relative cursor-none cursor-target "
                 onMouseEnter={() => setHoveredLink(link)}
                 onMouseLeave={() => setHoveredLink(null)}
                 animate={hoveredLink === link ? {
