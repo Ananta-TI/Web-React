@@ -65,7 +65,7 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
     href={profile.html_url}
     target="_blank"
     rel="noreferrer"
-    className="hover:underline hover:text-gray-500 transition"
+    className="hover:underline cursor-none hover:text-gray-500 transition"
   >
     {profile.login}
    <span className="ml-1">• NTA</span>
