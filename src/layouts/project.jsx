@@ -33,7 +33,7 @@ const About = () => {
           />
         </h2>
       </motion.div>
-
+            
       {/* ---- Showcase Container ---- */}
       <div className="flex justify-center px-6 md:px-20 lg:px-82 pb-24">
         <div
