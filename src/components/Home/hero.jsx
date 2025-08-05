@@ -3,7 +3,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import Particles from "./particles";
 import { ChevronDown } from "lucide-react";
-import Magnet from "./Magnet"; // Import komponen Magnet
+import Magnet from "./magnet"; // Import komponen Magnet
 
 export default function Hero() {
   const { isDarkMode } = useContext(ThemeContext);
