@@ -16,7 +16,7 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
         // Fetch followers
         fetch(data.followers_url)
           .then((res) => res.json())
-          .then((f) => setFollowers(f.slice(0, 6))); // ambil max 6 followers
+          .then((f) => setFollowers(f.slice(0, 10))); // ambil max 6 followers
       })
       .catch((err) => console.error(err));
   }, [username]);
