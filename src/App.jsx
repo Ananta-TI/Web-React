@@ -1,5 +1,5 @@
 import { ThemeProvider } from "./context/ThemeContext";
-import Header from "./layouts/header.jsx";
+import Header from "./layouts/header";
 import Footer from "./layouts/footer";
 import Hero from "./components/Home/hero";
 import Hero2 from "./components/Shared/TextPressure";
