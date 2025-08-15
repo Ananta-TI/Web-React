@@ -59,7 +59,7 @@ export default function Header() {
             initial={{ rotate: 0 }}
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="p-2 rounded-full"
+            className="p-2 rounded-full cursor-none cursor-target"
           >
             {isOpen ? (
               <X className="w-13 h-13 p-2 text-white rounded-full bg-zinc-800" />
@@ -90,11 +90,11 @@ export default function Header() {
           >
             {/* SVG Curve */}
             <motion.svg
-              className="w-[100px] h-full"
+              className="w-[99px] h-full"
               xmlns="http://www.w3.org/2000/svg"
             >
               <motion.path
-                fill={isDarkMode ? "rgb(39,39,42)" : "rgb(243,244,246)"}
+                fill={isDarkMode ? "rgb(243,244,246)" : "rgb(39,39,42) "}
                 variants={curveVariants}
                 initial="initial"
                 animate="enter"
@@ -106,8 +106,8 @@ export default function Header() {
             <div
               className={`h-full w-[480px] ${
                 isDarkMode
-                  ? "bg-zinc-800 text-white"
-                  : "bg-gray-100 text-gray-900"
+                  ? "bg-gray-100 text-gray-900"
+                  : "bg-zinc-800 text-white "
               } p-8 flex flex-col`}
             >
               <div className="flex items-center justify-between mt-10 mb-5">
