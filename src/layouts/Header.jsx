@@ -3,7 +3,7 @@ import { Menu, X, Moon, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 
-export default function MinimalistSidebarRight() {
+export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hoveredLink, setHoveredLink] = useState(null);
