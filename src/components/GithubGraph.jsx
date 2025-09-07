@@ -108,7 +108,7 @@ export default function GithubGraph({ username = "Ananta-TI" }) {
         )}
 
         {/* Custom CSS untuk styling tambahan */}
-        <style jsx>{`
+        <style>{`
           .github-calendar-dark {
             color: #e6edf3;
           }
