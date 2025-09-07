@@ -11,7 +11,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center ${
+      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
       }`}
     >
@@ -49,7 +49,7 @@ export default function Hero() {
           </div>
         </Magnet>
 
-        <h1 className="mt-6 text-9xl font-cocaine md:text-9xl">Ananta Firdaus</h1>
+        <h1 className="mt-6 text-9xl font-MailBox md:text-9xl">Ananta Firdaus</h1>
         <p className="max-w-2xl mx-auto mt-4 text-lg opacity-80">
           Passionate about web development, design, and technology.
         </p>

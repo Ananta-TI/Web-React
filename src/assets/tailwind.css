@@ -19,6 +19,18 @@
     font-family: 'cocaine';
     src: url('/fonts/Cocaine sans.ttf');
 }
+@font-face {
+    font-family: 'Exorcista';
+    src: url('/fonts/Exorcista_-Jed_40.ttf');
+}
+@font-face {
+    font-family: 'termination';
+    src: url('/fonts/X Termination.otf');
+}
+@font-face {
+    font-family: 'MailBox';
+    src: url('fonts/DK Rat Infested Mailbox.ttf');
+}
 
 @theme {
     --font-barlow: "Barlow", sans-serif;
@@ -26,6 +38,9 @@
     --font-PoppinsBold: "PoppinsBold", sans-serif;
     --font-lyrae: "AlphaLyrae", sans-serif;
     --font-cocaine: "cocaine", sans-serif; 
+    --font-Exorcista: "Exorcista", sans-serif;
+    --font-termination: "termination", sans-serif;
+    --font-MailBox: "MailBox", sans-serif;
     --color-latar: #f3f4f6;
     --color-teks: #374151; 
     --color-teks-samping: #6b7280;
