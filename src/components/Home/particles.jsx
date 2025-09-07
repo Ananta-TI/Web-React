@@ -93,37 +93,53 @@ const Particles = ({
   const containerRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+useEffect(() => {
+  const container = containerRef.current;
+  if (!container) return;
 
-    const renderer = new Renderer({ depth: false, alpha: true });
-    const gl = renderer.gl;
-    container.appendChild(gl.canvas);
-    gl.clearColor(0, 0, 0, 0);
+  const renderer = new Renderer({ depth: false, alpha: true });
+  const gl = renderer.gl;
+  container.appendChild(gl.canvas);
+  gl.clearColor(0, 0, 0, 0);
 
-    const camera = new Camera(gl, { fov: 15 });
-    camera.position.set(0, 0, cameraDistance);
+  const camera = new Camera(gl, { fov: 15 });
+  camera.position.set(0, 0, cameraDistance);
 
-    const resize = () => {
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-      renderer.setSize(width, height);
-      camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
-    };
-    window.addEventListener("resize", resize, false);
-    resize();
+  const resize = () => {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    renderer.setSize(width, height);
+    camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+  };
+  window.addEventListener("resize", resize, false);
+  resize();
 
-    const handleMouseMove = (e) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-      mouseRef.current = { x, y };
-    };
+  // 🖱️ Mouse handler
+  const handleMouseMove = (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+    mouseRef.current = { x, y };
+  };
 
-    if (moveParticlesOnHover) {
-      container.addEventListener("mousemove", handleMouseMove);
+  // 📱 Gyro handler
+  const handleOrientation = (e) => {
+    // e.gamma = left/right, e.beta = front/back
+    const x = e.gamma / 45; // normalisasi (-45..45)
+    const y = e.beta / 45;  // normalisasi (-45..45)
+    mouseRef.current = { x, y };
+  };
+
+  if (moveParticlesOnHover) {
+    // Desktop pakai mouse
+    container.addEventListener("mousemove", handleMouseMove);
+
+    // Mobile pakai gyro
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientation", handleOrientation, true);
     }
+  }
+
 
     const count = particleCount;
     const positions = new Float32Array(count * 3);
@@ -199,16 +215,17 @@ const Particles = ({
 
     animationFrameId = requestAnimationFrame(update);
 
-    return () => {
-      window.removeEventListener("resize", resize);
-      if (moveParticlesOnHover) {
-        container.removeEventListener("mousemove", handleMouseMove);
-      }
-      cancelAnimationFrame(animationFrameId);
-      if (container.contains(gl.canvas)) {
-        container.removeChild(gl.canvas);
-      }
-    };
+  return () => {
+    window.removeEventListener("resize", resize);
+    if (moveParticlesOnHover) {
+      container.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("deviceorientation", handleOrientation);
+    }
+    cancelAnimationFrame(animationFrameId);
+    if (container.contains(gl.canvas)) {
+      container.removeChild(gl.canvas);
+    }
+  };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     particleCount,
