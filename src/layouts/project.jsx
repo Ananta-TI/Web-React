@@ -112,7 +112,7 @@ const Projects = () => {
           transition={{ duration: 0.8 }}
           className="text-center"
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-6">
             <DecryptedText
               text="My Projects"
               speed={100}
