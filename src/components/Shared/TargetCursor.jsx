@@ -31,6 +31,15 @@ const TargetCursor = ({
   }, []);
 
   useEffect(() => {
+      // 🔎 Cek apakah device pakai input "coarse" (touchscreen)
+  const isTouch = window.matchMedia("(pointer: coarse)").matches;
+  if (isTouch) {
+    // Kalau mobile, jangan render cursor sama sekali
+    if (cursorRef.current) {
+      cursorRef.current.style.display = "none";
+    }
+    return; // stop semua logic GSAP
+  }
     if (!cursorRef.current) return;
 
     const originalCursor = document.body.style.cursor;
