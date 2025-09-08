@@ -1,75 +1,90 @@
+import { useNavigate } from "react-router-dom"; // tambahkan import ini di atas
 import { useContext } from "react";
 import { motion } from "framer-motion";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
-import { Github, ExternalLink, Globe, Code, Database, Palette } from "lucide-react";
+import {
+  Github,
+  ExternalLink,
+  Globe,
+  Code,
+  Database,
+  Palette,
+} from "lucide-react";
 import "../index.css";
 
+
 const Projects = () => {
-  const { isDarkMode = true } = useContext(ThemeContext) ?? {};
+  const theme = useContext(ThemeContext);
+  const isDarkMode = theme?.isDarkMode ?? true; // Default dark mode jika context belum tersedia
+  const navigate = useNavigate(); // inisialisasi useNavigate
 
   // Daftar Project dengan gambar preview
   const projects = [
     {
       title: "My First Web",
-      description: "Website pertama yang saya buat untuk belajar HTML, CSS, dan JavaScript dasar dengan desain modern dan responsif.",
+      description:
+        "Website pertama yang saya buat untuk belajar HTML, CSS Tailwind, dan JavaScript dasar dengan desain modern dan responsif.",
       demo: "https://ananta-ti.github.io/my-first-web/",
       repo: null,
       tags: ["HTML", "CSS", "JavaScript"],
       category: "Web Development",
       image: "/api/placeholder/400/250",
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
     },
+    // {
+    //   title: "My Second Web",
+    //   description:
+    //     "Pengembangan lebih lanjut dengan desain yang lebih modern dan responsif menggunakan Bootstrap.",
+    //   demo: "https://ananta-ti.github.io/my-second-web/",
+    //   repo: null,
+    //   tags: ["HTML", "CSS", "JavaScript"],
+    //   category: "Web Development",
+    //   image: "/api/placeholder/400/250",
+    //   color: "from-purple-500 to-pink-500",
+    // },
+    // {
+    //   title: "KABESTU",
+    //   description: "website company profile dari sebuah perusahaan besi dengan fitur lengkap dan antarmuka yang user-friendly.",
+    //   demo: null,
+    //   repo: "https://github.com/Ananta-TI/besi.git",
+    //   tags: ["laravel, Bootstrap", "MySQL"],
+    //   category: "Web Development",
+    //   image: "/api/placeholder/400/250",
+    //   color: "from-green-500 to-teal-500"
+    // },
     {
-      title: "My Second Web", 
-      description: "Pengembangan lebih lanjut dengan desain yang lebih modern dan responsif menggunakan framework terbaru.",
-      demo: "https://ananta-ti.github.io/my-second-web/",
-      repo: null,
-      tags: ["HTML", "CSS", "JavaScript"],
-      category: "Web Development", 
-      image: "/api/placeholder/400/250",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      title: "Besi App",
-      description: "Aplikasi mobile untuk manajemen inventory besi dengan fitur lengkap dan antarmuka yang user-friendly.",
-      demo: null,
-      repo: "https://github.com/Ananta-TI/besi.git",
-      tags: ["Mobile", "Flutter", "Dart"],
-      category: "Mobile Development",
-      image: "/api/placeholder/400/250", 
-      color: "from-green-500 to-teal-500"
-    },
-    {
-      title: "Guest Dashboard",
-      description: "Dashboard untuk manajemen tamu dengan antarmuka yang user-friendly dan fitur real-time monitoring.",
+      title: "Sedap",
+      description:
+        "Platform kuliner berbasis React yang menampilkan produk makanan lokal Indonesia dengan UI modern dan responsif. Mendukung eksplorasi camilan tradisional, makanan sehat, hingga kuliner kekinian, sekaligus mendorong pertumbuhan UMKM kuliner.",
       demo: "https://react-nta.vercel.app/guest",
       repo: null,
-      tags: ["React", "Dashboard", "UI/UX"],
-      category: "Dashboard",
+      tags: ["React", "Tailwind", "UI/UX"],
+      category: "Web Development",
       image: "/api/placeholder/400/250",
-      color: "from-orange-500 to-red-500" 
+      color: "from-orange-500 to-red-500",
     },
     {
       title: "React Inventory",
-      description: "Sistem inventory management yang dibangun dengan React dan modern UI untuk efisiensi bisnis.",
+      description:
+        "Sistem inventory management yang dibangun dengan React dan modern UI untuk efisiensi bisnis.",
       demo: "https://react-inventory-roan.vercel.app/",
       repo: null,
       tags: ["React", "Inventory", "Management"],
       category: "Web Application",
       image: "/api/placeholder/400/250",
-      color: "from-indigo-500 to-blue-500"
+      color: "from-indigo-500 to-blue-500",
     },
-    {
-      title: "MathDash Pro",
-      description: "Dashboard matematika interaktif dengan berbagai tool dan kalkulator untuk pembelajaran yang efektif.",
-      demo: "https://mathdash-pro.vercel.app/",
-      repo: null,
-      tags: ["React", "Math", "Education"],
-      category: "Education",
-      image: "/api/placeholder/400/250",
-      color: "from-yellow-500 to-orange-500"
-    },
+    // {
+    //   title: "MathDash Pro",
+    //   description: "Dashboard matematika interaktif untuk menghitung nilai FPB dan KPK.",
+    //   demo: "https://mathdash-pro.vercel.app/",
+    //   repo: null,
+    //   tags: ["React", "Math", "Education"],
+    //   category: "Education",
+    //   image: "/api/placeholder/400/250",
+    //   color: "from-yellow-500 to-orange-500"
+    // },
   ];
 
   const containerVariants = {
@@ -77,31 +92,31 @@ const Projects = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 50 
+    hidden: {
+      opacity: 0,
+      y: 50,
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   return (
     <section
       id="projects"
       className={`w-full min-h-screen py-20 transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900" : "bg-gray-50"
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
       }`}
     >
       {/* Section Heading */}
@@ -121,10 +136,13 @@ const Projects = () => {
               animateOn="view"
             />
           </h2>
-          <p className={`text-lg sm:text-xl max-w-3xl mx-auto ${
-            isDarkMode ? "text-zinc-400" : "text-gray-600"
-          }`}>
-            Koleksi project yang telah saya kembangkan menggunakan berbagai teknologi modern
+          <p
+            className={`relative text-base sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 font px-2 sm:px-4 md:px-0 ${
+              isDarkMode ? "text-zinc-400" : "text-gray-600"
+            }`}
+          >
+            Koleksi project yang telah saya kembangkan menggunakan berbagai
+            teknologi modern
           </p>
         </motion.div>
       </div>
@@ -141,13 +159,13 @@ const Projects = () => {
             <motion.div
               key={index}
               variants={cardVariants}
-              whileHover={{ 
+              whileHover={{
                 y: -8,
-                transition: { duration: 0.3, ease: "easeOut" }
+                transition: { duration: 0.3, ease: "easeOut" },
               }}
               className={`group relative overflow-hidden rounded-2xl ${
-                isDarkMode 
-                  ? "bg-zinc-800/50 border border-zinc-700/50" 
+                isDarkMode
+                  ? "bg-zinc-800/50 border border-zinc-700/50"
                   : "bg-white border border-gray-200"
               } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
             >
@@ -161,24 +179,28 @@ const Projects = () => {
                     loading="lazy"
                   />
                 ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}>
+                  <div
+                    className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}
+                  >
                     <div className="text-center text-white">
                       <Github className="w-12 h-12 mx-auto mb-2 opacity-80" />
                       <p className="text-sm font-medium">Repository</p>
                     </div>
                   </div>
                 )}
-                
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    isDarkMode 
-                      ? "bg-zinc-900/80 text-zinc-200" 
-                      : "bg-white/90 text-gray-700"
-                  } backdrop-blur-sm border border-white/20`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      isDarkMode
+                        ? "bg-zinc-900/80 text-zinc-200"
+                        : "bg-white/90 text-gray-700"
+                    } backdrop-blur-sm border border-white/20`}
+                  >
                     {project.category}
                   </span>
                 </div>
@@ -187,16 +209,20 @@ const Projects = () => {
               {/* Project Content */}
               <div className="p-9">
                 {/* Title */}
-                <h3 className={`text-xl font-bold mb-3 ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}>
+                <h3
+                  className={`text-xl font-bold mb-3 ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   {project.title}
                 </h3>
 
                 {/* Description */}
-                <p className={`text-sm leading-relaxed mb-4 ${
-                  isDarkMode ? "text-zinc-400" : "text-gray-600"
-                }`}>
+                <p
+                  className={`text-sm leading-relaxed mb-4 ${
+                    isDarkMode ? "text-zinc-400" : "text-gray-600"
+                  }`}
+                >
                   {project.description}
                 </p>
 
@@ -238,7 +264,9 @@ const Projects = () => {
                       rel="noreferrer"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`${project.demo ? 'px-3' : 'flex-1 justify-center'} flex items-center gap-2 py-2.5 ${
+                      className={`${
+                        project.demo ? "px-3" : "flex-1 justify-center"
+                      } flex items-center gap-2 py-2.5 ${
                         isDarkMode
                           ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-700"
@@ -255,6 +283,22 @@ const Projects = () => {
         </motion.div>
       </div>
 
+      
+      {/* Tombol ke All Projects */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center"
+      >
+        <button
+          onClick={() => navigate("/all-projects")}
+          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          View All Projects
+        </button>
+      </motion.div>
+
       {/* Bottom Section */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -262,14 +306,17 @@ const Projects = () => {
         transition={{ duration: 0.8, delay: 0.4 }}
         className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 text-center"
       >
-        <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${
-          isDarkMode 
-            ? "bg-zinc-800 text-zinc-300 border border-zinc-700" 
-            : "bg-white text-gray-600 border border-gray-200"
-        } shadow-lg`}>
+        <div
+          className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${
+            isDarkMode
+              ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
+              : "bg-white text-gray-600 border border-gray-200"
+          } shadow-lg`}
+        >
           <Code className="w-5 h-5" />
           <span className="font-medium">
-            {projects.length} Projects • {projects.filter(p => p.demo).length} Live Demos
+            {projects.length} Projects • {projects.filter((p) => p.demo).length}{" "}
+            Live Demos
           </span>
         </div>
       </motion.div>

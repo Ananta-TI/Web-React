@@ -67,7 +67,7 @@ export function AnimatedBeamDemo() {
     ${isDarkMode ? "bg-zinc-800" : "bg-zinc-200"}`}
           >
             <span
-              className={` whitespace-pre-wrap bg-clip-text text-center text-4xl font-semibold leading-none text-transparent sm:text-8xl 
+              className={` whitespace-pre-wrap bg-clip-text text-center text-6xl font-semibold font-lyrae leading-none text-transparent sm:text-8xl 
       ${isDarkMode
                   ? "bg-gradient-to-b from-zinc-100 to-zinc-900"
                   : "bg-gradient-to-b from-zinc-800 to-zinc-100"

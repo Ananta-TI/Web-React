@@ -2,8 +2,12 @@ import { useState, useEffect, useContext } from "react";
 import { Menu, X, Moon, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Header() {
+  const navigate = useNavigate();
+const location = useLocation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hoveredLink, setHoveredLink] = useState(null);
@@ -161,56 +165,61 @@ export default function Header() {
               <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
               {/* Navigation Links */}
-              <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-                {[
-                  { name: "Home", link: "#home" },
-                  { name: "About", link: "#About" },
-                  { name: "Projects", link: "#projects" },
-                  { name: "Contact", link: "#contact" }
-                ].map((item, index) => (
-                  <motion.a
-                    key={item.name}
-                    href={item.link}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const section = document.querySelector(item.link);
-                      if (section) {
-                        section.scrollIntoView({
-                          behavior: "smooth",
-                          block: "start"
-                        });
-                      }
-                      setIsOpen(false);
-                    }}
-                    className="cursor-target cursor-none relative block text-2xl md:text-4xl font-light touch-manipulation active:scale-95 transition-transform"
-                    onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
-                    onMouseLeave={() => !isMobile && setHoveredLink(null)}
-                    animated={
-                      !isMobile && hoveredLink === item.name
-                        ? {
-                            x: (mousePosition.x / window.innerWidth) * 10 - 5,
-                            y: (mousePosition.y / window.innerHeight) * 10 - 5
-                          }
-                        : { x: 0, y: 0 }
-                    }
-                    transition={{
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 10
-                    }}
-                    // Mobile tap animations
-                    whileTap={isMobile ? { scale: 0.95 } : {}}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ 
-                      opacity: 1, 
-                      y: 0,
-                      transition: { delay: index * 0.1 }
-                    }}
-                  >
-                    {item.name}
-                  </motion.a>
-                ))}
-              </nav>
+              {/* Navigation Links */}
+<nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
+  {location.pathname === "/all-projects" ? (
+    // ✅ Sidebar khusus untuk halaman All Projects
+    <motion.a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault();
+        navigate("/"); // balik ke home
+        setIsOpen(false);
+      }}
+      className="cursor-target cursor-none relative block text-2xl md:text-4xl font-light touch-manipulation active:scale-95 transition-transform"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+    >
+      ← Back to Home
+    </motion.a>
+  ) : (
+    // ✅ Sidebar default
+    [
+      { name: "Home", link: "#home" },
+      { name: "About", link: "#About" },
+      { name: "Projects", link: "#projects" },
+      { name: "Contact", link: "#contact" }
+    ].map((item, index) => (
+      <motion.a
+        key={item.name}
+        href={item.link}
+        onClick={(e) => {
+          e.preventDefault();
+          const section = document.querySelector(item.link);
+          if (section) {
+            section.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          }
+          setIsOpen(false);
+        }}
+        className="cursor-target cursor-none relative block text-2xl md:text-4xl font-light touch-manipulation active:scale-95 transition-transform"
+        onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
+        onMouseLeave={() => !isMobile && setHoveredLink(null)}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          transition: { delay: index * 0.1 }
+        }}
+      >
+        {item.name}
+      </motion.a>
+    ))
+  )}
+</nav>
+
 
               {/* Social Links */}
               <div className="mt-20 sm:mt-40">

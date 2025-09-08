@@ -58,7 +58,7 @@ const About = () => {
         <ExperienceList />
       </div>
 
-   <div className="flex flex-col lg:flex-row items-center justify-center mb-6 mt-2 gap-6 lg:gap-4 px-4 lg:px-86">
+   <div className="flex flex-col lg:flex-row items-center justify-center mb-6 mt-2 gap-6 lg:gap-4 px-4 lg:px-86 ">
   <div className="flex-shrink-0">
     <GithubCard username="Ananta-TI" />
   </div>
