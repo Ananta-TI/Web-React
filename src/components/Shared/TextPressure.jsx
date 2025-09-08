@@ -17,7 +17,7 @@ const TextPressure = ({
 
   minFontSize = 24,
 }) => {
-  const { isDarkMode } = useContext(ThemeContext); // Menyesuaikan mode
+  const { isDarkMode } = useContext(ThemeContext);
 
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const strokeColor = isDarkMode ? "#00FF00" : "#FF0000";
@@ -47,14 +47,31 @@ const TextPressure = ({
       cursorRef.current.x = e.clientX;
       cursorRef.current.y = e.clientY;
     };
+
     const handleTouchMove = (e) => {
       const t = e.touches[0];
       cursorRef.current.x = t.clientX;
       cursorRef.current.y = t.clientY;
     };
 
+    // Gyroscope
+    const handleDeviceOrientation = (e) => {
+      // β (beta) = front-back tilt [-180,180]
+      // γ (gamma) = left-right tilt [-90,90]
+      const { beta, gamma } = e;
+      if (beta != null && gamma != null) {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // map tilt ke koordinat
+        cursorRef.current.x = (gamma / 45) * (w / 2) + w / 2; // kiri-kanan
+        cursorRef.current.y = (beta / 45) * (h / 2) + h / 2; // atas-bawah
+      }
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("deviceorientation", handleDeviceOrientation);
 
     if (containerRef.current) {
       const { left, top, width, height } =
@@ -68,6 +85,7 @@ const TextPressure = ({
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("deviceorientation", handleDeviceOrientation);
     };
   }, []);
 
