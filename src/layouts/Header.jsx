@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { Menu, X, Moon, Globe } from "lucide-react";
+
+import {Github, Linkedin, Instagram, Mail, Music2, Menu, X, Moon, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -228,37 +229,43 @@ const location = useLocation();
                 </span>
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
                 <div className="flex flex-wrap gap-4 text-sm">
-                  {["Github", "LinkedIn", "Instagram", "Tiktok", "Email"].map(
-                    (link) => (
-                      <motion.a
-                        key={link}
-                        href="#"
-                        className="relative cursor-target cursor-none"
-                        onMouseEnter={() => setHoveredLink(link)}
-                        onMouseLeave={() => setHoveredLink(null)}
-                        animate={
-                          hoveredLink === link
-                            ? {
-                                x:
-                                  (mousePosition.x / window.innerWidth) * 5 -
-                                  2.5,
-                                y:
-                                  (mousePosition.y / window.innerHeight) * 5 -
-                                  2.5
-                              }
-                            : { x: 0, y: 0 }
-                        }
-                        transition={{
-                          type: "spring",
-                          stiffness: 100,
-                          damping: 10
-                        }}
-                      >
-                        {link}
-                      </motion.a>
-                    )
-                  )}
-                </div>
+  {[
+    { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
+    { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
+    { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> },
+    { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> },
+{ 
+  name: "Email", 
+  url: "mailto:anantafirdaus14@gmail.com?subject=Portfolio%20Inquiry&body=Halo%20Ananta,%0A%0ASaya%20melihat%20portfolio%20anda%20dan%20ingin%20berdiskusi%20lebih%20lanjut.", 
+  icon: <Mail size={18} /> 
+},
+  ].map((link) => (
+    <motion.a
+      key={link.name}
+      href={link.url}
+      target="_blank"
+      rel="noreferrer"
+      className={`relative flex items-center gap-2 cursor-target cursor-none hover:underline transition-colors ${
+        isDarkMode ? "text-gray-900 hover:text-gray-600" : "text-white hover:text-gray-300"
+      }`}
+      onMouseEnter={() => setHoveredLink(link.name)}
+      onMouseLeave={() => setHoveredLink(null)}
+      animate={
+        hoveredLink === link.name
+          ? {
+              x: (mousePosition.x / window.innerWidth) * 5 - 2.5,
+              y: (mousePosition.y / window.innerHeight) * 5 - 2.5,
+            }
+          : { x: 0, y: 0 }
+      }
+      transition={{ type: "spring", stiffness: 100, damping: 10 }}
+    >
+      {link.icon}
+      {link.name}
+    </motion.a>
+  ))}
+</div>
+
               </div>
 
               {/* Bottom Buttons */}
