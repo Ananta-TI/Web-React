@@ -42,7 +42,7 @@ const AllProjects = () => {
       repo: null,
       tags: ["HTML", "CSS", "JavaScript", "Tailwind"],
       category: "Web Development",
-      image: "/api/placeholder/400/250",
+      image: "img/first-web.png",
       color: "from-blue-500 to-cyan-500",
       year: "2023",
       status: "Completed",
@@ -55,7 +55,7 @@ const AllProjects = () => {
       repo: null,
       tags: ["HTML", "CSS", "JavaScript", "Bootstrap"],
       category: "Web Development",
-      image: "/api/placeholder/400/250",
+      image: "img/my-second-web.png",
       color: "from-purple-500 to-pink-500",
       year: "2023",
       status: "Completed",
@@ -68,7 +68,7 @@ const AllProjects = () => {
       repo: "https://github.com/Ananta-TI/besi.git",
       tags: ["Laravel", "Bootstrap", "MySQL", "PHP"],
       category: "Web Development",
-      image: "/api/placeholder/400/250",
+      image: "img/Kabestu.png",
       color: "from-green-500 to-teal-500",
       year: "2023",
       status: "Completed",
@@ -81,7 +81,7 @@ const AllProjects = () => {
       repo: null,
       tags: ["React", "Tailwind", "UI/UX", "JavaScript"],
       category: "Web Development",
-      image: "/api/placeholder/400/250",
+      image: "img/Sedap.png",
       color: "from-orange-500 to-red-500",
       year: "2024",
       status: "Completed",
@@ -94,7 +94,7 @@ const AllProjects = () => {
       repo: null,
       tags: ["React", "Inventory", "Management", "JavaScript"],
       category: "Web Application",
-      image: "/api/placeholder/400/250",
+      image: "img/ReactInventory.png",
       color: "from-indigo-500 to-blue-500",
       year: "2024",
       status: "Completed",
@@ -107,38 +107,14 @@ const AllProjects = () => {
       repo: null,
       tags: ["React", "Math", "Education", "JavaScript"],
       category: "Education",
-      image: "/api/placeholder/400/250",
+      image: "img/MathDash.png",
       color: "from-yellow-500 to-orange-500",
       year: "2024",
       status: "Completed",
       featured: false
     },
-    {
-      title: "Portfolio Website",
-      description: "Website portfolio personal dengan animasi modern dan desain responsif menggunakan React dan Framer Motion.",
-      demo: null,
-      repo: "https://github.com/username/portfolio",
-      tags: ["React", "Framer Motion", "Tailwind", "Portfolio"],
-      category: "Web Development",
-      image: "/api/placeholder/400/250",
-      color: "from-violet-500 to-purple-500",
-      year: "2024",
-      status: "In Progress",
-      featured: true
-    },
-    {
-      title: "E-Commerce Dashboard",
-      description: "Dashboard admin untuk e-commerce dengan fitur analytics, product management, dan order tracking.",
-      demo: null,
-      repo: "https://github.com/username/ecommerce-dashboard",
-      tags: ["React", "Dashboard", "Analytics", "E-commerce"],
-      category: "Web Application",
-      image: "/api/placeholder/400/250",
-      color: "from-emerald-500 to-cyan-500",
-      year: "2024",
-      status: "In Progress",
-      featured: false
-    }
+    
+ 
   ];
 
   // Get unique categories
@@ -147,7 +123,11 @@ const AllProjects = () => {
   // Filter projects based on search and category
   useEffect(() => {
     let filtered = allProjects;
-
+ window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "instant", // bisa "smooth" kalau mau animasi
+  });
     if (selectedCategory !== "All") {
       filtered = filtered.filter(project => project.category === selectedCategory);
     }
@@ -217,7 +197,7 @@ const AllProjects = () => {
       isDarkMode ? "bg-zinc-900 text-white" : "bg-gray-50 text-black"
     }`}>
       {/* Header Section */}
-      <div className={`sticky top-0 z-40 backdrop-blur-lg border-b transition-colors duration-500 ${
+      <div className={` top-0 z-40 backdrop-blur-lg border-b transition-colors duration-500 ${
         isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-white/80 border-gray-200"
       }`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -280,7 +260,7 @@ const AllProjects = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+<div className="flex flex-wrap gap-2 pb-2 sm:pb-0">
               {categories.map((category) => (
                 <motion.button
                   key={category}
@@ -337,14 +317,13 @@ const AllProjects = () => {
               )}
 
               {/* Project Image/Preview */}
-              <div className="relative h-48 overflow-hidden">
-                {project.demo ? (
-                  <iframe
-                    src={project.demo}
-                    title={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+             <div className="relative h-40 sm:h-52 md:h-64 lg:h-50 overflow-hidden rounded-xl">
+  <img
+    src={project.image}
+    alt={project.title}
+    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+    loading="lazy"
+  />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}>
                     <div className="text-center text-white">
@@ -352,7 +331,7 @@ const AllProjects = () => {
                       <p className="text-sm font-medium">Repository</p>
                     </div>
                   </div>
-                )}
+                )
 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

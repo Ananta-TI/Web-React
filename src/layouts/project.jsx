@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import "../index.css";
 
-
 const Projects = () => {
   const theme = useContext(ThemeContext);
   const isDarkMode = theme?.isDarkMode ?? true; // Default dark mode jika context belum tersedia
@@ -29,20 +28,20 @@ const Projects = () => {
       repo: null,
       tags: ["HTML", "CSS", "JavaScript"],
       category: "Web Development",
-      image: "/api/placeholder/400/250",
+      image: "/img/first-web.png",
       color: "from-blue-500 to-cyan-500",
     },
-    // {
-    //   title: "My Second Web",
-    //   description:
-    //     "Pengembangan lebih lanjut dengan desain yang lebih modern dan responsif menggunakan Bootstrap.",
-    //   demo: "https://ananta-ti.github.io/my-second-web/",
-    //   repo: null,
-    //   tags: ["HTML", "CSS", "JavaScript"],
-    //   category: "Web Development",
-    //   image: "/api/placeholder/400/250",
-    //   color: "from-purple-500 to-pink-500",
-    // },
+    {
+      title: "My Second Web",
+      description:
+        "Pengembangan lebih lanjut dengan desain yang lebih modern dan responsif menggunakan Bootstrap.",
+      demo: "https://ananta-ti.github.io/my-second-web/",
+      repo: null,
+      tags: ["HTML", "CSS", "JavaScript"],
+      category: "Web Development",
+      image: "img/my-second-web.png",
+      color: "from-purple-500 to-pink-500",
+    },
     // {
     //   title: "KABESTU",
     //   description: "website company profile dari sebuah perusahaan besi dengan fitur lengkap dan antarmuka yang user-friendly.",
@@ -50,20 +49,21 @@ const Projects = () => {
     //   repo: "https://github.com/Ananta-TI/besi.git",
     //   tags: ["laravel, Bootstrap", "MySQL"],
     //   category: "Web Development",
-    //   image: "/api/placeholder/400/250",
+    //   image: "img/Kabestu.png",
     //   color: "from-green-500 to-teal-500"
     // },
-    {
-      title: "Sedap",
-      description:
-        "Platform kuliner berbasis React yang menampilkan produk makanan lokal Indonesia dengan UI modern dan responsif. Mendukung eksplorasi camilan tradisional, makanan sehat, hingga kuliner kekinian, sekaligus mendorong pertumbuhan UMKM kuliner.",
-      demo: "https://react-nta.vercel.app/guest",
-      repo: null,
-      tags: ["React", "Tailwind", "UI/UX"],
-      category: "Web Development",
-      image: "/api/placeholder/400/250",
-      color: "from-orange-500 to-red-500",
-    },
+   {
+  title: "Sedap",
+  description:
+    "Platform kuliner berbasis React yang menampilkan produk makanan lokal Indonesia dengan UI modern dan responsif. Mendukung eksplorasi camilan tradisional, makanan sehat, hingga kuliner kekinian, sekaligus mendorong pertumbuhan UMKM kuliner.",
+  demo: "https://react-nta.vercel.app/guest",
+  repo: null,
+  tags: ["React", "Tailwind", "UI/UX"],
+  category: "Web Development",
+  image: "/img/Sedap.png", // cukup ini
+  color: "from-orange-500 to-red-500",
+}
+    ,
     {
       title: "React Inventory",
       description:
@@ -72,7 +72,7 @@ const Projects = () => {
       repo: null,
       tags: ["React", "Inventory", "Management"],
       category: "Web Application",
-      image: "/api/placeholder/400/250",
+      image: "img/ReactInventory.png",
       color: "from-indigo-500 to-blue-500",
     },
     // {
@@ -82,7 +82,7 @@ const Projects = () => {
     //   repo: null,
     //   tags: ["React", "Math", "Education"],
     //   category: "Education",
-    //   image: "/api/placeholder/400/250",
+    //   image: "img/MathDash.png",
     //   color: "from-yellow-500 to-orange-500"
     // },
   ];
@@ -148,7 +148,7 @@ const Projects = () => {
       </div>
 
       {/* Projects Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-30">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -163,21 +163,20 @@ const Projects = () => {
                 y: -8,
                 transition: { duration: 0.3, ease: "easeOut" },
               }}
-              className={`group relative overflow-hidden rounded-2xl ${
+              className={`group relative overflow-hidden rounded-3xl ${
                 isDarkMode
-                  ? "bg-zinc-800/50 border border-zinc-700/50"
-                  : "bg-white border border-gray-200"
+                  ? "bg-zinc-800/50 border-none "
+                  : "bg-white border-none "
               } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
             >
               {/* Project Image/Preview */}
-              <div className="relative h-48 sm:h-190 overflow-hidden">
-                {project.demo ? (
-                  <iframe
-                    src={project.demo}
-                    title={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+<div className="relative h-40 sm:h-52 md:h-64 lg:h-152 overflow-hidden rounded-xl">
+  <img
+    src={project.image}
+    alt={project.title}
+    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+    loading="lazy"
+  />
                 ) : (
                   <div
                     className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}
@@ -187,7 +186,7 @@ const Projects = () => {
                       <p className="text-sm font-medium">Repository</p>
                     </div>
                   </div>
-                )}
+                )
 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -244,19 +243,47 @@ const Projects = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
-                  {project.demo && (
-                    <motion.a
-                      href={project.demo}
-                      target="_blank"
-                      rel="noreferrer"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Live Demo
-                    </motion.a>
-                  )}
+  {project.demo && (
+    <motion.a
+      href={project.demo}
+      target="_blank"
+      rel="noreferrer"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`
+        relative z-10 overflow-hidden inline-flex items-center gap-3
+        px-8 py-4 text-[17px] uppercase font-lyrae font-semibold
+        rounded-lg border border-transparent
+        bg-transparent transition-all duration-500
+        cursor-none cursor-target
+
+        /* ::before - top line animation */
+        before:content-[''] before:absolute before:top-0 before:right-0
+        before:h-[2px] before:w-0
+        before:transition-all before:duration-500 before:z-[-1]
+
+        /* ::after - background fill animation */
+        after:content-[''] after:absolute after:left-0 after:bottom-0
+        after:h-0 after:w-full
+        after:transition-all after:duration-400 after:z-[-2]
+
+        /* Hover effects */
+        hover:before:w-full
+        hover:after:h-full hover:after:delay-200
+
+        ${
+          isDarkMode
+            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+               hover:text-zinc-900 border-gray-100/20`
+            : `text-gray-800 before:bg-gray-800 after:bg-gray-800
+               hover:text-white border-gray-800/20`
+        }
+      `}
+    >
+      <Globe className="w-5 h-5 relative z-20 transition-transform duration-300 group-hover:rotate-12" />
+      <span className="relative z-20 pointer-events-none">Live Demo</span>
+    </motion.a>
+  )}
                   {project.repo && (
                     <motion.a
                       href={project.repo}
@@ -283,7 +310,6 @@ const Projects = () => {
         </motion.div>
       </div>
 
-      
       {/* Tombol ke All Projects */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -293,9 +319,28 @@ const Projects = () => {
       >
         <button
           onClick={() => navigate("/all-projects")}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+          className={`
+    relative px-8 py-4 text-[17px] uppercase font-lyrae font-semibold rounded-lg
+    border-none bg-transparent transition-all duration-500 overflow-hidden
+    cursor-none cursor-target z-10
+    before:content-[''] before:absolute before:right-0 before:top-0
+    before:h-[2px] before:w-0 before:transition-all before:duration-500 before:z-[-1]
+    after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0 after:w-full
+    after:transition-all after:duration-400 after:z-[-2]
+    hover:before:w-full
+    hover:after:h-full hover:after:delay-200
+    ${
+      isDarkMode
+        ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+           hover:text-zinc-900 border border-gray-100/20`
+        : `text-gray-800 before:bg-gray-800 after:bg-gray-800
+           hover:text-white border border-gray-800/20`
+    }
+  `}
         >
-          View All Projects
+          <span className="relative z-20 pointer-events-none">
+            View All Projects
+          </span>
         </button>
       </motion.div>
 

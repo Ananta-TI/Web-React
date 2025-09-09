@@ -131,7 +131,7 @@ const location = useLocation();
             }}
           >
             {/* SVG Curve - Hidden on mobile for better performance */}
-            {!isMobile && (
+            { (
               <motion.svg
                 className="w-[99px] h-full"
                 xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +176,7 @@ const location = useLocation();
         navigate("/"); // balik ke home
         setIsOpen(false);
       }}
-      className="cursor-target cursor-none relative block text-2xl md:text-4xl font-light touch-manipulation active:scale-95 transition-transform"
+      className="cursor-target cursor-none relative block text-2xl font-lyrae  md:text-4xl touch-manipulation active:scale-95 transition-transform"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
     >
@@ -204,7 +204,7 @@ const location = useLocation();
           }
           setIsOpen(false);
         }}
-        className="cursor-target cursor-none relative block text-2xl md:text-4xl font-light touch-manipulation active:scale-95 transition-transform"
+        className="cursor-target cursor-none relative block text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
         onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
         onMouseLeave={() => !isMobile && setHoveredLink(null)}
         initial={{ opacity: 0, y: 20 }}
