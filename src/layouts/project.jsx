@@ -273,7 +273,7 @@ const Projects = () => {
 
         ${
           isDarkMode
-            ? `text-blue-500 before:bg-gray-100 after:bg-gray-100
+            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
                hover:text-zinc-900 border-gray-100/20`
             : `text-gray-800 before:bg-gray-800 after:bg-gray-800
                hover:text-white border-gray-800/20`
