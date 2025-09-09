@@ -229,7 +229,7 @@ const AllProjects = () => {
                 animateOn="view"
               />
             </h1>
-            <p className={`text-lg ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+            <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
               Eksplorasi lengkap dari semua project yang telah saya kembangkan
             </p>
           </motion.div>
@@ -328,7 +328,7 @@ const AllProjects = () => {
                   <div className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}>
                     <div className="text-center text-white">
                       <Github className="w-12 h-12 mx-auto mb-2 opacity-80" />
-                      <p className="text-sm font-medium">Repository</p>
+                      <p className="text-lg font-mono">Repository</p>
                     </div>
                   </div>
                 )
@@ -360,7 +360,7 @@ const AllProjects = () => {
               <div className="p-6">
                 {/* Title & Year */}
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <h3 className={`text-2xl font-lyrae font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     {project.title}
                   </h3>
                   <div className={`flex items-center gap-1 text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
@@ -370,7 +370,7 @@ const AllProjects = () => {
                 </div>
 
                 {/* Description */}
-                <p className={`text-sm leading-relaxed mb-4 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+                <p className={`text-lg font-mono leading-relaxed mb-4 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
                   {project.description}
                 </p>
 

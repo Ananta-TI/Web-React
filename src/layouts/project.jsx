@@ -209,7 +209,7 @@ const Projects = () => {
               <div className="p-9">
                 {/* Title */}
                 <h3
-                  className={`text-xl font-bold mb-3 ${
+                  className={`text-4xl font-lyrae mb-3 ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
@@ -218,7 +218,7 @@ const Projects = () => {
 
                 {/* Description */}
                 <p
-                  className={`text-sm leading-relaxed mb-4 ${
+                  className={`text-lg font-mono leading-relaxed mb-4 ${
                     isDarkMode ? "text-zinc-400" : "text-gray-600"
                   }`}
                 >
@@ -230,7 +230,7 @@ const Projects = () => {
                   {project.tags.map((tag, tagIndex) => (
                     <span
                       key={tagIndex}
-                      className={`px-2.5 py-1 text-xs rounded-md font-medium ${
+                      className={`px-2.5 py-1 text-xs rounded-md font-mono ${
                         isDarkMode
                           ? "bg-zinc-700 text-zinc-300"
                           : "bg-gray-100 text-gray-700"
@@ -297,7 +297,7 @@ const Projects = () => {
                         isDarkMode
                           ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      } rounded-lg font-medium text-sm transition-all duration-300`}
+                      } rounded-lg font-mono text-sm transition-all duration-300`}
                     >
                       <Github className="w-4 h-4" />
                       {!project.demo && "View Code"}
