@@ -252,7 +252,7 @@ const Projects = () => {
       whileTap={{ scale: 0.98 }}
       className={`
         relative z-10 overflow-hidden inline-flex items-center gap-3
-        px-3 py-1 text-[27px] border-t-0 font-lyrae font-bold
+        px-3 py-1 text-[17px] border-t-0 font-lyrae font-bold
         rounded-lg border 
         bg-transparent transition-all duration-500
         cursor-none cursor-target
