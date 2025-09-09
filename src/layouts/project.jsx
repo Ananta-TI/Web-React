@@ -252,8 +252,8 @@ const Projects = () => {
       whileTap={{ scale: 0.98 }}
       className={`
         relative z-10 overflow-hidden inline-flex items-center gap-3
-        px-8 py-4 text-[17px] uppercase font-lyrae font-semibold
-        rounded-lg border border-transparent
+        px-3 py-1 text-[27px] border-t-0 font-lyrae font-bold
+        rounded-lg border 
         bg-transparent transition-all duration-500
         cursor-none cursor-target
 
@@ -273,7 +273,7 @@ const Projects = () => {
 
         ${
           isDarkMode
-            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+            ? `text-blue-500 before:bg-gray-100 after:bg-gray-100
                hover:text-zinc-900 border-gray-100/20`
             : `text-gray-800 before:bg-gray-800 after:bg-gray-800
                hover:text-white border-gray-800/20`
@@ -320,8 +320,8 @@ const Projects = () => {
         <button
           onClick={() => navigate("/all-projects")}
           className={`
-    relative px-8 py-4 text-[17px] uppercase font-lyrae font-semibold rounded-lg
-    border-none bg-transparent transition-all duration-500 overflow-hidden
+    relative px-8 py-4 text-[17px] uppercase border-b-0 font-lyrae font-semibold rounded-lg
+     bg-transparent transition-all duration-500 overflow-hidden
     cursor-none cursor-target z-10
     before:content-[''] before:absolute before:right-0 before:top-0
     before:h-[2px] before:w-0 before:transition-all before:duration-500 before:z-[-1]
