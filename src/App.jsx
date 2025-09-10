@@ -10,7 +10,7 @@ import TargetCursor from "./components/Shared/TargetCursor";
 import Project from "./layouts/project";
 import AllProjects from "./layouts/AllProjects";
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 import './index.css';
 import './assets/tailwind.css';
@@ -40,7 +40,7 @@ function App() {
       </Routes>
 
       <Footer />
-              <SpeedInsights />
+      <SpeedInsights />
 
             <Analytics />
 
