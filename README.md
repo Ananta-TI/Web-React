@@ -45,7 +45,7 @@ Web-React adalah proyek website berbasis **React.js** yang dikembangkan dengan *
 ## 📌 Todo List  
 - [x] **Dark Mode**  
 - [x] **Smooth Scrolling**  
-- [ ] **Tambah Halaman Project**  
+- [x] **Tambah Halaman Project**  
 - [ ] **Optimasi Performansi**  
 
 ---
