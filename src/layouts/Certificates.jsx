@@ -99,7 +99,7 @@ const Certificates = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="columns-3 sm:columns-3 lg:columns-3 gap-6 space-y-6"
+          className="columns-3 sm:columns-3 lg:columns-3 gap-2 space-y-2"
         >
           {filteredCertificates.map((cert, index) => (
             <motion.div
@@ -182,11 +182,11 @@ const TiltedModal = ({ cert, onClose, isDarkMode }) => {
       if (beta == null || gamma == null) return;
 
       // Batasi sudut agar tidak terlalu ekstrem
-      const limitedBeta = Math.max(-90, Math.min(90, beta));
-      const limitedGamma = Math.max(-90, Math.min(90, gamma));
+      const limitedBeta = Math.max(-10, Math.min(10, beta));
+      const limitedGamma = Math.max(-10, Math.min(10, gamma));
 
-      const gyroX = (limitedBeta / 90) * -rotateAmplitude;
-      const gyroY = (limitedGamma / 90) * rotateAmplitude;
+      const gyroX = (limitedBeta / 10) * -rotateAmplitude;
+      const gyroY = (limitedGamma / 10) * rotateAmplitude;
 
       rotateX.set(gyroX);
       rotateY.set(gyroY);
