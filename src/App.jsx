@@ -1,7 +1,7 @@
 import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route } from "react-router-dom";
 
-import Header from "./layouts/header";
+import Header from "./layouts/Header";
 import Footer from "./layouts/footer";
 import Hero from "./components/Home/hero";
 import Hero2 from "./components/Shared/TextPressure";
