@@ -12,12 +12,12 @@ const Certificates = () => {
 
   // ✅ Data sertifikat
   const certificates = [
-    { image: "sertifikat/1.jpg", title: "Belajar Dasar Pemrograman Web", year: "2023" },
-    { image: "sertifikat/3.jpg", title: "Machine Learning for Beginners", year: "2024" },
-    { image: "sertifikat/2.jpg", title: "React Developer Path", year: "2024" },
-    { image: "sertifikat/4.jpg", title: "UI/UX Design Essentials with Figma", year: "2023" },
-    { image: "sertifikat/5.jpg", title: "Web Design Workshop", year: "2022" },
-    { image: "sertifikat/6.jpg", title: "Frontend Bootcamp", year: "2021" },
+      { image: "sertifikat/3.jpg", title: "Machine Learning for Beginners", year: "2024" },
+      { image: "sertifikat/4.jpg", title: "UI/UX Design Essentials with Figma", year: "2023" },
+      { image: "sertifikat/2.jpg", title: "React Developer Path", year: "2024" },
+      { image: "sertifikat/1.jpg", title: "Belajar Dasar Pemrograman Web", year: "2023" },
+      { image: "sertifikat/5.jpg", title: "Web Design Workshop", year: "2022" },
+      { image: "sertifikat/6.jpg", title: "Frontend Bootcamp", year: "2021" },
   ];
 
   // 🔝 Scroll ke atas saat halaman dibuka
@@ -99,7 +99,7 @@ const Certificates = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6"
+          className="columns-3 sm:columns-3 lg:columns-3 gap-6 space-y-6"
         >
           {filteredCertificates.map((cert, index) => (
             <motion.div
@@ -182,11 +182,11 @@ const TiltedModal = ({ cert, onClose, isDarkMode }) => {
       if (beta == null || gamma == null) return;
 
       // Batasi sudut agar tidak terlalu ekstrem
-      const limitedBeta = Math.max(-30, Math.min(30, beta));
-      const limitedGamma = Math.max(-30, Math.min(30, gamma));
+      const limitedBeta = Math.max(-90, Math.min(90, beta));
+      const limitedGamma = Math.max(-90, Math.min(90, gamma));
 
-      const gyroX = (limitedBeta / 30) * -rotateAmplitude;
-      const gyroY = (limitedGamma / 30) * rotateAmplitude;
+      const gyroX = (limitedBeta / 90) * -rotateAmplitude;
+      const gyroY = (limitedGamma / 90) * rotateAmplitude;
 
       rotateX.set(gyroX);
       rotateY.set(gyroY);
