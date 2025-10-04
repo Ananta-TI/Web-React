@@ -99,7 +99,7 @@ const Certificates = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="columns-3 sm:columns-3 lg:columns-3 gap-2 space-y-2"
+          className="columns-1 sm:columns-2 lg:columns-3 gap-2 space-y-2"
         >
           {filteredCertificates.map((cert, index) => (
             <motion.div
