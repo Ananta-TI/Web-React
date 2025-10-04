@@ -168,40 +168,76 @@ const location = useLocation();
               {/* Navigation Links */}
               {/* Navigation Links */}
 <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-  {location.pathname === "/all-projects" ? (
-    // ✅ Sidebar khusus untuk halaman All Projects
-    <motion.a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        navigate("/"); // balik ke home
-        setIsOpen(false);
-      }}
-      className="cursor-target cursor-none relative block text-2xl font-lyrae  md:text-4xl touch-manipulation active:scale-95 transition-transform"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-    >
-      ← Back to Home
-    </motion.a>
+  {["/all-projects", "/certificates"].includes(location.pathname) ? (
+    <>
+    
+      {/* 🔗 Link ke halaman lain */}
+      {location.pathname !== "/certificates" && (
+        <motion.a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/certificates");
+            setIsOpen(false);
+          }}
+          className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
+        >
+          Certificates
+        </motion.a>
+      )}
+      {location.pathname !== "/all-projects" && (
+        <motion.a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/all-projects");
+            setIsOpen(false);
+          }}
+          className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
+        >
+          All Projects
+        </motion.a>
+      )}  {/* 🔙 Back to Home */}
+      <motion.a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/");
+          setIsOpen(false);
+        }}
+        className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+      >
+        ← Back to Home
+      </motion.a>
+
+    </>
   ) : (
-    // ✅ Sidebar default
+    // ✅ Sidebar default (Home Page)
     [
       { name: "Home", link: "#home" },
       { name: "About", link: "#About" },
       { name: "Projects", link: "#projects" },
-      { name: "Contact", link: "#contact" }
+      { name: "Certificates", link: "/certificates" },
+      { name: "Contact", link: "#contact" },
     ].map((item, index) => (
       <motion.a
         key={item.name}
         href={item.link}
         onClick={(e) => {
           e.preventDefault();
-          const section = document.querySelector(item.link);
-          if (section) {
-            section.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
+          if (item.link.startsWith("#")) {
+            const section = document.querySelector(item.link);
+            if (section) {
+              section.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          } else {
+            navigate(item.link);
           }
           setIsOpen(false);
         }}
@@ -209,17 +245,14 @@ const location = useLocation();
         onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
         onMouseLeave={() => !isMobile && setHoveredLink(null)}
         initial={{ opacity: 0, y: 20 }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          transition: { delay: index * 0.1 }
-        }}
+        animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
       >
         {item.name}
       </motion.a>
     ))
   )}
 </nav>
+
 
 
               {/* Social Links */}

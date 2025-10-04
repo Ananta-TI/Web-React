@@ -1,7 +1,7 @@
 import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route } from "react-router-dom";
 
-import Header from "./layouts/Header";
+import Header from "./layouts/header";
 import Footer from "./layouts/footer";
 import Hero from "./components/Home/hero";
 import Hero2 from "./components/Shared/TextPressure";
@@ -9,6 +9,7 @@ import About from "./layouts/about";
 import TargetCursor from "./components/Shared/TargetCursor";
 import Project from "./layouts/project";
 import AllProjects from "./layouts/AllProjects";
+import Certificates from "./layouts/Certificates";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
@@ -37,6 +38,7 @@ function App() {
 
         {/* Halaman All Projects */}
         <Route path="/all-projects" element={<AllProjects />} />
+        <Route path="/certificates" element={<Certificates />} />
       </Routes>
 
       <Footer />

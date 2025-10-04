@@ -23,7 +23,7 @@ const Projects = () => {
     {
       title: "My First Web",
       description:
-        "Website pertama yang saya buat untuk belajar HTML, CSS Tailwind, dan JavaScript dasar dengan desain modern dan responsif.",
+        "Website pertamaku yang dibuat untuk mempelajari dasar-dasar HTML, CSS Tailwind, dan JavaScript.Mengusung desain sederhana namun responsif, proyek ini menjadi pijakan awal perjalananku di dunia pengembangan web.",
       demo: "https://ananta-ti.github.io/my-first-web/",
       repo: null,
       tags: ["HTML", "CSS", "JavaScript"],
@@ -31,17 +31,17 @@ const Projects = () => {
       image: "/img/first-web.png",
       color: "from-blue-500 to-cyan-500",
     },
-    {
-      title: "My Second Web",
-      description:
-        "Pengembangan lebih lanjut dengan desain yang lebih modern dan responsif menggunakan Bootstrap.",
-      demo: "https://ananta-ti.github.io/my-second-web/",
-      repo: null,
-      tags: ["HTML", "CSS", "JavaScript"],
-      category: "Web Development",
-      image: "img/my-second-web.png",
-      color: "from-purple-500 to-pink-500",
-    },
+    // {
+    //   title: "My Second Web",
+    //   description:
+    //     "Versi lanjutan dari proyek pertamaku, kali ini dengan tampilan yang lebih modern menggunakan Bootstrap.Fokus pada struktur layout yang rapi dan pengalaman pengguna yang lebih dinamis di berbagai perangkat. cuman masi perlu sedikit perbaikan nih.",
+    //   demo: "https://ananta-ti.github.io/my-second-web/",
+    //   repo: null,
+    //   tags: ["HTML", "CSS", "JavaScript"],
+    //   category: "Web Development",
+    //   image: "img/my-second-web.png",
+    //   color: "from-purple-500 to-pink-500",
+    // },
     // {
     //   title: "KABESTU",
     //   description: "website company profile dari sebuah perusahaan besi dengan fitur lengkap dan antarmuka yang user-friendly.",
