@@ -12,12 +12,13 @@ const Certificates = () => {
 
   // ✅ Data sertifikat
   const certificates = [
-      { image: "sertifikat/3.jpg", title: "Machine Learning for Beginners", year: "2024" },
-      { image: "sertifikat/4.jpg", title: "UI/UX Design Essentials with Figma", year: "2023" },
-      { image: "sertifikat/2.jpg", title: "React Developer Path", year: "2024" },
-      { image: "sertifikat/1.jpg", title: "Belajar Dasar Pemrograman Web", year: "2023" },
-      { image: "sertifikat/5.jpg", title: "Web Design Workshop", year: "2022" },
-      { image: "sertifikat/6.jpg", title: "Frontend Bootcamp", year: "2021" },
+      { image: "sertifikat/3.jpg",  year: "2024" },
+      { image: "sertifikat/4.jpg",  year: "2023" },
+      { image: "sertifikat/7.jpg",  year: "2021" },
+      { image: "sertifikat/2.jpg",  year: "2024" },
+      { image: "sertifikat/1.jpg",  year: "2023" },
+      { image: "sertifikat/5.jpg",  year: "2022" },
+      { image: "sertifikat/6.jpg",  year: "2021" },
   ];
 
   // 🔝 Scroll ke atas saat halaman dibuka
