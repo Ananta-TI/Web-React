@@ -1,216 +1,241 @@
-import {
-  Dribbble,
-  Facebook,
-  Github,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+"use client";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Loader, Mail, ArrowUp } from "lucide-react";
+import { ThemeContext } from "../context/ThemeContext";
 
-const data = {
-  facebookLink: 'https://facebook.com/mvpblocks',
-  instaLink: 'https://instagram.com/mvpblocks',
-  twitterLink: 'https://twitter.com/mvpblocks',
-  githubLink: 'https://github.com/mvpblocks',
-  dribbbleLink: 'https://dribbble.com/mvpblocks',
-  services: {
-    webdev: '/web-development',
-    webdesign: '/web-design',
-    marketing: '/marketing',
-    googleads: '/google-ads',
-  },
-  about: {
-    history: '/company-history',
-    team: '/meet-the-team',
-    handbook: '/employee-handbook',
-    careers: '/careers',
-  },
-  help: {
-    faqs: '/faqs',
-    support: '/support',
-    livechat: '/live-chat',
-  },
-  contact: {
-    email: 'hello@mvpblocks.com',
-    phone: '+91 8637373116',
-    address: 'Kolkata, West Bengal, India',
-  },
-  company: {
-    name: 'Mvpblocks',
-    description:
-      'Building beautiful and functional web experiences with modern technologies. We help startups and businesses create their digital presence.',
-    logo: '/logo.webp',
-  },
-};
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
-const socialLinks = [
-  { icon: Facebook, label: 'Facebook', href: data.facebookLink },
-  { icon: Instagram, label: 'Instagram', href: data.instaLink },
-  { icon: Twitter, label: 'Twitter', href: data.twitterLink },
-  { icon: Github, label: 'GitHub', href: data.githubLink },
-  { icon: Dribbble, label: 'Dribbble', href: data.dribbbleLink },
-];
-
-const aboutLinks = [
-  { text: 'Company History', href: data.about.history },
-  { text: 'Meet the Team', href: data.about.team },
-  { text: 'Employee Handbook', href: data.about.handbook },
-  { text: 'Careers', href: data.about.careers },
-];
-
-const serviceLinks = [
-  { text: 'Web Development', href: data.services.webdev },
-  { text: 'Web Design', href: data.services.webdesign },
-  { text: 'Marketing', href: data.services.marketing },
-  { text: 'Google Ads', href: data.services.googleads },
-];
-
-const helpfulLinks = [
-  { text: 'FAQs', href: data.help.faqs },
-  { text: 'Support', href: data.help.support },
-  { text: 'Live Chat', href: data.help.livechat, hasIndicator: true },
-];
-
-const contactInfo = [
-  { icon: Mail, text: data.contact.email },
-  { icon: Phone, text: data.contact.phone },
-  { icon: MapPin, text: data.contact.address, isAddress: true },
-];
+function ContactFormLine({ inputId, hasError }) {
+  return (
+    <svg
+      viewBox="0 0 300 100"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn(
+        `input-line-${inputId}`,
+        "pointer-events-none absolute bottom-0 right-0 h-[90px] w-[400%] fill-none stroke-[1.75] transition-colors duration-300 will-change-transform",
+        hasError
+          ? "stroke-red-500/80 peer-focus:!stroke-red-400"
+          : "stroke-zinc-500/40 peer-focus:!stroke-white/70"
+      )}
+      preserveAspectRatio="none"
+    >
+      <path d="M0 90H100C110 90 120 84 130 78C140 72 160 72 170 78C180 84 190 90 200 90H300" />
+    </svg>
+  );
+}
 
 export default function Footer() {
+  const theme = useContext(ThemeContext);
+  const isDarkMode = theme?.isDarkMode ?? true;
+  const formEl = useRef(null);
+  const el = useRef(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [pending, setPending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.fromTo(
+      el.current,
+      { opacity: 0, y: 60 },
+      {
+        opacity: 1,
+        y: 0,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: el.current,
+          start: "top bottom",
+          end: "top center",
+          scrub: false,
+        },
+      }
+    );
+  }, []);
+
+  const handleFocus = (inputId) => {
+    gsap.fromTo(
+      `.input-line-${inputId}`,
+      { xPercent: 0 },
+      { xPercent: 50, duration: 1, ease: "power1.inOut" }
+    );
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = true;
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+      newErrors.email = true;
+    if (!formData.subject.trim()) newErrors.subject = true;
+    if (formData.message.trim().length < 3) newErrors.message = true;
+    return newErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = validate();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setPending(true);
+    setSent(false);
+    setTimeout(() => {
+      setPending(false);
+      setSent(true);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setTimeout(() => setSent(false), 4000);
+    }, 1500);
+  };
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
   return (
-    <footer className="bg-secondary dark:bg-secondary/20 mt-16 w-full place-self-end rounded-t-xl">
-      <div className="mx-auto max-w-screen-xl px-4 pt-16 pb-6 sm:px-6 lg:px-8 lg:pt-24">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <footer
+      ref={el}
+      className={cn(
+        "relative z-10 w-full overflow-hidden",
+        isDarkMode ? "bg-[#0b0b0b] text-white" : "bg-white text-black"
+      )}
+    >
+      {/* Background gradient fill biar nutup layar */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black" />
+
+      <div className="w-full mt-100 mx-auto py-24 px-6 sm:px-12 lg:px-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-base">
           <div>
-            <div className="text-primary flex justify-center gap-2 sm:justify-start">
-              <img
-                src={data.company.logo || '/placeholder.svg'}
-                alt="logo"
-                className="h-8 w-8 rounded-full"
-              />
-              <span className="text-2xl font-semibold">
-                {data.company.name}
-              </span>
-            </div>
+            <h3 className="text-3xl font-light mb-6">Discover</h3>
+            <ul className="space-y-3">
+              {["Products", "Markets", "About", "Partners", "Stories"].map(
+                (item) => (
+                  <li key={item}>
+                    <a href="#" className="hover:text-zinc-400 transition-colors">
+                      {item}
+                    </a>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
 
-            <p className="text-foreground/50 mt-6 max-w-md text-center leading-relaxed sm:max-w-xs sm:text-left">
-              {data.company.description}
-            </p>
-
-            <ul className="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
-              {socialLinks.map(({ icon: Icon, label, href }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:text-primary/80 transition"
-                  >
-                    <span className="sr-only">{label}</span>
-                    <Icon className="size-6" />
+          <div>
+            <h3 className="text-3xl font-light mb-6">Social</h3>
+            <ul className="space-y-3">
+              {["LinkedIn", "WeChat"].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-zinc-400 transition-colors">
+                    {item}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:col-span-2">
-            <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">About Us</p>
-              <ul className="mt-8 space-y-4 text-sm">
-                {aboutLinks.map(({ text, href }) => (
-                  <li key={text}>
-                    <Link
-                      to={href}
-                      className="text-secondary-foreground/70 transition hover:text-primary"
-                    >
-                      {text}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div>
+            <h3 className="text-3xl font-light mb-6">Info</h3>
+            <ul className="space-y-3">
+              {["Privacy Policy", "Terms of Service"].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-zinc-400 transition-colors">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">Our Services</p>
-              <ul className="mt-8 space-y-4 text-sm">
-                {serviceLinks.map(({ text, href }) => (
-                  <li key={text}>
-                    <Link
-                      to={href}
-                      className="text-secondary-foreground/70 transition hover:text-primary"
-                    >
-                      {text}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div>
+            <h3 className="text-2xl font-light mb-4">Get in Touch</h3>
+            <form
+              ref={formEl}
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-3 mt-4 overflow-hidden"
+            >
+              {["name", "email", "subject", "message"].map((field, index) => (
+                <div key={field} className="relative overflow-hidden">
+                  {field === "message" ? (
+                    <textarea
+                      placeholder={field}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      onFocus={() => handleFocus(index + 1)}
+                      className="peer min-h-[7rem] w-full resize-none bg-transparent py-2 font-semibold outline-none placeholder:text-zinc-600"
+                    />
+                  ) : (
+                    <input
+                      type={field === "email" ? "email" : "text"}
+                      placeholder={field}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      onFocus={() => handleFocus(index + 1)}
+                      className="peer w-full bg-transparent py-2 text-base font-semibold outline-none placeholder:text-zinc-600"
+                    />
+                  )}
+                  <ContactFormLine inputId={index + 1} hasError={!!errors[field]} />
+                </div>
+              ))}
 
-            <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">Helpful Links</p>
-              <ul className="mt-8 space-y-4 text-sm">
-                {helpfulLinks.map(({ text, href, hasIndicator }) => (
-                  <li key={text}>
-                    <Link
-                      to={href}
-                      className={`${
-                        hasIndicator
-                          ? 'group flex justify-center gap-1.5 sm:justify-start'
-                          : 'text-secondary-foreground/70 transition hover:text-primary'
-                      }`}
-                    >
-                      <span>{text}</span>
-                      {hasIndicator && (
-                        <span className="relative flex size-2">
-                          <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                          <span className="bg-primary relative inline-flex size-2 rounded-full" />
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <button
+                type="submit"
+                disabled={pending}
+                className="mt-4 inline-flex items-center justify-center gap-x-2 border border-zinc-600 py-2 px-5 rounded-md hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              >
+                {pending ? (
+                  <>
+                    <Loader className="h-5 w-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    Send
+                  </>
+                )}
+              </button>
 
-            <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">Contact Us</p>
-              <ul className="mt-8 space-y-4 text-sm">
-                {contactInfo.map(({ icon: Icon, text, isAddress }) => (
-                  <li key={text}>
-                    <div className="flex items-center justify-center gap-1.5 sm:justify-start">
-                      <Icon className="text-primary size-5 shrink-0 shadow-sm" />
-                      {isAddress ? (
-                        <address className="text-secondary-foreground/70 -mt-0.5 flex-1 not-italic transition">
-                          {text}
-                        </address>
-                      ) : (
-                        <span className="text-secondary-foreground/70 flex-1 transition">
-                          {text}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {sent && (
+                <span className="text-green-400 text-sm mt-3 text-center">
+                  ✅ Message Sent Successfully!
+                </span>
+              )}
+            </form>
           </div>
         </div>
 
-        <div className="mt-12 border-t pt-6">
-          <div className="text-center sm:flex sm:justify-between sm:text-left">
-            <p className="text-sm">
-              <span className="block sm:inline">All rights reserved.</span>
-            </p>
-
-            <p className="text-secondary-foreground/70 mt-4 text-sm transition sm:order-first sm:mt-0">
-              &copy; 2025 {data.company.name}
-            </p>
+        <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-zinc-700/50 text-sm text-gray-400 gap-4"
+              id="contact"
+>
+          <div className="flex items-center space-x-2">
+            <div className="text-4xl sm:text-6xl tracking-wider font-MailBox">
+              @NANTA
+            </div>
+            <span>©2025</span>
           </div>
+          <div>All Rights Reserved</div>
+          <button
+            onClick={scrollToTop}
+            className="flex items-center gap-1 sm:gap-2 group"
+          >
+            <span>Back To Top</span>
+            <ArrowUp
+              size={18}
+              className="group-hover:-translate-y-1 transition-transform"
+            />
+          </button>
         </div>
       </div>
     </footer>
