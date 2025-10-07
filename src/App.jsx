@@ -12,6 +12,7 @@ import AllProjects from "./layouts/AllProjects";
 import Certificates from "./layouts/Certificates";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import Contact from "./layouts/contact/contact.jsx";
 
 import './index.css';
 import './assets/tailwind.css';

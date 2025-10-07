@@ -305,7 +305,7 @@ const location = useLocation();
               <div className="flex mt-auto space-x-3">
                 <button
                   onClick={handleDarkModeToggle}
-                  className="p-2 border rounded"
+                  className="p-2 border rounded cursor-target cursor-none"
                 >
                   <Moon />
                 </button>

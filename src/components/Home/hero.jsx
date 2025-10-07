@@ -49,7 +49,7 @@ export default function Hero() {
           </div>
         </Magnet>
 
-        <h1 className="mt-6 text-9xl font-MailBox md:text-9xl">Ananta Firdaus</h1>
+        <h1 className="mt-6 text-9xl font-MailBox md:text-9xl">@nanta Firdaus</h1>
         <p className=" mx-auto mt-4 text-lg opacity-80 font-mono">
           Passionate about web development, design, and technology.
         </p>

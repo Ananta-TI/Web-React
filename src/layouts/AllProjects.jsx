@@ -32,90 +32,94 @@ const AllProjects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [filteredProjects, setFilteredProjects] = useState([]);
+// Full project data
+const allProjects = [
+  {
+    title: "My First Web",
+    description:
+      "My very first website created to learn the fundamentals of HTML, CSS, and JavaScript. Featuring a simple yet responsive design, this project served as the foundation of my journey into web development.",
+    demo: "https://ananta-ti.github.io/my-first-web/",
+    repo: null,
+    tags: ["HTML", "CSS", "JavaScript", "Tailwind"],
+    category: "Web Development",
+    image: "img/first-web.png",
+    color: "from-blue-500 to-cyan-500",
+    year: "2023",
+    status: "Completed",
+    featured: true,
+  },
+  {
+    title: "My Second Web",
+    description:
+      "An improved version of my first project, featuring a more modern look built with Bootstrap. It focuses on clean layout structures and a dynamic user experience across various devices — though it still needs a few refinements.",
+    demo: "https://ananta-ti.github.io/my-second-web/",
+    repo: null,
+    tags: ["HTML", "CSS", "JavaScript", "Bootstrap"],
+    category: "Web Development",
+    image: "img/my-second-web.png",
+    color: "from-purple-500 to-pink-500",
+    year: "2023",
+    status: "Completed",
+    featured: false,
+  },
+  {
+    title: "KABESTU",
+    description:
+      "A company profile website for a steel manufacturing business, designed with a complete feature set and a user-friendly interface for better corporate presentation.",
+    demo: null,
+    repo: "https://github.com/Ananta-TI/besi.git",
+    tags: ["Laravel", "Bootstrap", "MySQL", "PHP"],
+    category: "Web Development",
+    image: "img/Kabestu.png",
+    color: "from-green-500 to-teal-500",
+    year: "2023",
+    status: "Completed",
+    featured: true,
+  },
+  {
+    title: "Sedap",
+    description:
+      "A React-based culinary platform showcasing Indonesian local food products with a modern and responsive UI. It promotes exploration of traditional snacks, healthy meals, and trendy dishes while empowering local culinary SMEs.",
+    demo: "https://react-nta.vercel.app/guest",
+    repo: null,
+    tags: ["React", "Tailwind", "UI/UX", "JavaScript"],
+    category: "Web Development",
+    image: "img/Sedap.png",
+    color: "from-orange-500 to-red-500",
+    year: "2024",
+    status: "Completed",
+    featured: true,
+  },
+  {
+    title: "React Inventory",
+    description:
+      "An inventory management system built with React, designed to streamline business operations with a clean and modern interface for better efficiency and usability.",
+    demo: "https://react-inventory-roan.vercel.app/",
+    repo: null,
+    tags: ["React", "Inventory", "Management", "JavaScript"],
+    category: "Web Application",
+    image: "img/ReactInventory.png",
+    color: "from-indigo-500 to-blue-500",
+    year: "2024",
+    status: "Completed",
+    featured: true,
+  },
+  {
+    title: "MathDash Pro",
+    description:
+      "An interactive math dashboard for calculating GCD and LCM values, designed with an intuitive and user-friendly interface to enhance learning experiences.",
+    demo: "https://mathdash-pro.vercel.app/",
+    repo: null,
+    tags: ["React", "Math", "Education", "JavaScript"],
+    category: "Education",
+    image: "img/MathDash.png",
+    color: "from-yellow-500 to-orange-500",
+    year: "2024",
+    status: "Completed",
+    featured: false,
+  },
+];
 
-  // Data lengkap semua projects
-  const allProjects = [
-    {
-      title: "My First Web",
-      description: "Website pertamaku yang dibuat untuk mempelajari dasar-dasar HTML, CSS, dan JavaScript.Mengusung desain sederhana namun responsif, proyek ini menjadi pijakan awal perjalananku di dunia pengembangan web.",
-      demo: "https://ananta-ti.github.io/my-first-web/",
-      repo: null,
-      tags: ["HTML", "CSS", "JavaScript", "Tailwind"],
-      category: "Web Development",
-      image: "img/first-web.png",
-      color: "from-blue-500 to-cyan-500",
-      year: "2023",
-      status: "Completed",
-      featured: true
-    },
-    {
-      title: "My Second Web",
-      description: "Versi lanjutan dari proyek pertamaku, kali ini dengan tampilan yang lebih modern menggunakan Bootstrap.Fokus pada struktur layout yang rapi dan pengalaman pengguna yang lebih dinamis di berbagai perangkat. cuman masi perlu sedikit perbaikan nih.",
-      demo: "https://ananta-ti.github.io/my-second-web/",
-      repo: null,
-      tags: ["HTML", "CSS", "JavaScript", "Bootstrap"],
-      category: "Web Development",
-      image: "img/my-second-web.png",
-      color: "from-purple-500 to-pink-500",
-      year: "2023",
-      status: "Completed",
-      featured: false
-    },
-    {
-      title: "KABESTU",
-      description: "Website company profile dari sebuah perusahaan besi dengan fitur lengkap dan antarmuka yang user-friendly.",
-      demo: null,
-      repo: "https://github.com/Ananta-TI/besi.git",
-      tags: ["Laravel", "Bootstrap", "MySQL", "PHP"],
-      category: "Web Development",
-      image: "img/Kabestu.png",
-      color: "from-green-500 to-teal-500",
-      year: "2023",
-      status: "Completed",
-      featured: true
-    },
-    {
-      title: "Sedap",
-      description: "Platform kuliner berbasis React yang menampilkan produk makanan lokal Indonesia dengan UI modern dan responsif. Mendukung eksplorasi camilan tradisional, makanan sehat, hingga kuliner kekinian, sekaligus mendorong pertumbuhan UMKM kuliner.",
-      demo: "https://react-nta.vercel.app/guest",
-      repo: null,
-      tags: ["React", "Tailwind", "UI/UX", "JavaScript"],
-      category: "Web Development",
-      image: "img/Sedap.png",
-      color: "from-orange-500 to-red-500",
-      year: "2024",
-      status: "Completed",
-      featured: true
-    },
-    {
-      title: "React Inventory",
-      description: "Sistem inventory management yang dibangun dengan React dan modern UI untuk efisiensi bisnis.",
-      demo: "https://react-inventory-roan.vercel.app/",
-      repo: null,
-      tags: ["React", "Inventory", "Management", "JavaScript"],
-      category: "Web Application",
-      image: "img/ReactInventory.png",
-      color: "from-indigo-500 to-blue-500",
-      year: "2024",
-      status: "Completed",
-      featured: true
-    },
-    {
-      title: "MathDash Pro",
-      description: "Dashboard matematika interaktif untuk menghitung nilai FPB dan KPK dengan antarmuka yang user-friendly.",
-      demo: "https://mathdash-pro.vercel.app/",
-      repo: null,
-      tags: ["React", "Math", "Education", "JavaScript"],
-      category: "Education",
-      image: "img/MathDash.png",
-      color: "from-yellow-500 to-orange-500",
-      year: "2024",
-      status: "Completed",
-      featured: false
-    },
-    
- 
-  ];
 
   // Get unique categories
   const categories = ["All", ...new Set(allProjects.map(project => project.category))];
@@ -230,8 +234,8 @@ const AllProjects = () => {
               />
             </h1>
             <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-              Eksplorasi lengkap dari semua project yang telah saya kembangkan
-            </p>
+
+A complete exploration of all the projects I have developed            </p>
           </motion.div>
 
           {/* Search and Filter */}
