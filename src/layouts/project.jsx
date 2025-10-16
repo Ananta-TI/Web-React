@@ -364,7 +364,7 @@ const projects = [
           } shadow-lg`}
         >
           <Code className="w-5 h-5" />
-          <span className="font-medium">
+          <span className="font-bold">
   <span className="text-[#F55247]">{projects.length} Projects</span> •{" "}
   <span className="text-[#FFA828]">
     {projects.filter((p) => p.demo).length} Live Demos

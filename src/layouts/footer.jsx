@@ -130,10 +130,11 @@ export default function Footer() {
           <div>
             <h3 className="text-3xl font-light mb-6">Discover</h3>
             <ul className="space-y-3">
-              {["Products", "Markets", "About", "Partners", "Stories"].map(
+            
+              {["Home", "About", "Projects", "Certificates", "Contact"].map(
                 (item) => (
                   <li key={item}>
-                    <a
+                    <a onClick={scrollToTop}
                       href="#"
                       className={cn(
                         "transition-colors cursor-none cursor-target",
@@ -153,7 +154,7 @@ export default function Footer() {
           <div>
             <h3 className="text-3xl font-light mb-6 ">Social</h3>
             <ul className="space-y-3">
-              {["LinkedIn", "WeChat"].map((item) => (
+              {["LinkedIn"].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
@@ -191,7 +192,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
           <div>
             <h3 className="text-2xl font-light mb-4">Get in Touch</h3>
             <form
