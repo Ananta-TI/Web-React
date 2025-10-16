@@ -12,13 +12,16 @@ const Certificates = () => {
 
   // ✅ Data sertifikat
   const certificates = [
-      { image: "sertifikat/3.jpg",  year: "2024" },
-      { image: "sertifikat/4.jpg",  year: "2023" },
-      { image: "sertifikat/7.jpg",  year: "2021" },
-      { image: "sertifikat/2.jpg",  year: "2024" },
-      { image: "sertifikat/1.jpg",  year: "2023" },
-      { image: "sertifikat/5.jpg",  year: "2022" },
-      { image: "sertifikat/6.jpg",  year: "2021" },
+      { image: "sertifikat/3.jpg",  year: "2025" },
+      { image: "sertifikat/4.jpg",  year: "2025" },
+      { image: "sertifikat/7.jpg",  year: "2025" },
+      { image: "sertifikat/2.jpg",  year: "2025" },
+      { image: "sertifikat/1.jpg",  year: "2024" },
+      { image: "sertifikat/5.jpg",  year: "2025" },
+      { image: "sertifikat/8.png",  year: "2025" },
+      { image: "sertifikat/10.png", year: "2025" },
+      { image: "sertifikat/9.png",  year: "2025" },
+      { image: "sertifikat/6.jpg",  year: "2025" },
   ];
 
   // 🔝 Scroll ke atas saat halaman dibuka

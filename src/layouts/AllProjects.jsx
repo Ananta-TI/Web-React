@@ -46,13 +46,13 @@ const allProjects = [
     color: "from-blue-500 to-cyan-500",
     year: "2023",
     status: "Completed",
-    featured: true,
+    featured: false,
   },
   {
     title: "My Second Web",
     description:
       "An improved version of my first project, featuring a more modern look built with Bootstrap. It focuses on clean layout structures and a dynamic user experience across various devices — though it still needs a few refinements.",
-    demo: "https://ananta-ti.github.io/my-second-web/",
+    demo: "https://ananta-ti.github.io/second-web/",
     repo: null,
     tags: ["HTML", "CSS", "JavaScript", "Bootstrap"],
     category: "Web Development",
@@ -74,7 +74,7 @@ const allProjects = [
     color: "from-green-500 to-teal-500",
     year: "2023",
     status: "Completed",
-    featured: true,
+    featured: false,
   },
   {
     title: "Sedap",
@@ -115,8 +115,22 @@ const allProjects = [
     image: "img/MathDash.png",
     color: "from-yellow-500 to-orange-500",
     year: "2024",
-    status: "Completed",
-    featured: false,
+    status: "In Progress",
+    featured: true,
+  },
+  {
+    title: "Book-Request",
+    description:
+      "Book & Module Request System for PCR campus libraries.Students, academic staff, and library staff can submit book or module requests, have them tested, and have them managed according to their role.",
+    demo: "https://github.com/Ananta-TI/Book-requests.git",
+    repo: null,
+    tags: ["React", "Math", "Education", "JavaScript"],
+    category: "Education",
+    image: "img/Book-Request.png",
+    color: "from-yellow-500 to-orange-500",
+    year: "2024",
+    status: "In Progress",
+    featured: true,
   },
 ];
 
@@ -243,7 +257,7 @@ A complete exploration of all the projects I have developed            </p>
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 cursor-none"
           >
             {/* Search Bar */}
             <div className="relative flex-1">
@@ -264,14 +278,14 @@ A complete exploration of all the projects I have developed            </p>
             </div>
 
             {/* Category Filter */}
-<div className="flex flex-wrap gap-2 pb-2 sm:pb-0">
+            <div className="flex flex-wrap gap-2 pb-2 sm:pb-0 cursor-none ">
               {categories.map((category) => (
                 <motion.button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium whitespace-nowrap transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium whitespace-nowrap transition-all duration-300 cursor-target cursor-none ${
                     selectedCategory === category
                       ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
                       : isDarkMode
@@ -395,7 +409,7 @@ A complete exploration of all the projects I have developed            </p>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 cursor-target cursor-none">
                   {project.demo && (
                     <motion.a
                       href={project.demo}
@@ -403,7 +417,7 @@ A complete exploration of all the projects I have developed            </p>
                       rel="noreferrer"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
+                      className="flex-1 flex items-center cursor-none justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
                     >
                       <Globe className="w-4 h-4" />
                       Live Demo
@@ -417,14 +431,14 @@ A complete exploration of all the projects I have developed            </p>
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`${
-                        project.demo ? "px-3" : "flex-1 justify-center"
+                        project.demo ? "px-3" : "flex-1 justify-center cursor-none"
                       } flex items-center gap-2 py-2.5 ${
                         isDarkMode
                           ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                       } rounded-lg font-medium text-sm transition-all duration-300`}
                     >
-                      <Github className="w-4 h-4" />
+                      <Github className="w-4 h-4 cursor-none" />
                       {!project.demo && "View Code"}
                     </motion.a>
                   )}
