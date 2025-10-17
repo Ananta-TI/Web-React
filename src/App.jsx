@@ -20,7 +20,7 @@ import './assets/tailwind.css';
 function App() {
   return (
     <ThemeProvider>
-      <TargetCursor spinDuration={4.1} hideDefaultCursor={true} />
+      <TargetCursor spinDuration={2.1} hideDefaultCursor={true} />
       <Header />
 
       <Routes>

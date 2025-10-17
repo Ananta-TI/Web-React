@@ -13,7 +13,7 @@ const TargetCursor = ({
 
   const constants = useMemo(
     () => ({
-      borderWidth: 3,
+      borderWidth: 8,
       cornerSize: 12,
       parallaxStrength: 0.00005,
     }),
@@ -25,7 +25,7 @@ const TargetCursor = ({
     gsap.to(cursorRef.current, {
       x,
       y,
-      duration: 0.1,
+      duration: 0.01,
       ease: "power3.out",
     });
   }, []);
