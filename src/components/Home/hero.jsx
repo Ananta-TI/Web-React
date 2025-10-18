@@ -5,6 +5,7 @@ import Particles from "./particles";
 import { ChevronDown } from "lucide-react";
 import Magnet from "./magnet"; // Import komponen Magnet
 
+
 export default function Hero() {
   const { isDarkMode } = useContext(ThemeContext);
 
@@ -40,12 +41,18 @@ export default function Hero() {
       >
         {/* Foto dengan Magnet Effect */}
         <Magnet magnetStrength={4}>
-          <div className="relative w-40 h-40 overflow-hidden rounded-full cursor-pointer md:w-96 md:h-76">
+          <div className="relative w-70 h-40 overflow-hidden  cursor-pointer md:w-96 md:h-76">
             <img
-              src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
-              alt="Ananta Firdaus"
-              className="object-cover w-full h-full "
-            />
+  key={isDarkMode}
+  src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
+  alt="Ananta Firdaus"
+  style={{
+    animation: "scale-in-hor-center 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both",
+  }}
+  className="object-cover w-full h-full"
+/>
+
+
           </div>
         </Magnet>
 

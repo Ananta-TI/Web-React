@@ -119,7 +119,7 @@ export default function Footer() {
     className={`absolute inset-0 -z-100 bg-gradient-to-b ${
       isDarkMode
         ? "from-zinc-900 via-zinc-950 to-black"
-        : "from-white via-gray-200 to-gray-400"
+        : "from-white via-gray-200 to-zinc-500"
     }`}
   />
 <div className="relative mt-0 mb-0">
@@ -128,7 +128,7 @@ export default function Footer() {
       <div className="w-full mx-auto py-24 px-6 sm:px-12 lg:px-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-base">
           <div>
-            <h3 className="text-3xl font-light mb-6">Discover</h3>
+            <h3 className="text-3xl font-bold font-lyrae mb-6">Discover</h3>
             <ul className="space-y-3">
             
               {["Home", "About", "Projects", "Certificates", "Contact"].map(
@@ -137,7 +137,7 @@ export default function Footer() {
                     <a onClick={scrollToTop}
                       href="#"
                       className={cn(
-                        "transition-colors cursor-none cursor-target",
+                        "transition-colors font-mono font-bold cursor-none cursor-target",
                         isDarkMode
                           ? "hover:text-zinc-400"
                           : "hover:text-zinc-700"
@@ -152,14 +152,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-3xl font-light mb-6 ">Social</h3>
+            <h3 className="text-3xl font-bold font-lyrae mb-6 ">Social</h3>
             <ul className="space-y-3">
               {["LinkedIn"].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
                     className={cn(
-                      "transition-colors cursor-none cursor-target",
+                      "transition-colors font-mono font-bold cursor-none cursor-target",
                       isDarkMode
                         ? "hover:text-zinc-400"
                         : "hover:text-zinc-700"
@@ -173,14 +173,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-3xl font-light mb-6">Info</h3>
+            <h3 className="text-3xl font-bold font-lyrae mb-6">Info</h3>
             <ul className="space-y-3">
               {["Privacy Policy", "Terms of Service"].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
                     className={cn(
-                      "transition-colors cursor-none cursor-target",
+                      "transition-colors font-mono font-bold cursor-none cursor-target",
                       isDarkMode
                         ? "hover:text-zinc-400"
                         : "hover:text-zinc-700"
@@ -193,11 +193,11 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-2xl font-light mb-4">Get in Touch</h3>
+            <h3 className="text-2xl font-bold font-lyrae mb-4">Get in Touch</h3>
             <form
               ref={formEl}
               onSubmit={handleSubmit}
-              className="flex flex-col gap-3 mt-4 overflow-hidden"
+              className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
             >
               {["name", "email", "subject", "message"].map((field, index) => (
                 <div key={field} className="relative overflow-hidden">
@@ -265,7 +265,7 @@ export default function Footer() {
               </button>
 
               {sent && (
-                <span className="text-green-400 text-sm mt-3 text-center">
+                <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
                   ✅ Message Sent Successfully!
                 </span>
               )}
@@ -292,13 +292,13 @@ export default function Footer() {
             >
               @NANTA
             </div>
-            <span>©2025</span>
+            <span className="font-mono font-bold">©2025</span>
           </div>
-          <div>All Rights Reserved</div>
+          <div  className="font-mono font-bold">All Rights Reserved</div>
           <button
             onClick={scrollToTop}
             className={cn(
-              "flex cursor-none cursor-target items-center gap-1 sm:gap-2 group",
+              "flex cursor-none cursor-target font-mono font-bold items-center gap-1 sm:gap-2 group",
               isDarkMode ? "hover:text-white" : "hover:text-zinc-800"
             )}
           >

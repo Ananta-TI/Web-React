@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Github, Linkedin, Instagram, Mail, Music2, Menu, X, Globe } from "lucide-react";
+import { Github, Linkedin, Instagram, Mail, Music2, Menu, X, Globe, House, User, Folder, Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -215,87 +215,94 @@ export default function Header() {
               <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
               {/* Navigation Links */}
-              <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-                {["/all-projects", "/certificates"].includes(location.pathname) ? (
-                  <>
-                    {location.pathname !== "/certificates" && (
-                      <motion.a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/certificates");
-                          setIsOpen(false);
-                        }}
-                        className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
-                      >
-                        Certificates
-                      </motion.a>
-                    )}
-                    {location.pathname !== "/all-projects" && (
-                      <motion.a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/all-projects");
-                          setIsOpen(false);
-                        }}
-                        className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
-                      >
-                        All Projects
-                      </motion.a>
-                    )}
-                    <motion.a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate("/");
-                        setIsOpen(false);
-                      }}
-                      className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-                    >
-                      ← Back to Home
-                    </motion.a>
-                  </>
-                ) : (
-                  [
-                    { name: "Home", link: "#home" },
-                    { name: "About", link: "#About" },
-                    { name: "Projects", link: "#projects" },
-                    { name: "Certificates", link: "/certificates" },
-                    { name: "Contact", link: "#contact" },
-                  ].map((item, index) => (
-                    <motion.a
-                      key={item.name}
-                      href={item.link}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (item.link.startsWith("#")) {
-                          const section = document.querySelector(item.link);
-                          if (section) {
-                            section.scrollIntoView({ behavior: "smooth", block: "start" });
-                          }
-                        } else {
-                          navigate(item.link);
-                        }
-                        setIsOpen(false);
-                      }}
-                      className="cursor-target cursor-none relative block text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
-                      onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
-                      onMouseLeave={() => !isMobile && setHoveredLink(null)}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
-                    >
-                      {item.name}
-                    </motion.a>
-                  ))
-                )}
-              </nav>
+<nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
+  {["/all-projects", "/certificates"].includes(location.pathname) ? (
+    <>
+      {location.pathname !== "/certificates" && (
+  <motion.a
+    href="#"
+    onClick={(e) => {
+      e.preventDefault();
+      navigate("/certificates");
+      setIsOpen(false);
+    }}
+    className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
+  >
+    <span>Certificates</span>
+    <Award size={32} strokeWidth={2} />
+  </motion.a>
+)}
+
+      {location.pathname !== "/all-projects" && (
+  <motion.a
+    href="#"
+    onClick={(e) => {
+      e.preventDefault();
+      navigate("/all-projects");
+      setIsOpen(false);
+    }}
+    className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
+  >
+    <span>All Projects</span>
+    <Folder size={32} strokeWidth={2} />
+  </motion.a>
+)}
+
+      <motion.a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/");
+          setIsOpen(false);
+        }}
+        className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+      >
+        ← Back to Home
+      </motion.a>
+    </>
+  ) : (
+    [
+      { name: "Home", link: "#home", style: <House size={32} strokeWidth={2}/> },
+      { name: "About", link: "#about", style: <User size={32} strokeWidth={2}/> },
+      { name: "Projects", link: "#projects", style: <Folder size={32} strokeWidth={2}/> },
+      { name: "Certificates", link: "/certificates", style: <Award size={32} strokeWidth={2}/> },
+      { name: "Contact", link: "#contact", style: <Mail size={32} /> },
+    ].map((item, index) => (
+<motion.a
+  key={item.name}
+  href={item.link}
+  onClick={(e) => {
+    e.preventDefault();
+    if (item.link.startsWith("#")) {
+      const section = document.querySelector(item.link);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      navigate(item.link);
+    }
+    setIsOpen(false);
+  }}
+  className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
+  onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
+  onMouseLeave={() => !isMobile && setHoveredLink(null)}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
+>
+  <span>{item.name}</span>
+  <div className="ml-auto ">{item.style}</div>
+</motion.a>
+
+    ))
+  )}
+</nav>
+
 
               {/* Social Links */}
               <div className="mt-20 sm:mt-40">
@@ -303,7 +310,7 @@ export default function Header() {
                   Links
                 </span>
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
-                <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex flex-wrap gap-4 font-mono font-bold">
                   {[
                     { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
                     { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
