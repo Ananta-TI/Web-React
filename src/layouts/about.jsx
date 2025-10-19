@@ -15,7 +15,7 @@ const About = () => {
 
   return (
     <section
-      id="About"
+      id="about"
       className={`w-full min-h-screen overflow-hidden flex-col items-center transition-colors duration-500 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
       }`}
