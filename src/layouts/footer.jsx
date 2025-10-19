@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Loader, Mail, ArrowUp } from "lucide-react";
 import { ThemeContext } from "../context/ThemeContext";
 import Line from "./line.jsx";
-
+// import SteampunkWatch from "./SteampunkWatch.jsx";
 // === Utility ===
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -309,6 +309,8 @@ export default function Footer() {
             />
           </button>
         </div>
+{/* <SteampunkWatch /> */}
+
       </div>
     </footer>
   );

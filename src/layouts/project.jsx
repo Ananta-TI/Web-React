@@ -5,6 +5,7 @@ import { useContext,useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
+import LayeredAnimations from "../components/Home/LayeredAnimations";
 import {
   Github,
   ExternalLink,
@@ -364,14 +365,17 @@ const projects = [
           } shadow-lg`}
         >
           <Code className="w-5 h-5" />
-          <span className="font-bold">
+          <span className="font-bold font-mono">
   <span className="text-[#F55247]">{projects.length} Projects</span> •{" "}
   <span className="text-[#FFA828]">
     {projects.filter((p) => p.demo).length} Live Demos
   </span>
 </span>
 
-        </div>
+        </div>      
+        
+        <LayeredAnimations />
+
       </motion.div>
 
 

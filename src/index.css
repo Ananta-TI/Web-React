@@ -7,6 +7,15 @@
 @import "tailwindcss";
 
 
+#smooth-wrapper {
+  height: 100%;
+  overflow: hidden;
+}
+
+#smooth-content {
+  will-change: transform;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -197,7 +206,7 @@
 
 @media screen and (max-width: 1000px) {
   .digital-ball {
-    @apply -translate-x-[-20%] -translate-y-2/4;
+    transform: translate(-20%, -50%);
   }
 }
 
@@ -205,7 +214,14 @@
   border: none;
   margin: 0 auto;
   height: min-content;
-  @apply stroke-[#111111] dark:stroke-white;
+  stroke: #111111;
+  color: #111111;
+}
+
+/* dark mode variant using the existing .dark root class */
+.dark .stroke {
+  stroke: #ffffff;
+  color: #ffffff;
 }
 
 .tiktok-embed {
@@ -289,5 +305,30 @@
   animation: rgb-border 3s linear infinite;
 }
 
+.layered-animations {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 16rem;
+  height: 16rem;
+  transform: scale(1.75);
+  z-index: 100;
+}
 
+.layered-animations .shape {
+  position: absolute;
+  overflow: visible;
+  width: 5rem;
+  height: 5rem;
+  stroke: currentColor;
+  fill: transparent;
+}
 
+.layered-animations .small.shape {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: currentColor;
+  stroke-width: 2px;
+  fill: currentColor;
+}
