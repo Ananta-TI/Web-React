@@ -332,8 +332,8 @@ animate(svg.createDrawable('.line'), {
                   {[
                     { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
                     { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
-                    { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> },
-                    { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> },
+                    {/* { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> }, */},
+                    {/* { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> }, */},
                     { 
                       name: "Email", 
                       url: "mailto:anantafirdaus14@gmail.com?subject=Portfolio%20Inquiry&body=Halo%20Ananta,%0A%0ASaya%20melihat%20portfolio%20anda%20dan%20ingin%20berdiskusi%20lebih%20lanjut.", 
