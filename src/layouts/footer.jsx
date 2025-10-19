@@ -194,82 +194,89 @@ export default function Footer() {
           </div>
           <div>
             <h3 className="text-2xl font-bold font-lyrae mb-4">Get in Touch</h3>
-            <form
-              ref={formEl}
-              onSubmit={handleSubmit}
-              className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
-            >
-              {["name", "email", "subject", "message"].map((field, index) => (
-                <div key={field} className="relative overflow-hidden">
-                  {field === "message" ? (
-                    <textarea
-                      placeholder={field}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field]: e.target.value })
-                      }
-                      onFocus={() => handleFocus(index + 1)}
-                      className={cn(
-                        "peer min-h-[7rem] cursor-none cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
-                        isDarkMode
-                          ? "placeholder:text-zinc-600 text-white"
-                          : "placeholder:text-zinc-500 text-zinc-900"
-                      )}
-                    />
-                  ) : (
-                    <input
-                      type={field === "email" ? "email" : "text"}
-                      placeholder={field}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field]: e.target.value })
-                      }
-                      onFocus={() => handleFocus(index + 1)}
-                      className={cn(
-                        "peer w-full cursor-none cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
-                        isDarkMode
-                          ? "placeholder:text-zinc-600 text-white"
-                          : "placeholder:text-zinc-500 text-zinc-900"
-                      )}
-                    />
-                  )}
-                  <ContactFormLine
-                    inputId={index + 1}
-                    hasError={!!errors[field]}
-                    isDarkMode={isDarkMode}
-                  />
-                </div>
-              ))}
-
-              <button
-                type="submit"
-                disabled={pending}
-                className={cn(
-                  "mt-4 cursor-target inline-flex cursor-none cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
-                  isDarkMode
-                    ? "border-zinc-600 hover:bg-zinc-800"
-                    : "border-zinc-400 hover:bg-zinc-200"
-                )}
-              >
-                {pending ? (
-                  <>
-                    <Loader className="h-5 w-5 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-5 w-5 " />
-                    Send
-                  </>
-                )}
-              </button>
-
-              {sent && (
-                <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
-                  ✅ Message Sent Successfully!
-                </span>
+             <form
+      ref={formEl}
+      onSubmit={handleSubmit}
+      className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
+    >
+      {["name", "email", "subject", "message"].map((field, index) => (
+        <div key={field} className="relative overflow-hidden">
+          {field === "message" ? (
+            <textarea
+              name={field}
+              placeholder={field}
+              value={formData[field]}
+              onChange={(e) =>
+                setFormData({ ...formData, [field]: e.target.value })
+              }
+              onFocus={() => handleFocus(index + 1)}
+              className={cn(
+                "peer min-h-[7rem] cursor-none cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
+                isDarkMode
+                  ? "placeholder:text-zinc-600 text-white"
+                  : "placeholder:text-zinc-500 text-zinc-900"
               )}
-            </form>
+            />
+          ) : (
+            <input
+              name={field}
+              type={field === "email" ? "email" : "text"}
+              placeholder={field}
+              value={formData[field]}
+              onChange={(e) =>
+                setFormData({ ...formData, [field]: e.target.value })
+              }
+              onFocus={() => handleFocus(index + 1)}
+              className={cn(
+                "peer w-full cursor-none cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
+                isDarkMode
+                  ? "placeholder:text-zinc-600 text-white"
+                  : "placeholder:text-zinc-500 text-zinc-900"
+              )}
+            />
+          )}
+          <ContactFormLine
+            inputId={index + 1}
+            hasError={!!errors[field]}
+            isDarkMode={isDarkMode}
+          />
+          {errors[field] && (
+            <span className="text-red-500 text-xs absolute right-0 top-2">
+              {errors[field]}
+            </span>
+          )}
+        </div>
+      ))}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className={cn(
+          "mt-4 cursor-target inline-flex cursor-none cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
+          isDarkMode
+            ? "border-zinc-600 hover:bg-zinc-800"
+            : "border-zinc-400 hover:bg-zinc-200"
+        )}
+      >
+        {pending ? (
+          <>
+            <Loader className="h-5 w-5 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          <>
+            <Mail className="h-5 w-5" />
+            Send
+          </>
+        )}
+      </button>
+
+      {sent && (
+        <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
+          ✅ Message Sent Successfully!
+        </span>
+      )}
+    </form>
           </div>
         </div>
 
