@@ -90,16 +90,19 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
 
         {/* Stack followers */}
         <div className="flex mt-2">
-          {followers.map((f, idx) => (
-            <img
-              key={f.id}
-              src={f.avatar_url}
-              alt="Follower"
-              className="w-6 h-6 rounded-full border-2 border-white dark:border-zinc-800 -ml-2 first:ml-0"
-              style={{ zIndex: followers.length - idx }}
-            />
-          ))}
-        </div>
+  {followers.map((f, idx) => (
+    <img
+      key={f.id}
+      src={f.avatar_url}
+      alt="Follower"
+      className={`w-6 h-6 rounded-full border-2 -ml-2 first:ml-0 ${
+        isDarkMode ? "border-stone-600" : "border-gray-700"
+      }`}
+      style={{ zIndex: followers.length - idx }}
+    />
+  ))}
+</div>
+
       </div>
     </div>
   );

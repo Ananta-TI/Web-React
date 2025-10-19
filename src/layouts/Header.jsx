@@ -3,6 +3,10 @@ import { Github, Linkedin, Instagram, Mail, Music2, Menu, X, Globe, House, User,
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import { animate, svg, stagger } from 'https://esm.sh/animejs';
+
+
+
 // import { createAnimation } from "./ThemeBtn"; // Import function untuk animasi
 
 export default function Header() {
@@ -14,7 +18,13 @@ export default function Header() {
   const [hoveredLink, setHoveredLink] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
-
+animate(svg.createDrawable('.line'), {
+  draw: ['0 0', '0 1', '1 1'],
+  ease: 'inOutQuad',
+  duration: 2000,
+  delay: stagger(100),
+  loop: true
+});
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -231,7 +241,11 @@ export default function Header() {
     animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
   >
     <span>Certificates</span>
-    <Award size={32} strokeWidth={2} />
+    <img
+  src="/svg/badge-4.svg"
+  alt="Badge 4"
+  className={`w-12 h-12 ${isDarkMode ? "invert" : ""}`}
+/>
   </motion.a>
 )}
 
@@ -248,7 +262,11 @@ export default function Header() {
     animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
   >
     <span>All Projects</span>
-    <Folder size={32} strokeWidth={2} />
+<img
+  src="/svg/work-7.svg"
+  alt="Badge 4"
+  className={`w-12 h-12 line ${isDarkMode ? "invert" : ""}`}
+/>
   </motion.a>
 )}
 

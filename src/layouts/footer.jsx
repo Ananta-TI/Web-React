@@ -119,7 +119,7 @@ export default function Footer() {
     className={`absolute inset-0 -z-100 bg-gradient-to-b ${
       isDarkMode
         ? "from-zinc-900 via-zinc-950 to-black"
-        : "from-white via-gray-200 to-zinc-500"
+        : "from-white via-gray-200 to-gray-400 "
     }`}
   />
 <div className="relative mt-0 mb-0">

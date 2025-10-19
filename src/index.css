@@ -254,7 +254,40 @@
 
 
 
+@keyframes border-spin {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
+.animate-border-spin {
+  background-size: 200% 200%;
+  animation: border-spin 3s linear infinite;
+  border-radius: 9999px;
+}
+
+@keyframes rgb-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-border-rgb {
+  background-size: 200% 200%;
+  animation: rgb-border 3s linear infinite;
+}
 
 
 
