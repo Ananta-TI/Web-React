@@ -223,7 +223,7 @@ const projects = [
 
                 {/* Description */}
                 <p
-                  className={`text-lg font-mono leading-relaxed mb-4 ${
+                  className={`text-lg  font-mono leading-relaxed line-clamp-3 mb-4 ${
                     isDarkMode ? "text-zinc-400" : "text-gray-600"
                   }`}
                 >
