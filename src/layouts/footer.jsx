@@ -4,8 +4,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Loader, Mail, ArrowUp } from "lucide-react";
 import { ThemeContext } from "../context/ThemeContext";
+import emailjs from "emailjs-com";
 import Line from "./line.jsx";
-// import SteampunkWatch from "./SteampunkWatch.jsx";
+
 // === Utility ===
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -36,8 +37,7 @@ function ContactFormLine({ inputId, hasError, isDarkMode }) {
 
 // === Footer utama ===
 export default function Footer() {
-  const theme = useContext(ThemeContext);
-  const isDarkMode = theme?.isDarkMode ?? true;
+  const { isDarkMode } = useContext(ThemeContext);
   const formEl = useRef(null);
   const el = useRef(null);
 
@@ -51,24 +51,24 @@ export default function Footer() {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  // useEffect(() => {
-  //   gsap.registerPlugin(ScrollTrigger);
-  //   gsap.fromTo(
-  //     el.current,
-  //     { opacity: 0, y: 60 },
-  //     {
-  //       opacity: 1,
-  //       y: 0,
-  //       ease: "power2.out",
-  //       scrollTrigger: {
-  //         trigger: el.current,
-  //         start: "top bottom",
-  //         end: "top center",
-  //         scrub: false,
-  //       },
-  //     }
-  //   );
-  // }, []);
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.fromTo(
+      el.current,
+      { opacity: 0, y: 60 },
+      {
+        opacity: 1,
+        y: 0,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: el.current,
+          start: "top bottom",
+          end: "top center",
+          scrub: false,
+        },
+      }
+    );
+  }, []);
 
   const handleFocus = (inputId) => {
     gsap.fromTo(
@@ -80,28 +80,46 @@ export default function Footer() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = true;
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
-      newErrors.email = true;
-    if (!formData.subject.trim()) newErrors.subject = true;
-    if (formData.message.trim().length < 3) newErrors.message = true;
-    return newErrors;
+    if (!formData.name.trim()) newErrors.name = "Required";
+    if (!formData.email.trim()) {
+      newErrors.email = "Required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Invalid email";
+    }
+    if (!formData.subject.trim()) newErrors.subject = "Required";
+    if (!formData.message.trim()) newErrors.message = "Required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = validate();
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (!validate()) return;
 
     setPending(true);
     setSent(false);
-    setTimeout(() => {
-      setPending(false);
+
+    try {
+      await emailjs.sendForm(
+        "service_m3pugyl",      // Service ID
+        "template_fbyckkg",    // Template ID
+        formEl.current,       
+        "F7OWxXL91oYx48edi"   // Public key
+      );
+
       setSent(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      setTimeout(() => setSent(false), 4000);
-    }, 1500);
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+      setErrors({});
+    } catch (err) {
+      console.error("Gagal mengirim pesan:", err);
+    } finally {
+      setPending(false);
+    }
   };
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -110,31 +128,32 @@ export default function Footer() {
     <footer
       ref={el}
       className={cn(
-    "relative z-10 w-full overflow-hidden transition-colors duration-500",
-    isDarkMode ? "text-white" : "text-zinc-900"
-  )}
->
-  {/* Background gradient */}
-  <div
-    className={`absolute inset-0 -z-100 bg-gradient-to-b ${
-      isDarkMode
-        ? "from-zinc-900 via-zinc-950 to-black"
-        : "from-white via-gray-200 to-gray-400 "
-    }`}
-  />
-<div className="relative mt-0 mb-0">
-  <Line />
-</div>
+        "relative z-10 w-full overflow-hidden transition-colors duration-500",
+        isDarkMode ? "text-white" : "text-zinc-900"
+      )}
+    >
+      {/* Background gradient */}
+      <div
+        className={`absolute inset-0 -z-100 bg-gradient-to-b ${
+          isDarkMode
+            ? "from-zinc-900 via-zinc-950 to-black"
+            : "from-white via-gray-200 to-gray-400 "
+        }`}
+      />
+      <div className="relative mt-0 mb-0">
+        <Line />
+      </div>
+
       <div className="w-full mx-auto py-24 px-6 sm:px-12 lg:px-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-base">
           <div>
             <h3 className="text-3xl font-bold font-lyrae mb-6">Discover</h3>
             <ul className="space-y-3">
-            
               {["Home", "About", "Projects", "Certificates", "Contact"].map(
                 (item) => (
                   <li key={item}>
-                    <a onClick={scrollToTop}
+                    <a
+                      onClick={scrollToTop}
                       href="#"
                       className={cn(
                         "transition-colors font-mono font-bold cursor-none cursor-target",
@@ -152,7 +171,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-3xl font-bold font-lyrae mb-6 ">Social</h3>
+            <h3 className="text-3xl font-bold font-lyrae mb-6">Social</h3>
             <ul className="space-y-3">
               {["LinkedIn"].map((item) => (
                 <li key={item}>
@@ -192,99 +211,99 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
           <div>
             <h3 className="text-2xl font-bold font-lyrae mb-4">Get in Touch</h3>
-             <form
-      ref={formEl}
-      onSubmit={handleSubmit}
-      className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
-    >
-      {["name", "email", "subject", "message"].map((field, index) => (
-        <div key={field} className="relative overflow-hidden">
-          {field === "message" ? (
-            <textarea
-              name={field}
-              placeholder={field}
-              value={formData[field]}
-              onChange={(e) =>
-                setFormData({ ...formData, [field]: e.target.value })
-              }
-              onFocus={() => handleFocus(index + 1)}
-              className={cn(
-                "peer min-h-[7rem] cursor-none cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
-                isDarkMode
-                  ? "placeholder:text-zinc-600 text-white"
-                  : "placeholder:text-zinc-500 text-zinc-900"
-              )}
-            />
-          ) : (
-            <input
-              name={field}
-              type={field === "email" ? "email" : "text"}
-              placeholder={field}
-              value={formData[field]}
-              onChange={(e) =>
-                setFormData({ ...formData, [field]: e.target.value })
-              }
-              onFocus={() => handleFocus(index + 1)}
-              className={cn(
-                "peer w-full cursor-none cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
-                isDarkMode
-                  ? "placeholder:text-zinc-600 text-white"
-                  : "placeholder:text-zinc-500 text-zinc-900"
-              )}
-            />
-          )}
-          <ContactFormLine
-            inputId={index + 1}
-            hasError={!!errors[field]}
-            isDarkMode={isDarkMode}
-          />
-          {errors[field] && (
-            <span className="text-red-500 text-xs absolute right-0 top-2">
-              {errors[field]}
-            </span>
-          )}
-        </div>
-      ))}
+            <form
+              ref={formEl}
+              onSubmit={handleSubmit}
+              className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
+            >
+              {["name", "email", "subject", "message"].map((field, index) => (
+                <div key={field} className="relative overflow-hidden">
+                  {field === "message" ? (
+                    <textarea
+                      name={field}
+                      placeholder={field}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      onFocus={() => handleFocus(index + 1)}
+                      className={cn(
+                        "peer min-h-[7rem] cursor-none cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
+                        isDarkMode
+                          ? "placeholder:text-zinc-600 text-white"
+                          : "placeholder:text-zinc-500 text-zinc-900"
+                      )}
+                    />
+                  ) : (
+                    <input
+                      name={field}
+                      type={field === "email" ? "email" : "text"}
+                      placeholder={field}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      onFocus={() => handleFocus(index + 1)}
+                      className={cn(
+                        "peer w-full cursor-none cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
+                        isDarkMode
+                          ? "placeholder:text-zinc-600 text-white"
+                          : "placeholder:text-zinc-500 text-zinc-900"
+                      )}
+                    />
+                  )}
+                  <ContactFormLine
+                    inputId={index + 1}
+                    hasError={!!errors[field]}
+                    isDarkMode={isDarkMode}
+                  />
+                  {errors[field] && (
+                    <span className="text-red-500 text-xs absolute right-0 top-2">
+                      {errors[field]}
+                    </span>
+                  )}
+                </div>
+              ))}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className={cn(
-          "mt-4 cursor-target inline-flex cursor-none cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
-          isDarkMode
-            ? "border-zinc-600 hover:bg-zinc-800"
-            : "border-zinc-400 hover:bg-zinc-200"
-        )}
-      >
-        {pending ? (
-          <>
-            <Loader className="h-5 w-5 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          <>
-            <Mail className="h-5 w-5" />
-            Send
-          </>
-        )}
-      </button>
+              <button
+                type="submit"
+                disabled={pending}
+                className={cn(
+                  "mt-4 cursor-target inline-flex cursor-none cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
+                  isDarkMode
+                    ? "border-zinc-600 hover:bg-zinc-800"
+                    : "border-zinc-400 hover:bg-zinc-200"
+                )}
+              >
+                {pending ? (
+                  <>
+                    <Loader className="h-5 w-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    Send
+                  </>
+                )}
+              </button>
 
-      {sent && (
-        <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
-          ✅ Message Sent Successfully!
-        </span>
-      )}
-    </form>
+              {sent && (
+                <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
+                  ✅ Message Sent Successfully!
+                </span>
+              )}
+            </form>
           </div>
         </div>
 
-        {/* Bagian bawah footer */}
         <div
           id="contact"
           className={cn(
-            "flex flex-col  sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
+            "flex flex-col sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
             isDarkMode
               ? "border-zinc-700/50 text-gray-400"
               : "border-zinc-300 text-gray-600"
@@ -293,7 +312,7 @@ export default function Footer() {
           <div className="flex items-center cursor-none cursor-target space-x-2">
             <div
               className={cn(
-                "text-4xl  sm:text-6xl tracking-wider font-MailBox",
+                "text-4xl sm:text-6xl tracking-wider font-MailBox",
                 isDarkMode ? "text-white" : "text-zinc-900"
               )}
             >
@@ -301,7 +320,7 @@ export default function Footer() {
             </div>
             <span className="font-mono font-bold">©2025</span>
           </div>
-          <div  className="font-mono font-bold">All Rights Reserved</div>
+          <div className="font-mono font-bold">All Rights Reserved</div>
           <button
             onClick={scrollToTop}
             className={cn(
@@ -316,8 +335,6 @@ export default function Footer() {
             />
           </button>
         </div>
-{/* <SteampunkWatch /> */}
-
       </div>
     </footer>
   );
