@@ -122,8 +122,8 @@ const allProjects = [
     title: "Book-Request",
     description:
       "Book & Module Request System for PCR campus libraries.Students, academic staff, and library staff can submit book or module requests, have them tested, and have them managed according to their role.",
-    demo: "https://github.com/Ananta-TI/Book-requests.git",
-    repo: null,
+    demo: null,
+    repo: "https://github.com/Ananta-TI/Book-requests.git",
     tags: ["React", "Math", "Education", "JavaScript"],
     category: "Education",
     image: "img/Book-Request.png",

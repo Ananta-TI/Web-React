@@ -9,6 +9,8 @@ import About from "./layouts/about";
 import TargetCursor from "./components/Shared/TargetCursor";
 import Project from "./layouts/project";
 import AllProjects from "./layouts/AllProjects";
+// import PrivacyPolicy from "./layouts/PrivacyPolicy.jsx";
+// import PrivacyPolicy from "./layouts/PrivacyPolicy";
 import Certificates from "./layouts/Certificates";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -40,6 +42,9 @@ function App() {
         {/* Halaman All Projects */}
         <Route path="/all-projects" element={<AllProjects />} />
         <Route path="/certificates" element={<Certificates />} />
+        {/* <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} /> */}
+
       </Routes>
 
       <Footer />

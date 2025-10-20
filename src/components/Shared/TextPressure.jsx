@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 
 const TextPressure = ({
-  text = "ANANTA FIRDAUS",
+  text = "CODE & DESIGN",
   fontFamily = "Compressa VF",
   fontUrl = "https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2",
 

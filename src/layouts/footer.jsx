@@ -2,17 +2,27 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Loader, Mail, ArrowUp } from "lucide-react";
+import {
+  Loader,
+  Mail,
+  ArrowUp,
+  Github,
+  Linkedin,
+  Instagram,
+  Music2,
+} from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import emailjs from "emailjs-com";
+import { motion } from "framer-motion";
 import Line from "./line.jsx";
 
-// === Utility ===
+// Utility class
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-// === ContactFormLine (SVG animasi garis input) ===
+// Garis animasi untuk input form
 function ContactFormLine({ inputId, hasError, isDarkMode }) {
   return (
     <svg
@@ -35,11 +45,12 @@ function ContactFormLine({ inputId, hasError, isDarkMode }) {
   );
 }
 
-// === Footer utama ===
 export default function Footer() {
   const { isDarkMode } = useContext(ThemeContext);
   const formEl = useRef(null);
   const el = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -51,6 +62,7 @@ export default function Footer() {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
 
+  // Animasi saat footer muncul
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     gsap.fromTo(
@@ -78,6 +90,7 @@ export default function Footer() {
     );
   };
 
+  // Validasi form
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Required";
@@ -92,28 +105,22 @@ export default function Footer() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Kirim form pakai EmailJS
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setPending(true);
     setSent(false);
-
     try {
       await emailjs.sendForm(
-        "service_m3pugyl",      // Service ID
-        "template_fbyckkg",    // Template ID
-        formEl.current,       
-        "F7OWxXL91oYx48edi"   // Public key
+        "service_m3pugyl",
+        "template_fbyckkg",
+        formEl.current,
+        "F7OWxXL91oYx48edi"
       );
-
       setSent(true);
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
       setErrors({});
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
@@ -124,6 +131,18 @@ export default function Footer() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
+  const discoverLinks = [
+    { name: "All Projects", path: "/all-projects" },
+    { name: "Certificates", path: "/certificates" },
+  ];
+
+  const socialLinks = [
+    { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
+    { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
+    { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> },
+    { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> },
+  ];
+
   return (
     <footer
       ref={el}
@@ -132,87 +151,77 @@ export default function Footer() {
         isDarkMode ? "text-white" : "text-zinc-900"
       )}
     >
-      {/* Background gradient */}
+      {/* Background Gradient */}
       <div
         className={`absolute inset-0 -z-100 bg-gradient-to-b ${
           isDarkMode
             ? "from-zinc-900 via-zinc-950 to-black"
-            : "from-white via-gray-200 to-gray-400 "
+            : "from-white via-gray-200 to-gray-400"
         }`}
       />
-      <div className="relative mt-0 mb-0">
+      <div className="relative">
         <Line />
       </div>
 
       <div className="w-full mx-auto py-24 px-6 sm:px-12 lg:px-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-base">
+          {/* === DISCOVER === */}
           <div>
             <h3 className="text-3xl font-bold font-lyrae mb-6">Discover</h3>
-            <ul className="space-y-3">
-              {["Home", "About", "Projects", "Certificates", "Contact"].map(
-                (item) => (
-                  <li key={item}>
-                    <a
-                      onClick={scrollToTop}
-                      href="#"
-                      className={cn(
-                        "transition-colors font-mono font-bold cursor-none cursor-target",
-                        isDarkMode
-                          ? "hover:text-zinc-400"
-                          : "hover:text-zinc-700"
-                      )}
-                    >
-                      {item}
-                    </a>
-                  </li>
-                )
-              )}
-            </ul>
+            {discoverLinks
+              .filter((link) => link.path !== location.pathname)
+              .map((link, i) => (
+                <motion.a
+                  key={link.name}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(link.path);
+                  }}
+                  className=" cursor-none relative font-bold font-mono transition-transform active:scale-95 block mb-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: { delay: i * 0.1 },
+                  }}
+                >
+                <span className="cursor-target">
+
+                  {link.name}
+                </span>
+                </motion.a>
+              ))}
           </div>
 
+          {/* === SOCIAL === */}
           <div>
             <h3 className="text-3xl font-bold font-lyrae mb-6">Social</h3>
-            <ul className="space-y-3">
-              {["LinkedIn"].map((item) => (
-                <li key={item}>
+            <ul className="space-y-3 font-mono font-bold">
+              {socialLinks.map((item) => (
+                <li key={item.name}>
                   <a
-                    href="#"
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={cn(
-                      "transition-colors font-mono font-bold cursor-none cursor-target",
-                      isDarkMode
-                        ? "hover:text-zinc-400"
-                        : "hover:text-zinc-700"
+                      "flex gap-2 transition-colors cursor-none hover:opacity-70",
+                      isDarkMode ? "hover:text-zinc-400" : "hover:text-zinc-700"
                     )}
                   >
-                    {item}
+                  <div className="flex gap-2 cursor-target">
+
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </div>
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-3xl font-bold font-lyrae mb-6">Info</h3>
-            <ul className="space-y-3">
-              {["Privacy Policy", "Terms of Service"].map((item) => (
-                <li key={item}>
-                  <a
-                    href="#"
-                    className={cn(
-                      "transition-colors font-mono font-bold cursor-none cursor-target",
-                      isDarkMode
-                        ? "hover:text-zinc-400"
-                        : "hover:text-zinc-700"
-                    )}
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
+          {/* === CONTACT FORM === */}
+          <div className="lg:col-span-2">
             <h3 className="text-2xl font-bold font-lyrae mb-4">Get in Touch</h3>
             <form
               ref={formEl}
@@ -231,7 +240,7 @@ export default function Footer() {
                       }
                       onFocus={() => handleFocus(index + 1)}
                       className={cn(
-                        "peer min-h-[7rem] cursor-none cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
+                        "peer min-h-[7rem] cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
                         isDarkMode
                           ? "placeholder:text-zinc-600 text-white"
                           : "placeholder:text-zinc-500 text-zinc-900"
@@ -248,7 +257,7 @@ export default function Footer() {
                       }
                       onFocus={() => handleFocus(index + 1)}
                       className={cn(
-                        "peer w-full cursor-none cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
+                        "peer w-full cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
                         isDarkMode
                           ? "placeholder:text-zinc-600 text-white"
                           : "placeholder:text-zinc-500 text-zinc-900"
@@ -272,7 +281,7 @@ export default function Footer() {
                 type="submit"
                 disabled={pending}
                 className={cn(
-                  "mt-4 cursor-target inline-flex cursor-none cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
+                  "mt-4 inline-flex cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
                   isDarkMode
                     ? "border-zinc-600 hover:bg-zinc-800"
                     : "border-zinc-400 hover:bg-zinc-200"
@@ -300,6 +309,7 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* === FOOTER BOTTOM === */}
         <div
           id="contact"
           className={cn(
@@ -309,7 +319,7 @@ export default function Footer() {
               : "border-zinc-300 text-gray-600"
           )}
         >
-          <div className="flex items-center cursor-none cursor-target space-x-2">
+          <div className="flex items-center cursor-target space-x-2">
             <div
               className={cn(
                 "text-4xl sm:text-6xl tracking-wider font-MailBox",
@@ -324,7 +334,7 @@ export default function Footer() {
           <button
             onClick={scrollToTop}
             className={cn(
-              "flex cursor-none cursor-target font-mono font-bold items-center gap-1 sm:gap-2 group",
+              "flex cursor-target font-mono font-bold items-center gap-1 sm:gap-2 group",
               isDarkMode ? "hover:text-white" : "hover:text-zinc-800"
             )}
           >

@@ -38,7 +38,7 @@ const About = () => {
         </h2>
 
         <TextReveal
-          className="relative text-base sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 font px-2 sm:px-4 md:px-0"
+          className="relative sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 px-2 sm:px-4 md:px-0"
           text="Hi there! 👋 I'm Ananta Firdaus, a frontend developer with a unique combination of traits—I'm both a perfectionist and lazy. I always strive for the most efficient way to achieve high-quality results. Currently studying Informatics Engineering at Politeknik Caltex Riau, I have a strong foundation in logical thinking and structured problem-solving. However, my passion lies in crafting elegant and interactive user interfaces, ensuring that every design is not only visually appealing but also intuitive and seamless. Lately, I've been diving deeper into React.js, exploring dynamic UI development and smooth animations to create engaging digital experiences. My goal is to bridge aesthetics and functionality, making technology feel effortless for users."
         />
       </motion.div>

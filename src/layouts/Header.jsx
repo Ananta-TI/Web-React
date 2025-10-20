@@ -1,11 +1,22 @@
 import { useState, useEffect, useContext } from "react";
-import { Github, Linkedin, Instagram, Mail, Music2, Menu, X, Globe, House, User, Folder, Award } from "lucide-react";
+import {
+  Github,
+  Linkedin,
+  Instagram,
+  Mail,
+  Music2,
+  Menu,
+  X,
+  Globe,
+  House,
+  User,
+  Folder,
+  Award,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { animate, svg, stagger } from 'https://esm.sh/animejs';
-
-
+import { animate, svg, stagger } from "https://esm.sh/animejs";
 
 // import { createAnimation } from "./ThemeBtn"; // Import function untuk animasi
 
@@ -18,46 +29,46 @@ export default function Header() {
   const [hoveredLink, setHoveredLink] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
-animate(svg.createDrawable('.line'), {
-  draw: ['0 0', '0 1', '1 1'],
-  ease: 'inOutQuad',
-  duration: 2000,
-  delay: stagger(100),
-  loop: true
-});
+  animate(svg.createDrawable(".line"), {
+    draw: ["0 0", "0 1", "1 1"],
+    ease: "inOutQuad",
+    duration: 2000,
+    delay: stagger(100),
+    loop: true,
+  });
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
     const handleMouseMove = (e) => {
       if (!isMobile) {
         setMousePosition({ x: e.clientX, y: e.clientY });
       }
     };
-    
+
     if (!isMobile) {
       window.addEventListener("mousemove", handleMouseMove);
     }
-    
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener("resize", checkMobile);
     };
   }, [isMobile]);
 
   useEffect(() => {
     if (isMobile && isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
-    
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, isMobile]);
 
@@ -94,47 +105,51 @@ animate(svg.createDrawable('.line'), {
         }
       }
     `;
-    
+
     // Inject CSS animation
     const styleId = "theme-transition-styles";
     let styleElement = document.getElementById(styleId);
-    
     if (!styleElement) {
       styleElement = document.createElement("style");
       styleElement.id = styleId;
       document.head.appendChild(styleElement);
     }
-    
     styleElement.textContent = customAnimation;
 
     // Gunakan View Transition API jika tersedia
     if (!document.startViewTransition) {
       setIsDarkMode((prev) => !prev);
+      setIsOpen(false); // <- Tutup sidebar
       return;
     }
 
     document.startViewTransition(() => {
       setIsDarkMode((prev) => !prev);
+      setIsOpen(false);
     });
   };
 
   const getViewportHeight = () => {
-    return typeof window !== 'undefined' ? window.innerHeight : 800;
+    return typeof window !== "undefined" ? window.innerHeight : 800;
   };
 
-  const initialPath = `M100 0 L100 ${getViewportHeight()} Q-100 ${getViewportHeight() / 2} 100 0`;
-  const targetPath = `M100 0 L100 ${getViewportHeight()} Q100 ${getViewportHeight() / 2} 100 0`;
+  const initialPath = `M100 0 L100 ${getViewportHeight()} Q-100 ${
+    getViewportHeight() / 2
+  } 100 0`;
+  const targetPath = `M100 0 L100 ${getViewportHeight()} Q100 ${
+    getViewportHeight() / 2
+  } 100 0`;
 
   const curveVariants = {
     initial: { d: initialPath },
     enter: {
       d: targetPath,
-      transition: { duration: isMobile ? 0.6 : 1, ease: [0.76, 0, 0.24, 1] }
+      transition: { duration: isMobile ? 0.6 : 1, ease: [0.76, 0, 0.24, 1] },
     },
     exit: {
       d: initialPath,
-      transition: { duration: isMobile ? 0.4 : 0.8, ease: [0.76, 0, 0.24, 1] }
-    }
+      transition: { duration: isMobile ? 0.4 : 0.8, ease: [0.76, 0, 0.24, 1] },
+    },
   };
 
   return (
@@ -146,11 +161,11 @@ animate(svg.createDrawable('.line'), {
             isDarkMode ? "text-white" : "text-zinc-800"
           }`}
         >
-          <img
-            src={isDarkMode ? "../img/logo1.png" : "../img/logo3.png"}
+          {/* <img
+            src={isDarkMode ? "../img/logo123.png" : "../img/logo123.png"}
             alt="Ananta Firdaus"
-            className="object-cover h-12 w-auto md:h-20 md:w-30"
-          />
+            className="object-cover h-12 w-auto md:h-20 md:w-20"
+          /> */}
         </span>
         <button
           onClick={handleToggleSidebar}
@@ -187,9 +202,9 @@ animate(svg.createDrawable('.line'), {
             initial={{ x: "100%" }}
             animate={{ x: "0%" }}
             exit={{ x: "100%" }}
-            transition={{ 
-              duration: isMobile ? 0.6 : 0.8, 
-              ease: [0.76, 0, 0.24, 1] 
+            transition={{
+              duration: isMobile ? 0.6 : 0.8,
+              ease: [0.76, 0, 0.24, 1],
             }}
           >
             {/* SVG Curve */}
@@ -208,9 +223,7 @@ animate(svg.createDrawable('.line'), {
 
             {/* Menu Panel */}
             <div
-              className={`h-full ${
-                isMobile ? 'w-screen' : 'w-[480px]'
-              } ${
+              className={`h-full ${isMobile ? "w-screen" : "w-[480px]"} ${
                 isDarkMode
                   ? "bg-gray-100 text-gray-900"
                   : "bg-zinc-800 text-white"
@@ -225,102 +238,141 @@ animate(svg.createDrawable('.line'), {
               <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
               {/* Navigation Links */}
-<nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-  {["/all-projects", "/certificates"].includes(location.pathname) ? (
-    <>
-      {location.pathname !== "/certificates" && (
-  <motion.a
-    href="#"
-    onClick={(e) => {
-      e.preventDefault();
-      navigate("/certificates");
-      setIsOpen(false);
-    }}
-    className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
-  >
-    <span>Certificates</span>
-    <img
-  src="/svg/badge-4.svg"
-  alt="Badge 4"
-  className={`w-12 h-12 ${isDarkMode ? "invert" : ""}`}
-/>
-  </motion.a>
-)}
+              <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
+                {["/all-projects", "/certificates"].includes(
+                  location.pathname
+                ) ? (
+                  <>
+                    {location.pathname !== "/certificates" && (
+                      <motion.a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate("/certificates");
+                          setIsOpen(false);
+                        }}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { delay: 0.2 },
+                        }}
+                      >
+                        <span>Certificates</span>
+                        <img
+                          src="/svg/badge-4.svg"
+                          alt="Badge 4"
+                          className={`w-12 h-12 ${isDarkMode ? "invert" : ""}`}
+                        />
+                      </motion.a>
+                    )}
 
-      {location.pathname !== "/all-projects" && (
-  <motion.a
-    href="#"
-    onClick={(e) => {
-      e.preventDefault();
-      navigate("/all-projects");
-      setIsOpen(false);
-    }}
-    className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
-  >
-    <span>All Projects</span>
-<img
-  src="/svg/work-7.svg"
-  alt="Badge 4"
-  className={`w-12 h-12 line ${isDarkMode ? "invert" : ""}`}
-/>
-  </motion.a>
-)}
+                    {location.pathname !== "/all-projects" && (
+                      <motion.a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate("/all-projects");
+                          setIsOpen(false);
+                        }}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { delay: 0.2 },
+                        }}
+                      >
+                        <span>All Projects</span>
+                        <img
+                          src="/svg/work-7.svg"
+                          alt="Badge 4"
+                          className={`w-12 h-12 line ${
+                            isDarkMode ? "invert" : ""
+                          }`}
+                        />
+                      </motion.a>
+                    )}
 
-      <motion.a
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          navigate("/");
-          setIsOpen(false);
-        }}
-        className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-      >
-        ← Back to Home
-      </motion.a>
-    </>
-  ) : (
-    [
-      { name: "Home", link: "#home", style: <House size={32} strokeWidth={2}/> },
-      { name: "About", link: "#about", style: <User size={32} strokeWidth={2}/> },
-      { name: "Projects", link: "#projects", style: <Folder size={32} strokeWidth={2}/> },
-      { name: "Certificates", link: "/certificates", style: <Award size={32} strokeWidth={2}/> },
-      { name: "Contact", link: "#contact", style: <Mail size={32} /> },
-    ].map((item, index) => (
-<motion.a
-  key={item.name}
-  href={item.link}
-  onClick={(e) => {
-    e.preventDefault();
-    if (item.link.startsWith("#")) {
-      const section = document.querySelector(item.link);
-      if (section) {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      navigate(item.link);
-    }
-    setIsOpen(false);
-  }}
-  className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
-  onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
-  onMouseLeave={() => !isMobile && setHoveredLink(null)}
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
->
-  <span>{item.name}</span>
-  <div className="ml-auto ">{item.style}</div>
-</motion.a>
-
-    ))
-  )}
-</nav>
-
+                    <motion.a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate("/");
+                        setIsOpen(false);
+                      }}
+                      className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+                    >
+                      ← Back to Home
+                    </motion.a>
+                  </>
+                ) : (
+                  [
+                    {
+                      name: "Home",
+                      link: "#home",
+                      style: <House size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "About",
+                      link: "#about",
+                      style: <User size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "Projects",
+                      link: "#projects",
+                      style: <Folder size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "Certificates",
+                      link: "/certificates",
+                      style: <Award size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "Contact",
+                      link: "#contact",
+                      style: <Mail size={32} />,
+                    },
+                  ].map((item, index) => (
+                    <motion.a
+                      key={item.name}
+                      href={item.link}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (item.link.startsWith("#")) {
+                          const section = document.querySelector(item.link);
+                          if (section) {
+                            section.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                          }
+                        } else {
+                          navigate(item.link);
+                        }
+                        setIsOpen(false);
+                      }}
+                      className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
+                      onMouseEnter={() =>
+                        !isMobile && setHoveredLink(item.name)
+                      }
+                      onMouseLeave={() => !isMobile && setHoveredLink(null)}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        transition: { delay: index * 0.1 },
+                      }}
+                    >
+                      <span>{item.name}</span>
+                      <div className="ml-auto ">{item.style}</div>
+                    </motion.a>
+                  ))
+                )}
+              </nav>
 
               {/* Social Links */}
               <div className="mt-20 sm:mt-40">
@@ -330,14 +382,31 @@ animate(svg.createDrawable('.line'), {
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
                 <div className="flex flex-wrap gap-4 font-mono font-bold">
                   {[
-                    { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
-                    { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
-                    {/* { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> }, */},
-                    {/* { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> }, */},
-                    { 
-                      name: "Email", 
-                      url: "mailto:anantafirdaus14@gmail.com?subject=Portfolio%20Inquiry&body=Halo%20Ananta,%0A%0ASaya%20melihat%20portfolio%20anda%20dan%20ingin%20berdiskusi%20lebih%20lanjut.", 
-                      icon: <Mail size={18} /> 
+                    {
+                      name: "Github",
+                      url: "https://github.com/Ananta-TI",
+                      icon: <Github size={18} />,
+                    },
+                    {
+                      name: "LinkedIn",
+                      url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/",
+                      icon: <Linkedin size={18} />,
+                    },
+                    {
+                      name: "Instagram",
+                      url: "https://instagram.com/ntakunti_14",
+                      icon: <Instagram size={18} />,
+                    },
+                    ,
+                    {
+                      name: "Tiktok",
+                      url: "https://tiktok.com/@ntakunti_14",
+                      icon: <Music2 size={18} />,
+                    },
+                    {
+                      name: "Email",
+                      url: "mailto:anantafirdaus14@gmail.com?subject=Portfolio%20Inquiry&body=Halo%20Ananta,%0A%0ASaya%20melihat%20portfolio%20anda%20dan%20ingin%20berdiskusi%20lebih%20lanjut.",
+                      icon: <Mail size={18} />,
                     },
                   ].map((link) => (
                     <motion.a
@@ -346,19 +415,28 @@ animate(svg.createDrawable('.line'), {
                       target="_blank"
                       rel="noreferrer"
                       className={`relative flex items-center gap-2 cursor-target cursor-none hover:underline transition-colors ${
-                        isDarkMode ? "text-gray-900 hover:text-gray-600" : "text-white hover:text-gray-300"
+                        isDarkMode
+                          ? "text-gray-900 hover:text-gray-600"
+                          : "text-white hover:text-gray-300"
                       }`}
                       onMouseEnter={() => setHoveredLink(link.name)}
                       onMouseLeave={() => setHoveredLink(null)}
                       animate={
                         hoveredLink === link.name
                           ? {
-                              x: (mousePosition.x / window.innerWidth) * 5 - 2.5,
-                              y: (mousePosition.y / window.innerHeight) * 5 - 2.5,
+                              x:
+                                (mousePosition.x / window.innerWidth) * 5 - 2.5,
+                              y:
+                                (mousePosition.y / window.innerHeight) * 5 -
+                                2.5,
                             }
                           : { x: 0, y: 0 }
                       }
-                      transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 10,
+                      }}
                     >
                       {link.icon}
                       {link.name}
@@ -374,10 +452,15 @@ animate(svg.createDrawable('.line'), {
                   className="p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95"
                   style={{
                     borderColor: isDarkMode ? "#d1d5db" : "#52525b",
-                    backgroundColor: isDarkMode ? "transparent" : "transparent"
+                    backgroundColor: isDarkMode ? "transparent" : "transparent",
                   }}
                 >
-                  <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
+                  <svg
+                    viewBox="0 0 240 240"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                  >
                     <motion.g
                       animate={{ rotate: isDarkMode ? -180 : 0 }}
                       transition={{ ease: "easeInOut", duration: 0.5 }}
@@ -399,8 +482,16 @@ animate(svg.createDrawable('.line'), {
                     />
                   </svg>
                 </button>
-                <button className={`p-2 border rounded hover:bg-gray-200 ${isDarkMode ? "border-gray-300" : "border-zinc-600"}`}>
-                  <Globe className={`w-5 h-5 ${isDarkMode ? "text-gray-900" : "text-white"}`} />
+                <button
+                  className={`p-2 border rounded hover:bg-gray-200 ${
+                    isDarkMode ? "border-gray-300" : "border-zinc-600"
+                  }`}
+                >
+                  <Globe
+                    className={`w-5 h-5 ${
+                      isDarkMode ? "text-gray-900" : "text-white"
+                    }`}
+                  />
                 </button>
               </div>
             </div>

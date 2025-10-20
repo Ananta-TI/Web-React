@@ -58,7 +58,7 @@ export default function Hero() {
 
         <h1 className="mt-6 text-9xl font-MailBox md:text-9xl">@nanta Firdaus</h1>
         <p className=" mx-auto mt-4 text-lg opacity-80 font-mono">
-          Passionate about web development, design, and technology.
+          Developing and designing the next generation of web applications.
         </p>
       </motion.div>
 
