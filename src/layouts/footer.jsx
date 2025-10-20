@@ -156,7 +156,7 @@ export default function Footer() {
         className={`absolute inset-0 -z-100 bg-gradient-to-b ${
           isDarkMode
             ? "from-zinc-900 via-zinc-950 to-black"
-            : "from-white via-gray-200 to-gray-400"
+            : "from-[#faf9f9] via-white/50 to-white/100"
         }`}
       />
       <div className="relative">
@@ -283,8 +283,8 @@ export default function Footer() {
                 className={cn(
                   "mt-4 inline-flex cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
                   isDarkMode
-                    ? "border-zinc-600 hover:bg-zinc-800"
-                    : "border-zinc-400 hover:bg-zinc-200"
+                    ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 "
+                    : "border-zinc-400 hover:bg-zinc-900 hover:text-zinc-50"
                 )}
               >
                 {pending ? (

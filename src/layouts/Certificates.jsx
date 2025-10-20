@@ -51,13 +51,13 @@ const Certificates = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className={`min-h-screen transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900 text-white" : "bg-gray-50 text-black"
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
       {/* ===== Header ===== */}
       <div
         className={`top-0 z-40 backdrop-blur-lg border-b ${
-          isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-white/80 border-gray-200"
+          isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-[#faf9f9] border-gray-400"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">

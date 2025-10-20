@@ -122,7 +122,7 @@ const projects = [
     <section
   id="projects"
   className={`relative w-full min-h-screen py-20 transition-colors duration-500 ${
-    isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
+    isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
   }`}
 >
 
@@ -281,7 +281,7 @@ const projects = [
           isDarkMode
             ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
                hover:text-zinc-900 border-gray-100/20`
-            : `text-gray-800 before:bg-gray-800 after:bg-gray-800
+            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
                hover:text-white border-gray-800/20`
         }
       `}
@@ -339,7 +339,7 @@ const projects = [
       isDarkMode
         ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
            hover:text-zinc-900 border border-gray-100/20`
-        : `text-gray-800 before:bg-gray-800 after:bg-gray-800
+        : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
            hover:text-white border border-gray-800/20`
     }
   `}

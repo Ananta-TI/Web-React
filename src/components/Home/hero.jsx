@@ -13,7 +13,7 @@ export default function Hero() {
     <section
       id="home"
       className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 ${
-        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
+isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
       {/* Background Particles */}

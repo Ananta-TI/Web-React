@@ -17,7 +17,7 @@ const About = () => {
     <section
       id="about"
       className={`w-full min-h-screen overflow-hidden flex-col items-center transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
       <motion.div

@@ -167,7 +167,7 @@ const TextPressure = ({
     <div
       ref={containerRef}
       className={`relative w-full h-full overflow-hidden transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900" : "bg-white"
+        isDarkMode ? "bg-zinc-900" : "bg-[#faf9f9]"
       }`}
     >
       <style>{`

@@ -212,11 +212,11 @@ const allProjects = [
 
   return (
     <div className={`min-h-screen transition-colors duration-500 ${
-      isDarkMode ? "bg-zinc-900 text-white" : "bg-gray-50 text-black"
+      isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
     }`}>
       {/* Header Section */}
       <div className={` top-0 z-40 backdrop-blur-lg border-b transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-white/80 border-gray-200"
+        isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-[#faf9f9] border-gray-200"
       }`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -224,7 +224,7 @@ const allProjects = [
 
 
             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-              isDarkMode ? "bg-zinc-800 text-zinc-300" : "bg-white text-gray-600 border border-gray-200"
+              isDarkMode ? "bg-zinc-800 text-zinc-300" : "bg-[#faf9f9] text-gray-600 border border-gray-200"
             }`}>
               <FolderOpen className="w-5 h-5" />
               <span className="font-medium">{filteredProjects.length} Projects</span>
