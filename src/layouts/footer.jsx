@@ -16,6 +16,8 @@ import { ThemeContext } from "../context/ThemeContext";
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
 import Line from "./line.jsx";
+import ProfileCard from './ProfileCard'
+
 
 // Utility class
 function cn(...classes) {
@@ -163,153 +165,185 @@ export default function Footer() {
         <Line />
       </div>
 
-      <div className="w-full mx-auto py-24 px-6 sm:px-12 lg:px-24">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-base">
-          {/* === DISCOVER === */}
-          <div>
-            <h3 className="text-3xl font-bold font-lyrae mb-6">Discover</h3>
-            {discoverLinks
-              .filter((link) => link.path !== location.pathname)
-              .map((link, i) => (
-                <motion.a
-                  key={link.name}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(link.path);
-                  }}
-                  className=" cursor-none relative font-bold font-mono transition-transform active:scale-95 block mb-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    transition: { delay: i * 0.1 },
-                  }}
-                >
-                <span className="cursor-target">
+      <div className="w-full mx-auto py-20 px-6 sm:px-12 lg:px-20 max-w-7xl">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
+          
+          {/* Left Section - Profile + Info */}
+          <div className="lg:col-span-5 space-y-10">
+            {/* Profile Card */}
+            <div className="flex justify-center lg:justify-start">
+              <ProfileCard
+                name="Ananta Firdaus"
+                title="Software Engineer"
+                handle="Ananta-TI"
+                status="Online"
+                contactText="Contact Me"
+                avatarUrl="../img/me.png"
+                showUserInfo={false}
+                enableTilt={true}
+                enableMobileTilt={true}
+                onContactClick={() => console.log('Contact clicked')}
+              />
+            </div>
 
-                  {link.name}
-                </span>
-                </motion.a>
-              ))}
-          </div>
-
-          {/* === SOCIAL === */}
-          <div>
-            <h3 className="text-3xl font-bold font-lyrae mb-6">Social</h3>
-            <ul className="space-y-3 font-mono font-bold">
-              {socialLinks.map((item) => (
-                <li key={item.name}>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      "flex gap-2 transition-colors cursor-none hover:opacity-70",
-                      isDarkMode ? "hover:text-zinc-400" : "hover:text-zinc-700"
-                    )}
-                  >
-                  <div className="flex gap-2 cursor-target">
-
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </div>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* === CONTACT FORM === */}
-          <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold font-lyrae mb-4">Get in Touch</h3>
-            <form
-              ref={formEl}
-              onSubmit={handleSubmit}
-              className="flex flex-col font-mono font-bold gap-3 mt-4 overflow-hidden"
-            >
-              {["name", "email", "subject", "message"].map((field, index) => (
-                <div key={field} className="relative overflow-hidden">
-                  {field === "message" ? (
-                    <textarea
-                      name={field}
-                      placeholder={field}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field]: e.target.value })
-                      }
-                      onFocus={() => handleFocus(index + 1)}
-                      className={cn(
-                        "peer min-h-[7rem] cursor-target w-full resize-none bg-transparent py-2 font-semibold outline-none transition-colors",
-                        isDarkMode
-                          ? "placeholder:text-zinc-600 text-white"
-                          : "placeholder:text-zinc-500 text-zinc-900"
-                      )}
-                    />
-                  ) : (
-                    <input
-                      name={field}
-                      type={field === "email" ? "email" : "text"}
-                      placeholder={field}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field]: e.target.value })
-                      }
-                      onFocus={() => handleFocus(index + 1)}
-                      className={cn(
-                        "peer w-full cursor-target bg-transparent py-2 text-base font-semibold outline-none transition-colors",
-                        isDarkMode
-                          ? "placeholder:text-zinc-600 text-white"
-                          : "placeholder:text-zinc-500 text-zinc-900"
-                      )}
-                    />
-                  )}
-                  <ContactFormLine
-                    inputId={index + 1}
-                    hasError={!!errors[field]}
-                    isDarkMode={isDarkMode}
-                  />
-                  {errors[field] && (
-                    <span className="text-red-500 text-xs absolute right-0 top-2">
-                      {errors[field]}
-                    </span>
-                  )}
+            {/* Discover & Social in two columns on mobile, stacked on large screens */}
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-10">
+              {/* Discover */}
+              <div>
+                <h3 className="text-2xl lg:text-3xl font-bold font-lyrae mb-4 lg:mb-6">
+                  Discover
+                </h3>
+                <div className="space-y-2">
+                  {discoverLinks
+                    .filter((link) => link.path !== location.pathname)
+                    .map((link, i) => (
+                      <motion.a
+                        key={link.name}
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(link.path);
+                        }}
+                        className="cursor-none relative font-bold font-mono transition-transform active:scale-95 block"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { delay: i * 0.1 },
+                        }}
+                      >
+                        <span className="cursor-target hover:opacity-70 transition-opacity">
+                          {link.name}
+                        </span>
+                      </motion.a>
+                    ))}
                 </div>
-              ))}
+              </div>
 
-              <button
-                type="submit"
-                disabled={pending}
-                className={cn(
-                  "mt-4 inline-flex cursor-target items-center justify-center gap-x-2 border py-2 px-5 rounded-md transition-colors disabled:opacity-50",
-                  isDarkMode
-                    ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 "
-                    : "border-zinc-400 hover:bg-zinc-900 hover:text-zinc-50"
-                )}
+              {/* Social */}
+              <div>
+                <h3 className="text-2xl lg:text-3xl font-bold font-lyrae mb-4 lg:mb-6">
+                  Social
+                </h3>
+                <ul className="space-y-3 font-mono font-bold">
+                  {socialLinks.map((item) => (
+                    <li key={item.name}>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          "flex gap-2 transition-colors cursor-none hover:opacity-70",
+                          isDarkMode ? "hover:text-zinc-400" : "hover:text-zinc-700"
+                        )}
+                      >
+                        <div className="flex gap-2 cursor-target">
+                          {item.icon}
+                          <span>{item.name}</span>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section - Contact Form */}
+          <div className="lg:col-span-7">
+            <div className="lg:pl-8">
+              <h3 className="text-3xl lg:text-4xl font-bold font-lyrae mb-6">
+                Get in Touch
+              </h3>
+              <form
+                ref={formEl}
+                onSubmit={handleSubmit}
+                className="flex flex-col font-mono font-bold gap-4 mt-6 overflow-hidden"
               >
-                {pending ? (
-                  <>
-                    <Loader className="h-5 w-5 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-5 w-5" />
-                    Send
-                  </>
-                )}
-              </button>
+                {["name", "email", "subject", "message"].map((field, index) => (
+                  <div key={field} className="relative overflow-hidden">
+                    {field === "message" ? (
+                      <textarea
+                        name={field}
+                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        value={formData[field]}
+                        onChange={(e) =>
+                          setFormData({ ...formData, [field]: e.target.value })
+                        }
+                        onFocus={() => handleFocus(index + 1)}
+                        className={cn(
+                          "peer min-h-[8rem] cursor-target w-full resize-none bg-transparent py-3 font-semibold outline-none transition-colors",
+                          isDarkMode
+                            ? "placeholder:text-zinc-600 text-white"
+                            : "placeholder:text-zinc-500 text-zinc-900"
+                        )}
+                      />
+                    ) : (
+                      <input
+                        name={field}
+                        type={field === "email" ? "email" : "text"}
+                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        value={formData[field]}
+                        onChange={(e) =>
+                          setFormData({ ...formData, [field]: e.target.value })
+                        }
+                        onFocus={() => handleFocus(index + 1)}
+                        className={cn(
+                          "peer w-full cursor-target bg-transparent py-3 text-base font-semibold outline-none transition-colors",
+                          isDarkMode
+                            ? "placeholder:text-zinc-600 text-white"
+                            : "placeholder:text-zinc-500 text-zinc-900"
+                        )}
+                      />
+                    )}
+                    <ContactFormLine
+                      inputId={index + 1}
+                      hasError={!!errors[field]}
+                      isDarkMode={isDarkMode}
+                    />
+                    {errors[field] && (
+                      <span className="text-red-500 text-xs absolute right-0 top-3">
+                        {errors[field]}
+                      </span>
+                    )}
+                  </div>
+                ))}
 
-              {sent && (
-                <span className="text-green-400 font-mono font-bold text-sm mt-3 text-center">
-                  ✅ Message Sent Successfully!
-                </span>
-              )}
-            </form>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className={cn(
+                    "mt-4 inline-flex cursor-target items-center justify-center gap-x-2 border py-3 px-6 rounded-md transition-colors disabled:opacity-50 font-bold",
+                    isDarkMode
+                      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900"
+                      : "border-zinc-400 hover:bg-zinc-900 hover:text-zinc-50"
+                  )}
+                >
+                  {pending ? (
+                    <>
+                      <Loader className="h-5 w-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-5 w-5" />
+                      Send Message
+                    </>
+                  )}
+                </button>
+
+                {sent && (
+                  <span className="text-green-400 font-mono font-bold text-sm mt-3">
+                    ✅ Message Sent Successfully!
+                  </span>
+                )}
+              </form>
+            </div>
           </div>
         </div>
 
-        {/* === FOOTER BOTTOM === */}
+        {/* Footer Bottom */}
         <div
           id="contact"
           className={cn(
@@ -319,26 +353,18 @@ export default function Footer() {
               : "border-zinc-300 text-gray-600"
           )}
         >
-          <div className="flex items-center cursor-target space-x-2">
-            <div
-              className={cn(
-                "text-4xl sm:text-6xl tracking-wider font-MailBox",
-                isDarkMode ? "text-white" : "text-zinc-900"
-              )}
-            >
-              @NANTA
-            </div>
-            <span className="font-mono font-bold">©2025</span>
+          <div className="font-mono font-bold">
+            © 2025 All Rights Reserved
           </div>
-          <div className="font-mono font-bold">All Rights Reserved</div>
+          
           <button
             onClick={scrollToTop}
             className={cn(
-              "flex cursor-target font-mono font-bold items-center gap-1 sm:gap-2 group",
+              "flex cursor-target font-mono font-bold items-center gap-2 group transition-colors",
               isDarkMode ? "hover:text-white" : "hover:text-zinc-800"
             )}
           >
-            <span>Back to Top</span>
+            <span>Back To Top</span>
             <ArrowUp
               size={18}
               className="group-hover:-translate-y-1 transition-transform"
