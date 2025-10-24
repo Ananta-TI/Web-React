@@ -473,28 +473,39 @@ A complete exploration of all the projects I have developed            </p>
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16"
         >
           {[
-            { label: "Total Projects", value: allProjects.length, icon: FolderOpen },
-            { label: "Completed", value: allProjects.filter(p => p.status === "Completed").length, icon: Zap },
-            { label: "Live Demos", value: allProjects.filter(p => p.demo).length, icon: Globe },
-            { label: "Featured", value: allProjects.filter(p => p.featured).length, icon: Star }
-          ].map((stat, index) => (
-            <div
-              key={index}
-              className={`p-6 rounded-xl text-center ${
-                isDarkMode
-                  ? "bg-zinc-800/50 border border-zinc-700/50"
-                  : "bg-white border border-gray-200"
-              } backdrop-blur-sm`}
-            >
-              <stat.icon className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? "text-blue-400" : "text-blue-500"}`} />
-              <div className={`text-2xl font-bold mb-1 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                {stat.value}
-              </div>
-              <div className={`text-sm ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
+  { label: "Total Projects", value: allProjects.length, icon: FolderOpen, color: "text-blue-500" },
+  { label: "Completed", value: allProjects.filter(p => p.status === "Completed").length, icon: Zap, color: "text-green-500" },
+  { label: "Live Demos", value: allProjects.filter(p => p.demo).length, icon: Globe, color: "text-purple-500" },
+  { label: "Featured", value: allProjects.filter(p => p.featured).length, icon: Star, color: "text-yellow-500" }
+].map((stat, index) => (
+  <div
+    key={index}
+    className={`p-6 rounded-xl text-center ${
+      isDarkMode
+        ? "bg-zinc-800/50 border border-zinc-700/50"
+        : "bg-white border border-gray-200"
+    } backdrop-blur-sm`}
+  >
+    <stat.icon
+      className={`w-8 h-8 mx-auto mb-2 ${stat.color}`}
+    />
+    <div
+      className={`text-2xl font-bold mb-1 ${
+        isDarkMode ? "text-white" : "text-gray-900"
+      }`}
+    >
+      {stat.value}
+    </div>
+    <div
+      className={`text-sm ${
+        isDarkMode ? "text-zinc-400" : "text-gray-600"
+      }`}
+    >
+      {stat.label}
+    </div>
+  </div>
+))}
+
         </motion.div>
       </div>
     </div>

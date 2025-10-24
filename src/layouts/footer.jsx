@@ -338,7 +338,7 @@ export default function Footer() {
               isDarkMode ? "hover:text-white" : "hover:text-zinc-800"
             )}
           >
-            <span>Back To Top</span>
+            <span>Back to Top</span>
             <ArrowUp
               size={18}
               className="group-hover:-translate-y-1 transition-transform"
