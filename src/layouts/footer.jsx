@@ -158,7 +158,7 @@ export default function Footer() {
         className={`absolute inset-0 -z-100 bg-gradient-to-b ${
           isDarkMode
             ? "from-zinc-900 via-zinc-950 to-black"
-            : "from-[#f7f7f7] via-[#c9c9c9] to-[#373737]"
+            : "from-[#f7f7f7] via-[#c9c9c9] to-[#797979]"
         }`}
       />
       <div className="relative">
