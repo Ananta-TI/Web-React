@@ -158,7 +158,7 @@ export default function Footer() {
         className={`absolute inset-0 -z-100 bg-gradient-to-b ${
           isDarkMode
             ? "from-zinc-900 via-zinc-950 to-black"
-            : "from-[#faf9f9] via-white/50 to-white/100"
+            : "from-[#f7f7f7] via-[#c9c9c9] to-[#373737]"
         }`}
       />
       <div className="relative">
@@ -235,7 +235,7 @@ export default function Footer() {
                         rel="noopener noreferrer"
                         className={cn(
                           "flex gap-2 transition-colors cursor-none hover:opacity-70",
-                          isDarkMode ? "hover:text-zinc-400" : "hover:text-zinc-700"
+                          isDarkMode ? "hover:text-zinc-400" : "hover:text-white"
                         )}
                       >
                         <div className="flex gap-2 cursor-target">
@@ -273,7 +273,7 @@ export default function Footer() {
                         }
                         onFocus={() => handleFocus(index + 1)}
                         className={cn(
-                          "peer min-h-[8rem] cursor-target w-full resize-none bg-transparent py-3 font-semibold outline-none transition-colors",
+                          "peer min-h-[8rem] cursor-target cursor-none w-full resize-none bg-transparent py-3 font-semibold outline-none transition-colors",
                           isDarkMode
                             ? "placeholder:text-zinc-600 text-white"
                             : "placeholder:text-zinc-500 text-zinc-900"
@@ -290,7 +290,7 @@ export default function Footer() {
                         }
                         onFocus={() => handleFocus(index + 1)}
                         className={cn(
-                          "peer w-full cursor-target bg-transparent py-3 text-base font-semibold outline-none transition-colors",
+                          "peer w-full cursor-target cursor-none bg-transparent py-3 text-base font-semibold outline-none transition-colors",
                           isDarkMode
                             ? "placeholder:text-zinc-600 text-white"
                             : "placeholder:text-zinc-500 text-zinc-900"
@@ -314,10 +314,10 @@ export default function Footer() {
                   type="submit"
                   disabled={pending}
                   className={cn(
-                    "mt-4 inline-flex cursor-target items-center justify-center gap-x-2 border py-3 px-6 rounded-md transition-colors disabled:opacity-50 font-bold",
+                    "mt-4 inline-flex cursor-target cursor-none items-center justify-center gap-x-2 border py-3 px-6 rounded-md transition-colors disabled:opacity-50 font-bold",
                     isDarkMode
                       ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900"
-                      : "border-zinc-400 hover:bg-zinc-900 hover:text-zinc-50"
+                      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50"
                   )}
                 >
                   {pending ? (
@@ -349,8 +349,8 @@ export default function Footer() {
           className={cn(
             "flex flex-col sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
             isDarkMode
-              ? "border-zinc-700/50 text-gray-400"
-              : "border-zinc-300 text-gray-600"
+              ? "border-zinc-300/50 text-white"
+              : "border-zinc-300 text-white"
           )}
         >
           <div className="font-mono font-bold">
@@ -361,7 +361,7 @@ export default function Footer() {
             onClick={scrollToTop}
             className={cn(
               "flex cursor-target font-mono font-bold items-center gap-2 group transition-colors",
-              isDarkMode ? "hover:text-white" : "hover:text-zinc-800"
+              isDarkMode ? "hover:text-white" : "hover:text-zinc-300"
             )}
           >
             <span>Back To Top</span>
