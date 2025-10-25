@@ -13,12 +13,12 @@
   --icon: none;
   --behind-gradient: none;
   --inner-gradient: none;
-  --sunpillar-1: hsl(2, 100%, 73%);
-  --sunpillar-2: hsl(53, 100%, 69%);
-  --sunpillar-3: hsl(93, 100%, 69%);
-  --sunpillar-4: hsl(176, 100%, 76%);
-  --sunpillar-5: hsl(228, 100%, 74%);
-  --sunpillar-6: hsl(283, 100%, 73%);
+  --sunpillar-1: #525252;
+  --sunpillar-2: #414141;
+  --sunpillar-3: #313131;
+  --sunpillar-4: #EEEEEE;
+  --sunpillar-5: #525252;
+  --sunpillar-6: #414141;
   --sunpillar-clr-1: var(--sunpillar-1);
   --sunpillar-clr-2: var(--sunpillar-2);
   --sunpillar-clr-3: var(--sunpillar-3);
@@ -82,15 +82,14 @@
   background-image:
     radial-gradient(
       farthest-side circle at var(--pointer-x) var(--pointer-y),
-      hsla(266, 100%, 90%, var(--card-opacity)) 4%,
-      hsla(266, 50%, 80%, calc(var(--card-opacity) * 0.75)) 10%,
-      hsla(266, 25%, 70%, calc(var(--card-opacity) * 0.5)) 50%,
-      hsla(266, 0%, 60%, 0) 100%
+      rgba(238, 238, 238, var(--card-opacity)) 4%,
+      rgba(82, 82, 82, calc(var(--card-opacity) * 0.75)) 10%,
+      rgba(65, 65, 65, calc(var(--card-opacity) * 0.5)) 50%,
+      rgba(49, 49, 49, 0) 100%
     ),
-    radial-gradient(35% 52% at 55% 20%, #b700ffc4 0%, #18002600 100%),
-radial-gradient(100% 100% at 50% 50%, #7500ff 1%, #18002600 76%),
-conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e100ff 100%);
-
+    radial-gradient(35% 52% at 55% 20%, #525252c4 0%, #31313100 100%),
+    radial-gradient(100% 100% at 50% 50%, #414141 1%, #31313100 76%),
+    conic-gradient(from 124deg at 50% 50%, #EEEEEE 0%, #525252 40%, #525252 60%, #EEEEEE 100%);
 
   overflow: hidden;
 }
@@ -152,12 +151,12 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
     ),
     repeating-linear-gradient(
       var(--angle),
-      #0e152e 0%,
-      hsl(180, 10%, 60%) 3.8%,
-      hsl(180, 29%, 66%) 4.5%,
-      hsl(180, 10%, 60%) 5.2%,
-      #0e152e 10%,
-      #0e152e 12%
+      #313131 0%,
+      #525252 3.8%,
+      #EEEEEE 4.5%,
+      #525252 5.2%,
+      #313131 10%,
+      #313131 12%
     ),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
@@ -210,7 +209,7 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
       var(--sunpillar-2),
       var(--sunpillar-3)
     ),
-    radial-gradient(circle at var(--pointer-x) var(--pointer-y), hsl(0, 0%, 70%) 0%, hsla(0, 0%, 30%, 0.2) 90%),
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), #EEEEEE 0%, rgba(49, 49, 49, 0.2) 90%),
     var(--grain);
   background-size:
     250% 250%,
@@ -244,8 +243,8 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
   overflow: hidden;
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsl(248, 25%, 80%) 12%,
-    hsla(207, 40%, 30%, 0.8) 90%
+    #EEEEEE 12%,
+    rgba(65, 65, 65, 0.8) 90%
   );
   mix-blend-mode: overlay;
   filter: brightness(0.8) contrast(1.2);
@@ -291,9 +290,9 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(238, 238, 238, 0.1);
   backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(238, 238, 238, 0.1);
   border-radius: 15px;
   padding: 12px 14px;
   pointer-events: auto;
@@ -310,7 +309,7 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
   height: 48px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(238, 238, 238, 0.1);
   flex-shrink: 0;
 }
 
@@ -331,30 +330,30 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
 .pc-handle {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(238, 238, 238, 0.9);
   line-height: 1;
 }
 
 .pc-status {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(238, 238, 238, 0.7);
   line-height: 1;
 }
 
 .pc-contact-btn {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(238, 238, 238, 0.1);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(238, 238, 238, 0.9);
   cursor: pointer;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
 }
 
 .pc-contact-btn:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(238, 238, 238, 0.4);
   transform: translateY(-1px);
   transition: all 0.2s ease;
   cursor: cursor-target;
@@ -387,7 +386,7 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
   margin: 0;
   font-size: min(3svh, 3em);
   margin: 0;
-  background-image: linear-gradient(to bottom, #fff, #6f6fbe);
+  background-image: linear-gradient(to bottom, #EEEEEE, #525252);
   background-size: 1em 1.5em;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -402,7 +401,7 @@ conic-gradient(from 124deg at 50% 50%, #e100ff 0%, #4e00ff 40%, #4e00ff 60%, #e1
   font-size: 16px;
   margin: 0 auto;
   width: min-content;
-  background-image: linear-gradient(to bottom, #fff, #4a4ac0);
+  background-image: linear-gradient(to bottom, #EEEEEE, #414141);
   background-size: 1em 1.5em;
   -webkit-text-fill-color: transparent;
   background-clip: text;
