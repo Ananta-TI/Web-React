@@ -12,6 +12,7 @@ import {
   User,
   Folder,
   Award,
+  History,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
@@ -239,7 +240,7 @@ export default function Header() {
 
               {/* Navigation Links */}
               <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-                {["/all-projects", "/certificates"].includes(
+                {["/all-projects", "/certificates","/timeline"].includes(
                   location.pathname
                 ) ? (
                   <>
@@ -294,6 +295,32 @@ export default function Header() {
                         />
                       </motion.a>
                     )}
+                    {location.pathname !== "/timeline" && (
+                      <motion.a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate("/timeline");
+                          setIsOpen(false);
+                        }}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { delay: 0.2 },
+                        }}
+                      >
+                        <span>Timeline</span>
+                        <img
+                          src="/svg/work-7.svg"
+                          alt="Badge 4"
+                          className={`w-12 h-12 line ${
+                            isDarkMode ? "invert" : ""
+                          }`}
+                        />
+                      </motion.a>
+                    )}
 
                     <motion.a
                       href="#"
@@ -330,6 +357,11 @@ export default function Header() {
                       name: "Certificates",
                       link: "/certificates",
                       style: <Award size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "Timeline",
+                      link: "/timeline",
+                      style: <History size={32} strokeWidth={2} />,
                     },
                     {
                       name: "Contact",

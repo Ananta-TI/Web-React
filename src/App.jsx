@@ -15,6 +15,7 @@ import Certificates from "./layouts/Certificates";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Contact from "./layouts/contact/contact.jsx";
+import Timeline from "./layouts/timeline";
 
 import './index.css';
 import './assets/tailwind.css';
@@ -40,6 +41,7 @@ function App() {
         />
 
         {/* Halaman All Projects */}
+        <Route path="/timeline" element={<Timeline />} />
         <Route path="/all-projects" element={<AllProjects />} />
         <Route path="/certificates" element={<Certificates />} />
         {/* <Route path="/privacy-policy" element={<PrivacyPolicy />} />
