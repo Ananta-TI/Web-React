@@ -37,7 +37,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   pathColor = "gray",
   pathWidth = 3,
   pathOpacity = 0.2,
-  gradientStartColor = "#ffaa40",
+  gradientStartColor = "#61DBFB",
   gradientStopColor = "#9c40ff",
   startXOffset = 0,
   startYOffset = 0,
@@ -168,7 +168,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
           transition={{
             delay,
             duration,
-            ease: [0.16, 1, 0.3, 1], // https://easings.net/#easeOutExpo
+            ease: [0.56, 1, 0.3, 1], // https://easings.net/#easeOutExpo
             repeat: Infinity,
             repeatDelay: 0,
           }}
