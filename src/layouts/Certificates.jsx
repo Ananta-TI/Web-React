@@ -11,18 +11,25 @@ const Certificates = () => {
   const [selectedCert, setSelectedCert] = useState(null);
 
   // ✅ Data sertifikat
-  const certificates = [
-      { image: "sertifikat/3.jpg",  year: "2025" },
-      { image: "sertifikat/4.jpg",  year: "2025" },
-      { image: "sertifikat/7.jpg",  year: "2025" },
-      { image: "sertifikat/2.jpg",  year: "2025" },
-      { image: "sertifikat/1.jpg",  year: "2024" },
-      { image: "sertifikat/5.jpg",  year: "2025" },
-      { image: "sertifikat/8.png",  year: "2025" },
-      { image: "sertifikat/10.png", year: "2025" },
-      { image: "sertifikat/9.png",  year: "2025" },
-      { image: "sertifikat/6.jpg",  year: "2025" },
-  ];
+ const certificates = [
+  { image: "sertifikat/1.jpg",  year: "2024" },
+  { image: "sertifikat/2.jpg",  year: "2025" },
+  { image: "sertifikat/3.jpg",  year: "2025" },
+  { image: "sertifikat/4.jpg",  year: "2025" },
+  { image: "sertifikat/5.jpg",  year: "2025" },
+  { image: "sertifikat/6.jpg",  year: "2025" },
+  { image: "sertifikat/7.jpg",  year: "2025" },
+  { image: "sertifikat/8.png",  year: "2025" },
+  { image: "sertifikat/9.png",  year: "2025" },
+  { image: "sertifikat/10.png", year: "2025" },
+  { image: "sertifikat/11.jpg", year: "2025" },
+  { image: "sertifikat/12.jpg", year: "2025" },
+  { image: "sertifikat/13.jpg", year: "2025" },
+  { image: "sertifikat/14.jpg", year: "2025" },
+  { image: "sertifikat/15.png", year: "2025" },
+  { image: "sertifikat/16.png", year: "2025" },
+];
+
 
   // 🔝 Scroll ke atas saat halaman dibuka
   useEffect(() => {
