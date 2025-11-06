@@ -375,7 +375,6 @@ const projects = [
         </div>      
         
         <LayeredAnimations />
-
       </motion.div>
 
 

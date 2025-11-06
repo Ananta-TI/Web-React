@@ -10,5 +10,16 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // vite.config.js
+server: {
+  proxy: {
+    "/api": {
+      target: 'https://ch.tetr.io',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, '')
+    }
+  }
+}
+
   },
 })

@@ -7,6 +7,8 @@ import GithubGraph from "../components/GithubGraph";
 import GithubCard from "../components/GithubCard";
 import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
+import Tetris from "./TetrioProfileCard.jsx";
+
 import "../index.css";
 
 const About = () => {
@@ -58,15 +60,27 @@ const About = () => {
         <ExperienceList />
       </div>
 
-   <div className="flex flex-col lg:flex-row items-center justify-center mb-6 mt-2 gap-6 lg:gap-4 px-4 lg:px-86 ">
-  <div className="flex-shrink-0">
+<div className="w-full max-w-7xl mx-auto px-4 mt-1 grid gap-6
+                grid-cols-1 lg:grid-cols-4 auto-rows-[minmax(120px,auto)]">
+
+  {/* GitHub Card */}
+  <div className="lg:col-span-1">
     <GithubCard username="Ananta-TI" />
   </div>
-  
-  <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-none">
+
+  {/* Graph BIG */}
+  <div className="lg:col-span-3 ">
     <GithubGraph />
   </div>
+
+  {/* Tetris Card full width */}
+  <div className="lg:col-span-3 -mt-5">
+    <Tetris />
+  </div>
 </div>
+
+
+
 
       {/* AnimatedBeamDemo Section */}
       <div className="dark px-4 sm:px-0">
