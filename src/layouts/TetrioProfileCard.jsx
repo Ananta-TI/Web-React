@@ -63,13 +63,13 @@ export default function TetrioProfileCard({
 
   return (
     <div
-      className={`cursor-target flex items-center gap-4 w-full max-w-xl rounded-xl p-4 transition-all duration-300 shadow-md
-      ${
-        isDarkMode
-          ? "bg-zinc-800 bg-opacity-60 border border-gray-600 border-b-0"
-          : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0"
-      } backdrop-blur-sm`}
-    >
+  className={`relative cursor-target flex items-center gap-4 w-full max-w-xl rounded-xl p-4 transition-all duration-300 shadow-md
+  ${isDarkMode
+    ? "bg-zinc-800 bg-opacity-60 border border-gray-600 border-b-0"
+    : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0"
+  } backdrop-blur-sm`}
+>
+
       {/* Avatar */}
       <img
   src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczMDAnIGhlaWdodD0nMzAwJyBzdHlsZT0nYmFja2dyb3VuZC1jb2xvcjpyZ2JhKDgsMTAsNiwxKTsnPjxnIHN0eWxlPSdmaWxsOnJnYmEoMTQ4LDIwMiw0MywxKTsgc3Ryb2tlOnJnYmEoMTQ4LDIwMiw0MywxKTsgc3Ryb2tlLXdpZHRoOjEuNTsnPjxyZWN0ICB4PScxMjknIHk9JzE3MScgd2lkdGg9JzQyJyBoZWlnaHQ9JzQyJy8+PHJlY3QgIHg9JzEyOScgeT0nMjEzJyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48cmVjdCAgeD0nODcnIHk9JzQ1JyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48cmVjdCAgeD0nMTcxJyB5PSc0NScgd2lkdGg9JzQyJyBoZWlnaHQ9JzQyJy8+PHJlY3QgIHg9Jzg3JyB5PSc4Nycgd2lkdGg9JzQyJyBoZWlnaHQ9JzQyJy8+PHJlY3QgIHg9JzE3MScgeT0nODcnIHdpZHRoPSc0MicgaGVpZ2h0PSc0MicvPjxyZWN0ICB4PSc4NycgeT0nMjEzJyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48cmVjdCAgeD0nMTcxJyB5PScyMTMnIHdpZHRoPSc0MicgaGVpZ2h0PSc0MicvPjxyZWN0ICB4PSc0NScgeT0nNDUnIHdpZHRoPSc0MicgaGVpZ2h0PSc0MicvPjxyZWN0ICB4PScyMTMnIHk9JzQ1JyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48cmVjdCAgeD0nNDUnIHk9JzEyOScgd2lkdGg9JzQyJyBoZWlnaHQ9JzQyJy8+PHJlY3QgIHg9JzIxMycgeT0nMTI5JyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48cmVjdCAgeD0nNDUnIHk9JzIxMycgd2lkdGg9JzQyJyBoZWlnaHQ9JzQyJy8+PHJlY3QgIHg9JzIxMycgeT0nMjEzJyB3aWR0aD0nNDInIGhlaWdodD0nNDInLz48L2c+PC9zdmc+"
@@ -88,9 +88,9 @@ export default function TetrioProfileCard({
   target="_blank"
   rel="noopener noreferrer"
   className={`
-    font-semibold truncate bg-clip-text text-transparent
-    bg-gradient-to-r from-green-400 to-green-800
-    transition-all duration-200 hover:brightness-110 hover:underline hover:cursor-none
+    font-bold truncate bg-clip-text text-transparent
+    bg-gradient-to-r from-green-400 to-green-500
+    transition-all duration-200 hover:brightness-110 hover:underline hover:cursor-none font-mono
   `}
 >
   {profile.username}
@@ -116,7 +116,13 @@ export default function TetrioProfileCard({
 
             <div className="text-xs mt-1 text-gray-400">
               {/* XP · joined · playtime */}
-              <span>{profile.xp ? `${Number(profile.xp).toLocaleString()} XP` : ""}</span>
+              <span
+  className={isDarkMode ? 'text-yellow-400 font-bold' : 'text-yellow-800 font-bold'}
+>
+
+              
+              
+              {profile.xp ? `${Number(profile.xp).toLocaleString()} XP` : ""}</span>
               <span className="mx-2">•</span>
               <span>{profile.join_relative ?? ""}</span>
               {profile.play_time_readable && (
@@ -141,20 +147,20 @@ export default function TetrioProfileCard({
         </div>
 
         {/* middle line: games / wins / winrate / apm pps vs */}
-        <div className="flex items-center justify-between mt-3 text-sm">
+        <div className="flex items-center justify-between mt-3 text-sm font-mono">
           <div className="text-sm">
             <div>
               Games: <span className="font-semibold">{profile.gamesplayed ?? "—"}</span>
               <span className="mx-2">•</span>
               Wins: <span className="font-semibold">{profile.gameswon ?? "—"}</span>
               {profile.winrate != null && (
-                <span className="ml-2 text-xs text-gray-400">({profile.winrate}%)</span>
+                <span className="ml-2 text-xs text-cyan-400">({profile.winrate}%)</span>
               )}
             </div>
             <div className="mt-1 text-xs">
-  <span className="text-red-400">APM: {profile.league?.apm ?? "—"}</span> •
-  <span className="text-blue-400 ml-1">PPS: {profile.league?.pps ?? "—"}</span> •
-  <span className="text-green-400 ml-1">VS: {profile.league?.vs ?? "—"}</span>
+  <span className="text-red-400 font-bold font-mono">APM: {profile.league?.apm ?? "—"}</span> •
+  <span className="text-blue-400 font-bold ml-1 font-mono">PPS: {profile.league?.pps ?? "—"}</span> •
+  <span className="text-green-400 font-bold ml-1 font-mono">VS: {profile.league?.vs ?? "—"}</span>
 </div>
 
           </div>
@@ -179,6 +185,30 @@ export default function TetrioProfileCard({
           </div>
         )}
       </div>
+      {/* info icon (hover popup) */}
+<div className="absolute bottom-2 right-2 group cursor-pointer">
+  <div
+    className={`w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold
+      ${isDarkMode ? "bg-zinc-700 text-white" : "bg-gray-300 text-black"}
+      transition-all duration-200 hover:scale-110`}
+    title="Info"
+  >
+    i
+  </div>
+
+  {/* tooltip popup */}
+  <div
+    className={`absolute bottom-7 right-0 w-64 text-xs rounded-md p-3 shadow-lg opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-300
+      ${isDarkMode ? "bg-zinc-600 text-gray-200" : "bg-white text-gray-800"}`}
+  >
+    <p className="font-mono font-bold"><span className="text-red-400 font-bold font-mono">APM</span> - Attacks Per Minute</p> <br />
+    <p className="font-mono font-bold"><span className="text-blue-400 font-bold font-mono">PPS</span> - Pieces Per Second</p> <br />
+    <p className="font-mono font-bold"><span className="text-green-400 font-bold">VS</span> - Versus Score</p>
+  </div>
+  
+</div>
+
+
     </div>
   );
 }

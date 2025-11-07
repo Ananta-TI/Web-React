@@ -74,9 +74,11 @@ const About = () => {
   </div>
 
   {/* Tetris Card full width */}
-  <div className="lg:col-span-3 -mt-5">
+  <div className="lg:col-span-3 lg:-mt-5">
     <Tetris />
+
   </div>
+
 </div>
 
 

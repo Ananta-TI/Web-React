@@ -295,7 +295,7 @@ export default function Header() {
                         />
                       </motion.a>
                     )}
-                    {location.pathname !== "/timeline" && (
+                    {/* {location.pathname !== "/timeline" && (
                       <motion.a
                         href="#"
                         onClick={(e) => {
@@ -320,7 +320,7 @@ export default function Header() {
                           }`}
                         />
                       </motion.a>
-                    )}
+                    )} */}
 
                     <motion.a
                       href="#"
@@ -358,11 +358,11 @@ export default function Header() {
                       link: "/certificates",
                       style: <Award size={32} strokeWidth={2} />,
                     },
-                    {
-                      name: "Timeline",
-                      link: "/timeline",
-                      style: <History size={32} strokeWidth={2} />,
-                    },
+                   // {
+                   //   name: "Timeline",
+                   //   link: "/timeline",
+                   //   style: <History size={32} strokeWidth={2} />,
+                   // },
                     {
                       name: "Contact",
                       link: "#contact",
