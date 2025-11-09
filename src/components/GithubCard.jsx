@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext.jsx";
+import { animate, createScope, spring, createDraggable } from 'animejs';
 
 export default function GithubProfileCard({ username = "Ananta-TI" }) {
   const themeCtx = useContext(ThemeContext);
@@ -88,18 +89,35 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
 
         {/* 📌 Stack followers (acak posisi tiap refresh) */}
         <div className="flex mt-2">
-          {followers.map((f, idx) => (
-            <img
-              key={f.id}
-              src={f.avatar_url}
-              alt="Follower"
-              className={`w-6 h-6 rounded-full border-2 -ml-2 first:ml-0 ${
-                isDarkMode ? "border-stone-600" : "border-gray-700"
-              }`}
-              style={{ zIndex: followers.length - idx }}
-            />
-          ))}
-        </div>
+  {followers.map((f, idx) => (
+    <a
+      key={f.id}
+      href={f.html_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative group -ml-2 first:ml-0 transition-all duration-200 ease-out"
+      style={{ zIndex: followers.length - idx }}
+    >
+      <img
+        src={f.avatar_url}
+        alt={f.login || "Follower"}
+        className={`w-6 h-6 rounded-full border-2 transition-transform duration-200 ease-out group-hover:scale-125 group-hover:-translate-y-1 group-hover:brightness-110 group-hover:z-50 ${
+          isDarkMode ? "border-stone-600" : "border-gray-700"
+        }`}
+      />
+      <div
+        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 
+        transition-all duration-300 delay-1 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+ bg-stone-700 text-white text-xs px-2 py-1 rounded shadow-md whitespace-nowrap pointer-events-none"
+      >
+        {f.login}
+      </div>
+    </a>
+  ))}
+</div>
+
+
+
       </div>
     </div>
   );

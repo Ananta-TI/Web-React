@@ -25,3 +25,4 @@ dist-ssr
 .env
 src/layouts/sidebar
 .vercel
+.env
