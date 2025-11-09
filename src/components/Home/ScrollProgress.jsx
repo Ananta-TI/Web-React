@@ -197,12 +197,12 @@ const ScrollIndicator = ({
   return (
     <div 
       ref={containerRef}
-      className={`fixed z-[1000] transition-all duration-500 ease-out ${
+      className={`fixed z-[20] transition-all duration-500 ease-out ${
         isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
       } ${
         isVertical 
           ? 'w-10 h-[50vh] top-1/2 left-5 -translate-y-1/2' 
-          : 'w-[90%] max-w-[600px] bottom-5 left-1/2 -translate-x-1/2 md:w-full md:max-w-[600px]'
+          : ' w-[90%] max-w-[600px] bottom-5 left-1/2 -translate-x-1/2 md:w-full md:max-w-[600px]'
       }`}
     >
       <div 
@@ -221,7 +221,7 @@ const ScrollIndicator = ({
         {/* Thumb */}
         {showThumb && (
           <div 
-            className={`absolute w-2 h-2 bg-[rgb(70,70,70)] rounded-full cursor-grab z-10 ${
+            className={`absolute w-2 h-2 bg-[rgb(70,70,70)] rounded-full cursor-grab cursor-target z-10 ${
               isDragging ? 'cursor-grabbing scale-125' : ''
             } ${
               isVertical ? 'left-1/2 -translate-x-1/2 -translate-y-1/2' : 'top-1/2 -translate-x-1/2 -translate-y-1/2'
@@ -271,7 +271,7 @@ const ScrollIndicator = ({
                       }
                     : { 
                         left: `${marker.percentage}%`,
-                        height: isFilled ? (marker.isMajor ? '40px' : '30px') : (marker.isMajor ? '14px' : '10px')
+                        height: isFilled ? (marker.isMajor ? '20px' : '10px') : (marker.isMajor ? '14px' : '10px')
                       }
                 }
               />
