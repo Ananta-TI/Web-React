@@ -334,5 +334,12 @@
 }
 
 
+.hamburger-react {
+  cursor: none !important;
+  
+}
 
+.hamburger-react * {
+  cursor: none !important;
+}
 

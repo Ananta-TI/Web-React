@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { ThemeContext } from "../../context/ThemeContext";
 
 const ScrollIndicator = ({ 
-  orientation = 'auto', // 'vertical', 'horizontal', or 'auto'
+  orientation = 'auto',
   showThumb = true,
   showTooltip = true,
   showPercentages = true 
 }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -13,47 +15,36 @@ const ScrollIndicator = ({
   const containerRef = useRef(null);
   const trackRef = useRef(null);
   
-  // Determine orientation based on screen size if set to 'auto'
   const actualOrientation = orientation === 'auto' 
     ? (isMobile ? 'horizontal' : 'vertical')
     : orientation;
   
   const isVertical = actualOrientation === 'vertical';
 
-  // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Create scale markers
   const createMarkers = () => {
     const markers = [];
     for (let i = 0; i <= 100; i += 2) {
       const isMajor = i % 10 === 0;
-      markers.push({
-        percentage: i,
-        isMajor,
-        showPercentage: isMajor && showPercentages
-      });
+      markers.push({ percentage: i, isMajor, showPercentage: isMajor && showPercentages });
     }
     return markers;
   };
 
   const markers = createMarkers();
 
-  // Check if page is scrollable
   const isScrollable = useCallback(() => {
     return document.documentElement.scrollHeight > window.innerHeight;
   }, []);
 
-  // Update scroll percentage
   const updateScroll = useCallback(() => {
     if (!isScrollable()) {
       setScrollPercentage(0);
@@ -68,7 +59,6 @@ const ScrollIndicator = ({
     
     setScrollPercentage(clampedPercentage);
     
-    // Hide when at very top or very bottom
     if (clampedPercentage <= 1 || clampedPercentage >= 99) {
       setIsVisible(false);
     } else {
@@ -76,20 +66,17 @@ const ScrollIndicator = ({
     }
   }, [isScrollable]);
 
-  // Scroll to percentage
   const scrollToPercentage = useCallback((percentage) => {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const targetScroll = (percentage / 100) * maxScroll;
     window.scrollTo({ top: targetScroll, behavior: 'auto' });
   }, []);
 
-  // Handle drag start
   const handleDragStart = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
 
-  // Handle drag move
   const handleDragMove = useCallback((e) => {
     if (!isDragging || !trackRef.current) return;
 
@@ -111,12 +98,8 @@ const ScrollIndicator = ({
     scrollToPercentage(percentage);
   }, [isDragging, isVertical, scrollToPercentage]);
 
-  // Handle drag end
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+  const handleDragEnd = useCallback(() => setIsDragging(false), []);
 
-  // Handle click on track
   const handleTrackClick = useCallback((e) => {
     if (!trackRef.current) return;
 
@@ -138,7 +121,6 @@ const ScrollIndicator = ({
     scrollToPercentage(percentage);
   }, [isVertical, scrollToPercentage]);
 
-  // Throttle function using requestAnimationFrame
   const throttle = (callback) => {
     let ticking = false;
     return (...args) => {
@@ -154,23 +136,16 @@ const ScrollIndicator = ({
 
   useEffect(() => {
     const handleScroll = throttle(updateScroll);
-    const handleResize = () => {
-      updateScroll();
-    };
-
+    const handleResize = () => updateScroll();
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
-    
-    // Initial update
     updateScroll();
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
     };
   }, [updateScroll]);
 
-  // Add drag event listeners
   useEffect(() => {
     if (isDragging) {
       const handleMove = (e) => handleDragMove(e);
@@ -190,9 +165,14 @@ const ScrollIndicator = ({
     }
   }, [isDragging, handleDragMove, handleDragEnd]);
 
-  if (!isScrollable()) {
-    return null;
-  }
+  if (!isScrollable()) return null;
+
+  const colorTrack = isDarkMode ? 'bg-zinc-700' : 'bg-zinc-300';
+  const colorProgress = isDarkMode ? 'bg-zinc-200' : 'bg-zinc-800';
+  const colorThumb = isDarkMode ? 'bg-zinc-300' : 'bg-zinc-700';
+  const colorTooltipBg = isDarkMode ? 'bg-zinc-200 text-zinc-800' : 'bg-zinc-700 text-zinc-200';
+  const colorMarkerActive = isDarkMode ? 'bg-zinc-200' : 'bg-zinc-800';
+  const colorMarkerInactive = isDarkMode ? 'bg-zinc-600' : 'bg-zinc-400';
 
   return (
     <div 
@@ -202,26 +182,24 @@ const ScrollIndicator = ({
       } ${
         isVertical 
           ? 'w-10 h-[50vh] top-1/2 left-5 -translate-y-1/2' 
-          : ' w-[90%] max-w-[600px] bottom-5 left-1/2 -translate-x-1/2 md:w-full md:max-w-[600px]'
+          : 'w-[90%] max-w-[600px] bottom-5 left-1/2 -translate-x-1/2 md:w-full md:max-w-[600px]'
       }`}
     >
       <div 
         ref={trackRef}
-        className={`relative bg-[rgb(70,70,70)] cursor-pointer ${isVertical ? 'w-px h-full' : 'h-px w-full'}`}
+        className={`relative ${colorTrack} cursor-pointer ${isVertical ? 'w-px h-full' : 'h-px w-full'}`}
         onClick={handleTrackClick}
       >
-        {/* Progress Bar */}
         <div 
-          className={`absolute top-0 left-0 bg-[rgb(200,200,200)] pointer-events-none ${
+          className={`absolute top-0 left-0 ${colorProgress} pointer-events-none ${
             isVertical ? 'w-full' : 'h-full'
           }`}
           style={isVertical ? { height: `${scrollPercentage}%` } : { width: `${scrollPercentage}%` }}
         />
         
-        {/* Thumb */}
         {showThumb && (
           <div 
-            className={`absolute w-2 h-2 bg-[rgb(70,70,70)] rounded-full cursor-grab cursor-target z-10 ${
+            className={`absolute w-2 h-2 ${colorThumb} rounded-full cursor-grab z-10 ${
               isDragging ? 'cursor-grabbing scale-125' : ''
             } ${
               isVertical ? 'left-1/2 -translate-x-1/2 -translate-y-1/2' : 'top-1/2 -translate-x-1/2 -translate-y-1/2'
@@ -231,38 +209,29 @@ const ScrollIndicator = ({
             onTouchStart={handleDragStart}
           />
         )}
-        
-        {/* Tooltip */}
+
         {showTooltip && isVertical && (
           <div 
-            className={`absolute bg-[rgb(200,200,200)] text-[rgb(60,60,60)] text-sm rounded px-3 py-2 text-center font-mono z-10 pointer-events-none left-full ml-2.5 -translate-y-1/2`}
+            className={`absolute ${colorTooltipBg} text-sm rounded px-3 py-2 text-center font-mono z-10 pointer-events-none left-full ml-2.5 -translate-y-1/2`}
             style={{ top: `${scrollPercentage}%` }}
           >
             {Math.round(scrollPercentage)}%
-            <div 
-              className={`absolute w-2 h-2 bg-[rgb(200,200,200)] top-1/2 left-[-0.25rem] -translate-y-1/2 rotate-45`}
-            />
+            <div className={`absolute w-2 h-2 ${isDarkMode ? 'bg-zinc-200' : 'bg-zinc-700'} top-1/2 left-[-0.25rem] -translate-y-1/2 rotate-45`} />
           </div>
         )}
       </div>
-      
-      {/* Scale */}
+
       <div className={`${isVertical ? 'absolute w-10 h-[calc(100%-2px)] top-0 left-px' : 'relative w-full h-10 mb-2.5'}`}>
         {markers.map((marker, index) => {
           const isFilled = marker.percentage < scrollPercentage || (marker.percentage === 100 && scrollPercentage >= 99);
-          const isVisible = (marker.percentage === 0 && scrollPercentage > 0) || marker.percentage < scrollPercentage || (marker.percentage === 100 && scrollPercentage >= 99);
+          const isVisibleMarker = (marker.percentage === 0 && scrollPercentage > 0) || marker.percentage < scrollPercentage || (marker.percentage === 100 && scrollPercentage >= 99);
           
           return (
             <React.Fragment key={index}>
-              {/* Marker Line */}
               <div
                 className={`absolute transition-all duration-300 ease-out ${
-                  isFilled ? 'bg-[rgb(200,200,200)]' : 'bg-[rgb(70,70,70)]'
-                } ${
-                  isVertical 
-                    ? 'h-px left-0' 
-                    : 'w-px top-0 -translate-x-1/2'
-                }`}
+                  isFilled ? colorMarkerActive : colorMarkerInactive
+                } ${isVertical ? 'h-px left-0' : 'w-px top-0 -translate-x-1/2'}`}
                 style={
                   isVertical 
                     ? { 
@@ -276,11 +245,10 @@ const ScrollIndicator = ({
                 }
               />
               
-              {/* Percentage Label */}
               {marker.showPercentage && isVertical && (
                 <div
-                  className={`absolute bg-[rgb(60,60,60)] text-[rgb(200,200,200)] px-1.5 py-0.5 rounded text-xs font-mono transition-all duration-300 ease-out ${
-                    isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                  className={`absolute ${isDarkMode ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-200 text-zinc-800'} px-1.5 py-0.5 rounded text-xs font-mono transition-all duration-300 ease-out ${
+                    isVisibleMarker ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
                   } -translate-y-1/2`}
                   style={{ left: '45px', top: `${marker.percentage}%` }}
                 >

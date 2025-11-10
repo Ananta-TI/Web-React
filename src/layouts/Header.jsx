@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { animate, svg, stagger } from "https://esm.sh/animejs";
+import { Divide as Hamburger } from 'hamburger-react'
 
 // import { createAnimation } from "./ThemeBtn"; // Import function untuk animasi
 
@@ -30,6 +31,22 @@ export default function Header() {
   const [hoveredLink, setHoveredLink] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
+  const [currentTime, setCurrentTime] = useState("");
+
+useEffect(() => {
+  const updateClock = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    setCurrentTime(`${hours}:${minutes}:${seconds}`);
+  };
+
+  updateClock(); // initial call
+  const interval = setInterval(updateClock, 1000);
+  return () => clearInterval(interval);
+}, []);
+
   animate(svg.createDrawable(".line"), {
     draw: ["0 0", "0 1", "1 1"],
     ease: "inOutQuad",
@@ -168,23 +185,20 @@ export default function Header() {
             className="object-cover h-12 w-auto md:h-20 md:w-20"
           /> */}
         </span>
-        <button
-          onClick={handleToggleSidebar}
-          className="p-2 text-gray-600 focus:outline-none touch-manipulation"
-        >
-          <motion.div
-            initial={{ rotate: 0 }}
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="p-2 rounded-full cursor-none cursor-target"
-          >
-            {isOpen ? (
-              <X className="w-10 h-10 md:w-13 md:h-13 p-2 text-white rounded-full bg-zinc-800" />
-            ) : (
-              <Menu className="w-10 h-10 md:w-13 md:h-13 p-2 text-white rounded-full bg-zinc-800" />
-            )}
-          </motion.div>
-        </button>
+       <div
+  className={`p-2 mt-1  cursor-none pointer-none cursor-target rounded-full transition-colors ${
+    isDarkMode ? 'bg-gray-100' : 'bg-zinc-800'
+  }`}
+>
+  <Hamburger
+  className="hover:cursor-none hover:pointer-none cursor-target"
+    toggled={isOpen}
+    toggle={setIsOpen}
+    color={isDarkMode ? '#18181b' : 'white'}
+    duration={0.4}
+    easing="ease-in"/>
+</div>
+
       </div>
 
       {/* Overlay */}
@@ -231,10 +245,18 @@ export default function Header() {
               } p-6 md:p-8 flex flex-col overflow-y-auto`}
             >
               <div className="flex items-center justify-between mt-8 md:mt-10 mb-5">
-                <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">
-                  Navigation
-                </span>
-              </div>
+  <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">
+    Navigation
+  </span>
+  <span
+    className={`text-sm font-mono ${
+      isDarkMode ? "text-gray-600" : "text-gray-300"
+    }`}
+  >
+    {currentTime}
+  </span>
+</div>
+
 
               <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
