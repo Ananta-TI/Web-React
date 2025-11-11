@@ -55,6 +55,10 @@
     font-family: Equiva;
     src: url('/fonts/Equiva.ttf');
 }
+@font-face {
+    font-family: Calculator;
+    src: url('/fonts/Calculator.ttf');
+}
 @theme {
     --font-barlow: "Barlow", sans-serif;
     --font-Poppins: "Poppins", sans-serif;
@@ -70,6 +74,7 @@
     --font-Skullines:"Skullines", sans-serif;
     --font-Jena:"Jena", sans-serif;
     --font-Equiva:"Equiva", sans-serif;
+    --font-Calculator:"Calculator", sans-serif;
     --color-latar: #f3f4f6;
     --color-teks: #374151; 
     --color-teks-samping: #6b7280;

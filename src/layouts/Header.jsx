@@ -249,8 +249,8 @@ useEffect(() => {
     Navigation
   </span>
   <span
-    className={`text-sm font-mono ${
-      isDarkMode ? "text-gray-600" : "text-gray-300"
+    className={`text-2xl font-Calculator font-bold ${
+      isDarkMode ? "text-black" : "text-gray-300"
     }`}
   >
     {currentTime}
