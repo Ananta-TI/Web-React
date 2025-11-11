@@ -251,7 +251,7 @@ useEffect(() => {
   <span
     className={`text-2xl font-Calculator font-bold ${
       isDarkMode ? "text-black" : "text-gray-300"
-    }`}
+    }mx-2`}
   >
     {currentTime}
   </span>
@@ -262,7 +262,7 @@ useEffect(() => {
 
               {/* Navigation Links */}
               <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-                {["/all-projects", "/certificates","/timeline"].includes(
+                {["/all-projects", "/certificates","/Scanner"].includes(
                   location.pathname
                 ) ? (
                   <>
@@ -317,12 +317,12 @@ useEffect(() => {
                         />
                       </motion.a>
                     )}
-                    {/* {location.pathname !== "/timeline" && (
+                    {location.pathname !== "/Scanner" && (
                       <motion.a
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          navigate("/timeline");
+                          navigate("/Scanner");
                           setIsOpen(false);
                         }}
                         className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
@@ -333,7 +333,7 @@ useEffect(() => {
                           transition: { delay: 0.2 },
                         }}
                       >
-                        <span>Timeline</span>
+                        <span>Scanner</span>
                         <img
                           src="/svg/work-7.svg"
                           alt="Badge 4"
@@ -342,7 +342,7 @@ useEffect(() => {
                           }`}
                         />
                       </motion.a>
-                    )} */}
+                    )}
 
                     <motion.a
                       href="#"
@@ -380,11 +380,11 @@ useEffect(() => {
                       link: "/certificates",
                       style: <Award size={32} strokeWidth={2} />,
                     },
-                   // {
-                   //   name: "Timeline",
-                   //   link: "/timeline",
-                   //   style: <History size={32} strokeWidth={2} />,
-                   // },
+                    {
+                      name: "Scanner",
+                      link: "/Scanner",
+                      style: <History size={32} strokeWidth={2} />,
+                    },
                     {
                       name: "Contact",
                       link: "#contact",

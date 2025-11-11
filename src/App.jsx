@@ -17,6 +17,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Contact from "./layouts/contact/contact.jsx";
 import Timeline from "./layouts/timeline";
+import Scanner from "./layouts/scanner";
 // import Courses from "./layouts/Courses";
 
 // import Courses from "./layouts/Courses";
@@ -49,7 +50,7 @@ function App() {
         {/* Halaman All Projects */}
           {/* <Route path="/courses" element={<Courses />} /> */}
 {/* <Route path="/courses" element={<Courses />} /> */}
-
+<Route path="/Scanner" element={<Scanner />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/all-projects" element={<AllProjects />} />
         <Route path="/certificates" element={<Certificates />} />
