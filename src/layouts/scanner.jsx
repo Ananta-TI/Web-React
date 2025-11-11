@@ -69,7 +69,7 @@ export default function WebsiteSecurityScanner() {
     setAnalysisId(null);
 
     try {
-      const res = await fetch("http://localhost:5000/api/vt/scan", {
+const res = await fetch("https://ananta-ti.vercel.app/api/vt/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: input }),
@@ -97,7 +97,7 @@ export default function WebsiteSecurityScanner() {
     for (let i = 0; i < maxRetries; i++) {
       setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
       try {
-        const res = await fetch(`http://localhost:5000/api/vt/result/${id}`);
+        const res = await fetch(`https://ananta-ti.vercel.app/api/vt/result/${id}`);
         if (res.ok) {
           const data = await res.json();
           const statusAttr = data?.data?.attributes?.status;
