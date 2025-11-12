@@ -59,7 +59,11 @@ export default function WebsiteSecurityScanner() {
 
   // layout variants copied from template style
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL ||
+  (window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://ananta-ti.vercel.app");
   // submit URL to backend (assumes backend at http://localhost:5000)
   async function handleScan() {
     if (!input) return;

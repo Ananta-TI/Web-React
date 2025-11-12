@@ -6,7 +6,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ananta-ti.vercel.app",
+    ],
+  })
+);
 app.use(express.json());
 
 const VT_KEY = process.env.VT_API_KEY;
