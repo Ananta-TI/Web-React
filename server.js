@@ -2,12 +2,23 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit"; // <-- IMPORT
 
 dotenv.config();
 
 const app = express();
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
+
+// Terapkan rate limiter ke semua rute API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 100, // Batasi setiap IP hingga 100 permintaan per 'window'
+  message: "Terlalu banyak permintaan dari IP ini, coba lagi setelah 15 menit",
+});
+app.use("/api/", apiLimiter); // <-- GUNAKAN
+
+// ... sisa kode Anda ...
 
 const VT_KEY = process.env.VT_API_KEY;
 if (!VT_KEY) console.warn("⚠️ VirusTotal API key not found (VT_API_KEY)!");

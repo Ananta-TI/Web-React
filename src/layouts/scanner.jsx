@@ -59,7 +59,7 @@ export default function WebsiteSecurityScanner() {
 
   // layout variants copied from template style
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   // submit URL to backend (assumes backend at http://localhost:5000)
   async function handleScan() {
     if (!input) return;
@@ -68,9 +68,9 @@ export default function WebsiteSecurityScanner() {
     setResult(null);
     setAnalysisId(null);
 
-    try {
-const res = await fetch("https://ananta-ti.vercel.app/api/vt/scan", {
-        method: "POST",
+   try {
+    const res = await fetch(`${BACKEND_URL}/api/vt/scan`, { // <-- DIUBAH
+      method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: input }),
       });
@@ -96,8 +96,8 @@ const res = await fetch("https://ananta-ti.vercel.app/api/vt/scan", {
     const delayMs = 3000;
     for (let i = 0; i < maxRetries; i++) {
       setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
-      try {
-        const res = await fetch(`https://ananta-ti.vercel.app/api/vt/result/${id}`);
+     try {
+    const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`); // <-- DIUBAH
         if (res.ok) {
           const data = await res.json();
           const statusAttr = data?.data?.attributes?.status;
@@ -321,12 +321,22 @@ const res = await fetch("https://ananta-ti.vercel.app/api/vt/scan", {
       {/* Stats and chart */}
       <div className="grid md:grid-cols-3 gap-6 mb-6">
         <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-3 rounded-xl bg-green-900/30 text-center">
-            <div className="text-2xl font-bold text-green-400">
-              {stats.harmless ?? "N/A"}
-            </div>
-            <div className="text-sm text-zinc-300">Harmless</div>
-          </div>
+<div
+  className={`p-3 rounded-xl text-center ${
+    isDarkMode
+      ? "bg-green-900/30 text-green-400"
+      : "bg-green-100 text-green-700"
+  }`}
+>
+  <div className="text-2xl font-bold">
+    {stats.harmless ?? "N/A"}
+  </div>
+  <div className={`text-sm ${isDarkMode ? "text-zinc-300" : "text-green-800"}`}>
+    Harmless
+  </div>
+</div>
+
+{/* Terapkan pola yang sama untuk Suspicious, Malicious, dan Undetected */}
 
           <div className="p-3 rounded-xl bg-yellow-900/30 text-center">
             <div className="text-2xl font-bold text-yellow-400">
