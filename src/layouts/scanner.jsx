@@ -83,12 +83,15 @@ export default function WebsiteSecurityScanner() {
         throw new Error(data.error || `HTTP ${res.status}: ${data.message || "Failed to scan"}`);
       }
       
-      if (!data.id) {
+      // VirusTotal returns nested structure: { data: { id: "..." } }
+      const analysisId = data.data?.id || data.id;
+      
+      if (!analysisId) {
         console.error("❌ Full response:", JSON.stringify(data, null, 2));
         throw new Error(`No analysis ID returned. Backend response: ${JSON.stringify(data)}`);
       }
       
-      setAnalysisId(data.id);
+      setAnalysisId(analysisId);
       setStatus("URL diterima. Menunggu hasil analisis...");
       // poll
       await pollResult(data.id);
