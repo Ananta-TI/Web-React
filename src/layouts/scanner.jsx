@@ -102,29 +102,50 @@ export default function WebsiteSecurityScanner() {
       setLoading(false);
     }
   }
-  async function pollResult(id) {
-    const maxRetries = 20;
-    const delayMs = 3000;
-    for (let i = 0; i < maxRetries; i++) {
-      setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          const statusAttr = data?.data?.attributes?.status;
-          if (statusAttr === "completed") {
-            setResult(data);
-            setStatus("✅ Analisis selesai!");
-            return;
-          }
-        }
-      } catch (err) {
-        console.error("poll error", err);
-      }
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-    setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti.");
-  }
+       async function pollResult(id) {
+       const maxRetries = 40;  // Naik dari 20 (total ~200s)
+       const delayMs = 5000;   // Naik dari 3000
+       for (let i = 0; i < maxRetries; i++) {
+         setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
+         try {
+           console.log(`🔄 Polling attempt ${i + 1}: Fetching ${BACKEND_URL}/api/vt/result/${id}`);
+           const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
+           console.log(`📡 Poll response status: ${res.status}`);
+           if (res.ok) {
+             const data = await res.json();
+             console.log(`📦 Poll response data:`, data);
+             const statusAttr = data?.data?.attributes?.status;
+             console.log(`🔍 Status attribute: ${statusAttr}`);
+             if (statusAttr === "completed") {
+               setResult(data);
+               setStatus("✅ Analisis selesai!");
+               return;
+             } else if (statusAttr === "queued" || statusAttr === "in-progress") {
+               // Lanjutkan polling jika masih dalam proses
+               console.log("⏳ Analysis still in progress, continuing poll...");
+             } else {
+               // Jika status lain (e.g., failed), hentikan dengan error
+               throw new Error(`Analysis failed with status: ${statusAttr}`);
+             }
+           } else {
+             console.error(`❌ Poll failed with status ${res.status}: ${res.statusText}`);
+             // Jika error 404 atau 429 (rate limit), hentikan polling
+             if (res.status === 404) {
+               throw new Error("Analysis ID not found. Check if scan was successful.");
+             } else if (res.status === 429) {
+               throw new Error("Rate limit exceeded. Try again later.");
+             }
+           }
+         } catch (err) {
+           console.error("❌ Poll error:", err);
+           setStatus(`❌ Error during polling: ${err.message}`);
+           return;  // Hentikan polling jika error fatal
+         }
+         await new Promise((r) => setTimeout(r, delayMs));
+       }
+       setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
+     }
+     
 
   function parseVendors(resultData) {
     const obj = resultData?.data?.attributes?.results || {};
