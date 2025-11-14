@@ -19,13 +19,12 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "x-apikey": VT_KEY,
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
       },
-      body: params.toString()
+      body: params.toString(),
     });
 
     const data = await response.json();
-
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
