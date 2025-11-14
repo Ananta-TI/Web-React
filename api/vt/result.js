@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  console.log("🔍 Fetching result for ID:", req.query.id);  // Tambah log
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
       `https://www.virustotal.com/api/v3/analyses/${id}`,
       { headers: { "x-apikey": VT_KEY } }
     );
-
+ console.log("📡 VT Response status:", response.status);  // Tambah log
     const data = await response.json();
     return res.status(200).json(data);
   } catch (err) {
