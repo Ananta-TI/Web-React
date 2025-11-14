@@ -94,7 +94,7 @@ export default function WebsiteSecurityScanner() {
       setAnalysisId(analysisId);
       setStatus("URL diterima. Menunggu hasil analisis...");
       // poll
-      await pollResult(data.id);
+await pollResult(analysisId);
     } catch (err) {
       console.error("❌ Scan error:", err);
       setStatus(`❌ Error: ${err.message}`);
