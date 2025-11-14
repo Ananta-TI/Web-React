@@ -64,26 +64,37 @@ export default function WebsiteSecurityScanner() {
     setStatus("Mengirim URL ke VirusTotal...");
     setResult(null);
     setAnalysisId(null);
-
     try {
+      console.log("🔍 Scanning URL:", input);
+      console.log("🌐 Backend URL:", BACKEND_URL);
+      
       const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: input }),
       });
       
+      console.log("📡 Response status:", res.status);
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to scan");
-      if (!data.id) throw new Error("No analysis ID returned");
-
+      console.log("📦 Response data:", data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}: ${data.message || "Failed to scan"}`);
+      }
+      
+      if (!data.id) {
+        console.error("❌ Full response:", JSON.stringify(data, null, 2));
+        throw new Error(`No analysis ID returned. Backend response: ${JSON.stringify(data)}`);
+      }
+      
       setAnalysisId(data.id);
       setStatus("URL diterima. Menunggu hasil analisis...");
-
       // poll
       await pollResult(data.id);
     } catch (err) {
-      console.error(err);
-      setStatus(`❌ Error: ${err.message}. Periksa backend/API key.`);
+      console.error("❌ Scan error:", err);
+      setStatus(`❌ Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
