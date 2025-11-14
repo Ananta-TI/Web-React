@@ -1,16 +1,11 @@
 {
-  "version": 2,
   "functions": {
-    "api/vt/*.js": {
-      "runtime": "nodejs18.x"
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
   },
-  "builds": [
-    { "src": "api/vt/*.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
   "routes": [
-    { "src": "/api/vt/(.*)", "dest": "/api/vt/$1.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/api/vt/scan", "dest": "/api/vt/scan.js" },
+    { "src": "/api/vt/result", "dest": "/api/vt/result.js" }
   ]
 }
