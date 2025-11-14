@@ -102,7 +102,6 @@ export default function WebsiteSecurityScanner() {
       setLoading(false);
     }
   }
-
   async function pollResult(id) {
     const maxRetries = 20;
     const delayMs = 3000;
