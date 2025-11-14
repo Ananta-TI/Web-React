@@ -84,7 +84,7 @@ export default function WebsiteSecurityScanner() {
       }
       
       // VirusTotal returns nested structure: { data: { id: "..." } }
-      const analysisId = data.data?.id || data.id;
+const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
       
       if (!analysisId) {
         console.error("❌ Full response:", JSON.stringify(data, null, 2));
