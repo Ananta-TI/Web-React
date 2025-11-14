@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/api/vt/scan", "dest": "/api/vt/scan.js" },
-    { "src": "/api/vt/result", "dest": "/api/vt/result.js" }
-  ]
+  "functions": {
+    "api/vt/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
