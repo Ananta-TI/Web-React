@@ -95,7 +95,7 @@ export default function WebsiteSecurityScanner() {
     for (let i = 0; i < maxRetries; i++) {
       setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
       try {
-        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
+const res = await fetch(`${BACKEND_URL}/api/vt/result?id=${id}`);
         if (res.ok) {
           const data = await res.json();
           const statusAttr = data?.data?.attributes?.status;
