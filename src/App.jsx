@@ -13,8 +13,8 @@ import AllProjects from "./layouts/AllProjects";
 // import PrivacyPolicy from "./layouts/PrivacyPolicy.jsx";
 // import PrivacyPolicy from "./layouts/PrivacyPolicy";
 import Certificates from "./layouts/Certificates";
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Contact from "./layouts/contact/contact.jsx";
 import Timeline from "./layouts/timeline";
 import Scanner from "./layouts/scanner";
@@ -22,9 +22,8 @@ import Scanner from "./layouts/scanner";
 
 // import Courses from "./layouts/Courses";
 
-
-import './index.css';
-import './assets/tailwind.css';
+import "./index.css";
+import "./assets/tailwind.css";
 
 function App() {
   return (
@@ -48,23 +47,21 @@ function App() {
         />
 
         {/* Halaman All Projects */}
-          {/* <Route path="/courses" element={<Courses />} /> */}
-{/* <Route path="/courses" element={<Courses />} /> */}
-<Route path="/Scanner" element={<Scanner />} />
+        {/* <Route path="/courses" element={<Courses />} /> */}
+        {/* <Route path="/courses" element={<Courses />} /> */}
+        <Route path="/Scanner" element={<Scanner />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/all-projects" element={<AllProjects />} />
         <Route path="/certificates" element={<Certificates />} />
         {/* <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} /> */}
-
+        <Routes path="/terms-of-service" element={<TermsOfService />} /> */}
       </Routes>
-      
-        <ScrollProgress />
+
+      <ScrollProgress />
       <Footer />
       <SpeedInsights />
 
-            <Analytics />
-
+      <Analytics />
     </ThemeProvider>
   );
 }

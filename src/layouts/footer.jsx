@@ -65,24 +65,24 @@ export default function Footer() {
   const [sent, setSent] = useState(false);
 
   // Animasi saat footer muncul
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    gsap.fromTo(
-      el.current,
-      { opacity: 0, y: 60 },
-      {
-        opacity: 1,
-        y: 0,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: el.current,
-          start: "top bottom",
-          end: "top center",
-          scrub: false,
-        },
-      }
-    );
-  }, []);
+  // useEffect(() => {
+  //   gsap.registerPlugin(ScrollTrigger);
+  //   gsap.fromTo(
+  //     el.current,
+  //     { opacity: 0, y: 60 },
+  //     {
+  //       opacity: 1,
+  //       y: 0,
+  //       ease: "power2.out",
+  //       scrollTrigger: {
+  //         trigger: el.current,
+  //         start: "top bottom",
+  //         end: "top center",
+  //         scrub: false,
+  //       },
+  //     }
+  //   );
+  // }, []);
 
   const handleFocus = (inputId) => {
     gsap.fromTo(

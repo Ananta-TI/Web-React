@@ -30,11 +30,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 // -------------------------
 const StatCard = ({ label, value, icon: Icon, colorClass }) => (
   <div
-    className={`p-6 rounded-xl text-center ${colorClass} backdrop-blur-sm border border-white/8`}
+    className={`p-4 sm:p-6 rounded-xl text-center ${colorClass} backdrop-blur-sm border border-white/8`}
   >
-    <Icon className="w-8 h-8 mx-auto mb-2" />
-    <div className="text-2xl font-bold mb-1">{value}</div>
-    <div className="text-sm opacity-80">{label}</div>
+    <Icon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+    <div className="text-xl sm:text-2xl font-bold mb-1">{value}</div>
+    <div className="text-xs sm:text-sm opacity-80">{label}</div>
   </div>
 );
 
@@ -84,7 +84,7 @@ export default function WebsiteSecurityScanner() {
       }
       
       // VirusTotal returns nested structure: { data: { id: "..." } }
-const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
+      const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
       
       if (!analysisId) {
         console.error("❌ Full response:", JSON.stringify(data, null, 2));
@@ -94,7 +94,7 @@ const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
       setAnalysisId(analysisId);
       setStatus("URL diterima. Menunggu hasil analisis...");
       // poll
-await pollResult(analysisId);
+      await pollResult(analysisId);
     } catch (err) {
       console.error("❌ Scan error:", err);
       setStatus(`❌ Error: ${err.message}`);
@@ -102,50 +102,50 @@ await pollResult(analysisId);
       setLoading(false);
     }
   }
-       async function pollResult(id) {
-       const maxRetries = 40;  // Naik dari 20 (total ~200s)
-       const delayMs = 5000;   // Naik dari 3000
-       for (let i = 0; i < maxRetries; i++) {
-         setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
-         try {
-           console.log(`🔄 Polling attempt ${i + 1}: Fetching ${BACKEND_URL}/api/vt/result/${id}`);
-           const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-           console.log(`📡 Poll response status: ${res.status}`);
-           if (res.ok) {
-             const data = await res.json();
-             console.log(`📦 Poll response data:`, data);
-             const statusAttr = data?.data?.attributes?.status;
-             console.log(`🔍 Status attribute: ${statusAttr}`);
-             if (statusAttr === "completed") {
-               setResult(data);
-               setStatus("✅ Analisis selesai!");
-               return;
-             } else if (statusAttr === "queued" || statusAttr === "in-progress") {
-               // Lanjutkan polling jika masih dalam proses
-               console.log("⏳ Analysis still in progress, continuing poll...");
-             } else {
-               // Jika status lain (e.g., failed), hentikan dengan error
-               throw new Error(`Analysis failed with status: ${statusAttr}`);
-             }
-           } else {
-             console.error(`❌ Poll failed with status ${res.status}: ${res.statusText}`);
-             // Jika error 404 atau 429 (rate limit), hentikan polling
-             if (res.status === 404) {
-               throw new Error("Analysis ID not found. Check if scan was successful.");
-             } else if (res.status === 429) {
-               throw new Error("Rate limit exceeded. Try again later.");
-             }
-           }
-         } catch (err) {
-           console.error("❌ Poll error:", err);
-           setStatus(`❌ Error during polling: ${err.message}`);
-           return;  // Hentikan polling jika error fatal
-         }
-         await new Promise((r) => setTimeout(r, delayMs));
-       }
-       setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
-     }
-     
+
+  async function pollResult(id) {
+    const maxRetries = 40;  // Naik dari 20 (total ~200s)
+    const delayMs = 5000;   // Naik dari 3000
+    for (let i = 0; i < maxRetries; i++) {
+      setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
+      try {
+        console.log(`🔄 Polling attempt ${i + 1}: Fetching ${BACKEND_URL}/api/vt/result/${id}`);
+        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
+        console.log(`📡 Poll response status: ${res.status}`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log(`📦 Poll response data:`, data);
+          const statusAttr = data?.data?.attributes?.status;
+          console.log(`🔍 Status attribute: ${statusAttr}`);
+          if (statusAttr === "completed") {
+            setResult(data);
+            setStatus("✅ Analisis selesai!");
+            return;
+          } else if (statusAttr === "queued" || statusAttr === "in-progress") {
+            // Lanjutkan polling jika masih dalam proses
+            console.log("⏳ Analysis still in progress, continuing poll...");
+          } else {
+            // Jika status lain (e.g., failed), hentikan dengan error
+            throw new Error(`Analysis failed with status: ${statusAttr}`);
+          }
+        } else {
+          console.error(`❌ Poll failed with status ${res.status}: ${res.statusText}`);
+          // Jika error 404 atau 429 (rate limit), hentikan polling
+          if (res.status === 404) {
+            throw new Error("Analysis ID not found. Check if scan was successful.");
+          } else if (res.status === 429) {
+            throw new Error("Rate limit exceeded. Try again later.");
+          }
+        }
+      } catch (err) {
+        console.error("❌ Poll error:", err);
+        setStatus(`❌ Error during polling: ${err.message}`);
+        return;  // Hentikan polling jika error fatal
+      }
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
+  }
 
   function parseVendors(resultData) {
     const obj = resultData?.data?.attributes?.results || {};
@@ -180,22 +180,22 @@ await pollResult(analysisId);
             : "bg-white/90 border-gray-200"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
           <div
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-lg ${
               isDarkMode
                 ? "bg-zinc-800 text-zinc-300"
                 : "bg-white text-gray-800 border border-gray-200"
             }`}
           >
-            <FolderOpen className="w-5 h-5" />
-            <div className="font-medium">Website Security</div>
+            <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="font-medium text-sm sm:text-base">Website Security</div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={toggle}
-              className={`px-3 py-2 rounded-md ${
+              className={`px-3 py-2 rounded-md text-sm sm:text-base ${
                 isDarkMode ? "bg-zinc-800" : "bg-gray-100"
               }`}
             >
@@ -207,7 +207,7 @@ await pollResult(analysisId);
 
       {/* Main content */}
       <div
-        className={`container mx-auto px-4 sm:px-6 lg:px-8 py-12 transition-colors duration-500 ${
+        className={`container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 transition-colors duration-500 ${
           isDarkMode ? "text-white" : "text-zinc-900"
         }`}
       >
@@ -215,9 +215,9 @@ await pollResult(analysisId);
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-8"
         >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4">
             <DecryptedText
               text="Website Security Scanner"
               speed={80}
@@ -226,7 +226,7 @@ await pollResult(analysisId);
             />
           </h1>
           <p
-            className={`text-lg ${
+            className={`text-base sm:text-lg ${
               isDarkMode ? "text-zinc-400" : "text-gray-600"
             }`}
           >
@@ -235,7 +235,7 @@ await pollResult(analysisId);
         </motion.div>
 
         {/* input + actions */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search
               className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${
@@ -245,7 +245,7 @@ await pollResult(analysisId);
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors duration-300 ${
+              className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors duration-300 text-sm sm:text-base ${
                 isDarkMode
                   ? "bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500"
                   : "bg-white border-gray-300 text-black placeholder-gray-400"
@@ -254,11 +254,11 @@ await pollResult(analysisId);
               onKeyPress={(e) => e.key === "Enter" && handleScan()}
             />
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={handleScan}
               disabled={loading || !input}
-              className={`px-6 py-3 rounded-xl font-medium transition-all ${
+              className={`px-4 sm:px-6 py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${
                 loading || !input
                   ? "bg-gray-600 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
@@ -266,7 +266,7 @@ await pollResult(analysisId);
             >
               {loading ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="animate-spin w-5 h-5" />
+                  <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
                   Memproses...
                 </div>
               ) : (
@@ -280,7 +280,7 @@ await pollResult(analysisId);
                 setAnalysisId(null);
                 setStatus("");
               }}
-              className={`px-4 py-3 rounded-xl transition-colors ${
+              className={`px-3 sm:px-4 py-3 rounded-xl transition-colors text-sm sm:text-base ${
                 isDarkMode
                   ? "bg-zinc-700/30 hover:bg-zinc-600/40"
                   : "bg-gray-200 hover:bg-gray-300"
@@ -306,7 +306,7 @@ await pollResult(analysisId);
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`rounded-2xl p-6 shadow-lg border transition-colors duration-500 ${
+            className={`rounded-2xl p-4 sm:p-6 shadow-lg border transition-colors duration-500 ${
               isDarkMode
                 ? "bg-[#1e293b] border-gray-700"
                 : "bg-gray-100 border-gray-300"
@@ -321,7 +321,7 @@ await pollResult(analysisId);
                 >
                   {result?.data?.attributes?.url}
                 </div>
-                <h2 className="text-2xl font-semibold mt-1">
+                <h2 className="text-xl sm:text-2xl font-semibold mt-1">
                   {result?.data?.attributes?.content?.title || result?.data?.id}
                 </h2>
                 <div
@@ -336,14 +336,14 @@ await pollResult(analysisId);
                 </div>
               </div>
 
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-2 sm:gap-4 items-center">
                 <a
                   href={`https://www.virustotal.com/gui/url/${encodeURIComponent(
                     analysisId
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base"
                 >
                   <ExternalLink className="w-4 h-4" /> Lihat di VirusTotal
                 </a>
@@ -351,7 +351,7 @@ await pollResult(analysisId);
             </div>
 
             {/* Stats and chart */}
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div
                   className={`p-3 rounded-xl text-center ${
@@ -360,9 +360,9 @@ await pollResult(analysisId);
                       : "bg-green-100 text-green-700"
                   }`}
                 >
-                  <div className="text-2xl font-bold">{stats.harmless ?? "N/A"}</div>
+                  <div className="text-xl sm:text-2xl font-bold">{stats.harmless ?? "N/A"}</div>
                   <div
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm ${
                       isDarkMode ? "text-zinc-300" : "text-green-800"
                     }`}
                   >
@@ -377,9 +377,9 @@ await pollResult(analysisId);
                       : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
-                  <div className="text-2xl font-bold">{stats.suspicious ?? "N/A"}</div>
+                  <div className="text-xl sm:text-2xl font-bold">{stats.suspicious ?? "N/A"}</div>
                   <div
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm ${
                       isDarkMode ? "text-zinc-300" : "text-yellow-800"
                     }`}
                   >
@@ -394,9 +394,9 @@ await pollResult(analysisId);
                       : "bg-red-100 text-red-700"
                   }`}
                 >
-                  <div className="text-2xl font-bold">{stats.malicious ?? "N/A"}</div>
+                  <div className="text-xl sm:text-2xl font-bold">{stats.malicious ?? "N/A"}</div>
                   <div
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm ${
                       isDarkMode ? "text-zinc-300" : "text-red-800"
                     }`}
                   >
@@ -411,9 +411,9 @@ await pollResult(analysisId);
                       : "bg-gray-200 text-gray-700"
                   }`}
                 >
-                  <div className="text-2xl font-bold">{stats.undetected ?? 0}</div>
+                  <div className="text-xl sm:text-2xl font-bold">{stats.undetected ?? 0}</div>
                   <div
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm ${
                       isDarkMode ? "text-zinc-300" : "text-gray-800"
                     }`}
                   >
@@ -423,7 +423,7 @@ await pollResult(analysisId);
               </div>
 
               <div
-                className={`h-48 rounded-xl flex justify-center items-center transition-colors ${
+                className={`h-48 sm:h-64 rounded-xl flex justify-center items-center transition-colors ${
                   isDarkMode ? "bg-[#0f1724]" : "bg-gray-200"
                 }`}
               >
@@ -433,8 +433,8 @@ await pollResult(analysisId);
                       data={pieData}
                       dataKey="value"
                       nameKey="name"
-                      outerRadius={80}
-                      innerRadius={45}
+                      outerRadius={60}
+                      innerRadius={30}
                       paddingAngle={3}
                     >
                       {pieData.map((entry, i) => (
@@ -448,7 +448,6 @@ await pollResult(analysisId);
             </div>
 
             {/* Vendor table */}
-            <div>
               <h3 className="text-lg font-semibold mb-3">
                 Security Vendors' Analysis
               </h3>
@@ -459,30 +458,32 @@ await pollResult(analysisId);
                     : "bg-gray-100 border-gray-300"
                 }`}
               >
-                <table className="w-full text-sm">
-                  <thead
-                    className={`${
-                      isDarkMode
-                        ? "bg-gray-800 text-gray-300"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    <tr>
-                      <th className="text-left px-3 py-2">Vendor</th>
-                      <th className="text-left px-3 py-2">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vendorList.map((v, i) => (
-                      <tr
-                        key={i}
-                        className={`border-b transition-colors ${
-                          isDarkMode
-                            ? "border-gray-800 hover:bg-gray-800/50"
-                            : "border-gray-300 hover:bg-gray-200"
-                        }`}
-                      >
-                        <td className="px-3 py-2">{v.vendor}</td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead
+                      className={`${
+                        isDarkMode
+                          ? "bg-gray-800 text-gray-300"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <tr>
+                        <th className="text-left px-3 py-2">Vendor</th>
+                        <th className="text-left px-3 py-2">Result</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendorList.map((v, i) => (
+                        <tr
+                          key={i}
+                          className={`border-b transition-colors ${
+                            isDarkMode
+                              ? "border-gray-800 hover:bg-gray-800/50"
+                              : "border-gray-300 hover:bg-gray-200"
+                          }`}
+                        >
+                          <td className="px-3 py-2">{v.vendor}</td>
+                          
                         <td
                           className={`px-3 py-2 font-medium ${
                             v.category === "harmless"
@@ -552,6 +553,8 @@ await pollResult(analysisId);
           />
         </div>
       </div>
+    
+
     </div>
   );
 }
