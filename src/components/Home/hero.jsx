@@ -2,6 +2,8 @@ import { useContext } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import Particles from "./particles";
+import LiquidEther from './LiquidEther';
+
 import { ChevronDown } from "lucide-react";
 import Magnet from "./magnet"; // Import komponen Magnet
 
@@ -18,7 +20,7 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
       {/* Background Particles */}
-      <Particles
+      {/* <Particles
         particleCount={200}
         particleSpread={8}
         speed={0.1}
@@ -31,7 +33,28 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
         cameraDistance={25}
         disableRotation={false}
         className="absolute inset-0 z-20 w-full h-full"
-      />
+      /> */}
+
+
+<div style={{ width: '100%', height: 800, position: 'absolute' }}>
+  <LiquidEther
+    colors={[ '#171717', '#fff', '#fff' ]}
+    mouseForce={20}
+    cursorSize={100}
+    isViscous={false}
+    viscous={30}
+    iterationsViscous={32}
+    iterationsPoisson={32}
+    resolution={0.5}
+    isBounce={false}
+    autoDemo={true}
+    autoSpeed={0.5}
+    autoIntensity={2.2}
+    takeoverDuration={0.25}
+    autoResumeDelay={3000}
+    autoRampDuration={0.6}
+  />
+</div>
 
       {/* Hero Content */}
       <motion.div
@@ -63,7 +86,7 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
         </p>
       </motion.div>
 
-      {/* Scroll Indicator */}
+          {/* Scroll Indicator */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 10 }}
@@ -72,6 +95,15 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       >
         <ChevronDown size={32} />
       </motion.div>
+
+      {/* Bottom Gradient Separator */}
+      <div
+        className={`absolute bottom-0 left-0 w-full h-40 z-30 pointer-events-none ${
+          isDarkMode
+            ? "bg-gradient-to-b from-transparent to-zinc-900"
+            : "bg-gradient-to-b from-transparent to-[#faf9f9]"
+        }`}
+      />
     </section>
   );
 }
