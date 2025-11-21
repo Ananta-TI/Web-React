@@ -8,6 +8,7 @@ import Magnet from "./magnet"; // Import komponen Magnet
 
 export default function Hero() {
   const { isDarkMode } = useContext(ThemeContext);
+window.scrollTo(0, 0);
 
   return (
     <section

@@ -33,11 +33,8 @@ const Certificates = () => {
 
   // 🔝 Scroll ke atas saat halaman dibuka
   useEffect(() => {
-    window.scrollTo(0, 0);
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 80);
-    setFilteredCertificates(certificates);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+setFilteredCertificates(shuffleArray(certificates));
   }, []);
 
   // 🔮 Variants animasi
@@ -50,6 +47,12 @@ const Certificates = () => {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
   };
+function shuffleArray(arr) {
+  return arr
+    .map((item) => ({ item, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ item }) => item);
+}
 
   return (
     <motion.div

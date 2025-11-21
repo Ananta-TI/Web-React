@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 import {
@@ -43,7 +44,10 @@ const StatCard = ({ label, value, icon: Icon, colorClass }) => (
 // -------------------------
 export default function WebsiteSecurityScanner() {
   const { isDarkMode, toggle } = useContext(ThemeContext);
-
+  const navigate = useNavigate();
+ useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   // UI state
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
@@ -155,7 +159,9 @@ export default function WebsiteSecurityScanner() {
       engine_name: info?.engine_name || "",
     }));
   }
-
+const handleBackToHome = () => {
+    navigate('/');
+  };
   const stats = result?.data?.attributes?.stats || {};
   const vendorList = parseVendors(result || {});
 const categoryPriority = {
@@ -205,7 +211,7 @@ const sortedVendors = vendorList.sort((a, b) => {
             <div className="font-medium text-sm sm:text-base">Website Security</div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <button
               onClick={toggle}
               className={`px-3 py-2 rounded-md text-sm sm:text-base ${
@@ -214,7 +220,7 @@ const sortedVendors = vendorList.sort((a, b) => {
             >
               Toggle Theme
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -230,14 +236,15 @@ const sortedVendors = vendorList.sort((a, b) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-6 sm:mb-8"
         >
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4">
-            <DecryptedText
-              text="Website Security Scanner"
-              speed={80}
-              maxIterations={80}
-              sequential
-            />
-          </h1>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
+                        <DecryptedText
+                          text="Website Security Scanner"
+                          speed={100}
+                          maxIterations={105}
+                          sequential
+                          animateOn="view"
+                        />
+                      </h1>
           <p
             className={`text-base sm:text-lg ${
               isDarkMode ? "text-zinc-400" : "text-gray-600"

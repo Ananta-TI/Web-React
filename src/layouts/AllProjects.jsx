@@ -141,11 +141,7 @@ const allProjects = [
   // Filter projects based on search and category
   useEffect(() => {
     let filtered = allProjects;
- window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: "instant", // bisa "smooth" kalau mau animasi
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
     if (selectedCategory !== "All") {
       filtered = filtered.filter(project => project.category === selectedCategory);
     }

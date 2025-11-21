@@ -136,6 +136,7 @@ export default function Footer() {
   const discoverLinks = [
     { name: "All Projects", path: "/all-projects" },
     { name: "Certificates", path: "/certificates" },
+    {name: "Scanner", path: "/scanner" },
   ];
 
   const socialLinks = [

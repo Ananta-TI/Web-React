@@ -101,7 +101,7 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
       <img
         src={f.avatar_url}
         alt={f.login || "Follower"}
-        className={`w-6 h-6 rounded-full border-2 transition-transform duration-200 ease-out group-hover:scale-125 group-hover:-translate-y-1 group-hover:brightness-110 group-hover:z-50 ${
+        className={`w-5 h-5 rounded-full border-2 transition-transform duration-200 ease-out group-hover:scale-125 group-hover:-translate-y-1 group-hover:brightness-110 group-hover:z-50 ${
           isDarkMode ? "border-stone-600" : "border-gray-700"
         }`}
       />
