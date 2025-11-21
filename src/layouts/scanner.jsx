@@ -158,6 +158,19 @@ export default function WebsiteSecurityScanner() {
 
   const stats = result?.data?.attributes?.stats || {};
   const vendorList = parseVendors(result || {});
+const categoryPriority = {
+  malicious: 1,
+  suspicious: 2,
+  harmless: 3,
+  undetected: 4,
+  unrated: 5,
+};
+
+const sortedVendors = vendorList.sort((a, b) => {
+  const priA = categoryPriority[a.category] || 99;
+  const priB = categoryPriority[b.category] || 99;
+  return priA - priB;
+});
 
   const pieData = [
     { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" },
@@ -442,7 +455,7 @@ export default function WebsiteSecurityScanner() {
           </thead>
 
           <tbody>
-            {vendorList.map((v, i) => (
+{sortedVendors.map((v, i) => (
               <tr
                 key={i}
                 className={`border-b ${
