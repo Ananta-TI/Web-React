@@ -432,7 +432,7 @@ const sortedVendors = vendorList.sort((a, b) => {
     {/* VENDOR TABLE */}
     <h3 className="text-lg font-semibold mb-3">Security Vendors' Analysis</h3>
 
-    <div
+      <div
       className={`rounded-lg border overflow-hidden ${
         isDarkMode
           ? "bg-zinc-700 border-gray-700"
@@ -444,7 +444,7 @@ const sortedVendors = vendorList.sort((a, b) => {
           <thead
             className={`${
               isDarkMode
-                ? "bg-gray-800 text-gray-300"
+                ? "bg-zinc-800 text-gray-300"
                 : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -455,7 +455,7 @@ const sortedVendors = vendorList.sort((a, b) => {
           </thead>
 
           <tbody>
-{sortedVendors.map((v, i) => (
+            {visibleVendors.map((v, i) => (
               <tr
                 key={i}
                 className={`border-b ${
@@ -484,6 +484,33 @@ const sortedVendors = vendorList.sort((a, b) => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Controls */}
+      <div className="p-4 flex justify-center">
+        {showCount < sortedVendors.length ? (
+          <button
+            onClick={handleShowMore}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              isDarkMode
+                ? "bg-zinc-800 text-gray-300 hover:bg-zinc-900"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            Show More
+          </button>
+        ) : (
+          <button
+            onClick={handleShowLess}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              isDarkMode
+                ? "bg-zinc-800 text-gray-300 hover:bg-zinc-900"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            Show Less
+          </button>
+        )}
       </div>
     </div>
 
