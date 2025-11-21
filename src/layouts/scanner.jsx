@@ -302,211 +302,180 @@ export default function WebsiteSecurityScanner() {
         )}
 
         {/* RESULT CARD */}
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`rounded-2xl p-4 sm:p-6 shadow-lg border transition-colors duration-500 ${
+       {result && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className={`rounded-2xl p-5 sm:p-7 shadow-xl border transition-colors duration-500 ${
+      isDarkMode
+        ? "bg-[#1e293b] border-gray-700"
+        : "bg-white border-gray-300"
+    }`}
+  >
+
+    {/* HEADER */}
+    <div className="flex flex-col lg:flex-row justify-between gap-5 mb-8">
+      <div className="flex-1 min-w-0">
+        <div
+          className={`text-xs sm:text-sm truncate ${
+            isDarkMode ? "text-zinc-300" : "text-gray-600"
+          }`}
+        >
+          {result?.data?.attributes?.url}
+        </div>
+
+        <h2 className="text-xl sm:text-2xl font-semibold mt-1 truncate">
+          {result?.data?.attributes?.content?.title || result?.data?.id}
+        </h2>
+
+        <div
+          className={`text-sm mt-2 ${
+            isDarkMode ? "text-zinc-400" : "text-gray-700"
+          }`}
+        >
+          Status:{" "}
+          <span className="font-semibold text-blue-500">
+            {result?.data?.attributes?.status}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-start lg:items-center">
+        <a
+          href={`https://www.virustotal.com/gui/url/${encodeURIComponent(
+            analysisId
+          )}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Lihat di VirusTotal
+        </a>
+      </div>
+    </div>
+
+    {/* GRID: STATS + PIE */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+
+      {/* Stats */}
+      <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        {/* Stat Item Template */}
+        {[
+          { label: "Harmless", value: stats.harmless, color: "green" },
+          { label: "Suspicious", value: stats.suspicious, color: "yellow" },
+          { label: "Malicious", value: stats.malicious, color: "red" },
+          { label: "Undetected", value: stats.undetected, color: "gray" },
+        ].map((item, idx) => (
+          <div
+            key={idx}
+            className={`p-4 rounded-xl text-center ${
               isDarkMode
-                ? "bg-[#1e293b] border-gray-700"
-                : "bg-gray-100 border-gray-300"
+                ? `bg-${item.color}-900/30 text-${item.color}-400`
+                : `bg-${item.color}-100 text-${item.color}-700`
             }`}
           >
-            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-              <div>
-                <div
-                  className={`text-sm ${
-                    isDarkMode ? "text-zinc-300" : "text-gray-600"
-                  }`}
-                >
-                  {result?.data?.attributes?.url}
-                </div>
-                <h2 className="text-xl sm:text-2xl font-semibold mt-1">
-                  {result?.data?.attributes?.content?.title || result?.data?.id}
-                </h2>
-                <div
-                  className={`text-sm mt-2 ${
-                    isDarkMode ? "text-zinc-400" : "text-gray-700"
-                  }`}
-                >
-                  Status:{" "}
-                  <span className="font-semibold text-blue-500">
-                    {result?.data?.attributes?.status}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 sm:gap-4 items-center">
-                <a
-                  href={`https://www.virustotal.com/gui/url/${encodeURIComponent(
-                    analysisId
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base"
-                >
-                  <ExternalLink className="w-4 h-4" /> Lihat di VirusTotal
-                </a>
-              </div>
+            <div className="text-2xl font-bold">
+              {item.value ?? "N/A"}
             </div>
-
-            {/* Stats and chart */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div
-                  className={`p-3 rounded-xl text-center ${
-                    isDarkMode
-                      ? "bg-green-900/30 text-green-400"
-                      : "bg-green-100 text-green-700"
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl font-bold">{stats.harmless ?? "N/A"}</div>
-                  <div
-                    className={`text-xs sm:text-sm ${
-                      isDarkMode ? "text-zinc-300" : "text-green-800"
-                    }`}
-                  >
-                    Harmless
-                  </div>
-                </div>
-
-                <div
-                  className={`p-3 rounded-xl text-center ${
-                    isDarkMode
-                      ? "bg-yellow-900/30 text-yellow-400"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl font-bold">{stats.suspicious ?? "N/A"}</div>
-                  <div
-                    className={`text-xs sm:text-sm ${
-                      isDarkMode ? "text-zinc-300" : "text-yellow-800"
-                    }`}
-                  >
-                    Suspicious
-                  </div>
-                </div>
-
-                <div
-                  className={`p-3 rounded-xl text-center ${
-                    isDarkMode
-                      ? "bg-red-900/30 text-red-400"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl font-bold">{stats.malicious ?? "N/A"}</div>
-                  <div
-                    className={`text-xs sm:text-sm ${
-                      isDarkMode ? "text-zinc-300" : "text-red-800"
-                    }`}
-                  >
-                    Malicious
-                  </div>
-                </div>
-
-                <div
-                  className={`p-3 rounded-xl text-center ${
-                    isDarkMode
-                      ? "bg-gray-700/30 text-gray-300"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl font-bold">{stats.undetected ?? 0}</div>
-                  <div
-                    className={`text-xs sm:text-sm ${
-                      isDarkMode ? "text-zinc-300" : "text-gray-800"
-                    }`}
-                  >
-                    Undetected
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`h-48 sm:h-64 rounded-xl flex justify-center items-center transition-colors ${
-                  isDarkMode ? "bg-[#0f1724]" : "bg-gray-200"
-                }`}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={60}
-                      innerRadius={30}
-                      paddingAngle={3}
-                    >
-                      {pieData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+            <div
+              className={`text-xs sm:text-sm mt-1 ${
+                isDarkMode ? "text-zinc-300" : "text-gray-800"
+              }`}
+            >
+              {item.label}
             </div>
+          </div>
+        ))}
+      </div>
 
-            {/* Vendor table */}
-              <h3 className="text-lg font-semibold mb-3">
-                Security Vendors' Analysis
-              </h3>
-              <div
-                className={`rounded-lg overflow-hidden border transition-colors ${
+      {/* Pie Chart */}
+      <div
+        className={`rounded-xl p-4 flex justify-center items-center ${
+          isDarkMode ? "bg-[#0f1724]" : "bg-gray-200"
+        }`}
+      >
+        <ResponsiveContainer width="100%" height={220}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={70}
+              innerRadius={35}
+              paddingAngle={3}
+            >
+              {pieData.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+
+    {/* VENDOR TABLE */}
+    <h3 className="text-lg font-semibold mb-3">Security Vendors' Analysis</h3>
+
+    <div
+      className={`rounded-lg border overflow-hidden ${
+        isDarkMode
+          ? "bg-[#0f1724] border-gray-700"
+          : "bg-gray-100 border-gray-300"
+      }`}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead
+            className={`${
+              isDarkMode
+                ? "bg-gray-800 text-gray-300"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            <tr>
+              <th className="text-left px-4 py-2">Vendor</th>
+              <th className="text-left px-4 py-2">Result</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {vendorList.map((v, i) => (
+              <tr
+                key={i}
+                className={`border-b ${
                   isDarkMode
-                    ? "bg-[#0f1724] border-gray-700"
-                    : "bg-gray-100 border-gray-300"
+                    ? "border-gray-800 hover:bg-gray-800/40"
+                    : "border-gray-300 hover:bg-gray-200"
                 }`}
               >
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead
-                      className={`${
-                        isDarkMode
-                          ? "bg-gray-800 text-gray-300"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      <tr>
-                        <th className="text-left px-3 py-2">Vendor</th>
-                        <th className="text-left px-3 py-2">Result</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {vendorList.map((v, i) => (
-                        <tr
-                          key={i}
-                          className={`border-b transition-colors ${
-                            isDarkMode
-                              ? "border-gray-800 hover:bg-gray-800/50"
-                              : "border-gray-300 hover:bg-gray-200"
-                          }`}
-                        >
-                          <td className="px-3 py-2">{v.vendor}</td>
-                          
-                        <td
-                          className={`px-3 py-2 font-medium ${
-                            v.category === "harmless"
-                              ? "text-green-400"
-                              : v.category === "malicious"
-                              ? "text-red-400"
-                              : v.category === "suspicious"
-                              ? "text-yellow-400"
-                              : isDarkMode
-                              ? "text-gray-400"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {v.category}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </motion.div>
-        )}
+                <td className="px-4 py-2">{v.vendor}</td>
+                <td
+                  className={`px-4 py-2 font-medium ${
+                    v.category === "harmless"
+                      ? "text-green-400"
+                      : v.category === "malicious"
+                      ? "text-red-400"
+                      : v.category === "suspicious"
+                      ? "text-yellow-400"
+                      : isDarkMode
+                      ? "text-gray-400"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {v.category}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </motion.div>
+)}
 
         {/* Empty state */}
         {!result && !loading && (
