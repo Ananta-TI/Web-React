@@ -22,6 +22,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "animejs": "^4.2.2",
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "emailjs-com": "^3.2.0",
@@ -61,5 +62,18 @@
     "sass-embedded": "^1.90.0",
     "tailwindcss": "^4.0.6",
     "vite": "^6.1.0"
-  }
+  },
+  "description": "Web-React adalah proyek website berbasis **React.js** yang dikembangkan dengan **Vite**. Website ini memiliki desain **minimalis, interaktif, dan responsif**, serta dilengkapi dengan **dark mode** dan animasi yang halus menggunakan **Framer Motion**.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ananta-TI/Web-React.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ananta-TI/Web-React/issues"
+  },
+  "homepage": "https://github.com/Ananta-TI/Web-React#readme"
 }

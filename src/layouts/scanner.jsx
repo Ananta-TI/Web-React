@@ -321,7 +321,7 @@ const sortedVendors = vendorList.sort((a, b) => {
     animate={{ opacity: 1, y: 0 }}
     className={`rounded-2xl p-5 sm:p-7 shadow-xl border transition-colors duration-500 ${
       isDarkMode
-        ? "bg-[#1e293b] border-gray-700"
+        ? "bg-zinc-800/50 border-gray-700"
         : "bg-white border-gray-300"
     }`}
   >
@@ -353,7 +353,7 @@ const sortedVendors = vendorList.sort((a, b) => {
         </div>
       </div>
 
-      <div className="flex items-start lg:items-center">
+      {/* <div className="flex items-start lg:items-center">
         <a
           href={`https://www.virustotal.com/gui/url/${encodeURIComponent(
             analysisId
@@ -365,7 +365,7 @@ const sortedVendors = vendorList.sort((a, b) => {
           <ExternalLink className="w-4 h-4" />
           Lihat di VirusTotal
         </a>
-      </div>
+      </div> */}
     </div>
 
     {/* GRID: STATS + PIE */}
@@ -406,7 +406,7 @@ const sortedVendors = vendorList.sort((a, b) => {
       {/* Pie Chart */}
       <div
         className={`rounded-xl p-4 flex justify-center items-center ${
-          isDarkMode ? "bg-[#0f1724]" : "bg-gray-200"
+          isDarkMode ? "bg-zinc-800" : "bg-gray-200"
         }`}
       >
         <ResponsiveContainer width="100%" height={220}>
@@ -435,7 +435,7 @@ const sortedVendors = vendorList.sort((a, b) => {
     <div
       className={`rounded-lg border overflow-hidden ${
         isDarkMode
-          ? "bg-[#0f1724] border-gray-700"
+          ? "bg-zinc-700 border-gray-700"
           : "bg-gray-100 border-gray-300"
       }`}
     >
