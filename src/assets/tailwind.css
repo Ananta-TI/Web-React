@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-@font-face {
+/* @font-face {
     font-family: 'Barlow';
     src: url('/font/Barlow-Regular.ttf');
-}
+} */
 @font-face {
     font-family: 'Poppins';
     src: url('/font/Poppins-Regular.ttf');
@@ -61,7 +61,7 @@
     src: url('/fonts/Calculator.ttf');
 }
 @theme {
-    --font-barlow: "Barlow", sans-serif;
+    /* --font-barlow: "Barlow", sans-serif; */
     --font-Poppins: "Poppins", sans-serif;
     --font-PoppinsBold: "PoppinsBold", sans-serif;
     --font-lyrae: "AlphaLyrae", sans-serif;
