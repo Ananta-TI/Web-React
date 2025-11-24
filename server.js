@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import axios from "axios";
 import cors from "cors";
@@ -23,6 +26,7 @@ app.post("/api/vt/scan", async (req, res) => {
 
     res.json(response.data);
   } catch (err) {
+    console.log("VT ERROR:", err.response?.data || err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -38,6 +42,7 @@ app.get("/api/vt/result/:id", async (req, res) => {
 
     res.json(response.data);
   } catch (err) {
+    console.log("VT ERROR:", err.response?.data || err.message);
     res.status(500).json({ error: err.message });
   }
 });

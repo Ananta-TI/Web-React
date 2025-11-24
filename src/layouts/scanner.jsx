@@ -4,56 +4,122 @@ import { useNavigate } from "react-router-dom";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 import {
-  Github,
   ExternalLink,
-  Globe,
   Search,
   FolderOpen,
-  Star,
-  Calendar,
-  Monitor,
-  Server,
-  Smartphone,
-  Database,
-  Palette,
-  Layers,
-  Zap,
   ShieldCheck,
   AlertTriangle,
   Skull,
   Loader2,
   BarChart2,
+  ListFilter,
+  Calendar, // Icon baru untuk tanggal
+  Activity, // Icon baru untuk method
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 // -------------------------
 // Helper components
 // -------------------------
-const StatCard = ({ label, value, icon: Icon, colorClass }) => (
-  <div
-    className={`p-4 sm:p-6 rounded-xl text-center ${colorClass} backdrop-blur-sm border border-white/8`}
-  >
-    <Icon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
-    <div className="text-xl sm:text-2xl font-bold mb-1">{value}</div>
-    <div className="text-xs sm:text-sm opacity-80">{label}</div>
-  </div>
-);
+
+// Helper function untuk mendapatkan warna dan ikon berdasarkan kategori
+const getCategoryDetails = (category, isDarkMode) => {
+  switch (category) {
+    case "harmless":
+      return {
+        icon: ShieldCheck,
+        colorClass: isDarkMode
+          ? "bg-green-600/20 text-green-400"
+          : "bg-green-100 text-green-700",
+        ringColor: "ring-green-500",
+        dotColor: "bg-green-500",
+      };
+    case "suspicious":
+      return {
+        icon: AlertTriangle,
+        colorClass: isDarkMode
+          ? "bg-yellow-600/20 text-yellow-400"
+          : "bg-yellow-100 text-yellow-700",
+        ringColor: "ring-yellow-500",
+        dotColor: "bg-yellow-500",
+      };
+    case "malicious":
+      return {
+        icon: Skull,
+        colorClass: isDarkMode
+          ? "bg-red-600/20 text-red-400"
+          : "bg-red-100 text-red-700",
+        ringColor: "ring-red-500",
+        dotColor: "bg-red-500",
+      };
+    case "undetected":
+    case "unrated":
+    default:
+      return {
+        icon: Search,
+        colorClass: isDarkMode
+          ? "bg-gray-600/20 text-gray-400"
+          : "bg-gray-100 text-gray-700",
+        ringColor: "ring-gray-500",
+        dotColor: "bg-gray-500",
+      };
+  }
+};
+
+const StatCard = ({ label, value, icon: Icon, colorClass, isDarkMode }) => {
+  const finalColorClass = colorClass || (isDarkMode ? "bg-zinc-800/50" : "bg-white");
+
+  return (
+    <div
+      className={`p-4 sm:p-6 rounded-xl text-center backdrop-blur-sm border transition-colors duration-300 ${finalColorClass} ${
+        isDarkMode ? "border-white/10" : "border-gray-200"
+      }`}
+    >
+      <Icon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+      <div className="text-xl sm:text-2xl font-bold mb-1">{value}</div>
+      <div className="text-xs sm:text-sm opacity-80">{label}</div>
+    </div>
+  );
+};
+
+
+// Custom Tooltip untuk Recharts
+const CustomTooltip = ({ active, payload, label, isDarkMode }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`p-2 rounded shadow-lg backdrop-blur-md text-sm ${
+          isDarkMode
+            ? "bg-zinc-700/70 border border-zinc-600 text-white"
+            : "bg-white/90 border border-gray-300 text-zinc-900"
+        }`}
+      >
+        <p className="font-semibold">{`${payload[0].name}`}</p>
+        <p>{`Count: ${payload[0].value}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 
 // -------------------------
 // Main component
 // -------------------------
 export default function WebsiteSecurityScanner() {
-  const { isDarkMode, toggle } = useContext(ThemeContext);
+  const { isDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
- useEffect(() => {
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
   // UI state
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState(null);
   const [result, setResult] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
   // Dynamic backend URL detection
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
@@ -108,8 +174,8 @@ export default function WebsiteSecurityScanner() {
   }
 
   async function pollResult(id) {
-    const maxRetries = 40;  // Naik dari 20 (total ~200s)
-    const delayMs = 5000;   // Naik dari 3000
+    const maxRetries = 40;  // total ~200s
+    const delayMs = 5000;   // 5 detik
     for (let i = 0; i < maxRetries; i++) {
       setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
       try {
@@ -143,47 +209,71 @@ export default function WebsiteSecurityScanner() {
         }
       } catch (err) {
         console.error("❌ Poll error:", err);
+        setLoading(false); // Hentikan loader
         setStatus(`❌ Error during polling: ${err.message}`);
         return;  // Hentikan polling jika error fatal
       }
       await new Promise((r) => setTimeout(r, delayMs));
     }
+    setLoading(false); // Hentikan loader jika timeout
     setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
   }
 
+  // --- UPDATED PARSER ---
+  // Menambahkan method dan result (detail) sesuai dokumentasi
   function parseVendors(resultData) {
     const obj = resultData?.data?.attributes?.results || {};
     return Object.entries(obj).map(([vendor, info]) => ({
       vendor,
       category: info?.category || "unrated",
-      engine_name: info?.engine_name || "",
+      engine_name: info?.engine_name || vendor,
+      method: info?.method || "unknown", // e.g., "blacklist", "monitor"
+      result: info?.result || "clean",   // e.g., "phishing site", "clean"
     }));
   }
-const handleBackToHome = () => {
-    navigate('/');
-  };
+  
   const stats = result?.data?.attributes?.stats || {};
+  const scanDate = result?.data?.attributes?.date; // Unix timestamp
   const vendorList = parseVendors(result || {});
-const categoryPriority = {
-  malicious: 1,
-  suspicious: 2,
-  harmless: 3,
-  undetected: 4,
-  unrated: 5,
-};
+  
+  const categoryPriority = {
+    malicious: 1,
+    suspicious: 2,
+    harmless: 3,
+    undetected: 4,
+    unrated: 5,
+  };
 
-const sortedVendors = vendorList.sort((a, b) => {
-  const priA = categoryPriority[a.category] || 99;
-  const priB = categoryPriority[b.category] || 99;
-  return priA - priB;
-});
+  // Urutkan berdasarkan prioritas dan kemudian nama vendor
+  const sortedVendors = vendorList.sort((a, b) => {
+    const priA = categoryPriority[a.category] || 99;
+    const priB = categoryPriority[b.category] || 99;
+    if (priA !== priB) {
+      return priA - priB;
+    }
+    return a.vendor.localeCompare(b.vendor);
+  });
 
   const pieData = [
-    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" },
-    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" },
-    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" },
-    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" },
-  ];
+    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" }, // Green
+    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" }, // Amber
+    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" }, // Red
+    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" }, // Gray
+  ].filter(d => d.value > 0); 
+  
+  // URL VirusTotal untuk analisis yang sedang berlangsung
+  const vtAnalysisUrl = analysisId 
+    ? `https://www.virustotal.com/gui/url/${result?.data?.attributes?.content?.url || input}/detection` 
+    : null;
+
+  // Format Date Helper
+  const formatScanDate = (timestamp) => {
+    if (!timestamp) return "-";
+    return new Date(timestamp * 1000).toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "medium",
+    });
+  };
 
   return (
     <div
@@ -210,17 +300,6 @@ const sortedVendors = vendorList.sort((a, b) => {
             <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5" />
             <div className="font-medium text-sm sm:text-base">Website Security</div>
           </div>
-
-          {/* <div className="flex items-center gap-3">
-            <button
-              onClick={toggle}
-              className={`px-3 py-2 rounded-md text-sm sm:text-base ${
-                isDarkMode ? "bg-zinc-800" : "bg-gray-100"
-              }`}
-            >
-              Toggle Theme
-            </button>
-          </div> */}
         </div>
       </div>
 
@@ -237,25 +316,25 @@ const sortedVendors = vendorList.sort((a, b) => {
           className="text-center mb-6 sm:mb-8"
         >
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
-                        <DecryptedText
-                          text="Website Security Scanner"
-                          speed={100}
-                          maxIterations={105}
-                          sequential
-                          animateOn="view"
-                        />
-                      </h1>
+            <DecryptedText
+              text="Website Security Scanner"
+              speed={100}
+              maxIterations={105}
+              sequential
+              animateOn="view"
+            />
+          </h1>
           <p
             className={`text-base sm:text-lg ${
               isDarkMode ? "text-zinc-400" : "text-gray-600"
             }`}
           >
-            Scan any URL using VirusTotal and show detailed vendor results.
+            Scan any URL using **VirusTotal** and show detailed vendor results.
           </p>
         </motion.div>
 
         {/* input + actions */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 max-w-4xl mx-auto">
           <div className="relative flex-1">
             <Search
               className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${
@@ -267,21 +346,22 @@ const sortedVendors = vendorList.sort((a, b) => {
               onChange={(e) => setInput(e.target.value)}
               className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors duration-300 text-sm sm:text-base ${
                 isDarkMode
-                  ? "bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500"
-                  : "bg-white border-gray-300 text-black placeholder-gray-400"
+                  ? "bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
               }`}
               placeholder="https://example.com"
               onKeyPress={(e) => e.key === "Enter" && handleScan()}
+              disabled={loading}
             />
           </div>
           <div className="flex gap-2 sm:gap-3">
             <button
               onClick={handleScan}
               disabled={loading || !input}
-              className={`px-4 sm:px-6 py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${
+              className={`px-4 sm:px-6 py-3 rounded-xl font-medium transition-all text-sm sm:text-base text-white ${
                 loading || !input
-                  ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  ? "bg-blue-800/50 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-lg shadow-blue-600/30"
               }`}
             >
               {loading ? (
@@ -299,11 +379,13 @@ const sortedVendors = vendorList.sort((a, b) => {
                 setResult(null);
                 setAnalysisId(null);
                 setStatus("");
+                setShowAll(false);
               }}
+              disabled={loading}
               className={`px-3 sm:px-4 py-3 rounded-xl transition-colors text-sm sm:text-base ${
                 isDarkMode
-                  ? "bg-zinc-700/30 hover:bg-zinc-600/40"
-                  : "bg-gray-200 hover:bg-gray-300"
+                  ? "bg-zinc-700/30 hover:bg-zinc-600/40 text-white"
+                  : "bg-gray-200 hover:bg-gray-300 text-zinc-900"
               }`}
             >
               Clear
@@ -313,7 +395,7 @@ const sortedVendors = vendorList.sort((a, b) => {
 
         {status && (
           <p
-            className={`text-sm text-center mb-6 transition-colors ${
+            className={`text-sm text-center mb-6 transition-colors font-mono max-w-4xl mx-auto ${
               isDarkMode ? "text-zinc-400" : "text-gray-500"
             }`}
           >
@@ -322,180 +404,233 @@ const sortedVendors = vendorList.sort((a, b) => {
         )}
 
         {/* RESULT CARD */}
-       {result && (
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`rounded-2xl p-5 sm:p-7 shadow-xl border transition-colors duration-500 ${
-      isDarkMode
-        ? "bg-zinc-800/50 border-gray-700"
-        : "bg-white border-gray-300"
-    }`}
-  >
-
-    {/* HEADER */}
-    <div className="flex flex-col lg:flex-row justify-between gap-5 mb-8">
-      <div className="flex-1 min-w-0">
-        <div
-          className={`text-xs sm:text-sm truncate ${
-            isDarkMode ? "text-zinc-300" : "text-gray-600"
-          }`}
-        >
-          {result?.data?.attributes?.url}
-        </div>
-
-        <h2 className="text-xl sm:text-2xl font-semibold mt-1 truncate">
-          {result?.data?.attributes?.content?.title || result?.data?.id}
-        </h2>
-
-        <div
-          className={`text-sm mt-2 ${
-            isDarkMode ? "text-zinc-400" : "text-gray-700"
-          }`}
-        >
-          Status:{" "}
-          <span className="font-semibold text-blue-500">
-            {result?.data?.attributes?.status}
-          </span>
-        </div>
-      </div>
-
-      {/* <div className="flex items-start lg:items-center">
-        <a
-          href={`https://www.virustotal.com/gui/url/${encodeURIComponent(
-            analysisId
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Lihat di VirusTotal
-        </a>
-      </div> */}
-    </div>
-
-    {/* GRID: STATS + PIE */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-
-      {/* Stats */}
-      <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-
-        {/* Stat Item Template */}
-        {[
-          { label: "Harmless", value: stats.harmless, color: "green" },
-          { label: "Suspicious", value: stats.suspicious, color: "yellow" },
-          { label: "Malicious", value: stats.malicious, color: "red" },
-          { label: "Undetected", value: stats.undetected, color: "gray" },
-        ].map((item, idx) => (
-          <div
-            key={idx}
-            className={`p-4 rounded-xl text-center ${
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-3xl p-5 sm:p-8 shadow-2xl transition-colors duration-500 max-w-4xl mx-auto ${
               isDarkMode
-                ? `bg-${item.color}-900/30 text-${item.color}-400`
-                : `bg-${item.color}-100 text-${item.color}-700`
+                ? "bg-zinc-800/80 border border-zinc-700/70"
+                : "bg-white border border-gray-300/80 shadow-gray-300/50"
             }`}
           >
-            <div className="text-2xl font-bold">
-              {item.value ?? "N/A"}
-            </div>
-            <div
-              className={`text-xs sm:text-sm mt-1 ${
-                isDarkMode ? "text-zinc-300" : "text-gray-800"
-              }`}
-            >
-              {item.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pie Chart */}
-      <div
-        className={`rounded-xl p-4 flex justify-center items-center ${
-          isDarkMode ? "bg-zinc-800" : "bg-gray-200"
-        }`}
-      >
-        <ResponsiveContainer width="100%" height={220}>
-          <PieChart>
-            <Pie
-              data={pieData}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={70}
-              innerRadius={35}
-              paddingAngle={3}
-            >
-              {pieData.map((entry, i) => (
-                <Cell key={i} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-
-    {/* VENDOR TABLE */}
-    <h3 className="text-lg font-semibold mb-3">Security Vendors' Analysis</h3>
-
-    <div
-      className={`rounded-lg border overflow-hidden ${
-        isDarkMode
-          ? "bg-zinc-700 border-gray-700"
-          : "bg-gray-100 border-gray-300"
-      }`}
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead
-            className={`${
-              isDarkMode
-                ? "bg-zinc-800 text-gray-300"
-                : "bg-gray-200 text-gray-700"
-            }`}
-          >
-            <tr>
-              <th className="text-left px-4 py-2">Vendor</th>
-              <th className="text-left px-4 py-2">Result</th>
-            </tr>
-          </thead>
-
-          <tbody>
-{sortedVendors.map((v, i) => (
-              <tr
-                key={i}
-                className={`border-b ${
-                  isDarkMode
-                    ? "border-gray-800 hover:bg-gray-800/40"
-                    : "border-gray-300 hover:bg-gray-200"
-                }`}
-              >
-                <td className="px-4 py-2">{v.vendor}</td>
-                <td
-                  className={`px-4 py-2 font-medium ${
-                    v.category === "harmless"
-                      ? "text-green-400"
-                      : v.category === "malicious"
-                      ? "text-red-400"
-                      : v.category === "suspicious"
-                      ? "text-yellow-400"
-                      : isDarkMode
-                      ? "text-gray-400"
-                      : "text-gray-700"
+            {/* HEADER */}
+            <div className="flex flex-col lg:flex-row justify-between gap-5 mb-8 border-b pb-5 border-dashed border-current/20">
+              <div className="flex-1 min-w-0">
+                <div
+                  className={`text-xs sm:text-sm truncate ${
+                    isDarkMode ? "text-zinc-400" : "text-gray-600"
                   }`}
                 >
-                  {v.category}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  {result?.data?.attributes?.url}
+                </div>
 
-  </motion.div>
-)}
+                <h2 className="text-xl sm:text-3xl font-bold font-lyrae mt-1 truncate text-blue-400">
+                  {result?.data?.attributes?.content?.title || "URL Scan Result"}
+                </h2>
+
+                <div className="flex flex-wrap items-center gap-4 mt-3">
+                    {/* Analysis ID */}
+                    <div
+                    className={`text-sm flex items-center gap-2 ${
+                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                    }`}
+                    >
+                        <BarChart2 className="w-4 h-4" />
+                        <span className="font-medium">ID:</span> 
+                        <span className="font-mono text-xs break-all opacity-80">
+                            {analysisId ? `${analysisId.substring(0, 12)}...` : "-"}
+                        </span>
+                    </div>
+
+                    {/* Scan Date - Ditambahkan */}
+                    <div
+                    className={`text-sm flex items-center gap-2 ${
+                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                    }`}
+                    >
+                        <Calendar className="w-4 h-4" />
+                        <span className="font-medium">Analyzed:</span> 
+                        <span className="text-xs">
+                            {formatScanDate(scanDate)}
+                        </span>
+                    </div>
+                </div>
+              </div>
+
+             
+            </div>
+
+            {/* GRID: STATS + PIE */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
+              {/* Stats & Summary (2/5) */}
+              <div className="lg:col-span-3">
+                <h3 className="text-xl font-semibold mb-4">Summary by Category</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {/* Stat Items */}
+                  {[
+                    { label: "Malicious", value: stats.malicious, category: "malicious" },
+                    { label: "Suspicious", value: stats.suspicious, category: "suspicious" },
+                    { label: "Harmless", value: stats.harmless, category: "harmless" },
+                    { label: "Undetected", value: stats.undetected, category: "undetected" },
+                  ].map((item, idx) => {
+                    const { colorClass, icon: Icon } = getCategoryDetails(item.category, isDarkMode);
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-4 rounded-xl text-center transition-colors duration-300 ${colorClass}`}
+                      >
+                        <div className="text-3xl font-extrabold flex items-center justify-center gap-2 mb-1">
+                          <Icon className="w-5 h-5" />
+                          {item.value ?? 0}
+                        </div>
+                        <div
+                          className={`text-xs sm:text-sm mt-1 font-medium ${
+                            isDarkMode ? "text-zinc-300" : "text-gray-800"
+                          }`}
+                        >
+                          {item.label}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Pie Chart (2/5) */}
+              <div className="lg:col-span-2 flex flex-col items-center">
+                <h3 className="text-xl font-semibold mb-4 text-center">Engine Distribution</h3>
+                <div
+                  className={`rounded-xl p-4 w-full flex justify-center items-center ${
+                    isDarkMode ? "bg-zinc-800/60" : "bg-gray-100"
+                  }`}
+                >
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={90}
+                        innerRadius={50}
+                        paddingAngle={3}
+                        fill="#8884d8" // Fallback fill color
+                        labelLine={false}
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={`cell-${i}`} fill={entry.color} stroke={isDarkMode ? "#27272a" : "#ffffff"} strokeWidth={2}/>
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        content={<CustomTooltip isDarkMode={isDarkMode} />} 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Pie Chart Legend */}
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
+                    {pieData.map((entry, index) => (
+                        <div key={`legend-${index}`} className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
+                            <span>{entry.name} ({entry.value})</span>
+                        </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            {/* VENDOR TABLE - UPDATED with Method & Detail */}
+            <h3 className="text-xl font-semibold mb-3 flex items-center gap-2 border-t pt-5 border-dashed border-current/20">
+                <ListFilter className="w-5 h-5" />
+                Vendor Scan Results
+            </h3>
+
+            <div
+              className={`rounded-xl border overflow-hidden transition-colors duration-300 ${
+                isDarkMode
+                  ? "bg-zinc-800 border-zinc-700"
+                  : "bg-gray-100 border-gray-300"
+              }`}
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead
+                    className={`${
+                      isDarkMode
+                        ? "bg-zinc-700 text-gray-300"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    <tr>
+                      <th className="text-left px-4 py-3 font-semibold">Vendor</th>
+                      <th className="text-left px-4 py-3 font-semibold">Method</th>
+                      <th className="text-left px-4 py-3 font-semibold">Details</th>
+                      <th className="text-left px-4 py-3 font-semibold">Result</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {(showAll ? sortedVendors : sortedVendors.slice(0, 10)).map((v, i) => {
+                      const { dotColor } = getCategoryDetails(v.category, isDarkMode);
+                      return (
+                        <tr key={i} className={`border-b transition-colors duration-300 ${
+                          isDarkMode
+                            ? "border-zinc-700/50 hover:bg-zinc-700/40"
+                            : "border-gray-300/80 hover:bg-gray-200"
+                        }`}>
+                          {/* 1. Vendor Name */}
+                          <td className="px-4 py-3 whitespace-nowrap">{v.vendor}</td>
+
+                          {/* 2. Method (Added) */}
+                          <td className="px-4 py-3">
+                             <span className={`px-2 py-1 rounded-md text-xs font-mono lowercase ${
+                                isDarkMode ? "bg-zinc-600/50 text-zinc-300" : "bg-gray-300/50 text-gray-700"
+                             }`}>
+                                {v.method}
+                             </span>
+                          </td>
+
+                          {/* 3. Detailed Result (Added) */}
+                          <td className={`px-4 py-3 truncate max-w-[200px] ${
+                                v.result === "clean" || v.result === "unrated" 
+                                ? "opacity-50 italic" 
+                                : isDarkMode ? "text-red-300 font-medium" : "text-red-700 font-medium"
+                             }`}>
+                             {v.result}
+                          </td>
+
+                          {/* 4. Category (Existing) */}
+                          <td className={`px-4 py-3 font-medium flex items-center gap-2 capitalize ${
+                            isDarkMode ? "text-white" : "text-zinc-900"
+                          }`}>
+                            <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
+                            {v.category}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {vendorList.length > 10 && (
+                <div className={`text-center py-3 border-t ${isDarkMode ? "border-zinc-700/50" : "border-gray-300/80"}`}>
+                  <button
+                    onClick={() => setShowAll(!showAll)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      isDarkMode
+                        ? "bg-zinc-600 hover:bg-zinc-500 text-white"
+                        : "bg-gray-300 hover:bg-gray-400 text-zinc-900"
+                    }`}
+                  >
+                    {showAll ? "Show Less" : `Show All (${vendorList.length})`}
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Empty state */}
         {!result && !loading && (
@@ -505,45 +640,57 @@ const sortedVendors = vendorList.sort((a, b) => {
             className="text-center py-24"
           >
             <div
-              className={`transition-colors ${
+              className={`transition-colors text-xl font-medium ${
                 isDarkMode ? "text-zinc-400" : "text-gray-500"
               }`}
             >
-              Masukkan URL dan klik <strong>Scan</strong> untuk memulai analisis.
+              Masukkan URL dan klik **Scan** untuk memulai analisis.
             </div>
+            <p className={`mt-2 text-sm ${isDarkMode ? "text-zinc-600" : "text-gray-400"}`}>
+                *Powered by VirusTotal API*
+            </p>
           </motion.div>
         )}
 
-        {/* Stats summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+        {/* Stats summary (Bottom Section) */}
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-6 border-t border-dashed border-current/20">
           <StatCard
-            label="Total Scans"
-            value={result ? 1 : 0}
+            label="Total Vendors"
+            value={vendorList.length || 0}
             icon={FolderOpen}
             colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
+            isDarkMode={isDarkMode}
           />
           <StatCard
-            label="Harmless"
+            label="Harmless Reports"
             value={stats.harmless ?? 0}
             icon={ShieldCheck}
-            colorClass={"bg-green-900/20"}
+            colorClass={getCategoryDetails("harmless", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
           />
           <StatCard
-            label="Suspicious"
+            label="Suspicious Reports"
             value={stats.suspicious ?? 0}
             icon={AlertTriangle}
-            colorClass={"bg-yellow-900/20"}
+            colorClass={getCategoryDetails("suspicious", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
           />
           <StatCard
-            label="Malicious"
+            label="Malicious Reports"
             value={stats.malicious ?? 0}
             icon={Skull}
-            colorClass={"bg-red-900/20"}
+            colorClass={getCategoryDetails("malicious", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
           />
+        <StatCard
+        label="Detection Ratio"
+        value={`${stats.malicious + stats.suspicious}/${vendorList.length}`}
+        icon={BarChart2}
+        colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
+        isDarkMode={isDarkMode}
+        />
         </div>
       </div>
-    
-
     </div>
   );
 }
