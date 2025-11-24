@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 import {
-  ExternalLink,
   Search,
   FolderOpen,
   ShieldCheck,
@@ -13,10 +12,10 @@ import {
   Loader2,
   BarChart2,
   ListFilter,
-  Calendar, // Icon baru untuk tanggal
-  Activity, // Icon baru untuk method
+  Calendar,
 } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+// Import MUI X Charts
+import { PieChart } from '@mui/x-charts/PieChart';
 
 // -------------------------
 // Helper components
@@ -82,27 +81,6 @@ const StatCard = ({ label, value, icon: Icon, colorClass, isDarkMode }) => {
   );
 };
 
-
-// Custom Tooltip untuk Recharts
-const CustomTooltip = ({ active, payload, label, isDarkMode }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        className={`p-2 rounded shadow-lg backdrop-blur-md text-sm ${
-          isDarkMode
-            ? "bg-zinc-700/70 border border-zinc-600 text-white"
-            : "bg-white/90 border border-gray-300 text-zinc-900"
-        }`}
-      >
-        <p className="font-semibold">{`${payload[0].name}`}</p>
-        <p>{`Count: ${payload[0].value}`}</p>
-      </div>
-    );
-  }
-  return null;
-};
-
-
 // -------------------------
 // Main component
 // -------------------------
@@ -131,39 +109,30 @@ export default function WebsiteSecurityScanner() {
   async function handleScan() {
     if (!input) return;
     setLoading(true);
-    setStatus("Mengirim URL ke VirusTotal...");
+    setStatus("Mengirim URL untuk pemindaian...");
     setResult(null);
     setAnalysisId(null);
     try {
-      console.log("🔍 Scanning URL:", input);
-      console.log("🌐 Backend URL:", BACKEND_URL);
-      
       const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: input }),
       });
       
-      console.log("📡 Response status:", res.status);
-      
       const data = await res.json();
-      console.log("📦 Response data:", data);
       
       if (!res.ok) {
         throw new Error(data.error || `HTTP ${res.status}: ${data.message || "Failed to scan"}`);
       }
       
-      // VirusTotal returns nested structure: { data: { id: "..." } }
-      const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
+      const analysisId = data.data?.id; 
       
       if (!analysisId) {
-        console.error("❌ Full response:", JSON.stringify(data, null, 2));
         throw new Error(`No analysis ID returned. Backend response: ${JSON.stringify(data)}`);
       }
       
       setAnalysisId(analysisId);
       setStatus("URL diterima. Menunggu hasil analisis...");
-      // poll
       await pollResult(analysisId);
     } catch (err) {
       console.error("❌ Scan error:", err);
@@ -174,66 +143,57 @@ export default function WebsiteSecurityScanner() {
   }
 
   async function pollResult(id) {
-    const maxRetries = 40;  // total ~200s
-    const delayMs = 5000;   // 5 detik
+    const maxRetries = 40;  
+    const delayMs = 5000;   
     for (let i = 0; i < maxRetries; i++) {
       setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
       try {
-        console.log(`🔄 Polling attempt ${i + 1}: Fetching ${BACKEND_URL}/api/vt/result/${id}`);
         const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-        console.log(`📡 Poll response status: ${res.status}`);
         if (res.ok) {
           const data = await res.json();
-          console.log(`📦 Poll response data:`, data);
           const statusAttr = data?.data?.attributes?.status;
-          console.log(`🔍 Status attribute: ${statusAttr}`);
+          
           if (statusAttr === "completed") {
             setResult(data);
-            setStatus("✅ Analisis selesai!");
+            setStatus("Analisis selesai!");
             return;
           } else if (statusAttr === "queued" || statusAttr === "in-progress") {
-            // Lanjutkan polling jika masih dalam proses
-            console.log("⏳ Analysis still in progress, continuing poll...");
+            console.log("⏳ Analysis still in progress...");
           } else {
-            // Jika status lain (e.g., failed), hentikan dengan error
             throw new Error(`Analysis failed with status: ${statusAttr}`);
           }
         } else {
-          console.error(`❌ Poll failed with status ${res.status}: ${res.statusText}`);
-          // Jika error 404 atau 429 (rate limit), hentikan polling
           if (res.status === 404) {
-            throw new Error("Analysis ID not found. Check if scan was successful.");
+            throw new Error("Analysis ID not found.");
           } else if (res.status === 429) {
-            throw new Error("Rate limit exceeded. Try again later.");
+            throw new Error("Rate limit exceeded.");
           }
         }
       } catch (err) {
         console.error("❌ Poll error:", err);
-        setLoading(false); // Hentikan loader
+        setLoading(false);
         setStatus(`❌ Error during polling: ${err.message}`);
-        return;  // Hentikan polling jika error fatal
+        return;  
       }
       await new Promise((r) => setTimeout(r, delayMs));
     }
-    setLoading(false); // Hentikan loader jika timeout
-    setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
+    setLoading(false); 
+    setStatus("⏱ Timeout: hasil belum tersedia.");
   }
 
-  // --- UPDATED PARSER ---
-  // Menambahkan method dan result (detail) sesuai dokumentasi
   function parseVendors(resultData) {
     const obj = resultData?.data?.attributes?.results || {};
     return Object.entries(obj).map(([vendor, info]) => ({
       vendor,
       category: info?.category || "unrated",
       engine_name: info?.engine_name || vendor,
-      method: info?.method || "unknown", // e.g., "blacklist", "monitor"
-      result: info?.result || "clean",   // e.g., "phishing site", "clean"
+      method: info?.method || "unknown",
+      result: info?.result || "clean",   
     }));
   }
   
   const stats = result?.data?.attributes?.stats || {};
-  const scanDate = result?.data?.attributes?.date; // Unix timestamp
+  const scanDate = result?.data?.attributes?.date; 
   const vendorList = parseVendors(result || {});
   
   const categoryPriority = {
@@ -244,7 +204,6 @@ export default function WebsiteSecurityScanner() {
     unrated: 5,
   };
 
-  // Urutkan berdasarkan prioritas dan kemudian nama vendor
   const sortedVendors = vendorList.sort((a, b) => {
     const priA = categoryPriority[a.category] || 99;
     const priB = categoryPriority[b.category] || 99;
@@ -255,18 +214,12 @@ export default function WebsiteSecurityScanner() {
   });
 
   const pieData = [
-    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" }, // Green
-    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" }, // Amber
-    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" }, // Red
-    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" }, // Gray
+    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" }, 
+    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" }, 
+    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" }, 
+    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" }, 
   ].filter(d => d.value > 0); 
-  
-  // URL VirusTotal untuk analisis yang sedang berlangsung
-  const vtAnalysisUrl = analysisId 
-    ? `https://www.virustotal.com/gui/url/${result?.data?.attributes?.content?.url || input}/detection` 
-    : null;
 
-  // Format Date Helper
   const formatScanDate = (timestamp) => {
     if (!timestamp) return "-";
     return new Date(timestamp * 1000).toLocaleString("id-ID", {
@@ -329,7 +282,7 @@ export default function WebsiteSecurityScanner() {
               isDarkMode ? "text-zinc-400" : "text-gray-600"
             }`}
           >
-            Scan any URL using **VirusTotal** and show detailed vendor results.
+            Periksa keamanan situs web Anda dengan Scanner. Masukkan URL di bawah.
           </p>
         </motion.div>
 
@@ -433,20 +386,20 @@ export default function WebsiteSecurityScanner() {
                     {/* Analysis ID */}
                     <div
                     className={`text-sm flex items-center gap-2 ${
-                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                      isDarkMode ? "text-zinc-400" : "text-gray-700"
                     }`}
                     >
                         <BarChart2 className="w-4 h-4" />
                         <span className="font-medium">ID:</span> 
                         <span className="font-mono text-xs break-all opacity-80">
-                            {analysisId ? `${analysisId.substring(0, 12)}...` : "-"}
+                          {analysisId ? `${analysisId.substring(0, 12)}...` : "-"}
                         </span>
                     </div>
 
-                    {/* Scan Date - Ditambahkan */}
+                    {/* Scan Date */}
                     <div
                     className={`text-sm flex items-center gap-2 ${
-                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                      isDarkMode ? "text-zinc-400" : "text-gray-700"
                     }`}
                     >
                         <Calendar className="w-4 h-4" />
@@ -457,11 +410,9 @@ export default function WebsiteSecurityScanner() {
                     </div>
                 </div>
               </div>
-
-             
             </div>
 
-            {/* GRID: STATS + PIE */}
+           {/* GRID: STATS + PIE */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
               {/* Stats & Summary (2/5) */}
               <div className="lg:col-span-3">
@@ -501,46 +452,52 @@ export default function WebsiteSecurityScanner() {
               <div className="lg:col-span-2 flex flex-col items-center">
                 <h3 className="text-xl font-semibold mb-4 text-center">Engine Distribution</h3>
                 <div
-                  className={`rounded-xl p-4 w-full flex justify-center items-center ${
+                  className={`rounded-xl p-4 w-full flex flex-col justify-center items-center ${
                     isDarkMode ? "bg-zinc-800/60" : "bg-gray-100"
                   }`}
                 >
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        outerRadius={90}
-                        innerRadius={50}
-                        paddingAngle={3}
-                        fill="#8884d8" // Fallback fill color
-                        labelLine={false}
-                      >
-                        {pieData.map((entry, i) => (
-                          <Cell key={`cell-${i}`} fill={entry.color} stroke={isDarkMode ? "#27272a" : "#ffffff"} strokeWidth={2}/>
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        content={<CustomTooltip isDarkMode={isDarkMode} />} 
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <PieChart
+                    series={[
+                      {
+                        data: pieData.map((entry, index) => ({
+                          id: index,
+                          value: entry.value,
+                          label: entry.name,
+                          color: entry.color,
+                        })),
+                        highlightScope: { fade: 'global', highlight: 'item' },
+                        faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                        innerRadius: 50,
+                        outerRadius: 90,
+                        paddingAngle: 3,
+                        cornerRadius: 5,
+                      },
+                    ]}
+                    height={200}
+                    slotProps={{
+                      legend: { hidden: true },
+                    }}
+                  />
                 </div>
-                
-                {/* Pie Chart Legend */}
+
+                {/* Pie Chart Legend (Custom Manual) */}
                 <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
-                    {pieData.map((entry, index) => (
-                        <div key={`legend-${index}`} className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-                            <span>{entry.name} ({entry.value})</span>
-                        </div>
-                    ))}
+                  {pieData.map((entry, index) => (
+                    <div key={`legend-${index}`} className="flex items-center gap-1">
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: entry.color }}
+                      ></span>
+                      <span>
+                        {entry.name} ({entry.value})
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* VENDOR TABLE - UPDATED with Method & Detail */}
+            {/* VENDOR TABLE */}
             <h3 className="text-xl font-semibold mb-3 flex items-center gap-2 border-t pt-5 border-dashed border-current/20">
                 <ListFilter className="w-5 h-5" />
                 Vendor Scan Results
@@ -579,10 +536,7 @@ export default function WebsiteSecurityScanner() {
                             ? "border-zinc-700/50 hover:bg-zinc-700/40"
                             : "border-gray-300/80 hover:bg-gray-200"
                         }`}>
-                          {/* 1. Vendor Name */}
                           <td className="px-4 py-3 whitespace-nowrap">{v.vendor}</td>
-
-                          {/* 2. Method (Added) */}
                           <td className="px-4 py-3">
                              <span className={`px-2 py-1 rounded-md text-xs font-mono lowercase ${
                                 isDarkMode ? "bg-zinc-600/50 text-zinc-300" : "bg-gray-300/50 text-gray-700"
@@ -590,8 +544,6 @@ export default function WebsiteSecurityScanner() {
                                 {v.method}
                              </span>
                           </td>
-
-                          {/* 3. Detailed Result (Added) */}
                           <td className={`px-4 py-3 truncate max-w-[200px] ${
                                 v.result === "clean" || v.result === "unrated" 
                                 ? "opacity-50 italic" 
@@ -599,8 +551,6 @@ export default function WebsiteSecurityScanner() {
                              }`}>
                              {v.result}
                           </td>
-
-                          {/* 4. Category (Existing) */}
                           <td className={`px-4 py-3 font-medium flex items-center gap-2 capitalize ${
                             isDarkMode ? "text-white" : "text-zinc-900"
                           }`}>
@@ -653,7 +603,8 @@ export default function WebsiteSecurityScanner() {
         )}
 
         {/* Stats summary (Bottom Section) */}
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-6 border-t border-dashed border-current/20">
+        {/* FIX: Mengubah md:grid-cols-4 menjadi md:grid-cols-3 lg:grid-cols-5 agar 5 item muat sebaris di layar besar */}
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-12 pt-6 border-t border-dashed border-current/20">
           <StatCard
             label="Total Vendors"
             value={vendorList.length || 0}
@@ -682,13 +633,13 @@ export default function WebsiteSecurityScanner() {
             colorClass={getCategoryDetails("malicious", isDarkMode).colorClass}
             isDarkMode={isDarkMode}
           />
-        <StatCard
-        label="Detection Ratio"
-        value={`${stats.malicious + stats.suspicious}/${vendorList.length}`}
-        icon={BarChart2}
-        colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
-        isDarkMode={isDarkMode}
-        />
+          <StatCard
+            label="Detection Ratio"
+            value={`${stats.malicious + stats.suspicious}/${vendorList.length}`}
+            icon={BarChart2}
+            colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
+            isDarkMode={isDarkMode}
+          />
         </div>
       </div>
     </div>
