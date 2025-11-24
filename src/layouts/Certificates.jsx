@@ -28,6 +28,7 @@ const Certificates = () => {
   { image: "sertifikat/14.jpg", year: "2025" },
   { image: "sertifikat/15.png", year: "2025" },
   { image: "sertifikat/16.png", year: "2025" },
+  { image: "sertifikat/17.png", year: "2025" },
 ];
 
 
