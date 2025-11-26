@@ -24,7 +24,9 @@ export async function fetchTetrioProfile(userId = "") {
     league: `${TETRIO_API}/users/${userId}/summaries/league`,
     zenith: `${TETRIO_API}/users/${userId}/summaries/zenith`, // quick play
     blitz: `${TETRIO_API}/users/${userId}/summaries/blitz`,
-    _40l: `${TETRIO_API}/users/${userId}/summaries/40l`
+    _40l: `${TETRIO_API}/users/${userId}/summaries/40l`,
+    zen: `${TETRIO_API}/users/${userId}/summaries/zen`, // zen mode
+    achievements: `${TETRIO_API}/users/${userId}/summaries/achievements`, // achievements
   };
 
   const calls = Object.entries(endpoints).map(async ([k, url]) => {
@@ -45,9 +47,11 @@ export async function fetchTetrioProfile(userId = "") {
 
   const u = data.user.data;
   const league = data.league.success ? data.league.data : null;
-  const zen = data.zenith.success ? data.zenith.data : null;
+  const zen_mode = data.zen.success ? data.zen.data : null;
+  const zenith = data.zenith.success ? data.zenith.data : null;
   const blitz = data.blitz.success ? data.blitz.data : null;
   const _40l = data._40l.success ? data._40l.data : null;
+  const achievements = data.achievements.success ? data.achievements.data : null;
 
   // helper winrate
   const gamesplayed = typeof u.gamesplayed === "number" ? u.gamesplayed : null;
@@ -66,17 +70,17 @@ export async function fetchTetrioProfile(userId = "") {
       meta: { rank: league.rank, tr: league.tr },
     });
   }
-  if (zen?.best?.record?.alt) {
+  if (zenith?.best?.record?.alt) {
     latest.push({
       type: "quickplay_pb",
-      text: `New Quick Play PB: ${zen.best.record.alt} m`,
-      meta: { alt: zen.best.record.alt, when: zen.best.record?.ts },
+      text: `New Quick Play PB: ${zenith.best.record.alt} m`,
+      meta: { alt: zenith.best.record.alt, when: zenith.best.record?.ts },
     });
-  } else if (zen?.record?.alt) {
+  } else if (zenith?.record?.alt) {
     latest.push({
       type: "quickplay_recent",
-      text: `Quick Play last: ${zen.record.alt} m`,
-      meta: { alt: zen.record.alt, when: zen.record?.ts },
+      text: `Quick Play last: ${zenith.record.alt} m`,
+      meta: { alt: zenith.record.alt, when: zenith.record?.ts },
     });
   }
   if (blitz?.record?.score) {
@@ -93,6 +97,13 @@ export async function fetchTetrioProfile(userId = "") {
       meta: { record: _40l.record, when: _40l.record?.ts },
     });
   }
+  if (zen_mode?.score) {
+    latest.push({
+      type: "zen_score",
+      text: `Zen Mode Level: ${zen_mode.level}, Score: ${zen_mode.score}`,
+      meta: { level: zen_mode.level, score: zen_mode.score },
+    });
+  }
 
   const cleanProfile = {
     id: u._id,
@@ -103,7 +114,7 @@ export async function fetchTetrioProfile(userId = "") {
       : null,
     xp: u.xp ?? null,
     join_ts: u.ts ?? null,
-    join_relative: u.ts ? relativeTime(u.ts) : null, // helper below
+    join_relative: u.ts ? relativeTime(u.ts) : null,
     play_time_seconds: u.gametime >= 0 ? u.gametime : null,
     play_time_readable: u.gametime >= 0 ? secondsToHuman(u.gametime) : null,
     gamesplayed: gamesplayed,
@@ -115,26 +126,232 @@ export async function fetchTetrioProfile(userId = "") {
     league: league
       ? {
           rank: league.rank,
+          bestrank: league.bestrank ?? null,
           tr: typeof league.tr === "number" ? Number(league.tr.toFixed(2)) : null,
           glicko: league.glicko ?? null,
+          gxe: league.gxe ?? null,
           rd: league.rd ?? null,
+          decaying: league.decaying ?? false,
           standing: league.standing ?? null,
+          standing_local: league.standing_local ?? null,
+          percentile: league.percentile ?? null,
+          percentile_rank: league.percentile_rank ?? null,
           gamesplayed: league.gamesplayed ?? null,
           gameswon: league.gameswon ?? null,
           apm: league.apm ?? null,
           pps: league.pps ?? null,
           vs: league.vs ?? null,
-          percentile: league.percentile ?? null,
+          next_rank: league.next_rank ?? null,
+          prev_rank: league.prev_rank ?? null,
+          next_at: league.next_at ?? null,
+          prev_at: league.prev_at ?? null,
+          past_seasons: league.past ?? {},
+        }
+      : null,
+    // zen mode
+    zen: zen_mode
+      ? {
+          level: zen_mode.level ?? null,
+          score: zen_mode.score ?? null,
         }
       : null,
     // summaries / pbs
-    quickplay: zen ? { record: zen.record ?? null, best: zen.best ?? null, rank: zen.rank ?? null } : null,
+    quickplay: zenith ? { record: zenith.record ?? null, best: zenith.best ?? null, rank: zenith.rank ?? null } : null,
     blitz: blitz ? { record: blitz.record ?? null, rank: blitz.rank ?? null } : null,
     lines40: _40l ? { record: _40l.record ?? null, rank: _40l.rank ?? null } : null,
+    achievements: achievements ?? null,
     latest,
   };
 
   return cleanProfile;
+}
+
+/**
+ * Fetch user achievements hanya
+ */
+export async function fetchTetrioAchievements(userId = "") {
+  if (!userId) throw new Error("userId is required");
+  
+  const url = `${TETRIO_API}/users/${userId}/summaries/achievements`;
+  const data = await proxyGet(url);
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching achievements");
+  }
+  
+  return data.data ?? [];
+}
+
+/**
+ * Fetch league summary dengan detail lengkap
+ */
+export async function fetchTetrioLeague(userId = "") {
+  if (!userId) throw new Error("userId is required");
+  
+  const url = `${TETRIO_API}/users/${userId}/summaries/league`;
+  const data = await proxyGet(url);
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching league data");
+  }
+  
+  const league = data.data;
+  return {
+    rank: league.rank,
+    bestrank: league.bestrank ?? null,
+    tr: typeof league.tr === "number" ? Number(league.tr.toFixed(2)) : null,
+    glicko: league.glicko ?? null,
+    gxe: league.gxe ?? null,
+    rd: league.rd ?? null,
+    decaying: league.decaying ?? false,
+    standing: league.standing ?? null,
+    standing_local: league.standing_local ?? null,
+    percentile: league.percentile ?? null,
+    percentile_rank: league.percentile_rank ?? null,
+    gamesplayed: league.gamesplayed ?? null,
+    gameswon: league.gameswon ?? null,
+    apm: league.apm ?? null,
+    pps: league.pps ?? null,
+    vs: league.vs ?? null,
+    next_rank: league.next_rank ?? null,
+    prev_rank: league.prev_rank ?? null,
+    next_at: league.next_at ?? null,
+    prev_at: league.prev_at ?? null,
+    past_seasons: league.past ?? {},
+  };
+}
+
+/**
+ * Fetch zen mode summary
+ */
+export async function fetchTetrioZen(userId = "") {
+  if (!userId) throw new Error("userId is required");
+  
+  const url = `${TETRIO_API}/users/${userId}/summaries/zen`;
+  const data = await proxyGet(url);
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching zen data");
+  }
+  
+  return {
+    level: data.data.level ?? null,
+    score: data.data.score ?? null,
+  };
+}
+
+/**
+ * Fetch single achievement info + leaderboard (top 100)
+ */
+export async function fetchAchievementInfo(achievementId) {
+  if (typeof achievementId !== "number" && typeof achievementId !== "string") {
+    throw new Error("achievementId is required");
+  }
+
+  const url = `${TETRIO_API}/achievements/${achievementId}`;
+  const data = await proxyGet(url);
+
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching achievement info");
+  }
+
+  const ach = data.data;
+  return {
+    achievement: ach.achievement ?? null,
+    leaderboard: ach.leaderboard ?? [],
+    cutoffs: ach.cutoffs ?? {},
+  };
+}
+
+/**
+ * Fetch achievement leaderboard with pagination
+ */
+export async function fetchAchievementLeaderboard(achievementId, options = {}) {
+  if (typeof achievementId !== "number" && typeof achievementId !== "string") {
+    throw new Error("achievementId is required");
+  }
+
+  const { after, before, limit = 25 } = options;
+
+  if (after && before) {
+    throw new Error("after and before cannot be used together");
+  }
+
+  if (limit < 1 || limit > 100) {
+    throw new Error("limit must be between 1 and 100");
+  }
+
+  let url = `${TETRIO_API}/achievements/${achievementId}/entries`;
+  const params = new URLSearchParams();
+
+  if (after) params.append("after", after);
+  if (before) params.append("before", before);
+  if (limit) params.append("limit", limit);
+
+  if (params.toString()) {
+    url += `?${params.toString()}`;
+  }
+
+  const data = await proxyGet(url);
+
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching achievement leaderboard");
+  }
+
+  return {
+    entries: (data.data?.entries ?? []).map((entry) => ({
+      user: entry.u ?? null,
+      score: entry.v ?? null,
+      additionalScore: entry.a ?? null,
+      updatedAt: entry.t ?? null,
+      extra: entry.x ?? null,
+      prisecter: entry.p ?? null,
+    })),
+    pagination: {
+      cursor: data.data?.entries?.[data.data.entries.length - 1]?.p ?? null,
+    },
+  };
+}
+
+/**
+ * Get achievement medal color by tier
+ */
+export function getAchievementMedalColor(tier) {
+  if (!tier) return "gray";
+  const t = tier.toLowerCase();
+  if (t === "diamond") return "cyan";
+  if (t === "platinum") return "slate";
+  if (t === "gold") return "yellow";
+  if (t === "silver") return "gray";
+  if (t === "bronze") return "orange";
+  return "gray";
+}
+
+/**
+ * Determine achievement tier from score and cutoffs
+ */
+export function getAchievementTier(score, cutoffs) {
+  if (!cutoffs) return null;
+  
+  const s = Number(score);
+  
+  if (cutoffs.diamond !== undefined && (cutoffs.diamond === null || s >= cutoffs.diamond)) {
+    return "diamond";
+  }
+  if (cutoffs.platinum !== undefined && (cutoffs.platinum === null || s >= cutoffs.platinum)) {
+    return "platinum";
+  }
+  if (cutoffs.gold !== undefined && (cutoffs.gold === null || s >= cutoffs.gold)) {
+    return "gold";
+  }
+  if (cutoffs.silver !== undefined && (cutoffs.silver === null || s >= cutoffs.silver)) {
+    return "silver";
+  }
+  if (cutoffs.bronze !== undefined && (cutoffs.bronze === null || s >= cutoffs.bronze)) {
+    return "bronze";
+  }
+  
+  return null;
 }
 
 /* small helpers */

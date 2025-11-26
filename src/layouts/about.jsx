@@ -8,6 +8,7 @@ import GithubCard from "../components/GithubCard";
 import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
 import Tetris from "./TetrioProfileCard.jsx";
+import SteamProfileCard from './SteamProfileCard';
 
 import "../index.css";
 
@@ -74,10 +75,15 @@ const About = () => {
   </div>
 
   {/* Tetris Card full width */}
-  <div className="lg:col-span-3 lg:-mt-5">
+  <div className="lg:col-span-2 lg:-mt-5">
     <Tetris />
 
   </div>
+  <div className="lg:col-span-2 lg:-mt-5">
+    <SteamProfileCard />
+  </div>
+
+
 
 </div>
 
