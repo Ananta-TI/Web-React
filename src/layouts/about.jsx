@@ -9,6 +9,7 @@ import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
 import Tetris from "./TetrioProfileCard.jsx";
 import SteamProfileCard from './SteamProfileCard';
+import DiscordProfileCard from "./DiscordProfileCard.jsx";
 
 import "../index.css";
 
@@ -74,14 +75,24 @@ const About = () => {
     <GithubGraph />
   </div>
 
-  {/* Tetris Card full width */}
-  <div className="lg:col-span-2 lg:-mt-5">
-    <Tetris />
-
-  </div>
-  <div className="lg:col-span-2 lg:-mt-5">
+  <div className="lg:col-span-2 lg:-px-50 lg:-mt-5">
     <SteamProfileCard />
   </div>
+
+  {/* Tetris Card full width */}
+  <div className="lg:col-span-2 lg:-mt-1">
+  <div className="lg:col-span-4 lg:-mt-4">
+<DiscordProfileCard userId="900690698133700638" />
+  </div>
+  <div className="lg:col-span-4 lg:mt-1">
+
+    <Tetris />
+  </div>
+
+  </div>
+  
+  
+
 
 
 
