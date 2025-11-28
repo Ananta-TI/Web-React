@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"; // tambahkan import ini di atas
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useContext,useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
@@ -21,77 +21,104 @@ const Projects = () => {
   const isDarkMode = theme?.isDarkMode ?? true; // Default dark mode jika context belum tersedia
   const navigate = useNavigate(); // inisialisasi useNavigate
   const waveRef = useRef(null);
+  gsap.registerPlugin(ScrollTrigger);
+  const imageRefs = useRef([]);
+  useEffect(() => {
+    if (!imageRefs.current.length) return;
 
-// List of Projects with Preview Images
-const projects = [
-  {
-    title: "My First Web",
-    description:
-      "My very first website built to learn the fundamentals of HTML, CSS, Tailwind, and JavaScript. Featuring a simple yet responsive design, this project marked the beginning of my journey into web development.",
-    demo: "https://ananta-ti.github.io/my-first-web/",
-    repo: null,
-    tags: ["HTML", "CSS", "JavaScript"],
-    category: "Web Development",
-    image: "/img/first-web.png",
-    color: "from-blue-500 to-cyan-500",
-  },
-  // {
-  //   title: "My Second Web",
-  //   description:
-  //     "The next iteration of my first project, now with a more modern look using Bootstrap. Focused on a clean layout structure and a more dynamic user experience across devices, though it still needs a few improvements.",
-  //   demo: "https://ananta-ti.github.io/my-second-web/",
-  //   repo: null,
-  //   tags: ["HTML", "CSS", "JavaScript"],
-  //   category: "Web Development",
-  //   image: "img/my-second-web.png",
-  //   color: "from-purple-500 to-pink-500",
-  // },
-  // {
-  //   title: "KABESTU",
-  //   description:
-  //     "A company profile website for a steel business, featuring a complete set of functions and a user-friendly interface.",
-  //   demo: null,
-  //   repo: "https://github.com/Ananta-TI/besi.git",
-  //   tags: ["Laravel", "Bootstrap", "MySQL"],
-  //   category: "Web Development",
-  //   image: "img/Kabestu.png",
-  //   color: "from-green-500 to-teal-500",
-  // },
-  {
-    title: "Sedap",
-    description:
-      "A React-based culinary platform showcasing local Indonesian food products with a modern and responsive UI. It allows users to explore traditional snacks, healthy meals, and contemporary cuisines while supporting local culinary SMEs.",
-    demo: "https://react-nta.vercel.app/guest",
-    repo: null,
-    tags: ["React", "Tailwind", "UI/UX"],
-    category: "Web Development",
-    image: "/img/Sedap.png",
-    color: "from-orange-500 to-red-500",
-  },
-  {
-    title: "React Inventory",
-    description:
-      "An inventory management system built with React and a modern interface, designed to improve business efficiency and data organization.",
-    demo: "https://react-inventory-roan.vercel.app/",
-    repo: null,
-    tags: ["React", "Inventory", "Management"],
-    category: "Web Application",
-    image: "img/ReactInventory.png",
-    color: "from-indigo-500 to-blue-500",
-  },
-  // {
-  //   title: "MathDash Pro",
-  //   description:
-  //     "An interactive mathematics dashboard for calculating GCD and LCM values, designed for education and engagement.",
-  //   demo: "https://mathdash-pro.vercel.app/",
-  //   repo: null,
-  //   tags: ["React", "Math", "Education"],
-  //   category: "Education",
-  //   image: "img/MathDash.png",
-  //   color: "from-yellow-500 to-orange-500",
-  // },
-];
+    imageRefs.current.forEach((img) => {
+      if (!img) return;
 
+      gsap.fromTo(
+        img.querySelector("img"),
+        { yPercent: -20 },
+        {
+          yPercent: 10,
+          ease: "none",
+          scrollTrigger: {
+            trigger: img,
+            start: "top bottom", // Mulai saat top card masuk viewport
+            end: "bottom top", // Selesai saat bottom card keluar viewport
+            scrub: 1, // Smooth scrolling (lebih tinggi = lebih smooth)
+          },
+        }
+      );
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, []);
+
+  // List of Projects with Preview Images
+  const projects = [
+    {
+      title: "My First Web",
+      description:
+        "My very first website built to learn the fundamentals of HTML, CSS, Tailwind, and JavaScript. Featuring a simple yet responsive design, this project marked the beginning of my journey into web development.",
+      demo: "https://ananta-ti.github.io/my-first-web/",
+      repo: null,
+      tags: ["HTML", "CSS", "JavaScript"],
+      category: "Web Development",
+      image: "/img/first-web.png",
+      // color: "from-blue-500 to-cyan-500",
+    },
+    // {
+    //   title: "My Second Web",
+    //   description:
+    //     "The next iteration of my first project, now with a more modern look using Bootstrap. Focused on a clean layout structure and a more dynamic user experience across devices, though it still needs a few improvements.",
+    //   demo: "https://ananta-ti.github.io/my-second-web/",
+    //   repo: null,
+    //   tags: ["HTML", "CSS", "JavaScript"],
+    //   category: "Web Development",
+    //   image: "img/my-second-web.png",
+    //   color: "from-purple-500 to-pink-500",
+    // },
+    // {
+    //   title: "KABESTU",
+    //   description:
+    //     "A company profile website for a steel business, featuring a complete set of functions and a user-friendly interface.",
+    //   demo: null,
+    //   repo: "https://github.com/Ananta-TI/besi.git",
+    //   tags: ["Laravel", "Bootstrap", "MySQL"],
+    //   category: "Web Development",
+    //   image: "img/Kabestu.png",
+    //   color: "from-green-500 to-teal-500",
+    // },
+    {
+      title: "Sedap",
+      description:
+        "A React-based culinary platform showcasing local Indonesian food products with a modern and responsive UI. It allows users to explore traditional snacks, healthy meals, and contemporary cuisines while supporting local culinary SMEs.",
+      demo: "https://react-nta.vercel.app/guest",
+      repo: null,
+      tags: ["React", "Tailwind", "UI/UX"],
+      category: "Web Development",
+      image: "/img/Sedap.png",
+      // color: "from-orange-500 to-red-500",
+    },
+    {
+      title: "React Inventory",
+      description:
+        "An inventory management system built with React and a modern interface, designed to improve business efficiency and data organization.",
+      demo: "https://react-inventory-roan.vercel.app/",
+      repo: null,
+      tags: ["React", "Inventory", "Management"],
+      category: "Web Application",
+      image: "img/ReactInventory.png",
+      // color: "from-indigo-500 to-blue-500",
+    },
+    // {
+    //   title: "MathDash Pro",
+    //   description:
+    //     "An interactive mathematics dashboard for calculating GCD and LCM values, designed for education and engagement.",
+    //   demo: "https://mathdash-pro.vercel.app/",
+    //   repo: null,
+    //   tags: ["React", "Math", "Education"],
+    //   category: "Education",
+    //   image: "img/MathDash.png",
+    //   color: "from-yellow-500 to-orange-500",
+    // },
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -120,12 +147,11 @@ const projects = [
 
   return (
     <section
-  id="projects"
-  className={`relative w-full min-h-screen py-20 transition-colors duration-500 ${
-    isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
-  }`}
->
-
+      id="projects"
+      className={`relative w-full min-h-screen py-20 transition-colors duration-500 ${
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
+      }`}
+    >
       {/* Section Heading */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <motion.div
@@ -148,7 +174,8 @@ const projects = [
               isDarkMode ? "text-zinc-400" : "text-gray-600"
             }`}
           >
-            A collection of projects that I have developed using various modern technologies.
+            A collection of projects that I have developed using various modern
+            technologies.
           </p>
         </motion.div>
       </div>
@@ -176,27 +203,28 @@ const projects = [
               } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
             >
               {/* Project Image/Preview */}
-<div className="relative h-40 sm:h-52 md:h-64 lg:h-152 overflow-hidden rounded-xl">
-  <img
-    src={project.image}
-    alt={project.title}
-    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-    loading="lazy"
-  />
+              <div className="relative h-40 sm:h-52 md:h-64 lg:h-140 overflow-hidden rounded-xl">
+                <div
+                  ref={(el) => (imageRefs.current[index] = el)}
+                  className="relative h-64 sm:h-72 md:h-80 lg:h-150 overflow-hidden rounded-t-3xl"
+                ><img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-[100%] object-cover"
+                  loading="lazy"
+                /></div>
+                
                 ) : (
-                  <div
-                    className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}
-                  >
-                    <div className="text-center text-white">
-                      <Github className="w-12 h-12 mx-auto mb-2 opacity-80" />
-                      <p className="text-sm font-medium">Repository</p>
-                    </div>
+                <div
+                  className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}
+                >
+                  <div className="text-center text-white">
+                    <Github className="w-12 h-12 mx-auto mb-2 opacity-80" />
+                    <p className="text-sm font-medium">Repository</p>
                   </div>
-                )
-
-                {/* Overlay */}
+                </div>
+                ){/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
                   <span
@@ -249,14 +277,14 @@ const projects = [
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
-  {project.demo && (
-    <motion.a
-      href={project.demo}
-      target="_blank"
-      rel="noreferrer"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`
+                  {project.demo && (
+                    <motion.a
+                      href={project.demo}
+                      target="_blank"
+                      rel="noreferrer"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
         relative z-10 overflow-hidden inline-flex items-center gap-3
         px-3 py-1 text-[17px] border-t-0 font-lyrae font-bold
         rounded-lg border 
@@ -285,11 +313,13 @@ const projects = [
                hover:text-white border-gray-800/20`
         }
       `}
-    >
-      <Globe className="w-5 h-5 relative z-20 transition-transform duration-300 group-hover:rotate-12" />
-      <span className="relative z-20 pointer-events-none">Live Demo</span>
-    </motion.a>
-  )}
+                    >
+                      <Globe className="w-5 h-5 relative z-20 transition-transform duration-300 group-hover:rotate-12" />
+                      <span className="relative z-20 pointer-events-none">
+                        Live Demo
+                      </span>
+                    </motion.a>
+                  )}
                   {project.repo && (
                     <motion.a
                       href={project.repo}
@@ -366,20 +396,16 @@ const projects = [
         >
           <Code className="w-5 h-5" />
           <span className="font-bold font-mono">
-  <span className="text-[#F55247]">{projects.length} Projects</span> •{" "}
-  <span className="text-[#FFA828]">
-    {projects.filter((p) => p.demo).length} Live Demos
-  </span>
-</span>
+            <span className="text-[#F55247]">{projects.length} Projects</span> •{" "}
+            <span className="text-[#FFA828]">
+              {projects.filter((p) => p.demo).length} Live Demos
+            </span>
+          </span>
+        </div>
 
-        </div>      
-        
         <LayeredAnimations />
       </motion.div>
-
-
     </section>
-    
   );
 };
 
