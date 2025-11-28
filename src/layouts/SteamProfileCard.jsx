@@ -115,7 +115,7 @@ export default function SteamProfileCard({
   if (!profile) return null;
 
   return (
-    <div className="font-sans antialiased text-gray-200 w-full h-full max-w-2xl mx-auto cursor-target">
+    <div className="font-sans antialiased text-gray-200 w-full h-full  mx-auto cursor-target">
       {/* CARD CONTAINER with Steam Gradient */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#171a21] to-[#1b2838] border border-[#2a475e] shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all hover:shadow-[0_8px_40px_rgba(102,192,244,0.1)]">
         

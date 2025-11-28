@@ -171,9 +171,9 @@ function Header({ user, discord, dark, onCopyId, onStatusClick }) {
 
       {/* Clan Tag jika ada */}
       {user.primary_guild && (
-        <div className="flex items-center gap-1 text-xs opacity-50 mt-1">
-          <span className="font-bold">[{user.primary_guild.tag}]</span>
-          <span>Clan Member</span>
+        <div className="flex items-center gap-1 text-xs  mt-1">
+          <span className="font-bold text-yellow-400">[{user.primary_guild.tag}]</span>
+          <span className="opacity-50">Clan Member</span>
         </div>
       )}
 
@@ -273,7 +273,7 @@ function ActivityItem({ act, dark, onActivityClick, enableClickableActivities })
   return (
     <div 
       onClick={enableClickableActivities ? () => onActivityClick(act) : undefined}
-      className={`flex items-start gap-3 p-3 rounded-lg border transition ${enableClickableActivities ? 'cursor-pointer' : ''} ${dark ? "bg-white/5 border-white/5 hover:bg-white/10" : "bg-gray-50 border-gray-200 hover:bg-gray-100"}`}
+      className={`flex items-start rounded-lg border transition ${enableClickableActivities ? 'cursor-pointer' : ''} ${dark ? "bg-white/5 border-white/5 hover:bg-white/10" : "bg-gray-50 border-gray-200 hover:bg-gray-100"}`}
     >
       <div className="relative shrink-0">
         {act.assets?.large_image ? (

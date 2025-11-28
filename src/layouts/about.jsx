@@ -8,7 +8,7 @@ import GithubCard from "../components/GithubCard";
 import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
 import Tetris from "./TetrioProfileCard.jsx";
-import SteamProfileCard from './SteamProfileCard';
+import SteamProfileCard from "./SteamProfileCard";
 import DiscordProfileCard from "./DiscordProfileCard.jsx";
 
 import "../index.css";
@@ -62,44 +62,33 @@ const About = () => {
         <ExperienceList />
       </div>
 
-<div className="w-full max-w-7xl mx-auto px-4 mt-1 grid gap-6
-                grid-cols-1 lg:grid-cols-4 auto-rows-[minmax(120px,auto)]">
+      <div
+        className="w-full max-w-7xl mx-auto px-4 mt-1 grid gap-6
+                grid-cols-1 lg:grid-cols-4 auto-rows-[minmax(120px,auto)]"
+      >
+        {/* GitHub Card */}
+        <div className="lg:col-span-1">
+          <GithubCard username="Ananta-TI" />
+        </div>
+        {/* Graph BIG */}
+        <div className="lg:col-span-3 ">
+          <GithubGraph />
+        </div>
+      </div>
 
-  {/* GitHub Card */}
-  <div className="lg:col-span-1">
-    <GithubCard username="Ananta-TI" />
-  </div>
-
-  {/* Graph BIG */}
-  <div className="lg:col-span-3 ">
-    <GithubGraph />
-  </div>
-
-  <div className="lg:col-span-2 lg:-px-50 lg:-mt-5">
-    <SteamProfileCard />
-  </div>
-
-  {/* Tetris Card full width */}
-  <div className="lg:col-span-2 lg:-mt-1">
-  <div className="lg:col-span-4 lg:-mt-4">
-<DiscordProfileCard userId="900690698133700638" />
-  </div>
-  <div className="lg:col-span-4 lg:mt-1">
-
-    <Tetris />
-  </div>
-
-  </div>
-  
-  
-
-
-
-
-</div>
-
-
-
+      <div
+        className="w-full max-w-7xl mx-auto px-4 mt-1
+                grid grid-cols-1 lg:grid-cols-7 gap-2 auto-rows-[minmax(120px,auto)]">
+        <div className="col-span-1 lg:col-span-3">
+          <Tetris />
+          <div className="mt-1">
+            <DiscordProfileCard userId="900690698133700638" />
+          </div>
+        </div>
+        <div className="col-span-1 lg:col-span-4">
+          <SteamProfileCard />
+        </div>
+      </div>
 
       {/* AnimatedBeamDemo Section */}
       <div className="dark px-4 sm:px-0">
