@@ -5,6 +5,7 @@ import { useContext, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
+// import AnimateDraw from "../components/Home/animateDraw";
 import LayeredAnimations from "../components/Home/LayeredAnimations";
 import {
   Github,
@@ -402,8 +403,16 @@ const Projects = () => {
             </span>
           </span>
         </div>
+        <div className="w-full flex justify-between items-start">
+  <div className="flex-shrink-0">
+    <LayeredAnimations />
+  </div>
 
-        <LayeredAnimations />
+  {/* <div className="flex-shrink-0">
+    <AnimateDraw />
+  </div> */}
+</div>
+
       </motion.div>
     </section>
   );

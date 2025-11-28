@@ -7,58 +7,73 @@
 @font-face {
     font-family: 'Poppins';
     src: url('/font/Poppins-Regular.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: 'PoppinsBold';
     src: url('/font/Poppins-ExtraBold.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: 'lyrae';
     src: url('/fonts/AlphaLyrae-Medium.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: 'cocaine';
     src: url('/fonts/Cocaine sans.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: 'Exorcista';
     src: url('/fonts/Exorcista_-Jed_40.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: 'termination';
     src: url('/fonts/X Termination.otf');
+    font-display: swap;
 }
 @font-face {
   font-family: 'MailBox';
   src: url('/fonts/MailBox.ttf') format('truetype');
+  font-display: swap;
 }
 @font-face {
     font-family: 'Aira';
     src: url('/fonts/Aira otf.otf');
+    font-display: swap;
 }
 @font-face {
     font-family: Ceraso;
     src: url('/fonts/Ceraso otf.otf');
+    font-display: swap;
 }
 @font-face {
     font-family: Darksame;
     src: url('/fonts/DarksameRegular.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: Skullines;
     src: url('/fonts/SkullinesDemo-Regular.otf');
+    font-display: swap;
 }
 @font-face {
     font-family: Jena;
     src: url('/fonts/JenaGotisch.ttf');
+    font-display: swap;
 }
 @font-face {
     font-family: Equiva;
     src: url('/fonts/Equiva.ttf');
+    font-display: swap;
+    
 }
 @font-face {
     font-family: Calculator;
     src: url('/fonts/Calculator.ttf');
+    font-display: swap;
 }
 @theme {
     /* --font-barlow: "Barlow", sans-serif; */
