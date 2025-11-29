@@ -29,6 +29,7 @@
     "emailjs-com": "^3.2.0",
     "express": "^5.1.0",
     "form-data": "^4.0.5",
+    "formidable": "^3.5.4",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "hamburger-react": "^2.5.2",
