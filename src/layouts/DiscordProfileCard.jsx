@@ -607,7 +607,7 @@ export default function DiscordProfileCard({
           {showRefreshButton && (
             <button
               onClick={handleRefresh}
-              className="opacity-30 hover:opacity-100 transition-opacity p-1 hover:rotate-180 transition-transform duration-500"
+              className="opacity-30 hover:opacity-100  p-1 hover:rotate-180 transition-transform duration-500"
               title="Refresh data"
             >
               <RefreshCw size={14} />
