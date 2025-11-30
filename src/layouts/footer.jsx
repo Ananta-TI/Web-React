@@ -17,7 +17,7 @@ import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
 import Line from "./line.jsx";
 import ProfileCard from './ProfileCard'
-
+import Noise from "../context/Nois.jsx";
 
 // Utility class
 function cn(...classes) {
@@ -155,23 +155,39 @@ export default function Footer() {
       )}
     >
       {/* Background Gradient */}
-      <div
-        className={`absolute inset-0 -z-100 bg-gradient-to-b ${
-          isDarkMode
-            ? "from-zinc-900 via-zinc-950 to-black"
-            : "from-[#f7f7f7] via-[#c9c9c9] to-[#797979]"
-        }`}
-      />
-      <div className="relative">
+      <div className="absolute inset-0 z-0  pointer-events-none">
+  {/* Background Gradient Base */}
+  <div
+    className={`absolute inset-0 bg-gradient-to-b ${
+      isDarkMode
+        ? "from-zinc-900 via-zinc-950 to-black"
+        : "from-white via-[#c9c9c9] to-[#797979]"
+    }`}
+  />
+
+  {/* Noise Component */}
+  <Noise patternAlpha={isDarkMode ? 50 : 70} />
+
+  {/* --- FADE OUT TOP --- */}
+  {/* Layer ini ditaruh paling bawah (di kode) agar menimpa Noise & Background */}
+  <div
+    className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${
+      isDarkMode
+        ? "from-zinc-900 to-transparent" // Warna awal Dark Mode
+        : "from-[#f7f7f7] to-transparent" // Warna awal Light Mode
+    }`}
+  />
+</div>
+      {/* <div className="relative z-50  -mt-50 -py-500">
         <Line />
-      </div>
+      </div> */}
 
       <div className="w-full mx-auto py-20 px-6 sm:px-12 lg:px-20 max-w-7xl">
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
           
           {/* Left Section - Profile + Info */}
-          <div className="lg:col-span-5 space-y-10">
+          <div className="lg:col-span-5 z-10 space-y-10">
             {/* Profile Card */}
             <div className="flex justify-center lg:justify-start">
               <ProfileCard
@@ -252,8 +268,8 @@ export default function Footer() {
           </div>
 
           {/* Right Section - Contact Form */}
-          <div className="lg:col-span-7">
-            <div className="lg:pl-8">
+          <div className="lg:col-span-7 z-10">
+            <div className="lg:pl-8 z-10">
               <h3 className="text-3xl lg:text-4xl font-bold font-lyrae mb-6">
                 Get in Touch
               </h3>
@@ -276,8 +292,8 @@ export default function Footer() {
                         className={cn(
                           "peer min-h-[8rem] cursor-target cursor-none w-full resize-none bg-transparent py-3 font-semibold outline-none transition-colors",
                           isDarkMode
-                            ? "placeholder:text-zinc-600 text-white"
-                            : "placeholder:text-zinc-500 text-zinc-900"
+                            ? "placeholder:text-zinc-200 text-white"
+                            : "placeholder:text-zinc-700 text-zinc-900"
                         )}
                       />
                     ) : (
@@ -293,8 +309,8 @@ export default function Footer() {
                         className={cn(
                           "peer w-full cursor-target cursor-none bg-transparent py-3 text-base font-semibold outline-none transition-colors",
                           isDarkMode
-                            ? "placeholder:text-zinc-600 text-white"
-                            : "placeholder:text-zinc-500 text-zinc-900"
+                            ? "placeholder:text-zinc-200 text-white"
+                            : "placeholder:text-zinc-700 text-zinc-900"
                         )}
                       />
                     )}
@@ -312,27 +328,33 @@ export default function Footer() {
                 ))}
 
                 <button
-                  type="submit"
-                  disabled={pending}
-                  className={cn(
-                    "mt-4 inline-flex cursor-target cursor-none items-center justify-center gap-x-2 border py-3 px-6 rounded-md transition-colors disabled:opacity-50 font-bold",
-                    isDarkMode
-                      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900"
-                      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50"
-                  )}
-                >
-                  {pending ? (
-                    <>
-                      <Loader className="h-5 w-5 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="h-5 w-5" />
-                      Send Message
-                    </>
-                  )}
-                </button>
+  type="submit"
+  disabled={pending}
+  // Tambahkan class 'group' agar kita bisa menganimasi icon di dalamnya saat button di-hover
+  className={cn(
+    "mt-4 group inline-flex cursor-target cursor-none items-center justify-center gap-x-2 border py-3 px-6 rounded-md font-bold",
+    // ANIMASI UTAMA DISINI:
+    "transition-all duration-600 ease-out", // Bikin transisi halus
+    "hover:shadow-lg",      // Membesar & ada bayangan pas hover
+    isDarkMode
+      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 hover:shadow-white/10"
+      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50 hover:shadow-zinc-900/20",
+    "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed" // Reset animasi kalau disabled
+  )}
+>
+  {pending ? (
+    <>
+      <Loader className="h-5 w-5 animate-spin" />
+      Sending...
+    </>
+  ) : (
+    <>
+      {/* Animasi Ikon: Goyang dikit & miring pas parent di-hover */}
+      <Mail className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-12" />
+      Send Message
+    </>
+  )}
+</button>
 
                 {sent && (
                   <span className="text-green-400 font-mono font-bold text-sm mt-3">
@@ -348,27 +370,27 @@ export default function Footer() {
         <div
           id="contact"
           className={cn(
-            "flex flex-col sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
+            "flex relative flex-col z-10 sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
             isDarkMode
-              ? "border-zinc-300/50 text-white"
-              : "border-zinc-300 text-white"
+              ? "border-white text-white"
+              : "border-black text-white"
           )}
         >
-          <div className="font-mono font-bold">
+          <div className="font-mono z-10 font-bold">
             © 2025 All Rights Reserved
           </div>
           
           <button
             onClick={scrollToTop}
             className={cn(
-              "flex cursor-target font-mono font-bold items-center gap-2 group transition-colors",
+              "flex cursor-target z-10 font-mono font-bold items-center gap-2 group transition-colors",
               isDarkMode ? "hover:text-white" : "hover:text-zinc-300"
             )}
           >
             <span>Back To Top</span>
             <ArrowUp
               size={18}
-              className="group-hover:-translate-y-1 transition-transform"
+              className="group-hover:-translate-y-1  transition-transform"
             />
           </button>
         </div>

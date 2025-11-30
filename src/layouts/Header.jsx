@@ -13,6 +13,7 @@ import {
   Folder,
   Award,
   History,
+  ScanText 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
@@ -283,11 +284,7 @@ useEffect(() => {
                         }}
                       >
                         <span>Certificates</span>
-                        <img
-                          src="/svg/badge-4.svg"
-                          alt="Badge 4"
-                          className={`w-12 h-12 ${isDarkMode ? "invert" : ""}`}
-                        />
+                      <Award size={32} strokeWidth={2} />
                       </motion.a>
                     )}
 
@@ -308,13 +305,7 @@ useEffect(() => {
                         }}
                       >
                         <span>All Projects</span>
-                        <img
-                          src="/svg/work-7.svg"
-                          alt="Badge 4"
-                          className={`w-12 h-12 line ${
-                            isDarkMode ? "invert" : ""
-                          }`}
-                        />
+                        <Folder size={32} strokeWidth={2} />
                       </motion.a>
                     )}
                     {location.pathname !== "/Scanner" && (
@@ -334,13 +325,7 @@ useEffect(() => {
                         }}
                       >
                         <span>Scanner</span>
-                        <img
-                          src="/svg/work-7.svg"
-                          alt="Badge 4"
-                          className={`w-12 h-12 line ${
-                            isDarkMode ? "invert" : ""
-                          }`}
-                        />
+                        <ScanText size={32} strokeWidth={2} />
                       </motion.a>
                     )}
 
@@ -383,7 +368,7 @@ useEffect(() => {
                     {
                       name: "Scanner",
                       link: "/Scanner",
-                      style: <History size={32} strokeWidth={2} />,
+                      style: <ScanText  size={32} strokeWidth={2} />,
                     },
                     {
                       name: "Contact",

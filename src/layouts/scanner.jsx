@@ -277,7 +277,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ||
   ].filter(d => d.value > 0);
 
   return (
-    <div className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}>
+    <div className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}>
       
 
       {/* HEADER */}
@@ -308,7 +308,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ||
 
       {/* Mode Switcher */}
       <div
-        className={` flex gap-1 p-1 rounded-lg border ${
+        className={` flex gap-1 p-1 cursor-target cursor-none rounded-lg border ${
           isDarkMode ? "bg-none border-zinc-700" : "bg-none border-gray-300"
         }`}
       >
@@ -330,7 +330,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ||
                 handleClear();
               }
             }}
-            className={`p-2 rounded-md transition-all ${
+            className={`p-2 rounded-md cursor-none transition-all ${
               (m.id === "history" && showHistoryTab) ||
               (mode === m.id && !showHistoryTab)
                 ? "bg-sky-600 text-white shadow"
@@ -339,7 +339,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ||
                 : "text-gray-500 hover:bg-gray-100"
             }`}
           >
-            <m.icon className="w-4 h-4" />
+            <m.icon className="w-4 h-4 cursor-none" />
           </button>
         ))}
       </div>

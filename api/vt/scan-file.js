@@ -34,7 +34,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // 2. Buat FormData untuk dikirim ke VirusTotal
     const formData = new FormData();
     // Baca file dari path temporary formidable
     formData.append("file", fs.createReadStream(file.filepath), file.originalFilename);
