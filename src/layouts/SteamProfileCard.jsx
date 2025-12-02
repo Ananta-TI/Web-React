@@ -8,6 +8,14 @@ const formatPlaytime = (minutes) => {
   return `${hours}h`;
 };
 
+// --- DATA MANUAL FRAME ---
+// Karena API tidak menyediakan Frame, kita harus pasang manual URL-nya di sini berdasarkan SteamID.
+// Kamu bisa cari URL frame (PNG/WebM) dari Steam Points Shop atau inspect element profile kamu.
+const MANUAL_FRAMES = {
+  "76561199745356826": "https://shared.fastly.steamstatic.com/community_assets/images/items/4101120/688f97fa743ac41b68ab10d5236a02f01ecb9725.png", // Contoh Frame Dota 2
+  // Tambahkan ID lain jika punya frame
+};
+
 export default function SteamProfileCard({
   steamIds = ["76561199745356826", "76561199166544214", "76561198773672138"],
   compact = false,
@@ -73,7 +81,13 @@ export default function SteamProfileCard({
 
         if (!mounted) return;
 
-        setProfile(profileRes.response?.players?.[0]);
+        // Inject Frame URL ke object profile jika ada di list MANUAL_FRAMES
+        const profileData = profileRes.response?.players?.[0];
+        if (profileData && MANUAL_FRAMES[profileData.steamid]) {
+            profileData.avatarFrame = MANUAL_FRAMES[profileData.steamid];
+        }
+
+        setProfile(profileData);
         setFriendsCount(friendRes.friendslist?.friends?.length || 0);
 
         const ownedGamesResponses = allGamesRes.slice(0, steamIds.length);
@@ -210,7 +224,6 @@ export default function SteamProfileCard({
     <div className={`font-sans antialiased w-full mx-auto transition-colors duration-300
         ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>
       
-      {/* 2. MAIN CARD CONTAINER (Ubah style disini) */}
       <div
         className={`relative overflow-hidden cursor-target rounded-xl border shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all group-card
         ${
@@ -225,22 +238,44 @@ export default function SteamProfileCard({
         <div className="relative p-5 flex flex-col gap-6">
           {/* HEADER (Avatar etc) */}
           <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="relative group flex-shrink-0 mx-auto sm:mx-0">
+            
+            {/* --- AVATAR & FRAME SECTION (UPDATED) --- */}
+            <div className="relative flex-shrink-0 mx-auto sm:mx-0">
+              
+              {/* Glow Effect di belakang Avatar */}
               <div
-                className={`absolute -inset-0.5 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200 ${
+                className={`absolute -inset-0.5 rounded-lg blur opacity-30 transition duration-200 ${
                   profile.personastate === 1 ? "bg-green-400" : "bg-blue-600"
                 }`}
               ></div>
-              <img
-                src={profile.avatarfull}
-                alt={profile.personaname}
-                className="relative w-24 h-24 rounded-lg object-cover border-2 border-[#2a475e] shadow-lg"
-              />
-              <div
-                className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#1b2838] ${getStatusColor(
-                  profile.personastate
-                )}`}
-              />
+              
+              {/* Wadah Utama Avatar (Relative untuk positioning) */}
+              <div className="relative w-24 h-24">
+                  {/* Gambar Avatar (z-10 agar di bawah frame) */}
+                  <img
+                    src={profile.avatarfull}
+                    alt={profile.personaname}
+                    className="relative z-10 w-full h-full rounded-lg object-cover border-2 border-[#2a475e] shadow-lg"
+                  />
+
+                  {/* Gambar Frame (z-20 agar di atas avatar, scale-125 agar lebih besar sedikit) */}
+                  {/* Gunakan pointer-events-none agar klik tembus ke avatar jika perlu */}
+                  {profile.avatarFrame && (
+                      <img 
+                          src={profile.avatarFrame} 
+                          alt="frame"
+                          className="absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] max-w-none pointer-events-none"
+                      />
+                  )}
+                  
+                  {/* Status Dot (z-30 agar paling atas) */}
+                  <div
+                    className={`absolute z-30 bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#1b2838] ${getStatusColor(
+                      profile.personastate
+                    )}`}
+                  />
+              </div>
+
             </div>
 
             <div className="flex-1 w-full text-center sm:text-left">
@@ -306,7 +341,6 @@ export default function SteamProfileCard({
                 <div className={`relative overflow-hidden rounded-lg border transition-all min-h-[140px]
                     ${isDarkMode ? "bg-[#101216] border-gray-800" : "bg-white border-gray-200 shadow-sm"}`}>
                   
-                  {/* Background Image Effect (Hanya di Dark Mode biar tidak kotor di Light Mode) */}
                   {isDarkMode && (
                       <div className="absolute inset-0 overflow-hidden opacity-20">
                         <img
@@ -319,7 +353,6 @@ export default function SteamProfileCard({
                   )}
 
                   <div className="relative p-4 flex flex-col gap-3 z-10">
-                    {/* Game Info Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <img
@@ -344,7 +377,6 @@ export default function SteamProfileCard({
                       </div>
                     </div>
 
-                    {/* DYNAMIC ACHIEVEMENT BAR */}
                     <div className="h-8 flex flex-col justify-center">
                       {loadingAch ? (
                         <div className={`w-full h-1.5 rounded-full overflow-hidden animate-pulse ${isDarkMode ? "bg-gray-800" : "bg-gray-200"}`}>
@@ -375,7 +407,6 @@ export default function SteamProfileCard({
                   </div>
                 </div>
 
-                {/* PAGINATION DOTS */}
                 <div className="flex justify-center gap-1.5 mt-2">
                   {topGames.map((_, idx) => (
                     <button
@@ -391,7 +422,6 @@ export default function SteamProfileCard({
                 </div>
               </div>
 
-              {/* --- RECENTLY PLAYED --- */}
               {recentlyPlayed && recentlyPlayed.length > 0 && (
                 <div className="mt-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -430,7 +460,6 @@ export default function SteamProfileCard({
                 </div>
               )}
 
-              {/* --- LIBRARY LIST --- */}
               {stats?.games && (
                 <div className={`pt-3 mt-2 border-t ${isDarkMode ? "border-gray-800/50" : "border-gray-200"}`}>
                   <button
