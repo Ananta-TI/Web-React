@@ -86,7 +86,9 @@ const About = () => {
           </div>
         </div>
         <div className="col-span-1 lg:col-span-4">
-          <SteamProfileCard />
+          <SteamProfileCard 
+            steamIds={["76561199745356826", "76561199166544214","76561198773672138"]}
+          />
         </div>
       </div>
 

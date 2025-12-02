@@ -28,7 +28,7 @@ import "./assets/tailwind.css";
 function App() {
   return (
     <ThemeProvider>
-      <TargetCursor spinDuration={1.1} hideDefaultCursor={true} />
+      <TargetCursor spinDuration={1.1} hideDefaultCursor={true} parallaxOn={false} />
 
       <Header />
 

@@ -6,6 +6,7 @@ const TargetCursor = ({
   targetSelector = ".cursor-target",
   spinDuration = 2,
   hideDefaultCursor = true,
+  parallaxOn=false
 }) => {
   const cursorRef = useRef(null);
   const cornersRef = useRef(null);

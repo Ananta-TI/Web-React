@@ -1,248 +1,475 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { ThemeContext } from "../context/ThemeContext.jsx";
 
-// Helper untuk format menit ke Jam
+// Helper format jam
 const formatPlaytime = (minutes) => {
   if (!minutes) return "0h";
-  const hours = Math.round(minutes / 60);
-  return `${hours.toLocaleString()}h`;
+  const hours = (minutes / 60).toFixed(1);
+  return `${hours}h`;
 };
 
 export default function SteamProfileCard({
-  steamId = "76561199166544214",
+  steamIds = ["76561199745356826", "76561199166544214", "76561198773672138"],
   compact = false,
 }) {
+  // 1. AMBIL CONTEXT DARK MODE
+  const { isDarkMode } = useContext(ThemeContext);
+
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
-  const [topGame, setTopGame] = useState(null);
+
+  // --- CAROUSEL STATE ---
+  const [topGames, setTopGames] = useState([]);
+  const [activeGameIndex, setActiveGameIndex] = useState(0);
+  const [achievementsCache, setAchievementsCache] = useState({});
+  const [loadingAch, setLoadingAch] = useState(false);
+
   const [expandedGames, setExpandedGames] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recentlyPlayed, setRecentlyPlayed] = useState(null);
+  const [friendsCount, setFriendsCount] = useState(0);
 
-  // Status Online/Offline Steam
   const getStatusColor = (status) => {
-    // 0: Offline, 1: Online, 2: Busy, 3: Away, 4: Snooze
-    if (status === 1) return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]"; // Online Glow
-    if (status > 1) return "bg-blue-400"; // Away/Busy
-    return "bg-gray-500"; // Offline
+    if (status === 1) return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]";
+    if (status > 1) return "bg-blue-400";
+    return "bg-gray-500";
   };
 
-  const getStatusText = (status) => {
-    if (status === 1) return "Online";
-    if (status > 1) return "Away/Busy";
-    return "Offline";
-  };
+  const API_KEY = "F10E38DFF1FBB84407DF02D50B49A8CF";
+  const PROXY_URL = "https://api.codetabs.com/v1/proxy?quest=";
+
+  const fetchWithProxy = (url) =>
+    fetch(`${PROXY_URL}${encodeURIComponent(url)}`).then((r) => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
 
-    // ⚠️ PENTING: Di Production, jangan taruh API KEY di frontend. Gunakan .env
-    const API_KEY = "A606B68DE5932545085B42E948C90379"; 
-    const PROXY_URL = "https://api.codetabs.com/v1/proxy?quest=";
-
     async function fetchData() {
       try {
-        const fetchWithProxy = (url) => 
-          fetch(`${PROXY_URL}${encodeURIComponent(url)}`).then((res) => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return res.json();
-          });
+        const mainSteamId = steamIds[0];
 
-        const [profileRes, gamesRes] = await Promise.all([
-          fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${steamId}`),
-          fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${steamId}&include_appinfo=true`),
+        const profileReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${mainSteamId}`);
+        const friendReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${API_KEY}&steamid=${mainSteamId}&relationship=friend`);
+
+        const gamesPromises = steamIds.map((id) =>
+          fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${id}&include_appinfo=true&include_played_free_games=true`)
+        );
+        const recentPromises = steamIds.map((id) =>
+          fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${API_KEY}&steamid=${id}`)
+        );
+
+        const [profileRes, friendRes, ...allGamesRes] = await Promise.all([
+          profileReq,
+          friendReq,
+          ...gamesPromises,
+          ...recentPromises,
         ]);
 
         if (!mounted) return;
 
-        const profileData = profileRes.response?.players?.[0];
-        const rawGames = gamesRes.response?.games || [];
+        setProfile(profileRes.response?.players?.[0]);
+        setFriendsCount(friendRes.friendslist?.friends?.length || 0);
 
-        if (!profileData) throw new Error("Profile not found");
+        const ownedGamesResponses = allGamesRes.slice(0, steamIds.length);
+        const recentGamesResponses = allGamesRes.slice(steamIds.length);
 
-        // Logic Sorting dipindah ke sini agar aman
-        const sortedGames = [...rawGames].sort((a, b) => b.playtime_forever - a.playtime_forever);
-        
-        setProfile(profileData);
-        setStats({
-          games: sortedGames,
-          total_count: gamesRes.response?.game_count || 0
+        const mergedGamesMap = new Map();
+        const mergedRecentMap = new Map();
+
+        ownedGamesResponses.forEach((res) => {
+          (res.response?.games || []).forEach((game) => {
+            if (mergedGamesMap.has(game.appid)) {
+              mergedGamesMap.get(game.appid).playtime_forever += game.playtime_forever;
+            } else {
+              mergedGamesMap.set(game.appid, { ...game });
+            }
+          });
         });
 
-        if (sortedGames.length > 0) {
-          setTopGame(sortedGames[0]);
-        }
+        recentGamesResponses.forEach((res) => {
+          (res.response?.games || []).forEach((game) => {
+            if (mergedRecentMap.has(game.appid)) {
+              mergedRecentMap.get(game.appid).playtime_2weeks += game.playtime_2weeks;
+            } else {
+              mergedRecentMap.set(game.appid, { ...game });
+            }
+          });
+        });
 
+        const finalGamesList = Array.from(mergedGamesMap.values()).sort((a, b) => b.playtime_forever - a.playtime_forever);
+
+        setStats({
+          games: finalGamesList,
+          total_count: finalGamesList.length,
+        });
+
+        setTopGames(finalGamesList.slice(0, 5));
+        setRecentlyPlayed(Array.from(mergedRecentMap.values()));
       } catch (err) {
-        if (mounted) setError(err.message || "Failed to fetch data");
+        console.error(err);
+        if (mounted) setError("Gagal load data steam.");
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
     fetchData();
-
     return () => {
       mounted = false;
     };
-  }, [steamId]);
+  }, [steamIds]);
 
-  // --- LOADING STATE (SKELETON) ---
+  useEffect(() => {
+    if (topGames.length === 0) return;
+
+    const currentGame = topGames[activeGameIndex];
+
+    if (achievementsCache[currentGame.appid] !== undefined) {
+      return;
+    }
+
+    setLoadingAch(true);
+
+    async function findAchievementData() {
+      let foundData = null;
+
+      for (const steamId of steamIds) {
+        try {
+          const res = await fetchWithProxy(
+            `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${currentGame.appid}&key=${API_KEY}&steamid=${steamId}`
+          );
+
+          if (res.playerstats && res.playerstats.achievements && res.playerstats.achievements.length > 0) {
+            const all = res.playerstats.achievements;
+            const unlocked = all.filter((a) => a.achieved === 1).length;
+
+            foundData = {
+              current: unlocked,
+              total: all.length,
+              percentage: Math.round((unlocked / all.length) * 100),
+              found: true,
+              sourceAccount: steamId,
+            };
+
+            if (res.playerstats.success) break;
+          }
+        } catch (err) {
+          continue;
+        }
+      }
+
+      setAchievementsCache((prev) => ({
+        ...prev,
+        [currentGame.appid]: foundData || { found: false },
+      }));
+
+      setLoadingAch(false);
+    }
+
+    findAchievementData();
+  }, [activeGameIndex, topGames, steamIds]);
+
+  const handlePrev = () => {
+    setActiveGameIndex((prev) => (prev === 0 ? topGames.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setActiveGameIndex((prev) => (prev === topGames.length - 1 ? 0 : prev + 1));
+  };
+
+  // --- SKELETON LOADING (Dynamic Theme) ---
   if (loading) {
     return (
-      <div className="w-full max-w-2xl bg-[#171a21] p-6 rounded-xl border border-gray-700 shadow-xl animate-pulse flex gap-4">
-        <div className="w-24 h-full bg-gray-700 rounded-lg"></div>
+      <div className={`w-full max-w-2xl p-6 rounded-xl shadow-xl animate-pulse flex gap-4 border
+        ${isDarkMode 
+            ? "bg-[#171a21] border-gray-700" 
+            : "bg-white border-gray-200"
+        }`}>
+        <div className={`w-24 h-24 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>
         <div className="flex-1 space-y-3">
-          <div className="h-6 bg-gray-700 rounded w-1/3"></div>
-          <div className="h-4 bg-gray-700 rounded w-1/4"></div>
-          <div className="h-20 bg-gray-700 rounded w-full mt-4"></div>
+          <div className={`h-6 rounded w-1/3 ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>
+          <div className={`h-20 rounded w-full mt-4 ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>
         </div>
       </div>
     );
   }
 
-  // --- ERROR STATE ---
-  if (error) {
-    return (
-      <div className="w-full max-w-2xl p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-200 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-        <span>Error: {error}</span>
-      </div>
-    );
-  }
-
+  if (error) return <div className="p-4 bg-red-900/20 text-red-200 border border-red-500 rounded">{error}</div>;
   if (!profile) return null;
 
-  return (
-    <div className="font-sans antialiased text-gray-200 w-full h-full  mx-auto cursor-target">
-      {/* CARD CONTAINER with Steam Gradient */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#171a21] to-[#1b2838] border border-[#2a475e] shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all hover:shadow-[0_8px_40px_rgba(102,192,244,0.1)]">
-        
-        {/* Background Decoration (Abstract Glow) */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#66c0f4] opacity-5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+  const activeGame = topGames[activeGameIndex];
+  const activeAch = activeGame ? achievementsCache[activeGame.appid] : null;
 
-        <div className="relative p-5 flex flex-col sm:flex-row gap-5">
-          
-          {/* 1. AVATAR COLUMN */}
-          <div className="flex-shrink-0 flex flex-col items-center sm:items-start">
-            <div className="relative group">
-              <div className={`absolute -inset-0.5 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200 ${profile.personastate === 1 ? 'bg-green-400' : 'bg-blue-600'}`}></div>
+  return (
+    <div className={`font-sans antialiased w-full mx-auto transition-colors duration-300
+        ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>
+      
+      {/* 2. MAIN CARD CONTAINER (Ubah style disini) */}
+      <div
+        className={`relative overflow-hidden cursor-target rounded-xl border shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all group-card
+        ${
+          isDarkMode
+            ? "bg-gradient-to-br from-[#171a21] to-[#1b2838] border-[#2a475e]"
+            : "bg-gradient-to-br from-white to-gray-100 border-gray-300 shadow-lg"
+        }`}
+      >
+        {/* Abstract Glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#66c0f4] opacity-5 rounded-full blur-[80px] pointer-events-none"></div>
+
+        <div className="relative p-5 flex flex-col gap-6">
+          {/* HEADER (Avatar etc) */}
+          <div className="flex flex-col sm:flex-row gap-5 items-start">
+            <div className="relative group flex-shrink-0 mx-auto sm:mx-0">
+              <div
+                className={`absolute -inset-0.5 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200 ${
+                  profile.personastate === 1 ? "bg-green-400" : "bg-blue-600"
+                }`}
+              ></div>
               <img
                 src={profile.avatarfull}
                 alt={profile.personaname}
-                className="relative w-28 h-28 rounded-lg object-cover border-2 border-[#2a475e] shadow-lg"
+                className="relative w-24 h-24 rounded-lg object-cover border-2 border-[#2a475e] shadow-lg"
               />
-              <div className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-2 border-[#1b2838] ${getStatusColor(profile.personastate)}`} />
+              <div
+                className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#1b2838] ${getStatusColor(
+                  profile.personastate
+                )}`}
+              />
             </div>
-            
-            <div className="mt-3 text-center sm:text-left">
-              <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-[#000000]/40 border border-gray-700 ${profile.personastate === 1 ? 'text-green-400' : 'text-gray-400'}`}>
-                {getStatusText(profile.personastate)}
+
+            <div className="flex-1 w-full text-center sm:text-left">
+              <a
+                href={profile.profileurl}
+                target="_blank"
+                rel="noreferrer"
+                className={`text-2xl font-bold transition-colors truncate block
+                    ${isDarkMode ? "text-white hover:text-[#66c0f4]" : "text-gray-900 hover:text-blue-600"}`}
+              >
+                {profile.personaname}
+              </a>
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 text-xs text-[#8f98a0] mt-2">
+                {profile.loccountrycode && (
+                  <span className={`flex items-center gap-1 px-2 py-1 rounded ${isDarkMode ? "bg-[#2a475e]/20" : "bg-gray-200 text-gray-700"}`}>
+                    <img
+                      src={`https://flagcdn.com/20x15/${profile.loccountrycode.toLowerCase()}.png`}
+                      alt="flag"
+                      className="w-4 opacity-80"
+                    />
+                    {profile.loccountrycode}
+                  </span>
+                )}
+                <span className={`px-2 py-1 rounded ${isDarkMode ? "bg-[#2a475e]/20" : "bg-gray-200 text-gray-700"}`}>
+                    Joined {new Date(profile.timecreated * 1000).getFullYear()}
+                </span>
+                <span className={`flex items-center gap-1 px-2 py-1 rounded cursor-default ${isDarkMode ? "bg-[#2a475e]/20 hover:text-white" : "bg-gray-200 text-gray-700"}`}>
+                  {friendsCount} Friends
+                </span>
+              </div>
+            </div>
+
+            <div className={`hidden sm:flex flex-col items-center px-4 py-2 rounded-lg border 
+                ${isDarkMode ? "bg-[#000000]/30 border-[#2a475e]" : "bg-white border-gray-300 shadow-sm"}`}>
+              <span className={`text-xl font-bold leading-none ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  {stats?.total_count || 0}
+              </span>
+              <span className={`text-[9px] uppercase tracking-wider mt-1 ${isDarkMode ? "text-[#66c0f4]" : "text-blue-600"}`}>
+                  Games
               </span>
             </div>
           </div>
 
-          {/* 2. MAIN INFO COLUMN */}
-          <div className="flex-1 w-full">
-            <div className="flex justify-between items-start">
-              <div>
-                <a
-                  href={`https://steamcommunity.com/profiles/${profile.steamid}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-2xl font-bold text-white hover:text-[#66c0f4] transition-colors truncate block"
+          {!compact && activeGame && (
+            <>
+              {/* --- TOP 5 CAROUSEL --- */}
+              <div className="relative group">
+                <button
+                  onClick={handlePrev}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 bg-black/50 hover:bg-[#66c0f4] rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg"
                 >
-                  {profile.personaname}
-                </a>
-                <div className="flex items-center gap-2 text-sm text-[#8f98a0] mt-1">
-                  {profile.realname && <span>{profile.realname}</span>}
-                  {profile.loccountrycode && (
-                    <>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <img 
-                          src={`https://flagcdn.com/20x15/${profile.loccountrycode.toLowerCase()}.png`} 
-                          alt={profile.loccountrycode} 
-                          className="w-4 h-3 opacity-80"
+                  ❮
+                </button>
+
+                <button
+                  onClick={handleNext}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 bg-black/50 hover:bg-[#66c0f4] rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg"
+                >
+                  ❯
+                </button>
+
+                {/* CARD CONTENT (Carousel Item) */}
+                <div className={`relative overflow-hidden rounded-lg border transition-all min-h-[140px]
+                    ${isDarkMode ? "bg-[#101216] border-gray-800" : "bg-white border-gray-200 shadow-sm"}`}>
+                  
+                  {/* Background Image Effect (Hanya di Dark Mode biar tidak kotor di Light Mode) */}
+                  {isDarkMode && (
+                      <div className="absolute inset-0 overflow-hidden opacity-20">
+                        <img
+                          key={activeGame.appid}
+                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
+                          className="w-full h-full object-cover blur-xl scale-150 transition-transform duration-700"
+                          alt=""
                         />
-                        {profile.loccountrycode}
-                      </span>
-                    </>
+                      </div>
                   )}
+
+                  <div className="relative p-4 flex flex-col gap-3 z-10">
+                    {/* Game Info Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
+                          alt={activeGame.name}
+                          className="w-12 h-12 rounded shadow-lg"
+                        />
+                        <div>
+                          <div className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDarkMode ? "text-[#66c0f4]" : "text-blue-600"}`}>
+                            Top #{activeGameIndex + 1} Most Played
+                          </div>
+                          <div className={`font-bold text-lg leading-tight line-clamp-1 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                            {activeGame.name}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                            {formatPlaytime(activeGame.playtime_forever)}
+                        </div>
+                        <div className="text-[10px] text-gray-500 uppercase">Hours</div>
+                      </div>
+                    </div>
+
+                    {/* DYNAMIC ACHIEVEMENT BAR */}
+                    <div className="h-8 flex flex-col justify-center">
+                      {loadingAch ? (
+                        <div className={`w-full h-1.5 rounded-full overflow-hidden animate-pulse ${isDarkMode ? "bg-gray-800" : "bg-gray-200"}`}>
+                          <div className={`h-full w-1/3 ${isDarkMode ? "bg-gray-600" : "bg-gray-400"}`}></div>
+                        </div>
+                      ) : activeAch && activeAch.found ? (
+                        <div className={`w-full rounded-lg p-2 border 
+                            ${isDarkMode ? "bg-[#000000]/40 border-white/5" : "bg-gray-100 border-gray-200"}`}>
+                          <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+                            <span className={`font-semibold ${isDarkMode ? "text-[#66c0f4]" : "text-blue-600"}`}>Achievement</span>
+                            <span>
+                              {activeAch.percentage}% ({activeAch.current}/{activeAch.total})
+                            </span>
+                          </div>
+                          <div className={`w-full rounded-full h-1.5 overflow-hidden ${isDarkMode ? "bg-gray-700/50" : "bg-gray-300"}`}>
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-[#66c0f4] h-1.5 rounded-full shadow-[0_0_10px_rgba(102,192,244,0.5)] transition-all duration-1000"
+                              style={{ width: `${activeAch.percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-gray-500 text-center italic">
+                          No stats available / Profile Private
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* PAGINATION DOTS */}
+                <div className="flex justify-center gap-1.5 mt-2">
+                  {topGames.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveGameIndex(idx)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all 
+                        ${idx === activeGameIndex 
+                            ? "bg-[#66c0f4] w-4" 
+                            : isDarkMode ? "bg-gray-600 hover:bg-gray-400" : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                    />
+                  ))}
                 </div>
               </div>
 
-              {/* Game Count Badge */}
-              <div className="bg-[#000000]/30 px-3 py-2 rounded-lg border border-[#2a475e] text-center min-w-[80px]">
-                 <span className="block text-xl font-bold text-white">{stats?.total_count || 0}</span>
-                 <span className="text-[10px] uppercase text-[#66c0f4] tracking-wide">Games</span>
-              </div>
-            </div>
-
-            {/* 3. TOP GAME HIGHLIGHT */}
-            {!compact && topGame && (
-              <div className="mt-5 p-3 rounded-lg bg-gradient-to-r from-[#16202d] to-[#1b2838] border border-[#2a475e]/50 relative group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#66c0f4] rounded-l-lg"></div>
-                <div className="flex justify-between items-center pl-2">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.699-3.181a1 1 0 011.827.95l-1.39 5.865a7.001 7.001 0 01-14.18 0l-1.39-5.865a1 1 0 011.827-.95l1.699 3.181L9 4.323V3a1 1 0 011-1zm-5 8.274l-.818 3.452a5 5 0 009.636 0l-.818-3.452a6.992 6.992 0 01-8 0z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-xs font-semibold text-[#66c0f4] uppercase tracking-wider">Most Played</span>
-                    </div>
-                    <h3 className="text-white font-medium truncate max-w-[200px] sm:max-w-xs">{topGame.name}</h3>
+              {/* --- RECENTLY PLAYED --- */}
+              {recentlyPlayed && recentlyPlayed.length > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-1 w-1 bg-[#66c0f4] rounded-full"></div>
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Recently Played</h4>
                   </div>
-                  <div className="text-right">
-                    <span className="block text-lg font-bold text-gray-200">{formatPlaytime(topGame.playtime_forever)}</span>
-                    <span className="text-xs text-gray-500">Total Hours</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {recentlyPlayed.slice(0, 4).map((game) => (
+                      <div
+                        key={game.appid}
+                        className={`flex items-center gap-3 p-2.5 rounded border transition-all group
+                            ${isDarkMode 
+                                ? "bg-[#000000]/20 border-transparent hover:border-[#66c0f4]/20 hover:bg-[#2a475e]/20" 
+                                : "bg-white border-gray-100 hover:border-blue-300 hover:bg-blue-50 shadow-sm"
+                            }`}
+                      >
+                        <img
+                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
+                          alt={game.name}
+                          className="w-10 h-10 rounded shadow-sm opacity-80 group-hover:opacity-100 transition-opacity"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
+                        />
+                        <div className="overflow-hidden">
+                          <div className={`text-sm font-medium truncate transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-[#66c0f4]" : "text-gray-800 group-hover:text-blue-600"}`}>
+                              {game.name}
+                          </div>
+                          <div className="text-[11px] text-[#4c6b8a] flex gap-2">
+                            <span>{formatPlaytime(game.playtime_2weeks)} past 2 weeks</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                
-                {/* Background Image of Game (Optional/Advanced: requires valid img id) */}
-                <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-[#000] to-transparent opacity-20 pointer-events-none"></div>
-              </div>
-            )}
+              )}
 
-            {/* 4. RECENT/TOP GAMES LIST */}
-            {!compact && stats?.games && stats.games.length > 0 && (
-              <div className="mt-4 space-y-1">
-                {stats.games.slice(0, expandedGames ? 6 : 2).map((game) => (
-                  <div key={game.appid} className="flex justify-between items-center text-sm p-2 hover:bg-[#ffffff]/5 rounded transition-colors group cursor-default">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <img 
-                        src={`http://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`} 
-                        alt="" 
-                        className="w-5 h-5 rounded-sm opacity-70 group-hover:opacity-100"
-                        onError={(e) => {e.target.style.display='none'}}
-                      />
-                      <span className="truncate text-gray-400 group-hover:text-gray-200">{game.name}</span>
-                    </div>
-                    <span className="font-mono text-xs text-[#4c6b8a] whitespace-nowrap">{formatPlaytime(game.playtime_forever)}</span>
-                  </div>
-                ))}
-                
-                {stats.games.length > 2 && (
+              {/* --- LIBRARY LIST --- */}
+              {stats?.games && (
+                <div className={`pt-3 mt-2 border-t ${isDarkMode ? "border-gray-800/50" : "border-gray-200"}`}>
                   <button
                     onClick={() => setExpandedGames(!expandedGames)}
-                    className="w-full mt-2 py-1 text-xs text-[#66c0f4] hover:text-white hover:bg-[#2a475e] rounded transition-colors flex items-center justify-center gap-1"
+                    className={`w-full group flex justify-between items-center text-xs transition-colors py-1 focus:outline-none
+                        ${isDarkMode ? "text-gray-500 hover:text-[#66c0f4]" : "text-gray-500 hover:text-blue-600"}`}
                   >
-                   {expandedGames ? "Show Less" : `View ${stats.games.length - 2} More Games`}
+                    <span className="uppercase tracking-wider font-semibold">
+                      Full Library ({stats.games.length})
+                    </span>
+                    <span className="transform group-hover:translate-y-0.5 transition-transform">
+                      {expandedGames ? "▲" : "▼"}
+                    </span>
                   </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Footer Info */}
-        {!compact && (
-           <div className="bg-[#000000]/20 px-5 py-2 flex justify-between items-center text-[10px] text-gray-500 border-t border-[#2a475e]/30">
-             <span>Joined {new Date(profile.timecreated * 1000).getFullYear()}</span>
-             <span>ID: {steamId}</span>
-           </div>
-        )}
+                  {expandedGames && (
+                    <div className="mt-3 space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                      {stats.games.map((game, idx) => (
+                        <div
+                          key={game.appid}
+                          className={`flex justify-between items-center text-[11px] p-1.5 rounded transition-colors
+                            ${isDarkMode ? "hover:bg-white/5" : "hover:bg-gray-100"}`}
+                        >
+                          <div className="flex items-center gap-2 overflow-hidden w-2/3">
+                            <span className="text-gray-500 text-[9px] w-4">{idx + 1}.</span>
+                            <span className={`truncate ${isDarkMode ? "text-gray-400" : "text-gray-700"}`}>{game.name}</span>
+                          </div>
+                          <span className="text-gray-500 font-mono">
+                            {formatPlaytime(game.playtime_forever)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
