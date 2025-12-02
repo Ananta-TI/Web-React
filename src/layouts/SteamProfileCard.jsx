@@ -127,7 +127,7 @@ export default function SteamProfileCard({
         setRecentlyPlayed(Array.from(mergedRecentMap.values()));
       } catch (err) {
         console.error(err);
-        if (mounted) setError("Gagal load data steam.");
+        if (mounted) setError("Hmmmmmmmmm,,,😔");
       } finally {
         if (mounted) setLoading(false);
       }
