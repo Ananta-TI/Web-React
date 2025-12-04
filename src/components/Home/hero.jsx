@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 // Import LiquidEther diubah menjadi import dinamis (Code Splitting)
 const LiquidEther = lazy(() => import('./LiquidEther')); 
 
-import { ChevronDown } from "lucide-react";
+// import { ChevronDown } from "lucide-react";
 import Magnet from "./magnet"; // Import komponen Magnet
 
 
@@ -14,7 +14,6 @@ export default function Hero() {
 // Biasanya, window.scrollTo(0, 0) lebih baik ditempatkan di useEffect 
 // atau di App.jsx jika Anda ingin memastikan ini hanya berjalan sekali, 
 // tapi saya biarkan di sini sesuai kode Anda:
-window.scrollTo(0, 0);
 
   return (
     <section
@@ -48,7 +47,7 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
           </Suspense>
       </div>
 
-      {/* Hero Content (Konten Kritis) */}
+{/* Hero Content (Konten Kritis) */}
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -66,9 +65,9 @@ isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
 // ATRIBUT LCP KRITIS
 fetchpriority="high" 
   loading="eager" 
-  style={{
-    animation: "scale-in-hor-center 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both",
-  }}
+//   style={{
+//      animation: "scale-in-hor-center 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both",
+//   }}
   className="object-cover w-full h-full"
 />
           </div>

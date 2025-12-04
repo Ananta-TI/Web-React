@@ -335,10 +335,16 @@ useEffect(() => {
                         e.preventDefault();
                         navigate("/");
                         setIsOpen(false);
+                       window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+                        
+
                       }}
                       className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
                       initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+                      animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
                     >
                       ← Back to Home
                     </motion.a>
