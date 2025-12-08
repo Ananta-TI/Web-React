@@ -18,6 +18,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import Contact from "./layouts/contact/contact.jsx";
 import Timeline from "./layouts/timeline";
 import Scanner from "./layouts/scanner";
+import ScannerCharts from "./layouts/scannerChart";
 // import Courses from "./layouts/Courses";
 
 // import Courses from "./layouts/Courses";
@@ -41,6 +42,7 @@ function App() {
               <Hero />
               <Hero2 />
               <About />
+              <ScannerCharts />
               <Project />
             </>
           }

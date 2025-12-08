@@ -11,6 +11,7 @@
     "start": "api/index.js"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.14.4",
     "@emailjs/browser": "^4.4.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
