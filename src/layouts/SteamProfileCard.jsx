@@ -15,7 +15,30 @@ const MANUAL_FRAMES = {
   "76561199745356826": "https://shared.fastly.steamstatic.com/community_assets/images/items/4101120/688f97fa743ac41b68ab10d5236a02f01ecb9725.png", // Contoh Frame Dota 2
   // Tambahkan ID lain jika punya frame
 };
+// Helper untuk mendapatkan class warna text berdasarkan status
+const getStatusColorClass = (profile) => {
+  // 1. Priority Utama: In-Game (Hijau Steam)
+  if (profile.gameextrainfo) {
+    return "text-emerald-500 font-bold drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"; 
+  }
 
+  // 2. Status Biasa
+  switch (profile.personastate) {
+    case 0: return "text-gray-500"; // Offline
+    case 1: return "text-blue-400 font-semibold"; // Online
+    case 2: return "text-red-500"; // Busy
+    case 3: return "text-amber-500"; // Away
+    case 4: return "text-blue-300"; // Snooze
+    default: return "text-blue-400"; // Looking to trade/play
+  }
+};
+
+// Helper Text (yang kamu buat tadi)
+const getStatusText = (profile) => {
+  if (profile.gameextrainfo) return `Playing ${profile.gameextrainfo}`;
+  const states = ["Offline", "Online", "Busy", "Away", "Snooze", "Looking to Trade", "Looking to Play"];
+  return states[profile.personastate] || "Offline";
+};
 export default function SteamProfileCard({
   steamIds = ["76561199745356826", "76561199166544214", "76561198773672138"],
   compact = false,
@@ -53,7 +76,7 @@ export default function SteamProfileCard({
       return r.json();
     });
 
-  useEffect(() => {
+useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
@@ -62,12 +85,16 @@ export default function SteamProfileCard({
       try {
         const mainSteamId = steamIds[0];
 
+        // 1. Fetch Profile & Friends (Cuma dari Main Account)
         const profileReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${mainSteamId}`);
         const friendReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${API_KEY}&steamid=${mainSteamId}&relationship=friend`);
 
+        // 2. Fetch Owned Games (Dari SEMUA Akun)
         const gamesPromises = steamIds.map((id) =>
           fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${id}&include_appinfo=true&include_played_free_games=true`)
         );
+        
+        // 3. Fetch Recently Played (Dari SEMUA Akun)
         const recentPromises = steamIds.map((id) =>
           fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${API_KEY}&steamid=${id}`)
         );
@@ -81,21 +108,21 @@ export default function SteamProfileCard({
 
         if (!mounted) return;
 
-        // Inject Frame URL ke object profile jika ada di list MANUAL_FRAMES
+        // --- Setup Profile Data ---
         const profileData = profileRes.response?.players?.[0];
         if (profileData && MANUAL_FRAMES[profileData.steamid]) {
             profileData.avatarFrame = MANUAL_FRAMES[profileData.steamid];
         }
-
         setProfile(profileData);
         setFriendsCount(friendRes.friendslist?.friends?.length || 0);
 
+        // --- Pisahkan Response ---
+        // Array slice: bagian awal adalah Owned Games, bagian akhir adalah Recent Games
         const ownedGamesResponses = allGamesRes.slice(0, steamIds.length);
         const recentGamesResponses = allGamesRes.slice(steamIds.length);
 
+        // --- MERGE OWNED GAMES (Total Playtime seumur hidup) ---
         const mergedGamesMap = new Map();
-        const mergedRecentMap = new Map();
-
         ownedGamesResponses.forEach((res) => {
           (res.response?.games || []).forEach((game) => {
             if (mergedGamesMap.has(game.appid)) {
@@ -106,9 +133,13 @@ export default function SteamProfileCard({
           });
         });
 
+        // --- MERGE RECENTLY PLAYED (Logic Baru) ---
+        const mergedRecentMap = new Map();
         recentGamesResponses.forEach((res) => {
+          // Cek apakah response valid dan punya array games
           (res.response?.games || []).forEach((game) => {
             if (mergedRecentMap.has(game.appid)) {
+              // Jika game sudah ada (misal main Dota di Akun 1 & Akun 2), jumlahkan jam main 2 minggunya
               mergedRecentMap.get(game.appid).playtime_2weeks += game.playtime_2weeks;
             } else {
               mergedRecentMap.set(game.appid, { ...game });
@@ -116,7 +147,11 @@ export default function SteamProfileCard({
           });
         });
 
+        // Sorting & Set State
         const finalGamesList = Array.from(mergedGamesMap.values()).sort((a, b) => b.playtime_forever - a.playtime_forever);
+        
+        // PENTING: Sort ulang Recently Played berdasarkan jam main 2 minggu terakhir
+        const finalRecentList = Array.from(mergedRecentMap.values()).sort((a, b) => b.playtime_2weeks - a.playtime_2weeks);
 
         setStats({
           games: finalGamesList,
@@ -124,10 +159,11 @@ export default function SteamProfileCard({
         });
 
         setTopGames(finalGamesList.slice(0, 5));
-        setRecentlyPlayed(Array.from(mergedRecentMap.values()));
+        setRecentlyPlayed(finalRecentList); 
+
       } catch (err) {
         console.error(err);
-        if (mounted) setError("Hmmmmmmmmm,,,😔");
+        if (mounted) setError("Gagal mengambil data Steam 😔");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -202,7 +238,7 @@ export default function SteamProfileCard({
     return (
       <div className={`w-full max-w-2xl p-6 rounded-xl shadow-xl animate-pulse flex gap-4 border
         ${isDarkMode 
-            ? "bg-[#171a21] border-gray-700" 
+            ? "bg-zinc-800 border-gray-700" 
             : "bg-white border-gray-200"
         }`}>
         <div className={`w-24 h-24 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>
@@ -228,12 +264,12 @@ export default function SteamProfileCard({
         className={`relative overflow-hidden cursor-target rounded-xl border shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all group-card
         ${
           isDarkMode
-            ? "bg-gradient-to-br from-[#171a21] to-[#1b2838] border-[#2a475e]"
-            : "bg-gradient-to-br from-white to-gray-100 border-gray-300 shadow-lg"
+            ? "bg-gradient-to-br from-zinc-900 to-zinc-700 border-gray-600 border-b-0"
+            : "bg-gradient-to-br from-white to-gray-100 border-gray-800 shadow-lg border-b-0"
         }`}
       >
         {/* Abstract Glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#66c0f4] opacity-5 rounded-full blur-[80px] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#66eff4] opacity-5 rounded-full blur-[80px] pointer-events-none"></div>
 
         <div className="relative p-5 flex flex-col gap-6">
           {/* HEADER (Avatar etc) */}
@@ -274,6 +310,7 @@ export default function SteamProfileCard({
                       profile.personastate
                     )}`}
                   />
+                  
               </div>
 
             </div>
@@ -288,6 +325,17 @@ export default function SteamProfileCard({
               >
                 {profile.personaname}
               </a>
+              <div className="flex flex-col">
+
+
+  {/* STATUS TEXT DENGAN WARNA */}
+  <div className={`text-xs mt-1 transition-colors ${getStatusColorClass(profile)}`}>
+     {/* Jika sedang main game, tambahkan icon stick game kecil (opsional) */}
+     {profile.gameextrainfo && <span className="mr-1">🎮</span>}
+     
+     {getStatusText(profile)}
+  </div>
+</div>
               <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 text-xs text-[#8f98a0] mt-2">
                 {profile.loccountrycode && (
                   <span className={`flex items-center gap-1 px-2 py-1 rounded ${isDarkMode ? "bg-[#2a475e]/20" : "bg-gray-200 text-gray-700"}`}>
@@ -439,7 +487,7 @@ export default function SteamProfileCard({
                             }`}
                       >
                         <img
-                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
+                          src={`https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
                           alt={game.name}
                           className="w-10 h-10 rounded shadow-sm opacity-80 group-hover:opacity-100 transition-opacity"
                           onError={(e) => {
