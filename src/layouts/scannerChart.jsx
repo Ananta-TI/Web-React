@@ -4,6 +4,7 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import { ThemeContext } from "../context/ThemeContext";
+import DecryptedText from "../components/Shared/DecryptedText";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -385,23 +386,29 @@ export default function ScanStatsDashboard() {
   }, [sortedBarData, isDarkMode, loading]);
 
   return (
-    <section className={`relative w-full min-h-screen py-20 ${
+    <section className={`relative w-full  min-h-screen py-20 ${
       isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-gray-900"
     }`}>
       <div className="container mx-auto px-4 text-center mb-12">
-        <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-          Scan Statistics
+        <h2 className='text-5xl font-bold font-lyrae mb-4 ${isDarkMode ? "text-white" : "text-black"}'>
+          <DecryptedText
+                     text="Scan Statistics"
+                     speed={100}
+                     maxIterations={105}
+                     sequential
+                     animateOn="view"
+                   />
         </h2>
-        <p className={`text-lg ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+        <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
           Comprehensive analysis of all scan activity
         </p>
 
         {/* Stats Cards */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div className="mt-8 grid font-mono grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
           <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-bold text-blue-500">{totalScans}</div>
+            <div className="text-3xl font-bold font-lyrae text-blue-500">{totalScans}</div>
             <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
               Total Scans
             </div>
@@ -409,7 +416,7 @@ export default function ScanStatsDashboard() {
           <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-bold text-green-500">
+            <div className="text-3xl font-lyrae font-bold text-green-500">
               {statusData.find((d) => d.name === "Harmless")?.value || 0}
             </div>
             <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
@@ -419,7 +426,7 @@ export default function ScanStatsDashboard() {
           <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-bold text-amber-500">
+            <div className="text-3xl font-lyrae font-bold text-amber-500">
               {statusData.find((d) => d.name === "Suspicious")?.value || 0}
             </div>
             <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
@@ -429,7 +436,7 @@ export default function ScanStatsDashboard() {
           <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-bold text-red-500">
+            <div className="text-3xl font-lyrae font-bold text-red-500">
               {statusData.find((d) => d.name === "Malicious")?.value || 0}
             </div>
             <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
@@ -444,7 +451,7 @@ export default function ScanStatsDashboard() {
         <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+          <h3 className="text-2xl font-lyrae font-semibold mb-6 flex items-center gap-2">
             <span className="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
             Status Distribution
           </h3>
@@ -461,7 +468,7 @@ export default function ScanStatsDashboard() {
         <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+          <h3 className="text-2xl font-lyrae font-semibold mb-6 flex items-center gap-2">
             <span className="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
             Scan Type Overview
           </h3>
@@ -478,11 +485,11 @@ export default function ScanStatsDashboard() {
         <div className={`lg:col-span-2 rounded-3xl p-8 transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+          <h3 className="text-2xl font-lyrae font-semibold mb-6 flex items-center gap-2">
             <span className="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
             Busiest Hours Ranking
           </h3>
-          <p className={`text-sm mb-4 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+          <p className={`text-sm font-mono mb-4 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
             Hours sorted by scan activity (highest to lowest)
           </p>
           {loading ? (
