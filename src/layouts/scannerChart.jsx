@@ -398,7 +398,7 @@ export default function ScanStatsDashboard() {
 
         {/* Stats Cards */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          <div className={`rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
             <div className="text-3xl font-bold text-blue-500">{totalScans}</div>
@@ -406,7 +406,7 @@ export default function ScanStatsDashboard() {
               Total Scans
             </div>
           </div>
-          <div className={`rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
             <div className="text-3xl font-bold text-green-500">
@@ -416,7 +416,7 @@ export default function ScanStatsDashboard() {
               Harmless
             </div>
           </div>
-          <div className={`rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
             <div className="text-3xl font-bold text-amber-500">
@@ -426,7 +426,7 @@ export default function ScanStatsDashboard() {
               Suspicious
             </div>
           </div>
-          <div className={`rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
             <div className="text-3xl font-bold text-red-500">
@@ -441,7 +441,7 @@ export default function ScanStatsDashboard() {
 
       <div className="container mx-auto px-4 grid gap-8 lg:grid-cols-2">
         {/* Pie Chart */}
-        <div className={`rounded-3xl p-8 transform hover:shadow-2xl transition-all duration-300 ${
+        <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
           <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
@@ -458,7 +458,7 @@ export default function ScanStatsDashboard() {
         </div>
 
         {/* Bar Chart */}
-        <div className={`rounded-3xl p-8 transform hover:shadow-2xl transition-all duration-300 ${
+        <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
           <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
