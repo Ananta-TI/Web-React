@@ -33,7 +33,7 @@
     "form-data": "^4.0.5",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.12",
-    "gsap": "^3.13.0",
+    "gsap": "^3.14.1",
     "hamburger-react": "^2.5.2",
     "lucide-react": "^0.475.0",
     "multer": "^2.0.2",
