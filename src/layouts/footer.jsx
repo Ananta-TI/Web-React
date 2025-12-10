@@ -16,8 +16,9 @@ import { ThemeContext } from "../context/ThemeContext";
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
 import Line from "./line.jsx";
-import ProfileCard from './ProfileCard'
+import ProfileCard from "./ProfileCard";
 import Noise from "../context/Nois.jsx";
+import supabase from "../supabaseClient";
 
 // Utility class
 function cn(...classes) {
@@ -107,25 +108,46 @@ export default function Footer() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Kirim form pakai EmailJS
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setPending(true);
-    setSent(false);
+    setSent(false); // Data yang akan dikirim ke Supabase
+
+    const contactData = {
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+    };
+
     try {
-      await emailjs.sendForm(
+      // 1. Kirim EmailJS (Seperti yang sudah ada)
+      const emailPromise = emailjs.sendForm(
         "service_m3pugyl",
         "template_fbyckkg",
         formEl.current,
         "F7OWxXL91oYx48edi"
-      );
+      ); // 2. Simpan ke Supabase
+
+      const { error: supabaseError } = await supabase
+        .from("contacts") // Ganti 'contacts' jika nama tabel Anda berbeda
+        .insert([contactData]); // Tunggu hingga EmailJS selesai
+
+      await emailPromise;
+
+      if (supabaseError) {
+        console.error("nope:", supabaseError);
+        // Anda bisa memilih untuk melempar error atau hanya logging,
+        // tergantung apakah kegagalan menyimpan data dianggap kegagalan total.
+      }
+
       setSent(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
       setErrors({});
     } catch (err) {
-      console.error("Gagal mengirim pesan:", err);
+      console.error("nope:", err);
     } finally {
       setPending(false);
     }
@@ -136,14 +158,30 @@ export default function Footer() {
   const discoverLinks = [
     { name: "All Projects", path: "/all-projects" },
     { name: "Certificates", path: "/certificates" },
-    {name: "Scanner", path: "/scanner" },
+    { name: "Scanner", path: "/scanner" },
   ];
 
   const socialLinks = [
-    { name: "Github", url: "https://github.com/Ananta-TI", icon: <Github size={18} /> },
-    { name: "LinkedIn", url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/", icon: <Linkedin size={18} /> },
-    { name: "Instagram", url: "https://instagram.com/ntakunti_14", icon: <Instagram size={18} /> },
-    { name: "Tiktok", url: "https://tiktok.com/@ntakunti_14", icon: <Music2 size={18} /> },
+    {
+      name: "Github",
+      url: "https://github.com/Ananta-TI",
+      icon: <Github size={18} />,
+    },
+    {
+      name: "LinkedIn",
+      url: "https://www.linkedin.com/in/ananta-firdaus-93448328b/",
+      icon: <Linkedin size={18} />,
+    },
+    {
+      name: "Instagram",
+      url: "https://instagram.com/ntakunti_14",
+      icon: <Instagram size={18} />,
+    },
+    {
+      name: "Tiktok",
+      url: "https://tiktok.com/@ntakunti_14",
+      icon: <Music2 size={18} />,
+    },
   ];
 
   return (
@@ -156,28 +194,28 @@ export default function Footer() {
     >
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0  pointer-events-none">
-  {/* Background Gradient Base */}
-  <div
-    className={`absolute inset-0 bg-gradient-to-b ${
-      isDarkMode
-        ? "from-zinc-900 via-zinc-950 to-black"
-        : "from-white via-[#c9c9c9] to-[#797979]"
-    }`}
-  />
+        {/* Background Gradient Base */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-b ${
+            isDarkMode
+              ? "from-zinc-900 via-zinc-950 to-black"
+              : "from-white via-[#c9c9c9] to-[#797979]"
+          }`}
+        />
 
-  {/* Noise Component */}
-  <Noise patternAlpha={isDarkMode ? 50 : 70} />
+        {/* Noise Component */}
+        <Noise patternAlpha={isDarkMode ? 50 : 70} />
 
-  {/* --- FADE OUT TOP --- */}
-  {/* Layer ini ditaruh paling bawah (di kode) agar menimpa Noise & Background */}
-  <div
-    className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${
-      isDarkMode
-        ? "from-zinc-900 to-transparent" // Warna awal Dark Mode
-        : "from-[#f7f7f7] to-transparent" // Warna awal Light Mode
-    }`}
-  />
-</div>
+        {/* --- FADE OUT TOP --- */}
+        {/* Layer ini ditaruh paling bawah (di kode) agar menimpa Noise & Background */}
+        <div
+          className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${
+            isDarkMode
+              ? "from-zinc-900 to-transparent" // Warna awal Dark Mode
+              : "from-[#f7f7f7] to-transparent" // Warna awal Light Mode
+          }`}
+        />
+      </div>
       {/* <div className="relative z-50  -mt-50 -py-500">
         <Line />
       </div> */}
@@ -185,7 +223,6 @@ export default function Footer() {
       <div className="w-full mx-auto py-20 px-6 sm:px-12 lg:px-20 max-w-7xl">
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
-          
           {/* Left Section - Profile + Info */}
           <div className="lg:col-span-5 z-10 space-y-10">
             {/* Profile Card */}
@@ -200,7 +237,7 @@ export default function Footer() {
                 showUserInfo={false}
                 enableTilt={true}
                 enableMobileTilt={true}
-                onContactClick={() => console.log('Contact clicked')}
+                onContactClick={() => console.log("Contact clicked")}
               />
             </div>
 
@@ -252,7 +289,9 @@ export default function Footer() {
                         rel="noopener noreferrer"
                         className={cn(
                           "flex gap-2 transition-colors cursor-none hover:opacity-70",
-                          isDarkMode ? "hover:text-zinc-400" : "hover:text-white"
+                          isDarkMode
+                            ? "hover:text-zinc-400"
+                            : "hover:text-white"
                         )}
                       >
                         <div className="flex gap-2 cursor-target">
@@ -283,7 +322,9 @@ export default function Footer() {
                     {field === "message" ? (
                       <textarea
                         name={field}
-                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        placeholder={
+                          field.charAt(0).toUpperCase() + field.slice(1)
+                        }
                         value={formData[field]}
                         onChange={(e) =>
                           setFormData({ ...formData, [field]: e.target.value })
@@ -300,7 +341,9 @@ export default function Footer() {
                       <input
                         name={field}
                         type={field === "email" ? "email" : "text"}
-                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        placeholder={
+                          field.charAt(0).toUpperCase() + field.slice(1)
+                        }
                         value={formData[field]}
                         onChange={(e) =>
                           setFormData({ ...formData, [field]: e.target.value })
@@ -328,33 +371,33 @@ export default function Footer() {
                 ))}
 
                 <button
-  type="submit"
-  disabled={pending}
-  // Tambahkan class 'group' agar kita bisa menganimasi icon di dalamnya saat button di-hover
-  className={cn(
-    "mt-4 group inline-flex cursor-target cursor-none items-center justify-center gap-x-2 border py-3 px-6 rounded-md font-bold",
-    // ANIMASI UTAMA DISINI:
-    "transition-all duration-600 ease-out", // Bikin transisi halus
-    "hover:shadow-lg",      // Membesar & ada bayangan pas hover
-    isDarkMode
-      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 hover:shadow-white/10"
-      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50 hover:shadow-zinc-900/20",
-    "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed" // Reset animasi kalau disabled
-  )}
->
-  {pending ? (
-    <>
-      <Loader className="h-5 w-5 animate-spin" />
-      Sending...
-    </>
-  ) : (
-    <>
-      {/* Animasi Ikon: Goyang dikit & miring pas parent di-hover */}
-      <Mail className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-12" />
-      Send Message
-    </>
-  )}
-</button>
+                  type="submit"
+                  disabled={pending}
+                  // Tambahkan class 'group' agar kita bisa menganimasi icon di dalamnya saat button di-hover
+                  className={cn(
+                    "mt-4 group inline-flex cursor-target cursor-none items-center justify-center gap-x-2 border py-3 px-6 rounded-md font-bold",
+                    // ANIMASI UTAMA DISINI:
+                    "transition-all duration-600 ease-out", // Bikin transisi halus
+                    "hover:shadow-lg", // Membesar & ada bayangan pas hover
+                    isDarkMode
+                      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 hover:shadow-white/10"
+                      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50 hover:shadow-zinc-900/20",
+                    "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed" // Reset animasi kalau disabled
+                  )}
+                >
+                  {pending ? (
+                    <>
+                      <Loader className="h-5 w-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      {/* Animasi Ikon: Goyang dikit & miring pas parent di-hover */}
+                      <Mail className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-12" />
+                      Send Message
+                    </>
+                  )}
+                </button>
 
                 {sent && (
                   <span className="text-green-400 font-mono font-bold text-sm mt-3">
@@ -371,15 +414,13 @@ export default function Footer() {
           id="contact"
           className={cn(
             "flex relative flex-col z-10 sm:flex-row justify-between items-center pt-8 border-t-2 text-sm gap-4",
-            isDarkMode
-              ? "border-white text-white"
-              : "border-black text-white"
+            isDarkMode ? "border-white text-white" : "border-black text-white"
           )}
         >
           <div className="font-mono z-10 font-bold">
             © 2025 All Rights Reserved
           </div>
-          
+
           <button
             onClick={scrollToTop}
             className={cn(
