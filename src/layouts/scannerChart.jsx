@@ -333,74 +333,75 @@ export default function ScanStatsDashboard() {
   }, [trendData, isDarkMode, loading]);
 
   return (
-    <section className={`relative w-full min-h-screen py-20 ${
+    <section className={`relative w-full min-h-screen py-12 sm:py-20 ${
       isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-gray-900"
     }`}>
-      <div className="container mx-auto px-4 text-center mb-12">
-        <h2 className={`text-5xl font-bold font-lyrae mb-4 ${isDarkMode ? "text-white" : "text-black"}`}>
+      <div className="container mx-auto px-4 sm:px-6 text-center mb-8 sm:mb-12"> 
+        <h2 className={`text-4xl sm:text-5xl font-bold font-lyrae mb-2 sm:mb-4 ${isDarkMode ? "text-white" : "text-black"}`}> 
           <DecryptedText
-             text="Scan Statistics"
-             speed={100}
-             maxIterations={105}
-             sequential
-             animateOn="view"
-           />
+            text="Scan Statistics"
+            speed={100}
+            maxIterations={105}
+            sequential
+            animateOn="view"
+          />
         </h2>
-        <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+        <p className={`text-base sm:text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
           Comprehensive analysis of all scan activity
         </p>
 
-        {/* Stats Cards */}
-        <div className="mt-8 grid font-mono grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        {/* Stats Cards: Gunakan grid-cols-2 untuk mobile kecil agar tidak terlalu panjang ke bawah */}
+        <div className="mt-8 grid font-mono grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"> 
           {/* Card Total */}
-          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-xl sm:rounded-2xl cursor-target p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-bold font-lyrae text-blue-500">{totalScans}</div>
-            <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Total Scans</div>
+            <div className="text-2xl sm:text-3xl font-bold font-lyrae text-blue-500">{totalScans}</div>
+            <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Total Scans</div>
           </div>
           {/* Card Harmless */}
-          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-xl sm:rounded-2xl cursor-target p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-lyrae font-bold text-green-500">
+            <div className="text-2xl sm:text-3xl font-lyrae font-bold text-green-500">
               {statusData.find((d) => d.name === "Harmless")?.value || 0}
             </div>
-            <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Harmless</div>
+            <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Harmless</div>
           </div>
           {/* Card Suspicious */}
-          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-xl sm:rounded-2xl cursor-target p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-lyrae font-bold text-amber-500">
+            <div className="text-2xl sm:text-3xl font-lyrae font-bold text-amber-500">
               {statusData.find((d) => d.name === "Suspicious")?.value || 0}
             </div>
-            <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Suspicious</div>
+            <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Suspicious</div>
           </div>
           {/* Card Malicious */}
-          <div className={`rounded-2xl cursor-target p-6 transform hover:scale-105 transition-all duration-300 ${
+          <div className={`rounded-xl sm:rounded-2xl cursor-target p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
             isDarkMode ? "bg-zinc-900/50 border border-zinc-700" : "bg-white border border-gray-200 shadow-sm"
           }`}>
-            <div className="text-3xl font-lyrae font-bold text-red-500">
+            <div className="text-2xl sm:text-3xl font-lyrae font-bold text-red-500">
               {statusData.find((d) => d.name === "Malicious")?.value || 0}
             </div>
-            <div className={`text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Malicious</div>
+            <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Malicious</div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 grid gap-8 lg:grid-cols-2">
+      {/* Chart containers: Gunakan grid-cols-1 di mobile, dan lg:grid-cols-2 di layar besar */}
+      <div className="container mx-auto px-4 sm:px-6 grid gap-6 lg:grid-cols-2"> 
         {/* Pie Chart (Status) */}
-        <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
+        <div className={`rounded-xl sm:rounded-3xl p-6 sm:p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-lyrae font-semibold mb-6 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
+          <h3 className="text-xl sm:text-2xl font-lyrae font-semibold mb-4 sm:mb-6 flex items-center gap-2"> 
+            <span className="w-1 h-5 sm:w-1.5 sm:h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
             Status Distribution
           </h3>
           {loading ? (
-            <div className="h-[350px] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="h-[300px] sm:h-[350px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500"></div>
             </div>
           ) : (
             <div ref={chart1Ref} style={{ width: "100%", height: "350px" }}></div>
@@ -408,40 +409,40 @@ export default function ScanStatsDashboard() {
         </div>
 
         {/* Bar Chart (Type) */}
-        <div className={`rounded-3xl p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
+        <div className={`rounded-xl sm:rounded-3xl p-6 sm:p-8 cursor-target transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-lyrae font-semibold mb-6 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
+          <h3 className="text-xl sm:text-2xl font-lyrae font-semibold mb-4 sm:mb-6 flex items-center gap-2">
+            <span className="w-1 h-5 sm:w-1.5 sm:h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></span>
             Scan Type Overview
           </h3>
           {loading ? (
-            <div className="h-[350px] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            <div className="h-[300px] sm:h-[350px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-purple-500"></div>
             </div>
           ) : (
             <div ref={chart2Ref} style={{ width: "100%", height: "350px" }}></div>
           )}
         </div>
 
-        {/* --- CHART 3: NEW ACTIVITY PULSE (Menggantikan Sorted Bar) --- */}
-        <div className={`lg:col-span-2 rounded-3xl p-8 transform hover:shadow-2xl transition-all duration-300 ${
+        {/* --- CHART 3: NEW ACTIVITY PULSE (Area Chart) --- */}
+        <div className={`lg:col-span-2 rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-900/50 border border-zinc-700 shadow-xl" : "bg-white border border-gray-200 shadow-lg"
         }`}>
-          <h3 className="text-2xl font-lyrae font-semibold mb-2 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></span>
+          <h3 className="text-xl sm:text-2xl font-lyrae font-semibold mb-2 flex items-center gap-2">
+            <span className="w-1 h-5 sm:w-1.5 sm:h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></span>
             Activity Pulse
           </h3>
-          <p className={`text-sm font-mono mb-6 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-             Real-time scan frequency timeline
+          <p className={`text-xs sm:text-sm font-mono mb-4 sm:mb-6 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+            Real-time scan frequency timeline
           </p>
           
           {loading ? (
-            <div className="h-[450px] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            <div className="h-[350px] sm:h-[450px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-indigo-500"></div>
             </div>
           ) : trendData.length === 0 ? (
-            <div className="h-[450px] flex items-center justify-center">
+            <div className="h-[350px] sm:h-[450px] flex items-center justify-center">
                <p className={isDarkMode ? "text-zinc-400" : "text-gray-600"}>No activity recorded yet</p>
             </div>
           ) : (
