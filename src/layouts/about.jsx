@@ -42,13 +42,16 @@ const About = () => {
         </h2>
 
         <TextReveal
-          className="relative sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 px-2 sm:px-4 md:px-0"
-          text="Hi there! 👋 I'm Ananta Firdaus, a frontend developer with a unique combination of traits—I'm both a perfectionist and lazy. I always strive for the most efficient way to achieve high-quality results. Currently studying Informatics Engineering at Politeknik Caltex Riau, I have a strong foundation in logical thinking and structured problem-solving. However, my passion lies in crafting elegant and interactive user interfaces, ensuring that every design is not only visually appealing but also intuitive and seamless. Lately, I've been diving deeper into React.js, exploring dynamic UI development and smooth animations to create engaging digital experiences. My goal is to bridge aesthetics and functionality, making technology feel effortless for users."
+          // Hapus -mt-2 disini jika masih terlalu dekat dengan judul "About Me"
+          className="relative lg:-mb-25 -mt-7 sm:-mb-10 sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 px-2 sm:px-4 md:px-0"
+          text="Hi there! 👋 I'm **Ananta** **Firdaus**, a **frontend** **developer** with a unique combination of traits—I'm both a **perfectionist** **and** **lazy**. I always strive for the most **efficient way** to achieve high-quality results. Currently studying **Informatics** **Engineering** at **Politeknik** **Caltex** **Riau**, I have a strong foundation in logical thinking and structured problem-solving. However, my passion lies in crafting elegant and interactive user interfaces, ensuring that every design is not only visually appealing but also intuitive and seamless. Lately, I've been diving deeper into **React.js**, exploring **dynamic** **UI **development** and **smooth **animations** to create engaging digital experiences. My goal is to bridge **aesthetics** and **functionality**, making technology feel effortless for users."
         />
       </motion.div>
 
       {/* Experience Section */}
-      <h2 className="text-3xl sm:text-4xl -mt-20 sm:-mt-30 px-4 sm:px-8 md:px-20 lg:px-80 md:text-5xl font-lyrae font-bold transition-colors duration-500">
+      {/* PERBAIKAN DISINI: */}
+      {/* Ubah -mt-20 menjadi mt-10 atau mt-20 agar turun ke bawah */}
+      <h2 className="text-3xl -mb-10 sm:mt-20 px-4 sm:px-8 md:px-20 lg:px-80 md:text-5xl font-lyrae font-bold transition-colors duration-500">
         <DecryptedText
           text="Experience"
           speed={100}
@@ -58,7 +61,7 @@ const About = () => {
         />
       </h2>
 
-      <div className="mt-6 sm:mt-10 px-4 sm:px-6 md:px-12 lg:px-80">
+      <div className="mt-15 sm:mt-10 px-4 sm:px-6 md:px-12 lg:px-80">
         <ExperienceList />
       </div>
 
