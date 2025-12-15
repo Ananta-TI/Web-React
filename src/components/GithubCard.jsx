@@ -98,22 +98,30 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
       className="cursor-none relative group hover:!z-50 focus:!z-50 outline-none" // Tambah focus untuk aksesibilitas
       style={{ zIndex: followers.length - idx }}
     >
-      <img
-        src={f.avatar_url}
-        alt={f.login || "Follower"}
-        // --- PERUBAHAN UTAMA ADA DI SINI ---
-        className={`
-          w-6 h-6 rounded-full border-2 object-cover bg-white
-          transition-all duration-300 
-          ease-[cubic-bezier(0.34,1.56,0.64,1)] 
-          transform-gpu will-change-transform
-          
-          group-hover:scale-[1.6] group-hover:-translate-y-2 
-          group-hover:brightness-110 group-hover:shadow-xl
-          
-          ${isDarkMode ? "border-stone-600 bg-stone-800" : "border-gray-700 bg-white"}
-        `}
-      />
+     <img
+  src={f.avatar_url}
+  alt={f.login || "Follower"}
+  className={`
+    w-10 h-6 rounded-full border object-cover
+    transform-gpu will-change-transform relative z-10
+
+    transition-all 
+    duration-700 
+    ease-out 
+    delay-200
+
+    group-hover:scale-[1.8] 
+    group-hover:-translate-y-2 
+
+    group-hover:z-50
+
+    group-hover:duration-300 
+    group-hover:delay-0 
+    group-hover:ease-[cubic-bezier(0.34,1.56,0.64,1)]
+    
+    ${isDarkMode ? "border-stone-600 bg-stone-800" : "border-gray-700 bg-white"}
+  `}
+/>
       
       {/* Tooltip: Delay dihapus/dikurangi agar instan muncul saat swipe cepat */}
       <div
