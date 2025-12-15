@@ -68,9 +68,8 @@ const Word = ({ children, progress, range, isHighlighted, isDarkMode }) => {
   // 1. Ini adalah animasi opacity untuk kata BIASA (dari redup ke terang)
   const dynamicOpacity = useTransform(progress, range, [0.1, 1]);
 
-  // 2. Tentukan warna. Highlight = Biru, Biasa = Mengikuti tema
   const colorClass = isHighlighted
-    ? "text-blue-600 dark:text-cyan-400" 
+    ? "text-[#c1ff72] dark:text-[#c1ff72]" 
     : isDarkMode 
       ? "text-white" 
       : "text-gray-900";
