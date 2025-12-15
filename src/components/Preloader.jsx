@@ -19,30 +19,30 @@ export default function Preloader() {
   const [isMorphing, setIsMorphing] = useState(false); // <-- STATE BARU UNTUK MORPHING
   const containerRef = useRef(null);
 
-  // Gothic themed stages
+  // BAGIAN INI YANG DIUBAH (Kalimatnya jadi teknis, icon tetap)
   const stages = [
     {
-      text: "Awakening Darkness",
+      text: "System Initialization", // Tadi: Awakening Darkness
       icon: Moon,
       target: 15,
     },
     {
-      text: "Summoning Spirits",
+      text: "Loading Dependencies", // Tadi: Summoning Spirits
       icon: Ghost,
       target: 35,
     },
     {
-      text: "Channeling Power",
+      text: "Starting Services", // Tadi: Channeling Power
       icon: Flame,
       target: 60,
     },
     {
-      text: "Opening Portal",
+      text: "Rendering Interface", // Tadi: Opening Portal
       icon: Eye,
       target: 85,
     },
     {
-      text: "Enter the Void",
+      text: "Access Granted", // Tadi: Enter the Void
       icon: Crown,
       target: 100,
     },
@@ -92,7 +92,7 @@ export default function Preloader() {
       {/* Minimal Background Grid */}
       <div className="absolute inset-0 opacity-5" style={{
         backgroundImage: `linear-gradient(white 1px, transparent 1px),
-                         linear-gradient(90deg, white 1px, transparent 1px)`,
+                          linear-gradient(90deg, white 1px, transparent 1px)`,
         backgroundSize: '50px 50px'
       }} />
 
@@ -247,7 +247,7 @@ export default function Preloader() {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - KATA "GOTHIC" DIHAPUS */}
       <motion.div
         className="absolute bottom-8 text-center"
         initial={{ opacity: 0 }}
@@ -258,7 +258,7 @@ export default function Preloader() {
           Powered by <span className="text-white">Ananta-TI</span>
         </p>
         <p className="text-[10px] text-gray-800 mt-1">
-          v2.0 • Gothic Loading System
+          v2.0 • System Loading
         </p>
       </motion.div>
 
