@@ -21,8 +21,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { animate, svg, stagger } from "https://esm.sh/animejs";
 import { Divide as Hamburger } from 'hamburger-react'
 
-// import { createAnimation } from "./ThemeBtn"; // Import function untuk animasi
-
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,28 +31,39 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
   const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
   const [currentTime, setCurrentTime] = useState("");
+  const [isThemeChanging, setIsThemeChanging] = useState(false);
 
-useEffect(() => {
-  const updateClock = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    setCurrentTime(`${hours}:${minutes}:${seconds}`);
-  };
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      setCurrentTime(`${hours}:${minutes}:${seconds}`);
+    };
 
-  updateClock(); // initial call
-  const interval = setInterval(updateClock, 1000);
-  return () => clearInterval(interval);
-}, []);
+    updateClock(); // initial call
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  animate(svg.createDrawable(".line"), {
-    draw: ["0 0", "0 1", "1 1"],
-    ease: "inOutQuad",
-    duration: 2000,
-    delay: stagger(100),
-    loop: true,
-  });
+  // Animasi untuk SVG lines
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      try {
+        animate(svg.createDrawable(".line"), {
+          draw: ["0 0", "0 1", "1 1"],
+          ease: "inOutQuad",
+          duration: 2000,
+          delay: stagger(100),
+          loop: true,
+        });
+      } catch (error) {
+        console.error("Error animating SVG:", error);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -94,6 +103,11 @@ useEffect(() => {
   const handleToggleSidebar = () => setIsOpen((prev) => !prev);
 
   const handleDarkModeToggle = () => {
+    // Cegah multiple clicks saat animasi berjalan
+    if (isThemeChanging) return;
+    
+    setIsThemeChanging(true);
+    
     // Custom animasi blur circle
     const customAnimation = `
       ::view-transition-group(root) {
@@ -137,15 +151,46 @@ useEffect(() => {
 
     // Gunakan View Transition API jika tersedia
     if (!document.startViewTransition) {
+      // Fallback untuk browser yang tidak support View Transition
       setIsDarkMode((prev) => !prev);
-      setIsOpen(false); // <- Tutup sidebar
+      setIsOpen(false); // Tutup sidebar
+      setIsThemeChanging(false);
       return;
     }
 
+    // Dapatkan posisi tombol untuk animasi circle
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    const x = buttonRect.left + buttonRect.width / 2;
+    const y = buttonRect.top + buttonRect.height / 2;
+    const maxRadius = Math.hypot(
+      Math.max(buttonRect.left, window.innerWidth - buttonRect.left),
+      Math.max(buttonRect.top, window.innerHeight - buttonRect.top)
+    );
+
     document.startViewTransition(() => {
       setIsDarkMode((prev) => !prev);
-      setIsOpen(false);
-    });
+      setIsOpen(false); // Tutup sidebar
+    }).ready;
+
+    // Animasi circle yang meluas dari tombol
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${maxRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 600,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
+
+    // Reset flag setelah animasi selesai
+    setTimeout(() => {
+      setIsThemeChanging(false);
+    }, 600);
   };
 
   const getViewportHeight = () => {
@@ -180,26 +225,21 @@ useEffect(() => {
             isDarkMode ? "text-white" : "text-zinc-800"
           }`}
         >
-          {/* <img
-            src={isDarkMode ? "../img/logo123.png" : "../img/logo123.png"}
-            alt="Ananta Firdaus"
-            className="object-cover h-12 w-auto md:h-20 md:w-20"
-          /> */}
+          {/* Logo */}
         </span>
-       <div
-  className={`p-2 mt-1  cursor-none pointer-none cursor-target rounded-full transition-colors ${
-    isDarkMode ? 'bg-gray-100' : 'bg-zinc-800'
-  }`}
->
-  <Hamburger
-  className="hover:cursor-none hover:pointer-none cursor-target"
-    toggled={isOpen}
-    toggle={setIsOpen}
-    color={isDarkMode ? '#18181b' : 'white'}
-    duration={0.4}
-    easing="ease-in"/>
-</div>
-
+        <div
+          className={`p-2 mt-1 cursor-none pointer-none cursor-target rounded-full transition-colors ${
+            isDarkMode ? 'bg-gray-100' : 'bg-zinc-800'
+          }`}
+        >
+          <Hamburger
+            className="hover:cursor-none hover:pointer-none cursor-target"
+            toggled={isOpen}
+            toggle={setIsOpen}
+            color={isDarkMode ? '#18181b' : 'white'}
+            duration={0.4}
+            easing="ease-in"/>
+        </div>
       </div>
 
       {/* Overlay */}
@@ -246,18 +286,17 @@ useEffect(() => {
               } p-6 md:p-8 flex flex-col overflow-y-auto`}
             >
               <div className="flex items-center justify-between mt-8 md:mt-10 mb-5">
-  <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">
-    Navigation
-  </span>
-  <span
-    className={`text-2xl font-Calculator font-bold ${
-      isDarkMode ? "text-black" : "text-gray-300"
-    }mx-2`}
-  >
-    {currentTime}
-  </span>
-</div>
-
+                <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">
+                  Navigation
+                </span>
+                <span
+                  className={`text-2xl font-Calculator font-bold ${
+                    isDarkMode ? "text-black" : "text-gray-300"
+                  }mx-2`}
+                >
+                  {currentTime}
+                </span>
+              </div>
 
               <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800 dark:bg-zinc-400"></div>
 
@@ -284,7 +323,7 @@ useEffect(() => {
                         }}
                       >
                         <span>Certificates</span>
-                      <Award size={32} strokeWidth={2} />
+                        <Award size={32} strokeWidth={2} />
                       </motion.a>
                     )}
 
@@ -335,14 +374,12 @@ useEffect(() => {
                         e.preventDefault();
                         navigate("/");
                         setIsOpen(false);
-                       window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-                        
-
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
                       }}
-                      className="cursor-target cursor-none relative block text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+                      className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
                     >
@@ -494,7 +531,10 @@ useEffect(() => {
               <div className="flex mt-auto space-x-3">
                 <button
                   onClick={handleDarkModeToggle}
-                  className="p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95"
+                  disabled={isThemeChanging}
+                  className={`p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95 ${
+                    isThemeChanging ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   style={{
                     borderColor: isDarkMode ? "#d1d5db" : "#52525b",
                     backgroundColor: isDarkMode ? "transparent" : "transparent",
