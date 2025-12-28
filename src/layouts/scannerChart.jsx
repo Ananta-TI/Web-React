@@ -30,7 +30,7 @@ export default function ScanStatsDashboard() {
   const [trendData, setTrendData] = useState([]);
   const [totalScans, setTotalScans] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [activeTimeRange, setActiveTimeRange] = useState('all'); // Changed from '24h' to 'all'
+  const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [chartError, setChartError] = useState(false);
 
   // Refs for Chart Containers
@@ -479,16 +479,6 @@ export default function ScanStatsDashboard() {
     <section className={`relative w-full min-h-screen py-12 sm:py-20 overflow-hidden ${
       isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-gray-900"
     }`}>
-      {/* Background decoration */}
-      {/* <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
-          isDarkMode ? "bg-purple-600" : "bg-blue-400"
-        }`}></div>
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
-          isDarkMode ? "bg-blue-600" : "bg-purple-400"
-        }`}></div>
-      </div> */}
-
       <div className="container mx-auto px-4 cursor-none sm:px-6 text-center mb-8 sm:mb-12 relative z-10"> 
         <h2 className={`text-4xl sm:text-5xl font-bold font-lyrae mb-2 sm:mb-4  ${
           isDarkMode 
@@ -536,7 +526,7 @@ export default function ScanStatsDashboard() {
         <div className="mt-8 grid font-mono font-bold grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"> 
           {/* Card Total */}
           <div className={`group relative cursor-target overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
           }`}>
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-500/20 to-transparent rounded-bl-full"></div>
             <div className="relative z-10">
@@ -544,7 +534,6 @@ export default function ScanStatsDashboard() {
                 <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                   <Activity className="w-4 h-4" />
                 </div>
-                {/* <span className="text-xs font-medium text-blue-500">+12%</span> */}
               </div>
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">{totalScans}</div>
               <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Total Scans</div>
@@ -553,7 +542,7 @@ export default function ScanStatsDashboard() {
           
           {/* Card Harmless */}
           <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
           }`}>
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-500/20 to-transparent rounded-bl-full"></div>
             <div className="relative z-10">
@@ -561,7 +550,6 @@ export default function ScanStatsDashboard() {
                 <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white">
                   <Shield className="w-4 h-4" />
                 </div>
-                {/* <span className="text-xs font-medium text-green-500">+8%</span> */}
               </div>
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
                 {statusData.find((d) => d.name === "Harmless")?.value || 0}
@@ -572,7 +560,7 @@ export default function ScanStatsDashboard() {
           
           {/* Card Suspicious */}
           <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
           }`}>
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-500/20 to-transparent rounded-bl-full"></div>
             <div className="relative z-10">
@@ -580,7 +568,6 @@ export default function ScanStatsDashboard() {
                 <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white">
                   <AlertTriangle className="w-4 h-4" />
                 </div>
-                {/* <span className="text-xs font-medium text-amber-500">+5%</span> */}
               </div>
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
                 {statusData.find((d) => d.name === "Suspicious")?.value || 0}
@@ -591,7 +578,7 @@ export default function ScanStatsDashboard() {
           
           {/* Card Malicious */}
           <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
           }`}>
             <div className="absolute  top-0 right-0 w-16 h-16 bg-gradient-to-br from-red-500/20 to-transparent rounded-bl-full"></div>
             <div className="relative z-10">
@@ -599,7 +586,6 @@ export default function ScanStatsDashboard() {
                 <div className="p-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white">
                   <Zap className="w-4 h-4" />
                 </div>
-                {/* <span className="text-xs font-medium text-red-500">+2%</span> */}
               </div>
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
                 {statusData.find((d) => d.name === "Malicious")?.value || 0}
@@ -614,7 +600,7 @@ export default function ScanStatsDashboard() {
       <div className="container mx-auto px-4 sm:px-6 grid gap-6 lg:grid-cols-2 relative z-10"> 
         {/* Pie Chart (Status) */}
         <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
-          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
         }`}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
           <div className="relative z-10">
@@ -651,7 +637,7 @@ export default function ScanStatsDashboard() {
 
         {/* Bar Chart (Type) */}
         <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
-          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
         }`}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
           <div className="relative z-10">
@@ -688,7 +674,7 @@ export default function ScanStatsDashboard() {
 
         {/* Activity Pulse Chart */}
         <div className={`lg:col-span-2 group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
-          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-white/80 border border-gray-200 shadow-lg backdrop-blur-sm"
+          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
         }`}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-bl-full"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-500/10 to-transparent rounded-tr-full"></div>

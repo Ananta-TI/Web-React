@@ -18,7 +18,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { animate, svg, stagger } from "https://esm.sh/animejs";
 import { Divide as Hamburger } from 'hamburger-react'
 
 export default function Header() {
@@ -42,26 +41,9 @@ export default function Header() {
       setCurrentTime(`${hours}:${minutes}:${seconds}`);
     };
 
-    updateClock(); // initial call
+    updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Animasi untuk SVG lines
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      try {
-        animate(svg.createDrawable(".line"), {
-          draw: ["0 0", "0 1", "1 1"],
-          ease: "inOutQuad",
-          duration: 2000,
-          delay: stagger(100),
-          loop: true,
-        });
-      } catch (error) {
-        console.error("Error animating SVG:", error);
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -193,6 +175,31 @@ export default function Header() {
     }, 600);
   };
 
+  const handleNavigation = (link) => {
+    setIsOpen(false);
+    
+    // Delay sedikit untuk animasi close
+    setTimeout(() => {
+      if (link.startsWith("#")) {
+        // Smooth scroll ke section
+        const element = document.querySelector(link);
+        if (element) {
+          const headerOffset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      } else {
+        // Navigate ke route lain
+        navigate(link);
+      }
+    }, 300); // Sesuaikan dengan durasi animasi close
+  };
+
   const getViewportHeight = () => {
     return typeof window !== "undefined" ? window.innerHeight : 800;
   };
@@ -292,7 +299,7 @@ export default function Header() {
                 <span
                   className={`text-2xl font-Calculator font-bold ${
                     isDarkMode ? "text-black" : "text-gray-300"
-                  }mx-2`}
+                  } mx-2`}
                 >
                   {currentTime}
                 </span>
@@ -307,14 +314,9 @@ export default function Header() {
                 ) ? (
                   <>
                     {location.pathname !== "/certificates" && (
-                      <motion.a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/certificates");
-                          setIsOpen(false);
-                        }}
-                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2"
+                      <motion.button
+                        onClick={() => handleNavigation("/certificates")}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full text-left"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{
                           opacity: 1,
@@ -324,18 +326,13 @@ export default function Header() {
                       >
                         <span>Certificates</span>
                         <Award size={32} strokeWidth={2} />
-                      </motion.a>
+                      </motion.button>
                     )}
 
                     {location.pathname !== "/all-projects" && (
-                      <motion.a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/all-projects");
-                          setIsOpen(false);
-                        }}
-                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
+                      <motion.button
+                        onClick={() => handleNavigation("/all-projects")}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full text-left"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{
                           opacity: 1,
@@ -345,17 +342,13 @@ export default function Header() {
                       >
                         <span>All Projects</span>
                         <Folder size={32} strokeWidth={2} />
-                      </motion.a>
+                      </motion.button>
                     )}
+                    
                     {location.pathname !== "/Scanner" && (
-                      <motion.a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/Scanner");
-                          setIsOpen(false);
-                        }}
-                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full"
+                      <motion.button
+                        onClick={() => handleNavigation("/Scanner")}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full text-left"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{
                           opacity: 1,
@@ -365,26 +358,23 @@ export default function Header() {
                       >
                         <span>Scanner</span>
                         <ScanText size={32} strokeWidth={2} />
-                      </motion.a>
+                      </motion.button>
                     )}
 
-                    <motion.a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate("/");
-                        setIsOpen(false);
+                    <motion.button
+                      onClick={() => {
+                        handleNavigation("/");
                         window.scrollTo({
                           top: 0,
                           behavior: 'smooth'
                         });
                       }}
-                      className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform"
+                      className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform w-full text-left"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
                     >
                       ← Back to Home
-                    </motion.a>
+                    </motion.button>
                   </>
                 ) : (
                   [
@@ -419,25 +409,10 @@ export default function Header() {
                       style: <Mail size={32} />,
                     },
                   ].map((item, index) => (
-                    <motion.a
+                    <motion.button
                       key={item.name}
-                      href={item.link}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (item.link.startsWith("#")) {
-                          const section = document.querySelector(item.link);
-                          if (section) {
-                            section.scrollIntoView({
-                              behavior: "smooth",
-                              block: "start",
-                            });
-                          }
-                        } else {
-                          navigate(item.link);
-                        }
-                        setIsOpen(false);
-                      }}
-                      className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform"
+                      onClick={() => handleNavigation(item.link)}
+                      className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae touch-manipulation active:scale-95 transition-transform w-full text-left"
                       onMouseEnter={() =>
                         !isMobile && setHoveredLink(item.name)
                       }
@@ -450,8 +425,8 @@ export default function Header() {
                       }}
                     >
                       <span>{item.name}</span>
-                      <div className="ml-auto ">{item.style}</div>
-                    </motion.a>
+                      <div className="ml-auto">{item.style}</div>
+                    </motion.button>
                   ))
                 )}
               </nav>
@@ -479,7 +454,6 @@ export default function Header() {
                       url: "https://instagram.com/ntakunti_14",
                       icon: <Instagram size={18} />,
                     },
-                    ,
                     {
                       name: "Tiktok",
                       url: "https://tiktok.com/@ntakunti_14",

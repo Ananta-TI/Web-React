@@ -10,6 +10,7 @@ import ExperienceList from "../components/Home/ExperienceList";
 import Tetris from "./TetrioProfileCard.jsx";
 import SteamProfileCard from "./SteamProfileCard";
 import DiscordProfileCard from "./DiscordProfileCard.jsx";
+import ScannerChart from "./scannerChart.jsx";
 
 import "../index.css";
 
@@ -98,6 +99,10 @@ const About = () => {
       {/* AnimatedBeamDemo Section */}
       <div className="dark px-4 sm:px-0">
         <AnimatedBeamDemo />
+      </div>
+      {/* Scanner Chart Section */}
+      <div className="w-full max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20">
+        <ScannerChart />
       </div>
     </section>
   );
