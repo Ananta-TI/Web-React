@@ -103,7 +103,7 @@ function shuffleArray(arr) {
                 isDarkMode ? "text-zinc-400" : "text-gray-600"
               }`}
             >
-              Koleksi sertifikat dari kursus, pelatihan, dan kompetisi yang telah saya selesaikan.
+              A collection of certificates from courses, trainings, and competitions that I have completed.
             </p>
           </motion.div>
         </div>

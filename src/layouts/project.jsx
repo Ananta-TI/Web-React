@@ -22,6 +22,8 @@ import {
   Star,
   Clock,
   ArrowRight,
+  Layers,
+  Zap,
 } from "lucide-react";
 import "../index.css";
 
@@ -32,6 +34,9 @@ const Projects = () => {
   const waveRef = useRef(null);
   gsap.registerPlugin(ScrollTrigger);
   const imageRefs = useRef([]);
+  const cardRefs = useRef([]);
+  const titleRef = useRef(null);
+  const sectionRef = useRef(null);
   
   // State for filtering, sorting, and modal
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -51,13 +56,13 @@ const Projects = () => {
       description:
         "My very first website built to learn the fundamentals of HTML, CSS, Tailwind, and JavaScript. Featuring a simple yet responsive design, this project marked the beginning of my journey into web development.",
       demo: "https://ananta-ti.github.io/my-first-web/",
-      repo: null,
+      repo: "https://github.com/Ananta-TI/my-first-web.git",
       tags: ["HTML", "CSS", "JavaScript"],
       category: "Web Development",
       image: "/img/first-web.png",
       date: "2023-01-15",
       difficulty: "Beginner",
-      featured: true,
+      featured: null,
       status: "Completed",
     },
     {
@@ -66,7 +71,7 @@ const Projects = () => {
       description:
         "A React-based culinary platform showcasing local Indonesian food products with a modern and responsive UI. It allows users to explore traditional snacks, healthy meals, and contemporary cuisines while supporting local culinary SMEs.",
       demo: "https://react-nta.vercel.app/guest",
-      repo: null,
+      repo: "https://github.com/Ananta-TI/React-Nta.git",
       tags: ["React", "Tailwind", "UI/UX"],
       category: "Web Development",
       image: "/img/Sedap.png",
@@ -81,13 +86,13 @@ const Projects = () => {
       description:
         "An inventory management system built with React and a modern interface, designed to improve business efficiency and data organization.",
       demo: "https://react-inventory-roan.vercel.app/",
-      repo: null,
+      repo: "https://github.com/Ananta-TI/react-inventory.git",
       tags: ["React", "Inventory", "Management"],
       category: "Web Application",
       image: "img/ReactInventory.png",
       date: "2023-08-10",
       difficulty: "Intermediate",
-      featured: false,
+      featured: true,
       status: "In Progress",
     },
   ];
@@ -147,9 +152,11 @@ const Projects = () => {
     setFilteredProjects(projects);
   }, []);
   
+  // Enhanced parallax effects with GSAP
   useEffect(() => {
-    if (!imageRefs.current.length) return;
+    if (!imageRefs.current.length || !cardRefs.current.length || !sectionRef.current) return;
 
+    // Parallax for images
     imageRefs.current.forEach((img) => {
       if (!img) return;
 
@@ -157,7 +164,7 @@ const Projects = () => {
         img.querySelector("img"),
         { yPercent: -20 },
         {
-          yPercent: 10,
+          yPercent: 20,
           ease: "none",
           scrollTrigger: {
             trigger: img,
@@ -168,6 +175,44 @@ const Projects = () => {
         }
       );
     });
+
+    // Parallax for cards
+    // cardRefs.current.forEach((card, index) => {
+    //   if (!card) return;
+
+    //   gsap.fromTo(
+    //     card,
+    //     { yPercent: index % 2 === 0 ? -5 : 5 },
+    //     {
+    //       yPercent: index % 2 === 0 ? 5 : -5,
+    //       ease: "none",
+    //       scrollTrigger: {
+    //         trigger: card,
+    //         start: "top bottom",
+    //         end: "bottom top",
+    //         scrub: 1,
+    //       },
+    //     }
+    //   );
+    // });
+
+    // Parallax for section title
+    if (titleRef.current) {
+      gsap.fromTo(
+        titleRef.current,
+        { yPercent: -10 },
+        {
+          yPercent: 10,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        }
+      );
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -187,7 +232,7 @@ const Projects = () => {
   const cardVariants = {
     hidden: {
       opacity: 0,
-      y: 50,
+      // y: 50,
     },
     visible: {
       opacity: 1,
@@ -260,14 +305,29 @@ const Projects = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="projects"
-      className={`relative w-full min-h-screen py-20 transition-colors duration-500 ${
+      className={`relative w-full min-h-screen py-20 overflow-hidden transition-colors duration-500 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
+      {/* Background Parallax Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute top-20 left-10 w-64 h-64 rounded-full opacity-20 blur-3xl ${
+          isDarkMode ? "bg-blue-500" : "bg-indigo-300"
+        }`} />
+        <div className={`absolute top-1/2 right-10 w-96 h-96 rounded-full opacity-20 blur-3xl ${
+          isDarkMode ? "bg-purple-500" : "bg-pink-300"
+        }`} />
+        <div className={`absolute bottom-20 left-1/3 w-80 h-80 rounded-full opacity-20 blur-3xl ${
+          isDarkMode ? "bg-teal-500" : "bg-teal-300"
+        }`} />
+      </div>
+
       {/* Section Heading */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16 relative z-10">
         <motion.div
+          ref={titleRef}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -283,7 +343,7 @@ const Projects = () => {
             />
           </h2>
           <p
-            className={`relative text-base sm:text-lg md:text-2xl leading-relaxed font-mono transition-colors duration-500 font px-2 sm:px-4 md:px-0 ${
+            className={`relative text-base sm:text-lg md:text-xl leading-relaxed font-mono transition-colors duration-500 font px-2 sm:px-4 md:px-0 ${
               isDarkMode ? "text-zinc-400" : "text-gray-600"
             }`}
           >
@@ -294,48 +354,47 @@ const Projects = () => {
       </div>
 
       {/* Projects Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-30">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {filteredProjects.length > 0 ? (
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
           >
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
+                ref={(el) => (cardRefs.current[index] = el)}
                 variants={cardVariants}
                 whileHover={{
-                  y: -8,
+                  // y: -8,
                   transition: { duration: 0.3, ease: "easeOut" },
                 }}
                 className={`group relative overflow-hidden rounded-3xl ${
                   isDarkMode
                     ? "bg-zinc-800/50 border-none "
-                    : "bg-white border-none "
+                    : "bg-white/80 border-none "
                 } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
               >
                 {/* Project Image/Preview */}
-                <div className="relative h-40 sm:h-52 md:h-64 lg:h-140 overflow-hidden rounded-xl">
-                  <div
-                    ref={(el) => (imageRefs.current[index] = el)}
-                    className="relative h-64 sm:h-72 md:h-80 lg:h-150 overflow-hidden rounded-t-3xl"
-                  >
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-[100%] object-cover"
-                      loading="lazy"
-                    />
-                  </div>
+                <div 
+                  ref={(el) => (imageRefs.current[index] = el)}
+                  className="relative h-48 sm:h-52 md:h-64 lg:h-56 overflow-hidden rounded-t-3xl"
+                >
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   {/* Featured Badge */}
                   {project.featured && (
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 z-10">
                       <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
                         <Star className="w-3 h-3" />
                         Featured
@@ -344,7 +403,7 @@ const Projects = () => {
                   )}
                   
                   {/* Category Badge */}
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 left-4 z-10">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         isDarkMode
@@ -358,10 +417,10 @@ const Projects = () => {
                 </div>
 
                 {/* Project Content */}
-                <div className="p-9">
+                <div className="p-4 sm:p-6">
                   {/* Title */}
                   <h3
-                    className={`text-4xl font-lyrae mb-3 ${
+                    className={`text-xl sm:text-2xl lg:text-3xl font-lyrae mb-3 ${
                       isDarkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
@@ -370,7 +429,7 @@ const Projects = () => {
 
                   {/* Description */}
                   <p
-                    className={`text-lg font-mono leading-relaxed line-clamp-3 mb-4 ${
+                    className={`text-sm sm:text-base font-mono leading-relaxed line-clamp-3 mb-4 ${
                       isDarkMode ? "text-zinc-400" : "text-gray-600"
                     }`}
                   >
@@ -378,17 +437,17 @@ const Projects = () => {
                   </p>
                   
                   {/* Project Meta */}
-                  <div className="flex items-center gap-4 mb-4 text-sm font-mono">
+                  <div className="flex flex-wrap items-center gap-3 mb-4 text-xs sm:text-sm font-mono">
                     <span className={`flex items-center gap-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                       {new Date(project.date).toLocaleDateString()}
                     </span>
                     <span className={`flex items-center gap-1 ${getDifficultyColor(project.difficulty)}`}>
-                      <Code className="w-4 h-4" />
+                      <Code className="w-3 h-3 sm:w-4 sm:h-4" />
                       {project.difficulty}
                     </span>
                     <span className={`flex items-center gap-1 ${getStatusColor(project.status)}`}>
-                      <Clock className="w-4 h-4" />
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                       {project.status}
                     </span>
                   </div>
@@ -398,7 +457,7 @@ const Projects = () => {
                     {project.tags.map((tag, tagIndex) => (
                       <span
                         key={tagIndex}
-                        className={`px-2.5 py-1 text-xs rounded-md font-mono ${
+                        className={`px-2 py-1 text-xs rounded-md font-mono ${
                           isDarkMode
                             ? "bg-zinc-700 text-zinc-300"
                             : "bg-gray-100 text-gray-700"
@@ -410,8 +469,43 @@ const Projects = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <motion.button
+                      onClick={() => openProjectModal(project)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2 
+        px-4 py-2 text-sm sm:text-base font-lyrae font-bold border-b-0
+        rounded-lg border 
+        bg-transparent transition-all duration-500
+
+        /* ::before - top line animation */
+        before:content-[''] before:absolute before:top-0 before:right-0
+        before:h-[2px] before:w-0
+        before:transition-all before:duration-500 before:z-[-1]
+
+        /* ::after - background fill animation */
+        after:content-[''] after:absolute after:left-0 after:bottom-0 
+        after:h-0 after:w-full
+        after:transition-all after:duration-400 after:z-[-2]
+
+        /* Hover effects */
+        hover:before:w-full
+        hover:after:h-full hover:after:delay-200
+cursor-target
+        ${
+          isDarkMode
+            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+               hover:text-zinc-900 border-gray-100/20`
+            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
+               hover:text-white border-gray-800/20`
+        }
+      `}
+                    >
+                      <Layers className="w-4 h-4 cursor-target sm:w-5 sm:h-5" />
+                      <span>View Details</span>
+                    </motion.button>
                     
                     {project.demo && (
                       <motion.a
@@ -420,12 +514,11 @@ const Projects = () => {
                         rel="noreferrer"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`
-        relative z-10 overflow-hidden inline-flex items-center gap-3
-        px-3 py-1 text-[17px] border-t-0 font-lyrae font-bold
+                        className={` cursor-target border-b-0
+        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
+        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
         rounded-lg border 
         bg-transparent transition-all duration-500
-        cursor-none cursor-target
 
         /* ::before - top line animation */
         before:content-[''] before:absolute before:top-0 before:right-0
@@ -450,30 +543,8 @@ const Projects = () => {
         }
       `}
                       >
-                        <Globe className="w-5 h-5 relative z-20 transition-transform duration-300 group-hover:rotate-12" />
-                        <span className="relative z-20 pointer-events-none">
-                          Live Demo
-                        </span>
-                      </motion.a>
-                    )}
-                    
-                    {project.repo && (
-                      <motion.a
-                        href={project.repo}
-                        target="_blank"
-                        rel="noreferrer"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`${
-                          project.demo ? "px-3" : "flex-1 justify-center"
-                        } flex items-center gap-2 py-2.5 ${
-                          isDarkMode
-                            ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                        } rounded-lg font-mono text-sm transition-all duration-300`}
-                      >
-                        <Github className="w-4 h-4" />
-                        {!project.demo && "View Code"}
+                        <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>Live Demo</span>
                       </motion.a>
                     )}
                   </div>
@@ -509,14 +580,14 @@ const Projects = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center"
+        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center relative z-10"
       >
         <button
           onClick={() => navigate("/all-projects")}
-          className={`
-    relative px-8 py-4 text-[17px] uppercase border-b-0 font-lyrae font-semibold rounded-lg
+          className={`cursor-target
+    relative px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base uppercase border-b-0 font-lyrae font-semibold rounded-lg
      bg-transparent transition-all duration-500 overflow-hidden
-    cursor-none cursor-target z-10
+    z-10
     before:content-[''] before:absolute before:right-0 before:top-0
     before:h-[2px] before:w-0 before:transition-all before:duration-500 before:z-[-1]
     after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0 after:w-full
@@ -532,7 +603,7 @@ const Projects = () => {
     }
   `}
         >
-          <span className="relative z-20 pointer-events-none">
+          <span className="relative z-20">
             View All Projects
           </span>
         </button>
@@ -543,24 +614,24 @@ const Projects = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 text-center"
+        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 text-center relative z-10"
       >
         <div
-          className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${
+          className={`inline-flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full ${
             isDarkMode
               ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
               : "bg-white text-gray-600 border border-gray-200"
           } shadow-lg`}
         >
-          <Code className="w-5 h-5" />
-          <span className="font-bold font-mono">
+          <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="font-bold font-mono text-sm sm:text-base">
             <span className="text-[#F55247]">{filteredProjects.length} Projects</span> •{" "}
             <span className="text-[#FFA828]">
               {filteredProjects.filter((p) => p.demo).length} Live Demos
             </span>
           </span>
         </div>
-        <div className="w-full flex justify-between items-start">
+        <div className="w-full flex justify-between items-start mt-8">
           <div className="flex-shrink-0">
             <LayeredAnimations />
           </div>
@@ -590,7 +661,7 @@ const Projects = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="relative h-64 sm:h-80 overflow-hidden rounded-t-2xl">
+              <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden rounded-t-2xl">
                 <img
                   src={selectedProject.image}
                   alt={selectedProject.title}
@@ -600,7 +671,7 @@ const Projects = () => {
                 
                 <button
                   onClick={closeModal}
-                  className={`absolute top-4 right-4 p-2 rounded-full ${
+                  className={`absolute top-4 right-4 p-2 rounded-full cursor-target ${
                     isDarkMode ? "bg-zinc-900/80 text-white" : "bg-white/80 text-black"
                   } backdrop-blur-sm`}
                 >
@@ -608,20 +679,20 @@ const Projects = () => {
                 </button>
                 
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-3xl sm:text-4xl font-lyrae text-white mb-2">
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-lyrae text-white mb-2">
                     {selectedProject.title}
                   </h3>
-                  <div className="flex items-center gap-4 text-white text-sm">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-white text-xs sm:text-sm">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                       {new Date(selectedProject.date).toLocaleDateString()}
                     </span>
                     <span className={`flex items-center gap-1 ${getDifficultyColor(selectedProject.difficulty)}`}>
-                      <Code className="w-4 h-4" />
+                      <Code className="w-3 h-3 sm:w-4 sm:h-4" />
                       {selectedProject.difficulty}
                     </span>
                     <span className={`flex items-center gap-1 ${getStatusColor(selectedProject.status)}`}>
-                      <Clock className="w-4 h-4" />
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                       {selectedProject.status}
                     </span>
                   </div>
@@ -629,21 +700,21 @@ const Projects = () => {
               </div>
               
               {/* Modal Content */}
-              <div className="p-6 sm:p-8">
+              <div className="p-4 sm:p-6 md:p-8">
                 <div className="mb-6">
-                  <h4 className="text-xl font-bold mb-3">About this project</h4>
-                  <p className={`font-mono leading-relaxed ${isDarkMode ? "text-zinc-300" : "text-gray-700"}`}>
+                  <h4 className="text-lg sm:text-xl font-bold mb-3">About this project</h4>
+                  <p className={`text-sm sm:text-base font-mono leading-relaxed ${isDarkMode ? "text-zinc-300" : "text-gray-700"}`}>
                     {selectedProject.description}
                   </p>
                 </div>
                 
                 <div className="mb-6">
-                  <h4 className="text-xl font-bold mb-3">Technologies Used</h4>
+                  <h4 className="text-lg sm:text-xl font-bold mb-3">Technologies Used</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedProject.tags.map((tag, tagIndex) => (
                       <span
                         key={tagIndex}
-                        className={`px-3 py-1 rounded-full text-sm font-mono ${
+                        className={`px-3 py-1 rounded-full text-xs sm:text-sm font-mono ${
                           isDarkMode
                             ? "bg-zinc-700 text-zinc-300"
                             : "bg-gray-100 text-gray-700"
@@ -661,13 +732,36 @@ const Projects = () => {
                       href={selectedProject.demo}
                       target="_blank"
                       rel="noreferrer"
-                      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono font-medium ${
-                        isDarkMode
-                          ? "bg-blue-600 hover:bg-blue-700 text-white"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      } transition-colors duration-300`}
+                      className={` cursor-target border-b-0
+        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
+        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
+        rounded-lg border 
+        bg-transparent transition-all duration-500
+
+        /* ::before - top line animation */
+        before:content-[''] before:absolute before:top-0 before:right-0
+        before:h-[2px] before:w-0
+        before:transition-all before:duration-500 before:z-[-1]
+
+        /* ::after - background fill animation */
+        after:content-[''] after:absolute after:left-0 after:bottom-0
+        after:h-0 after:w-full
+        after:transition-all after:duration-400 after:z-[-2]
+
+        /* Hover effects */
+        hover:before:w-full
+        hover:after:h-full hover:after:delay-200
+
+        ${
+          isDarkMode
+            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+               hover:text-zinc-900 border-gray-100/20`
+            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
+               hover:text-white border-gray-800/20`
+        }
+      `}
                     >
-                      <Globe className="w-5 h-5" />
+                      <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                       View Live Demo
                     </a>
                   )}
@@ -677,13 +771,36 @@ const Projects = () => {
                       href={selectedProject.repo}
                       target="_blank"
                       rel="noreferrer"
-                      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono font-medium ${
-                        isDarkMode
-                          ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      } transition-colors duration-300`}
+                      className={` cursor-target border-b-0
+        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
+        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
+        rounded-lg border 
+        bg-transparent transition-all duration-500
+
+        /* ::before - top line animation */
+        before:content-[''] before:absolute before:top-0 before:right-0
+        before:h-[2px] before:w-0
+        before:transition-all before:duration-500 before:z-[-1]
+
+        /* ::after - background fill animation */
+        after:content-[''] after:absolute after:left-0 after:bottom-0
+        after:h-0 after:w-full
+        after:transition-all after:duration-400 after:z-[-2]
+
+        /* Hover effects */
+        hover:before:w-full
+        hover:after:h-full hover:after:delay-200
+
+        ${
+          isDarkMode
+            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
+               hover:text-zinc-900 border-gray-100/20`
+            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
+               hover:text-white border-gray-800/20`
+        }
+      `}
                     >
-                      <Github className="w-5 h-5" />
+                      <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                       View Repository
                     </a>
                   )}
@@ -693,6 +810,13 @@ const Projects = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <div
+      className={`absolute bottom-0 left-0 w-full h-40 z-30 pointer-events-none ${
+isDarkMode
+ ? "bg-gradient-to-b from-transparent to-zinc-900"
+ : "bg-gradient-to-b from-transparent to-[#faf9f9]"
+ }`}
+ />
     </section>
   );
 };
