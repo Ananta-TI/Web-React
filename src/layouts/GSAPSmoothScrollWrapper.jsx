@@ -1,17 +1,17 @@
-// src/layouts/GSAPSmoothScrollWrapper.jsx
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+
+export let smootherInstance = null;
 
 const GSAPSmoothScrollWrapper = ({ children }) => {
   const smootherRef = useRef(null);
 
   useEffect(() => {
-    // Create smoother
-    const smoother = ScrollSmoother.create({
+    smootherInstance = ScrollSmoother.create({
       wrapper: "#smooth-wrapper",
       content: "#smooth-content",
       smooth: 1,
@@ -19,28 +19,20 @@ const GSAPSmoothScrollWrapper = ({ children }) => {
       smoothTouch: 0.1,
     });
 
-    // Refresh ScrollTrigger on resize
-    const handleResize = () => {
-      ScrollTrigger.refresh();
-    };
-
-    window.addEventListener('resize', handleResize);
+    const handleResize = () => ScrollTrigger.refresh();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      smoother.kill();
-      window.removeEventListener('resize', handleResize);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      smootherInstance?.kill();
+      smootherInstance = null;
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
-    <>
-      <div id="smooth-wrapper">
-        <div id="smooth-content">
-          {children}
-        </div>
-      </div>
-    </>
+    <div id="smooth-wrapper">
+      <div id="smooth-content">{children}</div>
+    </div>
   );
 };
 

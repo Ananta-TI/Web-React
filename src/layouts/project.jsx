@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 import LayeredAnimations from "../components/Home/LayeredAnimations";
+import { createPortal } from "react-dom";
+import { smootherInstance } from "../layouts/GSAPSmoothScrollWrapper";
+
 import {
   Github,
   ExternalLink,
@@ -146,79 +149,61 @@ const Projects = () => {
     
     setFilteredProjects(result);
   }, [searchTerm, selectedCategory, selectedTech, sortBy]);
-  
+  useEffect(() => {
+  if (!smootherInstance) return;
+
+  if (showModal) {
+    smootherInstance.paused(true);
+  } else {
+    smootherInstance.paused(false);
+  }
+}, [showModal]);
+
   // Initialize filtered projects on mount
   useEffect(() => {
     setFilteredProjects(projects);
   }, []);
-  
-  // Enhanced parallax effects with GSAP
-  useEffect(() => {
-    if (!imageRefs.current.length || !cardRefs.current.length || !sectionRef.current) return;
 
-    // Parallax for images
-    imageRefs.current.forEach((img) => {
+  
+// useEffect(() => {
+//   if (showModal) {
+//     document.documentElement.style.pointerEvents = "none";
+//     document.body.style.pointerEvents = "none";
+//   } else {
+//     document.documentElement.style.pointerEvents = "";
+//     document.body.style.pointerEvents = "";
+//   }
+// }, [showModal]);
+
+  // Enhanced parallax effects with GSAP
+useEffect(() => {
+  if (!sectionRef.current) return;
+
+  const ctx = gsap.context(() => {
+    Object.values(imageRefs.current).forEach((wrapper) => {
+      const img = wrapper?.querySelector("img");
       if (!img) return;
 
       gsap.fromTo(
-        img.querySelector("img"),
-        { yPercent: -20 },
+        img,
+        { yPercent: -12 },
         {
-          yPercent: 20,
+          yPercent: 12,
           ease: "none",
           scrollTrigger: {
-            trigger: img,
+            trigger: wrapper,
             start: "top bottom",
             end: "bottom top",
-            scrub: 1,
+            scrub: 0.8,
           },
         }
       );
     });
+  }, sectionRef);
 
-    // Parallax for cards
-    // cardRefs.current.forEach((card, index) => {
-    //   if (!card) return;
+  return () => ctx.revert();
+}, [filteredProjects]);
 
-    //   gsap.fromTo(
-    //     card,
-    //     { yPercent: index % 2 === 0 ? -5 : 5 },
-    //     {
-    //       yPercent: index % 2 === 0 ? 5 : -5,
-    //       ease: "none",
-    //       scrollTrigger: {
-    //         trigger: card,
-    //         start: "top bottom",
-    //         end: "bottom top",
-    //         scrub: 1,
-    //       },
-    //     }
-    //   );
-    // });
-
-    // Parallax for section title
-    if (titleRef.current) {
-      gsap.fromTo(
-        titleRef.current,
-        { yPercent: -10 },
-        {
-          yPercent: 10,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1,
-          },
-        }
-      );
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, [filteredProjects]);
-  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -378,16 +363,16 @@ const Projects = () => {
                 } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
               >
                 {/* Project Image/Preview */}
-                <div 
-                  ref={(el) => (imageRefs.current[index] = el)}
-                  className="relative h-48 sm:h-52 md:h-64 lg:h-56 overflow-hidden rounded-t-3xl"
-                >
+                <div
+  ref={(el) => (imageRefs.current[project.id] = el)}
+  className="relative h-48 sm:h-52 md:h-64 lg:h-56 overflow-hidden rounded-t-3xl"
+>
                   <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+    src={project.image}
+    alt={project.title}
+    className="absolute top-0 left-0 w-full h-[120%]"
+    loading="lazy"
+  />
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -639,6 +624,7 @@ cursor-target
       </motion.div>
       
       {/* Project Details Modal */}
+      {createPortal(
       <AnimatePresence>
         {showModal && selectedProject && (
           <motion.div
@@ -648,7 +634,7 @@ cursor-target
             exit={{ opacity: 0 }}
             onClick={closeModal}
           >
-            <div className="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm " />
             
             <motion.div
               variants={modalVariants}
@@ -809,7 +795,10 @@ cursor-target
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+        document.body
+      )}
+
       <div
       className={`absolute bottom-0 left-0 w-full h-40 z-30 pointer-events-none ${
 isDarkMode
@@ -818,6 +807,7 @@ isDarkMode
  }`}
  />
     </section>
+    
   );
 };
 

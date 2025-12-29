@@ -362,12 +362,12 @@
 /* src/index.css */
 
 /* Smooth scrolling untuk seluruh aplikasi */
-html {
+/* html {
   scroll-behavior: smooth;
-}
+} */
 
 /* Untuk browser yang tidak mendukung scroll-behavior */
-@supports not (scroll-behavior: smooth) {
+/* @supports not (scroll-behavior: smooth) {
   html {
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
@@ -376,7 +376,7 @@ html {
   section {
     scroll-snap-align: start;
   }
-}
+} */
 
 /* Custom scrollbar */
 /* ::-webkit-scrollbar {
@@ -407,7 +407,7 @@ html {
 
 /* Fix untuk smooth scrolling dengan fixed header */
 html {
-  scroll-padding-top: 80px; /* Sesuaikan dengan tinggi header */
+  scroll-padding-top: 80px; 
 }
 
 /* Smooth transitions untuk theme change */
@@ -424,5 +424,16 @@ html {
 .gpu-accelerated {
   transform: translateZ(0);
   backface-visibility: hidden;
-  perspective: 1000px;
+  perspective: 10000px;
+}
+
+/* Di CSS Anda */
+.modal-overlay {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  /* Ini akan membuat elemen berada di luar alur normal scroll */
 }

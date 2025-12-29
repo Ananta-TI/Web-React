@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { FolderOpen, X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const Certificates = () => {
   const theme = useContext(ThemeContext);
@@ -32,6 +33,17 @@ const Certificates = () => {
   { image: "sertifikat/18.png", year: "2025" },
 ];
 
+useEffect(() => {
+  if (selectedCert) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [selectedCert]);
 
   // 🔝 Scroll ke atas saat halaman dibuka
   useEffect(() => {
@@ -140,13 +152,17 @@ function shuffleArray(arr) {
       </div>
 
       {/* ===== Modal Preview with Advanced 3D Tilt ===== */}
-      {selectedCert && (
-        <TiltedModal 
-          cert={selectedCert} 
-          onClose={() => setSelectedCert(null)}
-          isDarkMode={isDarkMode}
-        />
-      )}
+      {createPortal(
+  selectedCert && (
+    <TiltedModal
+      cert={selectedCert}
+      onClose={() => setSelectedCert(null)}
+      isDarkMode={isDarkMode}
+    />
+  ),
+  document.body
+)}
+
     </motion.div>
   );
 };
