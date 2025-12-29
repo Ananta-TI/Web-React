@@ -370,7 +370,7 @@ useEffect(() => {
                   <img
     src={project.image}
     alt={project.title}
-    className="absolute top-0 left-0 w-full h-[120%]"
+    className="absolute top-0 left-0 w-full h-[100%]"
     loading="lazy"
   />
                   
