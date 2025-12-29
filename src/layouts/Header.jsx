@@ -184,7 +184,7 @@ export default function Header() {
         // Smooth scroll ke section
         const element = document.querySelector(link);
         if (element) {
-          const headerOffset = 80;
+          const headerOffset = 10;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
           

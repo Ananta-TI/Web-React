@@ -14,7 +14,7 @@ const GSAPSmoothScrollWrapper = ({ children }) => {
     smootherInstance = ScrollSmoother.create({
       wrapper: "#smooth-wrapper",
       content: "#smooth-content",
-      smooth: 1,
+      smooth: 2,
       effects: true,
       smoothTouch: 0.1,
     });
@@ -25,7 +25,7 @@ const GSAPSmoothScrollWrapper = ({ children }) => {
     return () => {
       smootherInstance?.kill();
       smootherInstance = null;
-      window.removeEventListener("resize", handleResize);
+      // window.removeEventListener("resize", handleResize);
     };
   }, []);
 
