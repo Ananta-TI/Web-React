@@ -305,6 +305,7 @@ export default function WebsiteSecurityScanner() {
   };
 
   // --- API HANDLERS ---
+// Di dalam komponen WebsiteSecurityScanner-mu
 const fetchMetadata = async (type, id) => {
     try {
         let endpointType = 'files';
@@ -312,9 +313,9 @@ const fetchMetadata = async (type, id) => {
         else if (type === 'domain') endpointType = 'domains';
         else if (type === 'ip-address') endpointType = 'ip_addresses';
 
-        // 🔥 TAMBAHKAN TIMESTAMP DI SINI JUGA
         const timestamp = new Date().getTime();
-        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}?_t=${timestamp}`);
+        // Perhatikan URL-nya menggunakan query parameter
+        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}?id=${encodeURIComponent(id)}&_t=${timestamp}`);
         
         const data = await res.json();
         if(res.ok) return data.data;

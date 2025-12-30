@@ -1,11 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ],
-   "functions": {
+  "functions": {
     "api/**/*.js": {
       "maxDuration": 30
     }
