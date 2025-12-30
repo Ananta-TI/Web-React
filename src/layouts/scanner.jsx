@@ -200,11 +200,72 @@ const abortRef = React.useRef(null);
   // TOAST STATE
   const [toast, setToast] = useState(null);
 
-  const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "http://localhost:5000"
-      : "https://ananta-ti.vercel.app");
+// 🔧 Fix Normalisasi URL Backend
+const BACKEND_URL = (
+  import.meta.env.VITE_BACKEND_URL ||
+  (window.location.hostname.includes("localhost")
+    ? "http://localhost:5000"
+    : "https://ananta-ti.vercel.app")
+).replace(/\/+$/, ""); // <--- buang slash di belakang
 
+const startScan = async () => {
+  if (!input.trim()) return setError("URL tidak boleh kosong.");
+  setLoading(true);
+  setError("");
+  setResult(null);
+  setMetadata(null);
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: input }),
+    });
+
+    const data = await res.json();
+    if (!data.analysis_id) throw new Error("Tidak mendapatkan analysis ID.");
+
+    setAnalysisId(data.analysis_id);
+    pollResult(data.analysis_id);
+  } catch (err) {
+    setError(err.message || "Scan gagal dimulai.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const pollResult = async (id) => {
+  clearInterval(pollRef.current);
+
+  pollRef.current = setInterval(async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
+      const data = await res.json();
+
+      // Kalau selesai → set data + stop polling
+      if (data.status === "completed" || data.data) {
+        clearInterval(pollRef.current);
+        setResult(data.data);
+        setMetadata(data.metadata || {});
+        setStatus("Scan completed");
+        return;
+      }
+
+      // Kalau status error → stop polling
+      if (res.status >= 400) {
+        clearInterval(pollRef.current);
+        setError("Server error saat mengambil hasil scan.");
+        return;
+      }
+    } catch (err) {
+      clearInterval(pollRef.current);
+      setError("Koneksi terputus saat polling data.");
+    }
+  }, 2000); // 2 detik polling
+};
+
+
+      
   // --- HISTORY LOGIC ---
   useEffect(() => {
     const loadLocal = localStorage.getItem("scanHistory");
