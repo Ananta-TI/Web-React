@@ -318,7 +318,7 @@ const fetchMetadata = async (type, id) => {
         // Perbaikan URL - gunakan query parameter untuk id
         const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`)
         
-        console.log(`🔍 Fetching metadata from: ${BACKEND_URL}/api/vt/metadata/${endpointType}?id=${encodeURIComponent(id)}&_t=${timestamp}`);
+        console.log(`🔍 Fetching metadata from: ${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`);
         
         if (!res.ok) {
             console.error(`❌ Metadata fetch failed with status: ${res.status}`);
