@@ -1,9 +1,6 @@
-import axios from "axios";
-import FormData from "form-data";
 import { IncomingForm } from "formidable";
 import fs from "fs";
 
-// Kita harus mematikan body parser bawaan Next.js/Vercel agar bisa baca file stream
 export const config = {
   api: {
     bodyParser: false,
@@ -16,9 +13,11 @@ export default async function handler(req, res) {
   }
 
   const VT_KEY = process.env.VT_API_KEY;
+  if (!VT_KEY) {
+    return res.status(500).json({ error: "VT_API_KEY missing" });
+  }
 
   try {
-    // 1. Parse file yang diupload menggunakan formidable
     const data = await new Promise((resolve, reject) => {
       const form = new IncomingForm();
       form.parse(req, (err, fields, files) => {
@@ -27,32 +26,30 @@ export default async function handler(req, res) {
       });
     });
 
-    // Ambil file (formidable mungkin mengembalikan array)
     const file = Array.isArray(data.files.file) ? data.files.file[0] : data.files.file;
 
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    const FormData = require("form-data");
     const formData = new FormData();
-    // Baca file dari path temporary formidable
     formData.append("file", fs.createReadStream(file.filepath), file.originalFilename);
 
-    // 3. Kirim ke VirusTotal
+    const axios = require("axios");
     const response = await axios.post(
       "https://www.virustotal.com/api/v3/files",
       formData,
       {
         headers: {
           "x-apikey": VT_KEY,
-          ...formData.getHeaders(), // Header multipart boundary
+          ...formData.getHeaders(),
         },
         maxBodyLength: Infinity,
       }
     );
 
     return res.status(200).json(response.data);
-
   } catch (err) {
     console.error("Upload Error:", err);
     return res.status(500).json({ error: err.message || "Upload failed" });

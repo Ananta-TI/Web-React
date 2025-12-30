@@ -200,10 +200,9 @@ const abortRef = React.useRef(null);
   // TOAST STATE
   const [toast, setToast] = useState(null);
 
-  const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "http://localhost:5000"
-      : window.location.origin);
+  const BACKEND_URL = process.env.NODE_ENV === 'production' 
+  ? window.location.origin 
+  : "http://localhost:3000"; // Use Next.js dev server port, not Express
 
   // --- HISTORY LOGIC ---
   useEffect(() => {
