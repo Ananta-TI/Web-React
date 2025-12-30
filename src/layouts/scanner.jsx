@@ -203,7 +203,7 @@ const abortRef = React.useRef(null);
   const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://localhost:5000"
-      : "https://ananta-ti--ananta23ti.replit.app");
+      : "https://ananta-ti.vercel.app");
 
   // --- HISTORY LOGIC ---
   useEffect(() => {
