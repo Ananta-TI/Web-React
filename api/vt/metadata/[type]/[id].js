@@ -1,8 +1,11 @@
+import axios from "axios";
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Vercel otomatis mengambil parameter dari nama folder/file [type] dan [id]
   const { type, id } = req.query;
   const VT_KEY = process.env.VT_API_KEY;
 
@@ -12,7 +15,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const axios = require("axios");
     const response = await axios.get(
       `https://www.virustotal.com/api/v3/${type}/${encodeURIComponent(id)}`,
       {
