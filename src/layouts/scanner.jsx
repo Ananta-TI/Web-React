@@ -1,713 +1,695 @@
-import React, { useState, useEffect, useContext } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 import {
-  Search, FolderOpen, ShieldCheck, AlertTriangle, Skull, Loader2,
-  BarChart2, ListFilter, Calendar, FileUp, Globe, Database, X,
-  FileText, Hash, Clock, Fingerprint, Cpu, Layers, Copy, Check,
-  History, Trash2, ChevronRight
+  ExternalLink,
+  Search,
+  FolderOpen,
+  ShieldCheck,
+  AlertTriangle,
+  Skull,
+  Loader2,
+  BarChart2,
+  ListFilter,
+  Calendar, // Icon baru untuk tanggal
+  Activity, // Icon baru untuk method
 } from "lucide-react";
-import { PieChart } from '@mui/x-charts/PieChart';
-import supabase from '../supabaseClient';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 // -------------------------
-// Helper: Copyable Text
+// Helper components
 // -------------------------
-const CopyableText = ({ text, label, isCode = false }) => {
-  const [copied, setCopied] = useState(false);
-  const { isDarkMode } = useContext(ThemeContext);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text || "");
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Copy failed:", err);
-    }
-  };
+// Helper function untuk mendapatkan warna dan ikon berdasarkan kategori
+const getCategoryDetails = (category, isDarkMode) => {
+  switch (category) {
+    case "harmless":
+      return {
+        icon: ShieldCheck,
+        colorClass: isDarkMode
+          ? "bg-green-600/20 text-green-400"
+          : "bg-green-100 text-green-700",
+        ringColor: "ring-green-500",
+        dotColor: "bg-green-500",
+      };
+    case "suspicious":
+      return {
+        icon: AlertTriangle,
+        colorClass: isDarkMode
+          ? "bg-yellow-600/20 text-yellow-400"
+          : "bg-yellow-100 text-yellow-700",
+        ringColor: "ring-yellow-500",
+        dotColor: "bg-yellow-500",
+      };
+    case "malicious":
+      return {
+        icon: Skull,
+        colorClass: isDarkMode
+          ? "bg-red-600/20 text-red-400"
+          : "bg-red-100 text-red-700",
+        ringColor: "ring-red-500",
+        dotColor: "bg-red-500",
+      };
+    case "undetected":
+    case "unrated":
+    default:
+      return {
+        icon: Search,
+        colorClass: isDarkMode
+          ? "bg-gray-600/20 text-gray-400"
+          : "bg-gray-100 text-gray-700",
+        ringColor: "ring-gray-500",
+        dotColor: "bg-gray-500",
+      };
+  }
+};
+
+const StatCard = ({ label, value, icon: Icon, colorClass, isDarkMode }) => {
+  const finalColorClass = colorClass || (isDarkMode ? "bg-zinc-800/50" : "bg-white");
 
   return (
-    <div className={`group flex items-center justify-between p-2 rounded-lg border transition-all ${
-        isDarkMode ? "bg-zinc-900/50 border-zinc-700 hover:border-blue-500/50" : "bg-gray-50 border-gray-200 hover:border-blue-300"
-    }`}>
-      <div className="flex flex-col min-w-0 flex-1 mr-2">
-        <span className={`text-[10px] uppercase tracking-wider font-bold mb-0.5 ${isDarkMode ? "text-zinc-500" : "text-gray-500"}`}>
-            {label}
-        </span>
-        <span className={`text-xs sm:text-sm truncate font-medium ${isCode ? "font-mono" : ""} ${isDarkMode ? "text-zinc-200" : "text-gray-800"}`}>
-            {text || "-"}
-        </span>
-      </div>
-      <button onClick={handleCopy} className={`p-1.5 rounded-md transition-colors ${
-          copied ? "text-green-500 bg-green-500/10" : isDarkMode ? "text-zinc-500 hover:text-white hover:bg-zinc-700" : "text-gray-400 hover:text-black hover:bg-gray-200"
-      }`} aria-label={`Copy ${label}`}>
-        {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-      </button>
+    <div
+      className={`p-4 sm:p-6 rounded-xl text-center backdrop-blur-sm border transition-colors duration-300 ${finalColorClass} ${
+        isDarkMode ? "border-white/10" : "border-gray-200"
+      }`}
+    >
+      <Icon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+      <div className="text-xl sm:text-2xl font-bold mb-1">{value}</div>
+      <div className="text-xs sm:text-sm opacity-80">{label}</div>
     </div>
   );
 };
 
-// -------------------------
-// Helper: Section Card
-// -------------------------
-const SectionCard = ({ title, icon: Icon, children, isDarkMode }) => (
-  <div className={`mb-6 rounded-xl border overflow-hidden ${isDarkMode ? "bg-zinc-800/40 border-zinc-700" : "bg-white border-gray-200"}`}>
-    <div className={`px-4 py-3 border-b flex items-center gap-2 font-semibold text-sm ${
-        isDarkMode ? "bg-zinc-800 border-zinc-700 text-zinc-200" : "bg-gray-50 border-gray-200 text-gray-700"
-    }`}>
-      {Icon && <Icon className="w-4 h-4 text-blue-500" />} {title}
-    </div>
-    <div className="p-4 grid grid-cols-1 gap-3">
-        {children}
-    </div>
-  </div>
-);
+
+// Custom Tooltip untuk Recharts
+const CustomTooltip = ({ active, payload, label, isDarkMode }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`p-2 rounded shadow-lg backdrop-blur-md text-sm ${
+          isDarkMode
+            ? "bg-zinc-700/70 border border-zinc-600 text-white"
+            : "bg-white/90 border border-gray-300 text-zinc-900"
+        }`}
+      >
+        <p className="font-semibold">{`${payload[0].name}`}</p>
+        <p>{`Count: ${payload[0].value}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 
 // -------------------------
-// Main Component
+// Main component
 // -------------------------
 export default function WebsiteSecurityScanner() {
   const { isDarkMode } = useContext(ThemeContext);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, []);
+  const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   // UI state
   const [input, setInput] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [mode, setMode] = useState("scan");
-
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState(null);
-
   const [result, setResult] = useState(null);
-  const [metadata, setMetadata] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("detection");
-  const [showAllVendors, setShowAllVendors] = useState(false);
-
-  // HISTORY STATE
-  const [history, setHistory] = useState([]);
-  const [showHistoryTab, setShowHistoryTab] = useState(false);
-
-  const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
+  // Dynamic backend URL detection
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://localhost:5000"
       : "https://ananta-ti.vercel.app");
 
-  // --- HISTORY LOGIC ---
-  useEffect(() => {
-    const loadLocal = localStorage.getItem("scanHistory");
-    if (loadLocal) {
-      try {
-        setHistory(JSON.parse(loadLocal));
-      } catch (err) {
-        console.error("Error parsing local history:", err);
-        localStorage.removeItem("scanHistory");
-      }
-    }
-
-    const loadSupabase = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("scan_history")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(20);
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          const formatted = data.map((d) => ({
-            ...d,
-            timestamp: new Date(d.created_at).getTime(),
-            id: d.vt_id || d.id
-          }));
-          setHistory((prev) => {
-            const combined = [...formatted, ...prev];
-            const unique = Array.from(new Map(combined.map(item => [item.vt_id || item.id, item])).values());
-            return unique.slice(0, 20);
-          });
-        }
-      } catch (err) {
-        console.error("Error loading Supabase history:", err);
-      }
-    };
-
-    loadSupabase();
-  }, []);
-
-  // Save History (nama fungsi disesuaikan dengan penggunaan di komponen)
-  const saveToHistory = async (resData, metaData, name, type) => {
-    const item = {
-      vt_id: resData.data.id,
-      name,
-      type,
-      stats: resData.data.attributes.stats,
-      result: resData,
-      metadata: metaData
-    };
-
-    try {
-      await supabase.from("scan_history").insert([item]);
-    } catch (err) {
-      // Jangan ganggu UX kalau insert gagal; tetap simpan lokal.
-      console.warn("Supabase insert failed (non-blocking):", err);
-    }
-
-    const local = {
-      ...item,
-      id: resData.data.id,
-      timestamp: Date.now(),
-    };
-
-    const newList = [local, ...history].slice(0, 20);
-    setHistory(newList);
-    localStorage.setItem("scanHistory", JSON.stringify(newList));
-  };
-
-  const restoreHistory = (item) => {
-    setResult(item.result);
-    setMetadata(item.metadata);
-    setShowHistoryTab(false);
-    window.scrollTo({ top: 300, behavior: "smooth" });
-  };
-
-  const clearHistory = () => {
-    setHistory([]);
-    localStorage.removeItem("scanHistory");
-  };
-
-  // --- API HANDLERS ---
-  async function fetchMetadata(type, id) {
-    try {
-        let endpointType = 'files';
-        if (type === 'url') endpointType = 'urls';
-        else if (type === 'domain') endpointType = 'domains';
-        else if (type === 'ip-address') endpointType = 'ip_addresses';
-
-        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`);
-        const data = await res.json();
-        if(res.ok) return data.data;
-        return null;
-    } catch (err) {
-        console.error("Gagal ambil metadata:", err);
-        return null;
-    }
-  }
-
-  async function pollResult(id, type, inputName) {
-    const maxRetries = 40;
-    const delayMs = 3000;
-    for (let i = 0; i < maxRetries; i++) {
-      setStatus(`Menganalisis... (${i + 1}/${maxRetries})`);
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-        const data = await res.json();
-
-        if (data?.data?.attributes?.status === "completed") {
-            setResult(data);
-            setStatus("Mengambil detail...");
-
-            let targetId = null;
-            if (type === 'file') targetId = data.meta?.file_info?.sha256;
-            else if (type === 'url') targetId = data.meta?.url_info?.id;
-
-            let meta = null;
-            if (targetId) {
-                meta = await fetchMetadata(type, targetId);
-                setMetadata(meta);
-            }
-
-            // SIMPAN KE HISTORY
-            saveToHistory(data, meta, inputName, type);
-
-            setStatus("Selesai!");
-            setLoading(false);
-            return;
-        }
-      } catch (err) { console.error(err); }
-      await new Promise(r => setTimeout(r, delayMs));
-    }
-    setLoading(false); setStatus("⏱ Timeout.");
-  }
-
-  async function handleScanUrl() {
+  // submit URL to backend
+  async function handleScan() {
     if (!input) return;
-    setLoading(true); setStatus("Mengirim URL..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
+    setLoading(true);
+    setStatus("Mengirim URL ke VirusTotal...");
+    setResult(null);
+    setAnalysisId(null);
     try {
+      console.log("🔍 Scanning URL:", input);
+      console.log("🌐 Backend URL:", BACKEND_URL);
+      
       const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: input }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: input }),
       });
+      
+      console.log("📡 Response status:", res.status);
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed");
-      setAnalysisId(data.data.id);
-      await pollResult(data.data.id, 'url', input);
-    } catch (err) { setStatus(`❌ Error: ${err.message}`); setLoading(false); }
-  }
-
-  async function handleScanFile() {
-    if (!selectedFile) return;
-    setLoading(true); setStatus("Mengupload File..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      setAnalysisId(data.data.id);
-      await pollResult(data.data.id, 'file', selectedFile.name);
-    } catch (err) { setStatus(`❌ Error: ${err.message}`); setLoading(false); }
-  }
-
-  async function handleSearch() {
-    if (!input) return;
-    setLoading(true); setStatus("Searching DB..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(input)}`);
-      const data = await res.json();
-      if (!res.ok || !data.data || data.data.length === 0) throw new Error("Data tidak ditemukan.");
-
-      const item = data.data[0];
-      const simulatedResult = {
-        data: {
-            id: item.id, type: item.type,
-            attributes: {
-                url: input, content: { title: item.attributes.meaningful_name || item.type },
-                date: item.attributes.last_analysis_date,
-                stats: item.attributes.last_analysis_stats,
-                results: item.attributes.last_analysis_results,
-                status: "completed"
-            }
-        }
-      };
-      setResult(simulatedResult);
-      setMetadata(item);
-
-      // Simpan ke History untuk Search juga
-      saveToHistory(simulatedResult, item, input, 'search');
-
-      setStatus("Selesai!");
+      console.log("📦 Response data:", data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}: ${data.message || "Failed to scan"}`);
+      }
+      
+      // VirusTotal returns nested structure: { data: { id: "..." } }
+      const analysisId = data.data?.id; // karena backend mengembalikan format VT asli
+      
+      if (!analysisId) {
+        console.error("❌ Full response:", JSON.stringify(data, null, 2));
+        throw new Error(`No analysis ID returned. Backend response: ${JSON.stringify(data)}`);
+      }
+      
+      setAnalysisId(analysisId);
+      setStatus("URL diterima. Menunggu hasil analisis...");
+      // poll
+      await pollResult(analysisId);
+    } catch (err) {
+      console.error("❌ Scan error:", err);
+      setStatus(`❌ Error: ${err.message}`);
+    } finally {
       setLoading(false);
-    } catch (err) { setStatus(`❌ Error: ${err.message}`); setLoading(false); }
+    }
   }
 
-  const handleSubmit = () => {
-    setActiveTab("detection");
-    if (mode === "scan") handleScanUrl();
-    else if (mode === "file") handleScanFile();
-    else handleSearch();
+  async function pollResult(id) {
+    const maxRetries = 40;  // total ~200s
+    const delayMs = 5000;   // 5 detik
+    for (let i = 0; i < maxRetries; i++) {
+      setStatus(`Menunggu hasil... (${i + 1}/${maxRetries})`);
+      try {
+        console.log(`🔄 Polling attempt ${i + 1}: Fetching ${BACKEND_URL}/api/vt/result/${id}`);
+        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
+        console.log(`📡 Poll response status: ${res.status}`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log(`📦 Poll response data:`, data);
+          const statusAttr = data?.data?.attributes?.status;
+          console.log(`🔍 Status attribute: ${statusAttr}`);
+          if (statusAttr === "completed") {
+            setResult(data);
+            setStatus("✅ Analisis selesai!");
+            return;
+          } else if (statusAttr === "queued" || statusAttr === "in-progress") {
+            // Lanjutkan polling jika masih dalam proses
+            console.log("⏳ Analysis still in progress, continuing poll...");
+          } else {
+            // Jika status lain (e.g., failed), hentikan dengan error
+            throw new Error(`Analysis failed with status: ${statusAttr}`);
+          }
+        } else {
+          console.error(`❌ Poll failed with status ${res.status}: ${res.statusText}`);
+          // Jika error 404 atau 429 (rate limit), hentikan polling
+          if (res.status === 404) {
+            throw new Error("Analysis ID not found. Check if scan was successful.");
+          } else if (res.status === 429) {
+            throw new Error("Rate limit exceeded. Try again later.");
+          }
+        }
+      } catch (err) {
+        console.error("❌ Poll error:", err);
+        setLoading(false); // Hentikan loader
+        setStatus(`❌ Error during polling: ${err.message}`);
+        return;  // Hentikan polling jika error fatal
+      }
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    setLoading(false); // Hentikan loader jika timeout
+    setStatus("⏱ Timeout: hasil belum tersedia. Coba lagi nanti atau periksa VirusTotal langsung.");
   }
 
-  const handleClear = () => {
-    setInput(""); setSelectedFile(null); setResult(null); setMetadata(null); setStatus("");
+  // --- UPDATED PARSER ---
+  // Menambahkan method dan result (detail) sesuai dokumentasi
+  function parseVendors(resultData) {
+    const obj = resultData?.data?.attributes?.results || {};
+    return Object.entries(obj).map(([vendor, info]) => ({
+      vendor,
+      category: info?.category || "unrated",
+      engine_name: info?.engine_name || vendor,
+      method: info?.method || "unknown", // e.g., "blacklist", "monitor"
+      result: info?.result || "clean",   // e.g., "phishing site", "clean"
+    }));
   }
-
-  // --- DATA PROCESSING ---
+  
   const stats = result?.data?.attributes?.stats || {};
-  const scanDate = result?.data?.attributes?.date || result?.data?.attributes?.last_analysis_date;
+  const scanDate = result?.data?.attributes?.date; // Unix timestamp
+  const vendorList = parseVendors(result || {});
+  
+  const categoryPriority = {
+    malicious: 1,
+    suspicious: 2,
+    harmless: 3,
+    undetected: 4,
+    unrated: 5,
+  };
 
-  const vendorObj = result?.data?.attributes?.results || {};
-  const vendorList = Object.entries(vendorObj).map(([vendor, info]) => ({
-      vendor, category: info?.category || "unrated", result: info?.result || info?.category || "clean"
-  }));
+  // Urutkan berdasarkan prioritas dan kemudian nama vendor
   const sortedVendors = vendorList.sort((a, b) => {
-    if (a.category === 'malicious' && b.category !== 'malicious') return -1;
-    if (b.category === 'malicious' && a.category !== 'malicious') return 1;
+    const priA = categoryPriority[a.category] || 99;
+    const priB = categoryPriority[b.category] || 99;
+    if (priA !== priB) {
+      return priA - priB;
+    }
     return a.vendor.localeCompare(b.vendor);
   });
 
   const pieData = [
-    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" },
-    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" },
-    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" },
-    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" },
-  ].filter(d => d.value > 0);
+    { name: "Harmless", value: stats.harmless || 0, color: "#22c55e" }, // Green
+    { name: "Suspicious", value: stats.suspicious || 0, color: "#f59e0b" }, // Amber
+    { name: "Malicious", value: stats.malicious || 0, color: "#ef4444" }, // Red
+    { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" }, // Gray
+  ].filter(d => d.value > 0); 
+  
+  // URL VirusTotal untuk analisis yang sedang berlangsung
+  const vtAnalysisUrl = analysisId 
+    ? `https://www.virustotal.com/gui/url/${result?.data?.attributes?.content?.url || input}/detection` 
+    : null;
+
+  // Format Date Helper
+  const formatScanDate = (timestamp) => {
+    if (!timestamp) return "-";
+    return new Date(timestamp * 1000).toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "medium",
+    });
+  };
 
   return (
-    <div className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}>
-      {/* HEADER */}
+    <div
+      className={`${
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-zinc-900"
+      } min-h-screen transition-colors duration-500`}
+    >
+      {/* Header */}
       <div
-        className={`top-0 z-40  backdrop-blur-lg border-b ${
-          isDarkMode ? "bg-zinc-900/80 border-zinc-800" : "bg-[#faf9f9] border-gray-400"
+        className={`top-0 z-40 backdrop-blur-lg border-b ${
+          isDarkMode
+            ? "bg-zinc-900/80 border-zinc-800"
+            : "bg-white/90 border-gray-200"
         }`}
       >
-        <div className="container mx-auto px-4  sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center mt-10 mb-20 justify-between ">
-            <div
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                isDarkMode ? "bg-none text-zinc-300" : "bg-none text-gray-600  border-gray-200"
-              }`}
-            >
-              <ShieldCheck className="w-5 h-5 text-red-500" />
-              <span className="font-medium">
-                SecurityScanner <span className="text-red-600">Ultimate</span>
-              </span>
-            </div>
-
-            <div
-              className={` flex gap-1 p-1 cursor-target rounded-lg border ${
-                isDarkMode ? "bg-none border-zinc-700" : "bg-none border-gray-300"
-              }`}
-            >
-              {[
-                { id: "scan", icon: Globe },
-                { id: "file", icon: FileUp },
-                { id: "search", icon: Database },
-                { id: "history", icon: History }
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => {
-                    if (m.id === "history") {
-                      setShowHistoryTab(true);
-                      setResult(null);
-                    } else {
-                      setMode(m.id);
-                      setShowHistoryTab(false);
-                      handleClear();
-                    }
-                  }}
-                  className={`p-2 rounded-md transition-all ${
-                    (m.id === "history" && showHistoryTab) ||
-                    (mode === m.id && !showHistoryTab)
-                      ? "bg-sky-600 text-white shadow"
-                      : isDarkMode
-                      ? "text-zinc-400 hover:bg-zinc-700"
-                      : "text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  <m.icon className="w-4 h-4" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
+          <div
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-lg ${
+              isDarkMode
+                ? "bg-zinc-800 text-zinc-300"
+                : "bg-white text-gray-800 border border-gray-200"
+            }`}
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-3">
-              Security Scanner
-            </h1>
-            <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-              Scan URL, file, atau hash dengan lebih mudah dan cepat.
-            </p>
-          </motion.div>
+            <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="font-medium text-sm sm:text-base">Website Security</div>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10 max-w-5xl">
-        {!showHistoryTab && (
-            <div className="max-w-3xl mx-auto mb-12">
-                <div className={`p-1.5 rounded-2xl border flex gap-2 shadow-xl ${isDarkMode?"bg-zinc-800 border-zinc-700":"bg-white border-gray-200"}`}>
-                    <div className="flex-1">
-                        {mode === 'file' ? (
-                            <div className="relative w-full h-full">
-                                 <input type="file" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} className="hidden" id="file-upload" />
-                                 <label htmlFor="file-upload" className={`w-full h-full px-4 py-3 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-opacity-50 transition-colors ${isDarkMode?"hover:bg-zinc-700":"hover:bg-gray-50"}`}>
-                                     <div className={`p-2 rounded-lg ${isDarkMode?"bg-zinc-700":"bg-gray-100"}`}><FileUp className="w-5 h-5 text-blue-500"/></div>
-                                     <span className={`text-sm font-medium truncate ${!selectedFile && "opacity-50"}`}>
-                                         {selectedFile ? selectedFile.name : "Click to browse file (Max 32MB)"}
-                                     </span>
-                                 </label>
-                                 {selectedFile && <button onClick={()=>setSelectedFile(null)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-red-500/10 rounded-full text-red-500"><X className="w-4 h-4"/></button>}
-                            </div>
-                        ) : (
-                            <div className="relative h-full flex items-center">
-                                <div className="absolute left-4 opacity-50"><Search className="w-5 h-5"/></div>
-                                <input
-                                    value={input}
-                                    onChange={(e)=>setInput(e.target.value)}
-                                    className="w-full h-full pl-12 pr-4 bg-transparent outline-none font-medium placeholder:opacity-50"
-                                    placeholder={mode==='scan' ? "https://malicious-site.com" : "Hash, IP, or Domain..."}
-                                    onKeyDown={(e)=>e.key==='Enter'&&handleSubmit()}
-                                />
-                            </div>
-                        )}
+      {/* Main content */}
+      <div
+        className={`container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 transition-colors duration-500 ${
+          isDarkMode ? "text-white" : "text-zinc-900"
+        }`}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-6 sm:mb-8"
+        >
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
+            <DecryptedText
+              text="Website Security Scanner"
+              speed={100}
+              maxIterations={105}
+              sequential
+              animateOn="view"
+            />
+          </h1>
+          <p
+            className={`text-base sm:text-lg ${
+              isDarkMode ? "text-zinc-400" : "text-gray-600"
+            }`}
+          >
+            Scan any URL using **VirusTotal** and show detailed vendor results.
+          </p>
+        </motion.div>
+
+        {/* input + actions */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 max-w-4xl mx-auto">
+          <div className="relative flex-1">
+            <Search
+              className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${
+                isDarkMode ? "text-zinc-400" : "text-gray-400"
+              }`}
+            />
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors duration-300 text-sm sm:text-base ${
+                isDarkMode
+                  ? "bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+              }`}
+              placeholder="https://example.com"
+              onKeyPress={(e) => e.key === "Enter" && handleScan()}
+              disabled={loading}
+            />
+          </div>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              onClick={handleScan}
+              disabled={loading || !input}
+              className={`px-4 sm:px-6 py-3 rounded-xl font-medium transition-all text-sm sm:text-base text-white ${
+                loading || !input
+                  ? "bg-blue-800/50 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-lg shadow-blue-600/30"
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
+                  Memproses...
+                </div>
+              ) : (
+                "Scan"
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setInput("");
+                setResult(null);
+                setAnalysisId(null);
+                setStatus("");
+                setShowAll(false);
+              }}
+              disabled={loading}
+              className={`px-3 sm:px-4 py-3 rounded-xl transition-colors text-sm sm:text-base ${
+                isDarkMode
+                  ? "bg-zinc-700/30 hover:bg-zinc-600/40 text-white"
+                  : "bg-gray-200 hover:bg-gray-300 text-zinc-900"
+              }`}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {status && (
+          <p
+            className={`text-sm text-center mb-6 transition-colors font-mono max-w-4xl mx-auto ${
+              isDarkMode ? "text-zinc-400" : "text-gray-500"
+            }`}
+          >
+            {status}
+          </p>
+        )}
+
+        {/* RESULT CARD */}
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-3xl p-5 sm:p-8 shadow-2xl transition-colors duration-500 max-w-4xl mx-auto ${
+              isDarkMode
+                ? "bg-zinc-800/80 border border-zinc-700/70"
+                : "bg-white border border-gray-300/80 shadow-gray-300/50"
+            }`}
+          >
+            {/* HEADER */}
+            <div className="flex flex-col lg:flex-row justify-between gap-5 mb-8 border-b pb-5 border-dashed border-current/20">
+              <div className="flex-1 min-w-0">
+                <div
+                  className={`text-xs sm:text-sm truncate ${
+                    isDarkMode ? "text-zinc-400" : "text-gray-600"
+                  }`}
+                >
+                  {result?.data?.attributes?.url}
+                </div>
+
+                <h2 className="text-xl sm:text-3xl font-bold font-lyrae mt-1 truncate text-blue-400">
+                  {result?.data?.attributes?.content?.title || "URL Scan Result"}
+                </h2>
+
+                <div className="flex flex-wrap items-center gap-4 mt-3">
+                    {/* Analysis ID */}
+                    <div
+                    className={`text-sm flex items-center gap-2 ${
+                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                    }`}
+                    >
+                        <BarChart2 className="w-4 h-4" />
+                        <span className="font-medium">ID:</span> 
+                        <span className="font-mono text-xs break-all opacity-80">
+                            {analysisId ? `${analysisId.substring(0, 12)}...` : "-"}
+                        </span>
                     </div>
 
-                    <button
-                        onClick={handleSubmit}
-                        disabled={loading || (mode==='file'?!selectedFile:!input)}
-                        className={`px-8 rounded-xl font-bold text-white transition-all transform active:scale-95 ${
-                            loading || (mode==='file'?!selectedFile:!input) ? "bg-zinc-600 opacity-50 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/20"
-                        }`}>
-                        {loading ? <Loader2 className="animate-spin w-5 h-5"/> : "SCAN"}
-                    </button>
-
+                    {/* Scan Date - Ditambahkan */}
+                    <div
+                    className={`text-sm flex items-center gap-2 ${
+                        isDarkMode ? "text-zinc-400" : "text-gray-700"
+                    }`}
+                    >
+                        <Calendar className="w-4 h-4" />
+                        <span className="font-medium">Analyzed:</span> 
+                        <span className="text-xs">
+                            {formatScanDate(scanDate)}
+                        </span>
+                    </div>
                 </div>
-                {status && <div className="text-center mt-4 text-xs font-mono text-zinc-500 animate-pulse">{status}</div>}
+              </div>
+
+             
             </div>
-        )}
 
-        {showHistoryTab && (
-            <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-2"><History className="w-6 h-6 text-blue-500"/> Scan History</h2>
-                    {history.length > 0 && (
-                        <button onClick={clearHistory} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-red-500 bg-red-500/10 hover:bg-red-500/20 transition">
-                            <Trash2 className="w-4 h-4"/> Clear All
-                        </button>
-                    )}
+            {/* GRID: STATS + PIE */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
+              {/* Stats & Summary (2/5) */}
+              <div className="lg:col-span-3">
+                <h3 className="text-xl font-semibold mb-4">Summary by Category</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {/* Stat Items */}
+                  {[
+                    { label: "Malicious", value: stats.malicious, category: "malicious" },
+                    { label: "Suspicious", value: stats.suspicious, category: "suspicious" },
+                    { label: "Harmless", value: stats.harmless, category: "harmless" },
+                    { label: "Undetected", value: stats.undetected, category: "undetected" },
+                  ].map((item, idx) => {
+                    const { colorClass, icon: Icon } = getCategoryDetails(item.category, isDarkMode);
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-4 rounded-xl text-center transition-colors duration-300 ${colorClass}`}
+                      >
+                        <div className="text-3xl font-extrabold flex items-center justify-center gap-2 mb-1">
+                          <Icon className="w-5 h-5" />
+                          {item.value ?? 0}
+                        </div>
+                        <div
+                          className={`text-xs sm:text-sm mt-1 font-medium ${
+                            isDarkMode ? "text-zinc-300" : "text-gray-800"
+                          }`}
+                        >
+                          {item.label}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {history.length === 0 ? (
-                    <div className="text-center py-20 opacity-50 border rounded-2xl border-dashed">
-                        <History className="w-12 h-12 mx-auto mb-3"/>
-                        <p>No scan history yet.</p>
-                    </div>
-                ) : (
-                    <div className="grid gap-3">
-                        {history.map((item, idx) => (
-                            <div key={idx} onClick={() => restoreHistory(item)}
-                                className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer group transition-all ${
-                                isDarkMode ? "bg-zinc-800/50 border-zinc-700 hover:border-blue-500" : "bg-white border-gray-200 hover:border-blue-400"
-                            }`}>
-                                <div className="flex items-center gap-4 min-w-0">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                                        item.stats?.malicious > 0 ? "border-red-500 text-red-500" : "border-green-500 text-green-500"
-                                    }`}>
-                                        {item.stats?.malicious > 0 ? <Skull className="w-5 h-5"/> : <ShieldCheck className="w-5 h-5"/>}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="font-bold truncate max-w-md">{item.name}</div>
-                                        <div className="text-xs opacity-50 flex items-center gap-2">
-                                            <span className="uppercase font-bold tracking-wider">{item.type}</span>
-                                            <span>•</span>
-                                            <span>{new Date(item.timestamp).toLocaleString()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <div className={`font-bold ${item.stats?.malicious > 0 ? "text-red-500":"text-green-500"}`}>
-                                            {item.stats?.malicious > 0 ? `${item.stats.malicious} Detections` : "Clean"}
-                                        </div>
-                                    </div>
-                                    <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 transition"/>
-                                </div>
-                            </div>
+              {/* Pie Chart (2/5) */}
+              <div className="lg:col-span-2 flex flex-col items-center">
+                <h3 className="text-xl font-semibold mb-4 text-center">Engine Distribution</h3>
+                <div
+                  className={`rounded-xl p-4 w-full flex justify-center items-center ${
+                    isDarkMode ? "bg-zinc-800/60" : "bg-gray-100"
+                  }`}
+                >
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={90}
+                        innerRadius={50}
+                        paddingAngle={3}
+                        fill="#8884d8" // Fallback fill color
+                        labelLine={false}
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={`cell-${i}`} fill={entry.color} stroke={isDarkMode ? "#27272a" : "#ffffff"} strokeWidth={2}/>
                         ))}
-                    </div>
-                )}
-            </motion.div>
-        )}
+                      </Pie>
+                      <Tooltip 
+                        content={<CustomTooltip isDarkMode={isDarkMode} />} 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Pie Chart Legend */}
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
+                    {pieData.map((entry, index) => (
+                        <div key={`legend-${index}`} className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
+                            <span>{entry.name} ({entry.value})</span>
+                        </div>
+                    ))}
+                </div>
+              </div>
+            </div>
 
-        <AnimatePresence>
-        {result && !showHistoryTab && (
-            <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className="space-y-6">
+            {/* VENDOR TABLE - UPDATED with Method & Detail */}
+            <h3 className="text-xl font-semibold mb-3 flex items-center gap-2 border-t pt-5 border-dashed border-current/20">
+                <ListFilter className="w-5 h-5" />
+                Vendor Scan Results
+            </h3>
 
-                {/* 1. Summary Header Card */}
-                <div className={`rounded-2xl p-6 border shadow-2xl relative overflow-hidden ${isDarkMode?"bg-zinc-800/60 border-zinc-700":"bg-white border-gray-200"}`}>
-                     <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none ${
-                         stats.malicious > 0 ? "bg-red-500" : stats.suspicious > 0 ? "bg-yellow-500" : "bg-green-500"
-                     }`}></div>
+            <div
+              className={`rounded-xl border overflow-hidden transition-colors duration-300 ${
+                isDarkMode
+                  ? "bg-zinc-800 border-zinc-700"
+                  : "bg-gray-100 border-gray-300"
+              }`}
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead
+                    className={`${
+                      isDarkMode
+                        ? "bg-zinc-700 text-gray-300"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    <tr>
+                      <th className="text-left px-4 py-3 font-semibold">Vendor</th>
+                      <th className="text-left px-4 py-3 font-semibold">Method</th>
+                      <th className="text-left px-4 py-3 font-semibold">Details</th>
+                      <th className="text-left px-4 py-3 font-semibold">Result</th>
+                    </tr>
+                  </thead>
 
-                     <div className="relative z-10 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-                         <div className="flex-1 min-w-0">
-                             <div className="flex items-center gap-2 mb-2">
-                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isDarkMode?"bg-zinc-700 text-zinc-300":"bg-gray-100 text-gray-600"}`}>
-                                     {result.data.type || mode} Analysis
-                                 </span>
-                                 <span className="text-xs opacity-50 flex items-center gap-1"><Clock className="w-3 h-3"/> {scanDate ? new Date(scanDate*1000).toLocaleString() : "Just now"}</span>
-                             </div>
-                             <h2 className="text-2xl sm:text-3xl font-bold truncate mb-1" title={metadata?.attributes?.meaningful_name || input}>
-                                 {mode==='file' && selectedFile ? selectedFile.name : (metadata?.attributes?.meaningful_name || input || "Scan Result")}
-                             </h2>
-                             <div className="text-xs font-mono opacity-50 truncate max-w-md">{result.data.id}</div>
-                         </div>
+                  <tbody>
+                    {(showAll ? sortedVendors : sortedVendors.slice(0, 10)).map((v, i) => {
+                      const { dotColor } = getCategoryDetails(v.category, isDarkMode);
+                      return (
+                        <tr key={i} className={`border-b transition-colors duration-300 ${
+                          isDarkMode
+                            ? "border-zinc-700/50 hover:bg-zinc-700/40"
+                            : "border-gray-300/80 hover:bg-gray-200"
+                        }`}>
+                          {/* 1. Vendor Name */}
+                          <td className="px-4 py-3 whitespace-nowrap">{v.vendor}</td>
 
-                         <div className="flex items-center gap-4">
-                             <div className="text-right">
-                                 <div className={`text-4xl font-black ${stats.malicious > 0 ? "text-red-500" : "text-green-500"}`}>
-                                     {stats.malicious}
-                                     <span className={`text-lg font-medium ml-1 ${isDarkMode?"text-zinc-500":"text-gray-400"}`}>/ {vendorList.length}</span>
-                                 </div>
-                                 <div className="text-[10px] uppercase font-bold tracking-widest opacity-60">Detections</div>
-                             </div>
-                             <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
-                                 stats.malicious > 0 ? "border-red-500 text-red-500" : "border-green-500 text-green-500"
+                          {/* 2. Method (Added) */}
+                          <td className="px-4 py-3">
+                             <span className={`px-2 py-1 rounded-md text-xs font-mono lowercase ${
+                                isDarkMode ? "bg-zinc-600/50 text-zinc-300" : "bg-gray-300/50 text-gray-700"
                              }`}>
-                                 {stats.malicious > 0 ? <Skull className="w-8 h-8"/> : <ShieldCheck className="w-8 h-8"/>}
-                             </div>
-                         </div>
-                     </div>
+                                {v.method}
+                             </span>
+                          </td>
+
+                          {/* 3. Detailed Result (Added) */}
+                          <td className={`px-4 py-3 truncate max-w-[200px] ${
+                                v.result === "clean" || v.result === "unrated" 
+                                ? "opacity-50 italic" 
+                                : isDarkMode ? "text-red-300 font-medium" : "text-red-700 font-medium"
+                             }`}>
+                             {v.result}
+                          </td>
+
+                          {/* 4. Category (Existing) */}
+                          <td className={`px-4 py-3 font-medium flex items-center gap-2 capitalize ${
+                            isDarkMode ? "text-white" : "text-zinc-900"
+                          }`}>
+                            <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
+                            {v.category}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {vendorList.length > 10 && (
+                <div className={`text-center py-3 border-t ${isDarkMode ? "border-zinc-700/50" : "border-gray-300/80"}`}>
+                  <button
+                    onClick={() => setShowAll(!showAll)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      isDarkMode
+                        ? "bg-zinc-600 hover:bg-zinc-500 text-white"
+                        : "bg-gray-300 hover:bg-gray-400 text-zinc-900"
+                    }`}
+                  >
+                    {showAll ? "Show Less" : `Show All (${vendorList.length})`}
+                  </button>
                 </div>
-
-                {/* 2. Navigation Tabs */}
-                <div className="flex justify-center">
-                     <div className={`p-1 rounded-xl flex gap-1 border ${isDarkMode?"bg-zinc-900 border-zinc-700":"bg-gray-100 border-gray-200"}`}>
-                         {['detection', 'details'].map(tab => (
-                             <button key={tab} onClick={()=>setActiveTab(tab)}
-                                 className={`px-6 py-2 rounded-lg text-sm font-bold capitalize transition-all ${
-                                     activeTab===tab ? "bg-white dark:bg-zinc-700 shadow-sm text-blue-600 dark:text-blue-400" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                                 }`}>
-                                 {tab}
-                             </button>
-                         ))}
-                     </div>
-                </div>
-
-                {/* 3. Content Area */}
-                <div className="min-h-[500px]">
-
-                    {/* --- TAB DETECTION --- */}
-                    {activeTab === 'detection' && (
-                        <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Chart */}
-                            <div className={`lg:col-span-1 rounded-2xl p-6 border ${isDarkMode?"bg-zinc-800/40 border-zinc-700":"bg-white border-gray-200"}`}>
-                                <h3 className="font-bold mb-6 flex items-center gap-2"><BarChart2 className="w-4 h-4 text-blue-500"/> Engine Summary</h3>
-                                <div className="h-48 flex justify-center items-center">
-                                    <PieChart series={[{ data: pieData.map((e,i)=>({id:i, value:e.value, color:e.color})), innerRadius: 60, paddingAngle: 2 }]} height={200} slotProps={{ legend: { hidden: true } }} />
-                                </div>
-                                <div className="mt-6 space-y-2">
-                                    {pieData.map(d=>(
-                                        <div key={d.name} className="flex justify-between text-sm items-center">
-                                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full" style={{backgroundColor:d.color}}/> {d.name}</div>
-                                            <span className="font-bold opacity-70">{d.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Vendor List */}
-                            <div className={`lg:col-span-2 rounded-2xl p-0 border overflow-hidden flex flex-col ${isDarkMode?"bg-zinc-800/40 border-zinc-700":"bg-white border-gray-200"}`}>
-                                <div className={`px-6 py-4 border-b font-bold flex justify-between items-center ${isDarkMode?"border-zinc-700":"border-gray-200"}`}>
-                                    <div className="flex items-center gap-2"><ListFilter className="w-4 h-4 text-blue-500"/> Security Vendors</div>
-                                    <div className="text-xs opacity-50">{vendorList.length} Engines</div>
-                                </div>
-                                <div className="flex-1 overflow-y-auto max-h-[500px] p-2">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        {(showAllVendors ? sortedVendors : sortedVendors.slice(0, 16)).map((v,i)=>(
-                                            <div key={i} className={`p-3 rounded-lg border flex items-center justify-between group hover:shadow-md transition-all ${isDarkMode?"bg-zinc-900/50 border-zinc-700/50":"bg-gray-50 border-gray-100"}`}>
-                                                <span className="text-sm font-medium">{v.vendor}</span>
-                                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase flex items-center gap-1 ${
-                                                    v.category==='malicious'?"bg-red-500/10 text-red-500":
-                                                    v.category==='suspicious'?"bg-yellow-500/10 text-yellow-500":
-                                                    v.category==='harmless'?"bg-green-500/10 text-green-500":"bg-gray-500/10 text-gray-500"
-                                                }`}>
-                                                    {v.category==='malicious' && <Skull className="w-3 h-3"/>}
-                                                    {v.result || v.category}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {vendorList.length > 16 && (
-                                        <button onClick={()=>setShowAllVendors(!showAllVendors)} className="w-full mt-2 py-3 text-sm text-blue-500 font-medium hover:bg-blue-500/10 rounded-lg transition-colors">
-                                            {showAllVendors ? "Show Less" : `View All ${vendorList.length} Vendors`}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* --- TAB DETAILS --- */}
-                    {activeTab === 'details' && (
-                        <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}}>
-                            {!metadata ? (
-                                <div className="flex flex-col items-center justify-center py-20 opacity-50">
-                                    <Loader2 className="w-10 h-10 animate-spin mb-4 text-blue-500"/>
-                                    <p>Fetching deep metadata object...</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div className="lg:col-span-2">
-                                        <SectionCard title="Basic Properties" icon={Hash} isDarkMode={isDarkMode}>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <CopyableText label="MD5" text={metadata.attributes.md5} isCode />
-                                                <CopyableText label="SHA-1" text={metadata.attributes.sha1} isCode />
-                                                <CopyableText label="SHA-256" text={metadata.attributes.sha256} isCode />
-                                                <CopyableText label="Vhash" text={metadata.attributes.vhash} isCode />
-                                                <CopyableText label="Authentihash" text={metadata.attributes.authentihash} isCode />
-                                                <CopyableText label="Imphash" text={metadata.attributes.imphash} isCode />
-                                                <CopyableText label="SSDEEP" text={metadata.attributes.ssdeep} isCode />
-                                                <CopyableText label="File Type" text={metadata.attributes.type_description} />
-                                                <CopyableText label="Magic" text={metadata.attributes.magic} />
-                                                <CopyableText label="File Size" text={metadata.attributes.size ? `${(metadata.attributes.size/1024).toFixed(2)} KB` : "-"} />
-                                            </div>
-                                        </SectionCard>
-                                    </div>
-
-                                    <SectionCard title="History" icon={Clock} isDarkMode={isDarkMode}>
-                                        <div className="space-y-1">
-                                            <CopyableText label="Creation Time" text={metadata.attributes.creation_date ? new Date(metadata.attributes.creation_date*1000).toUTCString() : "-"} />
-                                            <CopyableText label="First Submission" text={metadata.attributes.first_submission_date ? new Date(metadata.attributes.first_submission_date*1000).toUTCString() : "-"} />
-                                            <CopyableText label="Last Analysis" text={metadata.attributes.last_analysis_date ? new Date(metadata.attributes.last_analysis_date*1000).toUTCString() : "-"} />
-                                        </div>
-                                    </SectionCard>
-
-                                    <SectionCard title="Names" icon={FileText} isDarkMode={isDarkMode}>
-                                        <div className={`text-xs p-3 rounded-lg max-h-40 overflow-y-auto ${isDarkMode?"bg-zinc-900/50 text-zinc-400":"bg-gray-50 text-gray-600"}`}>
-                                            {metadata.attributes.names?.length ? metadata.attributes.names.map((n, i) => (
-                                                <div key={i} className="mb-1 pb-1 border-b border-dashed border-current/10 last:border-0 last:mb-0">{n}</div>
-                                            )) : "No names found"}
-                                        </div>
-                                    </SectionCard>
-
-                                    {metadata.attributes.signature_info && (
-                                        <div className="lg:col-span-2">
-                                            <SectionCard title="Signature Info" icon={Fingerprint} isDarkMode={isDarkMode}>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    <CopyableText label="Product" text={metadata.attributes.signature_info.product} />
-                                                    <CopyableText label="Description" text={metadata.attributes.signature_info.description} />
-                                                    <CopyableText label="Original Name" text={metadata.attributes.signature_info.original_name} />
-                                                    <CopyableText label="Copyright" text={metadata.attributes.signature_info.copyright} />
-                                                    <CopyableText label="Signers" text={metadata.attributes.signature_info.signers_details?.map(s=>s.name).join("; ")} />
-                                                    <div className={`p-2 rounded border text-center text-xs font-bold uppercase ${metadata.attributes.signature_info.verified ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"}`}>
-                                                        {metadata.attributes.signature_info.verified ? "Signature Verified" : "Invalid Signature"}
-                                                    </div>
-                                                </div>
-                                            </SectionCard>
-                                        </div>
-                                    )}
-
-                                    {metadata.attributes.pe_info && (
-                                        <div className="lg:col-span-2">
-                                            <SectionCard title="Portable Executable Info" icon={Cpu} isDarkMode={isDarkMode}>
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                                                    <CopyableText label="Target Machine" text={metadata.attributes.pe_info.machine_type} />
-                                                    <CopyableText label="Entry Point" text={metadata.attributes.pe_info.entry_point} isCode />
-                                                    <CopyableText label="Sections Count" text={metadata.attributes.pe_info.sections?.length} />
-                                                </div>
-
-                                                <h4 className="text-xs font-bold uppercase opacity-50 mb-2 mt-4 flex items-center gap-1"><Layers className="w-3 h-3"/> Sections</h4>
-                                                <div className={`overflow-x-auto rounded-lg border ${isDarkMode?"border-zinc-700":"border-gray-200"}`}>
-                                                    <table className="w-full text-xs text-left">
-                                                        <thead className={isDarkMode?"bg-zinc-700":"bg-gray-100"}>
-                                                            <tr><th className="p-2">Name</th><th className="p-2">Virtual Size</th><th className="p-2">Entropy</th><th className="p-2">MD5</th></tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {metadata.attributes.pe_info.sections?.map((s,i)=>(
-                                                                <tr key={i} className={`border-b last:border-0 ${isDarkMode?"border-zinc-700/50":"border-gray-100"}`}>
-                                                                    <td className="p-2 font-mono text-blue-500">{s.name}</td>
-                                                                    <td className="p-2">{s.virtual_size}</td>
-                                                                    <td className="p-2">{(s.entropy ?? 0).toFixed(2)}</td>
-                                                                    <td className="p-2 font-mono opacity-50">{s.md5}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </SectionCard>
-                                        </div>
-                                    )}
-
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
-
-                </div>
-            </motion.div>
+              )}
+            </div>
+          </motion.div>
         )}
-        </AnimatePresence>
 
+        {/* Empty state */}
+        {!result && !loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-24"
+          >
+            <div
+              className={`transition-colors text-xl font-medium ${
+                isDarkMode ? "text-zinc-400" : "text-gray-500"
+              }`}
+            >
+              Masukkan URL dan klik **Scan** untuk memulai analisis.
+            </div>
+            <p className={`mt-2 text-sm ${isDarkMode ? "text-zinc-600" : "text-gray-400"}`}>
+                *Powered by VirusTotal API*
+            </p>
+          </motion.div>
+        )}
+
+        {/* Stats summary (Bottom Section) */}
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-6 border-t border-dashed border-current/20">
+          <StatCard
+            label="Total Vendors"
+            value={vendorList.length || 0}
+            icon={FolderOpen}
+            colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
+            isDarkMode={isDarkMode}
+          />
+          <StatCard
+            label="Harmless Reports"
+            value={stats.harmless ?? 0}
+            icon={ShieldCheck}
+            colorClass={getCategoryDetails("harmless", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
+          />
+          <StatCard
+            label="Suspicious Reports"
+            value={stats.suspicious ?? 0}
+            icon={AlertTriangle}
+            colorClass={getCategoryDetails("suspicious", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
+          />
+          <StatCard
+            label="Malicious Reports"
+            value={stats.malicious ?? 0}
+            icon={Skull}
+            colorClass={getCategoryDetails("malicious", isDarkMode).colorClass}
+            isDarkMode={isDarkMode}
+          />
+        <StatCard
+        label="Detection Ratio"
+        value={`${stats.malicious + stats.suspicious}/${vendorList.length}`}
+        icon={BarChart2}
+        colorClass={isDarkMode ? "bg-zinc-800/50" : "bg-white"}
+        isDarkMode={isDarkMode}
+        />
+        </div>
       </div>
     </div>
   );
