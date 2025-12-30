@@ -200,10 +200,7 @@ const abortRef = React.useRef(null);
   // TOAST STATE
   const [toast, setToast] = useState(null);
 
-  const BACKEND_URL = process.env.NODE_ENV === 'production' 
-  ? window.location.origin 
-  : "http://localhost:3000"; // Use Next.js dev server port, not Express
-
+  const BACKEND_URL = "";
   // --- HISTORY LOGIC ---
   useEffect(() => {
     const loadLocal = localStorage.getItem("scanHistory");
