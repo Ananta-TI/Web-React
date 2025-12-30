@@ -6,7 +6,7 @@ import {
   Search, FolderOpen, ShieldCheck, AlertTriangle, Skull, Loader2,
   BarChart2, ListFilter, Calendar, FileUp, Globe, Database, X,
   FileText, Hash, Clock, Fingerprint, Cpu, Layers, Copy, Check,
-  History, Trash2, ChevronRight, Info, RefreshCw, Bug
+  History, Trash2, ChevronRight, Info, RefreshCw
 } from "lucide-react";
 import { PieChart } from '@mui/x-charts/PieChart';
 import supabase from '../supabaseClient';
@@ -198,20 +198,10 @@ export default function WebsiteSecurityScanner() {
   // TOAST STATE
   const [toast, setToast] = useState(null);
 
-  // DEBUG STATE
-  const [debugInfo, setDebugInfo] = useState("");
-
-  // PERBAIKAN: Backend URL yang lebih jelas dan debug info
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
+  const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://localhost:5000"
-      : "https://ananta-ti.vercel.app");
-
-  // Tambahkan log untuk debugging
-  useEffect(() => {
-    console.log("Backend URL:", BACKEND_URL);
-    setDebugInfo(`Backend: ${BACKEND_URL}`);
-  }, [BACKEND_URL]);
+      : "https://ananta-ti.vercel.app/");
 
   // --- HISTORY LOGIC ---
   useEffect(() => {
@@ -311,18 +301,8 @@ export default function WebsiteSecurityScanner() {
         else if (type === 'domain') endpointType = 'domains';
         else if (type === 'ip-address') endpointType = 'ip_addresses';
 
-        console.log(`Fetching metadata for ${endpointType}/${id}`);
         const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`);
-        
-        // PERBAIKAN: Tambahkan pengecekan status response
-        if (!res.ok) {
-          console.error("Metadata fetch failed:", res.status, res.statusText);
-          return null;
-        }
-        
         const data = await res.json();
-        console.log("Metadata response:", data);
-        
         if(res.ok) return data.data;
         return null;
     } catch (err) {
@@ -331,30 +311,16 @@ export default function WebsiteSecurityScanner() {
     }
   }
 
-  // PERBAIKAN: Polling dengan error handling yang lebih baik
   const pollResult = async (id, type, inputName) => {
     const maxRetries = 40;
     const delayMs = 3000;
-    
-    console.log(`Starting polling for ${id} of type ${type}`);
-    
     for (let i = 0; i < maxRetries; i++) {
       const currentProgress = Math.round(((i + 1) / maxRetries) * 100);
       setProgress(currentProgress);
       setStatus(`Menganalisis... (${i + 1}/${maxRetries})`);
-      
       try {
-        console.log(`Polling attempt ${i + 1}/${maxRetries} for ${id}`);
         const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-        
-        // PERBAIKAN: Tambahkan pengecekan status response
-        if (!res.ok) {
-          console.error("Poll request failed:", res.status, res.statusText);
-          continue; // Lanjut ke iterasi berikutnya
-        }
-        
         const data = await res.json();
-        console.log("Poll response:", data);
 
         if (data?.data?.attributes?.status === "completed") {
             setResult(data);
@@ -379,148 +345,49 @@ export default function WebsiteSecurityScanner() {
             setProgress(0);
             return;
         }
-      } catch (err) { 
-        console.error("Polling error:", err);
-        // Lanjut ke iterasi berikutnya
-      }
-      
+      } catch (err) { console.error(err); }
       await new Promise(r => setTimeout(r, delayMs));
     }
-    
-    // PERBAIKAN: Pesan error yang lebih jelas
-    setError("Analysis timed out. The scan might still be running in the background. Please try again later.");
+    setError("Analysis timed out. Please try again.");
     setLoading(false);
     setProgress(0);
   }
 
-  // PERBAIKAN: Fungsi scan URL dengan error handling yang lebih baik
   const handleScanUrl = async () => {
-    if (!input) {
-      setError("Please enter a URL to scan");
-      return;
-    }
-    
-    // PERBAIKAN: Validasi URL
+    if (!input) return;
+    setLoading(true); setError(""); setStatus("Mengirim URL..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
     try {
-      new URL(input);
-    } catch (e) {
-      setError("Please enter a valid URL (e.g., https://example.com)");
-      return;
-    }
-    
-    setLoading(true); 
-    setError(""); 
-    setStatus("Mengirim URL..."); 
-    setResult(null); 
-    setMetadata(null); 
-    setShowHistoryTab(false);
-    
-    try {
-      console.log("Scanning URL:", input);
       const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
-        method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify({ url: input }),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: input }),
       });
-      
-      // PERBAIKAN: Tambahkan pengecekan status response
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `Server responded with status: ${res.status}`);
-      }
-      
       const data = await res.json();
-      console.log("Scan response:", data);
-      
+      if (!res.ok) throw new Error(data.error || "Failed to submit URL");
       setAnalysisId(data.data.id);
       await pollResult(data.data.id, 'url', input);
-    } catch (err) { 
-      console.error("Scan error:", err);
-      setError(`Error: ${err.message}`); 
-      setLoading(false); 
-      setProgress(0); 
-    }
+    } catch (err) { setError(`Error: ${err.message}`); setLoading(false); setProgress(0); }
   }
 
-  // PERBAIKAN: Fungsi scan file dengan error handling yang lebih baik
   const handleScanFile = async () => {
-    if (!selectedFile) {
-      setError("Please select a file to scan");
-      return;
-    }
-    
-    // PERBAIKAN: Validasi ukuran file
-    if (selectedFile.size > 32 * 1024 * 1024) {
-      setError("File size exceeds 32MB limit");
-      return;
-    }
-    
-    setLoading(true); 
-    setError(""); 
-    setStatus("Mengupload File..."); 
-    setResult(null); 
-    setMetadata(null); 
-    setShowHistoryTab(false);
-    
+    if (!selectedFile) return;
+    setLoading(true); setError(""); setStatus("Mengupload File..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
     try {
-      console.log("Scanning file:", selectedFile.name);
       const formData = new FormData();
       formData.append("file", selectedFile);
-      
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, { 
-        method: "POST", 
-        body: formData 
-      });
-      
-      // PERBAIKAN: Tambahkan pengecekan status response
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `Server responded with status: ${res.status}`);
-      }
-      
+      const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, { method: "POST", body: formData });
       const data = await res.json();
-      console.log("File scan response:", data);
-      
+      if (!res.ok) throw new Error(data.error || "Upload failed");
       setAnalysisId(data.data.id);
       await pollResult(data.data.id, 'file', selectedFile.name);
-    } catch (err) { 
-      console.error("File scan error:", err);
-      setError(`Error: ${err.message}`); 
-      setLoading(false); 
-      setProgress(0); 
-    }
+    } catch (err) { setError(`Error: ${err.message}`); setLoading(false); setProgress(0); }
   }
 
-  // PERBAIKAN: Fungsi search dengan error handling yang lebih baik
   const handleSearch = async () => {
-    if (!input) {
-      setError("Please enter a search query");
-      return;
-    }
-    
-    setLoading(true); 
-    setError(""); 
-    setStatus("Searching DB..."); 
-    setResult(null); 
-    setMetadata(null); 
-    setShowHistoryTab(false);
-    
+    if (!input) return;
+    setLoading(true); setError(""); setStatus("Searching DB..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
     try {
-      console.log("Searching for:", input);
       const res = await fetch(`${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(input)}`);
-      
-      // PERBAIKAN: Tambahkan pengecekan status response
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `Server responded with status: ${res.status}`);
-      }
-      
       const data = await res.json();
-      console.log("Search response:", data);
-      
-      if (!data.data || data.data.length === 0) {
-        throw new Error("No results found for your search query");
-      }
+      if (!res.ok || !data.data || data.data.length === 0) throw new Error("Data tidak ditemukan.");
 
       const item = data.data[0];
       const simulatedResult = {
@@ -543,38 +410,18 @@ export default function WebsiteSecurityScanner() {
       
       setStatus("Selesai!");
       setLoading(false);
-    } catch (err) { 
-      console.error("Search error:", err);
-      setError(`Error: ${err.message}`); 
-      setLoading(false); 
-      setProgress(0); 
-    }
+    } catch (err) { setError(`Error: ${err.message}`); setLoading(false); setProgress(0); }
   }
 
   const handleSubmit = () => {
     setActiveTab("detection");
-    setError(""); // Clear previous errors
-    
-    // PERBAIKAN: Validasi mode dan input
-    if (mode === "scan") {
-      handleScanUrl();
-    } else if (mode === "file") {
-      handleScanFile();
-    } else if (mode === "search") {
-      handleSearch();
-    } else {
-      setError("Invalid mode selected");
-    }
+    if (mode === "scan") handleScanUrl();
+    else if (mode === "file") handleScanFile();
+    else handleSearch();
   }
 
   const handleClear = () => {
-    setInput(""); 
-    setSelectedFile(null); 
-    setResult(null); 
-    setMetadata(null); 
-    setStatus(""); 
-    setError(""); 
-    setProgress(0);
+    setInput(""); setSelectedFile(null); setResult(null); setMetadata(null); setStatus(""); setError(""); setProgress(0);
   }
 
   // --- DATA PROCESSING ---
@@ -685,12 +532,6 @@ export default function WebsiteSecurityScanner() {
                 {progress > 0 && (
                     <div className="w-full bg-zinc-700 rounded-full h-2 mt-4">
                         <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
-                    </div>
-                )}
-                {/* PERBAIKAN: Tambahkan debug info */}
-                {process.env.NODE_ENV === "development" && (
-                    <div className="mt-2 text-xs text-zinc-500 font-mono">
-                        Debug: {debugInfo}
                     </div>
                 )}
             </div>
