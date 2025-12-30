@@ -194,6 +194,8 @@ export default function WebsiteSecurityScanner() {
   // HISTORY STATE
   const [history, setHistory] = useState([]);
   const [showHistoryTab, setShowHistoryTab] = useState(false);
+const pollRef = React.useRef(null);
+const abortRef = React.useRef(null);
 
   // TOAST STATE
   const [toast, setToast] = useState(null);
@@ -201,7 +203,7 @@ export default function WebsiteSecurityScanner() {
   const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL) ||
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://localhost:5000"
-      : "https://ananta-ti.vercel.app/");
+      : "https://ananta-ti.vercel.app");
 
   // --- HISTORY LOGIC ---
   useEffect(() => {
@@ -311,75 +313,140 @@ export default function WebsiteSecurityScanner() {
     }
   }
 
-  const pollResult = async (id, type, inputName) => {
-    const maxRetries = 40;
-    const delayMs = 3000;
-    for (let i = 0; i < maxRetries; i++) {
-      const currentProgress = Math.round(((i + 1) / maxRetries) * 100);
-      setProgress(currentProgress);
-      setStatus(`Menganalisis... (${i + 1}/${maxRetries})`);
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/vt/result/${id}`);
-        const data = await res.json();
+const startPolling = useCallback(async (analysisId, type, inputName) => {
+  let attempt = 0;
+  const maxAttempts = 20;
+  const intervalMs = 5000;
 
-        if (data?.data?.attributes?.status === "completed") {
-            setResult(data);
-            setStatus("Mengambil detail...");
-            setProgress(100);
+  if (pollRef.current) clearInterval(pollRef.current);
+  if (abortRef.current) abortRef.current.abort();
 
-            let targetId = null;
-            if (type === 'file') targetId = data.meta?.file_info?.sha256;
-            else if (type === 'url') targetId = data.meta?.url_info?.id;
+  abortRef.current = new AbortController();
 
-            let meta = null;
-            if (targetId) {
-                meta = await fetchMetadata(type, targetId);
-                setMetadata(meta);
-            }
+  setProgress(0);
+  setStatus("Menganalisis...");
 
-            // SIMPAN KE HISTORY
-            saveToHistory(data, meta, inputName, type);
+  pollRef.current = setInterval(async () => {
+    attempt++;
 
-            setStatus("Selesai!");
-            setLoading(false);
-            setProgress(0);
-            return;
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/api/vt/result/${analysisId}`,
+        { signal: abortRef.current.signal }
+      );
+
+      const data = await res.json();
+
+      setProgress(Math.min(100, Math.round((attempt / maxAttempts) * 100)));
+
+      if (data?.data?.attributes?.status === "completed") {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+
+        setResult(data);
+        setProgress(100);
+        setStatus("Mengambil detail...");
+
+        let targetId = null;
+        if (type === "file") targetId = data.meta?.file_info?.sha256;
+        if (type === "url") targetId = data.meta?.url_info?.id;
+
+        let meta = null;
+        if (targetId) {
+          meta = await fetchMetadata(type, targetId);
+          setMetadata(meta);
         }
-      } catch (err) { console.error(err); }
-      await new Promise(r => setTimeout(r, delayMs));
+
+        await saveToHistory(data, meta, inputName, type);
+
+        setLoading(false);
+        setStatus("Selesai!");
+        setTimeout(() => setProgress(0), 800);
+      }
+
+      if (attempt >= maxAttempts) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+        throw new Error("Polling timeout");
+      }
+
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+      setError("Gagal mengambil hasil scan.");
+      setLoading(false);
+      setProgress(0);
     }
-    setError("Analysis timed out. Please try again.");
+  }, intervalMs);
+}, []);
+
+
+const handleScanUrl = async () => {
+  if (!input) return;
+
+  setLoading(true);
+  setError("");
+  setResult(null);
+  setMetadata(null);
+  setShowHistoryTab(false);
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: input }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    setAnalysisId(data.data.id);
+    startPolling(data.data.id, "url", input);
+
+  } catch (err) {
+    setError(err.message);
     setLoading(false);
-    setProgress(0);
   }
+};
 
-  const handleScanUrl = async () => {
-    if (!input) return;
-    setLoading(true); setError(""); setStatus("Mengirim URL..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: input }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to submit URL");
-      setAnalysisId(data.data.id);
-      await pollResult(data.data.id, 'url', input);
-    } catch (err) { setError(`Error: ${err.message}`); setLoading(false); setProgress(0); }
-  }
 
-  const handleScanFile = async () => {
-    if (!selectedFile) return;
-    setLoading(true); setError(""); setStatus("Mengupload File..."); setResult(null); setMetadata(null); setShowHistoryTab(false);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      setAnalysisId(data.data.id);
-      await pollResult(data.data.id, 'file', selectedFile.name);
-    } catch (err) { setError(`Error: ${err.message}`); setLoading(false); setProgress(0); }
+const handleScanFile = async () => {
+  if (!selectedFile) return;
+
+  setLoading(true);
+  setError("");
+  setResult(null);
+  setMetadata(null);
+  setShowHistoryTab(false);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    setAnalysisId(data.data.id);
+    startPolling(data.data.id, "file", selectedFile.name);
+
+  } catch (err) {
+    setError(err.message);
+    setLoading(false);
   }
+};
+useEffect(() => {
+  return () => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    if (abortRef.current) abortRef.current.abort();
+  };
+}, []);
+
 
   const handleSearch = async () => {
     if (!input) return;
