@@ -306,6 +306,7 @@ export default function WebsiteSecurityScanner() {
 
   // --- API HANDLERS ---
 // Di dalam komponen WebsiteSecurityScanner-mu
+// Ganti fungsi fetchMetadata yang ada dengan ini:
 const fetchMetadata = async (type, id) => {
     try {
         let endpointType = 'files';
@@ -314,12 +315,18 @@ const fetchMetadata = async (type, id) => {
         else if (type === 'ip-address') endpointType = 'ip_addresses';
 
         const timestamp = new Date().getTime();
-        // Perhatikan URL-nya menggunakan query parameter
-        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}?id=${encodeURIComponent(id)}&_t=${timestamp}`);
+        // Perbaikan URL - gunakan query parameter untuk id
+        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`)
+        
+        console.log(`🔍 Fetching metadata from: ${BACKEND_URL}/api/vt/metadata/${endpointType}?id=${encodeURIComponent(id)}&_t=${timestamp}`);
+        
+        if (!res.ok) {
+            console.error(`❌ Metadata fetch failed with status: ${res.status}`);
+            return null;
+        }
         
         const data = await res.json();
-        if(res.ok) return data.data;
-        return null;
+        return data.data;
     } catch (err) {
         console.error("Gagal ambil metadata:", err);
         return null;

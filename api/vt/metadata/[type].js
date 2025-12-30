@@ -1,6 +1,7 @@
 // File: /api/vt/metadata/[type].js
 
 export default async function handler(req, res) {
+  // Set cache control headers
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -9,36 +10,41 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { type, id } = req.query; // Akan diisi dari URL, contoh: /api/vt/metadata/files?sha256=...
+  // Get type and id from query parameters
+  const { type, id } = req.query;
   const VT_KEY = process.env.VT_API_KEY;
 
   if (!VT_KEY) {
-    return res.status(500).json({ error: "Konfigurasi server tidak lengkap (VT_API_KEY hilang)." });
+    return res.status(500).json({ error: "VT_API_KEY missing" });
   }
 
   const allowedTypes = ['files', 'urls', 'domains', 'ip_addresses'];
   if (!allowedTypes.includes(type)) {
-    return res.status(400).json({ error: "Tipe tidak valid. Gunakan: files, urls, domains, ip_addresses" });
+    return res.status(400).json({ error: "Invalid type" });
   }
 
   try {
+    console.log(`🔍 Fetching metadata for type: ${type}, id: ${id}`);
+    
     const response = await fetch(
       `https://www.virustotal.com/api/v3/${type}/${encodeURIComponent(id)}`,
-      { headers: { "x-apikey": VT_KEY } }
+      {
+        headers: { "x-apikey": VT_KEY },
+      }
     );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(response.status).json({ 
-        error: `Error dari VirusTotal: ${response.status}`,
-        details: errorText 
+    
+    console.log(`✅ Metadata received for ${type}/${id}`);
+    return res.status(200).json(response.data);
+  } catch (err) {
+    console.error(`❌ Error fetching metadata for ${type}/${id}:`, err.message);
+    
+    if (err.response) {
+      return res.status(err.response.status).json({ 
+        error: `VirusTotal API error: ${err.response.status}`,
+        details: err.response.data 
       });
     }
-
-    const data = await response.json();
-    return res.status(200).json(data);
-  } catch (err) {
-    console.error(`❌ Gagal mengambil metadata untuk ${type}/${id}:`, err.message);
+    
     return res.status(500).json({ error: err.message });
   }
 }
