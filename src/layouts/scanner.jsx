@@ -305,14 +305,17 @@ export default function WebsiteSecurityScanner() {
   };
 
   // --- API HANDLERS ---
-  const fetchMetadata = async (type, id) => {
+const fetchMetadata = async (type, id) => {
     try {
         let endpointType = 'files';
         if (type === 'url') endpointType = 'urls';
         else if (type === 'domain') endpointType = 'domains';
         else if (type === 'ip-address') endpointType = 'ip_addresses';
 
-        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`);
+        // 🔥 TAMBAHKAN TIMESTAMP DI SINI JUGA
+        const timestamp = new Date().getTime();
+        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}?_t=${timestamp}`);
+        
         const data = await res.json();
         if(res.ok) return data.data;
         return null;
@@ -320,88 +323,111 @@ export default function WebsiteSecurityScanner() {
         console.error("Gagal ambil metadata:", err);
         return null;
     }
-  }
+}
 
-  const startPolling = useCallback(async (analysisId, type, inputName) => {
-    let attempt = 0;
-    const maxAttempts = 20;
-    const intervalMs = 5000;
+// Di dalam komponen WebsiteSecurityScanner-mu
 
-    if (pollRef.current) clearInterval(pollRef.current);
-    if (abortRef.current) abortRef.current.abort();
+const startPolling = useCallback(async (analysisId, type, inputName) => {
+  let attempt = 0;
+  const maxAttempts = 20;
+  const intervalMs = 5000;
 
-    abortRef.current = new AbortController();
+  if (pollRef.current) clearInterval(pollRef.current);
+  if (abortRef.current) abortRef.current.abort();
 
-    setProgress(0);
-    setStatus("Menganalisis...");
+  abortRef.current = new AbortController();
 
-    pollRef.current = setInterval(async () => {
-      attempt++;
+  setProgress(0);
+  setStatus("Menganalisis...");
 
-      try {
-        const resultUrl = `${BACKEND_URL}/api/vt/result/${analysisId}`;
-        console.log(`Polling attempt ${attempt} to:`, resultUrl);
+  pollRef.current = setInterval(async () => {
+    attempt++;
+
+    try {
+      // 🔥 TAMBAHKAN TIMESTAMP UNTUK MENCEGAH CACHING
+      const timestamp = new Date().getTime();
+      const resultUrl = `${BACKEND_URL}/api/vt/result/${analysisId}?_t=${timestamp}`;
+      
+      console.log(`🔍 Polling attempt ${attempt} ke: ${resultUrl}`);
+      
+      const res = await fetch(resultUrl, { 
+        signal: abortRef.current.signal,
+        // 🔥 TAMBAHKAN HEADER UNTUK MEMASTIKAN TIDAK AMBIL DARI CACHE
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      console.log(`📡 Status respons polling: ${res.status}`);
+      
+      // 🔥 CEK CONTENT-TYPE SEBELUM MENGURAHI JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const errorText = await res.text();
+        console.error("❌ Respons bukan JSON! Menerima:", errorText.substring(0, 200));
         
-        const res = await fetch(resultUrl, { signal: abortRef.current.signal });
-        
-        console.log(`Polling response status: ${res.status}`);
-        
-        if (!res.ok) {
-          console.error("Polling request failed:", res.status);
-          // Jangan langsung error, coba lagi
+        // Jika menerima HTML, hentikan polling dan tampilkan error yang jelas
+        if (errorText.includes("<!doctype") || errorText.includes("<html")) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+          setError("API tidak dikonfigurasi dengan benar di server. Server mengembalikan halaman HTML, bukan data JSON.");
+          setLoading(false);
+          setProgress(0);
           return;
         }
-        
-        const data = await res.json();
-        console.log("Polling data:", data);
+        // Untuk error lain, coba lagi
+        return;
+      }
+      
+      const data = await res.json();
+      console.log("✅ Data polling diterima:", data);
 
-        setProgress(Math.min(100, Math.round((attempt / maxAttempts) * 100)));
+      setProgress(Math.min(100, Math.round((attempt / maxAttempts) * 100)));
 
-        // Periksa berbagai kemungkinan struktur respons
-        if (data?.data?.attributes?.status === "completed" || 
-            data?.status === "completed" || 
-            data?.data) {
-          clearInterval(pollRef.current);
-          pollRef.current = null;
-
-          setResult(data);
-          setProgress(100);
-          setStatus("Mengambil detail...");
-
-          let targetId = null;
-          if (type === "file") targetId = data.meta?.file_info?.sha256 || data.data?.meta?.file_info?.sha256;
-          if (type === "url") targetId = data.meta?.url_info?.id || data.data?.meta?.url_info?.id;
-
-          let meta = null;
-          if (targetId) {
-            meta = await fetchMetadata(type, targetId);
-            setMetadata(meta);
-          }
-
-          await saveToHistory(data, meta, inputName, type);
-
-          setLoading(false);
-          setStatus("Selesai!");
-          setTimeout(() => setProgress(0), 800);
-        }
-
-        if (attempt >= maxAttempts) {
-          clearInterval(pollRef.current);
-          pollRef.current = null;
-          throw new Error("Polling timeout");
-        }
-
-      } catch (err) {
-        if (err.name === "AbortError") return;
+      // Periksa apakah scan sudah selesai
+      if (data?.data?.attributes?.status === "completed") {
         clearInterval(pollRef.current);
         pollRef.current = null;
-        console.error("Polling error:", err);
-        setError("Gagal mengambil hasil scan: " + (err.message || "Unknown error"));
+
+        setResult(data);
+        setProgress(100);
+        setStatus("Mengambil detail...");
+
+        let targetId = null;
+        if (type === "file") targetId = data.meta?.file_info?.sha256;
+        if (type === "url") targetId = data.meta?.url_info?.id;
+
+        let meta = null;
+        if (targetId) {
+          meta = await fetchMetadata(type, targetId);
+          setMetadata(meta);
+        }
+
+        await saveToHistory(data, meta, inputName, type);
+
         setLoading(false);
-        setProgress(0);
+        setStatus("Selesai!");
+        setTimeout(() => setProgress(0), 800);
       }
-    }, intervalMs);
-  }, []);
+
+      if (attempt >= maxAttempts) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+        throw new Error("Waktu polling habis, scan terlalu lama.");
+      }
+
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+      console.error("❌ Error saat polling:", err);
+      setError("Gagal mengambil hasil scan: " + (err.message || "Kesalahan tidak diketahui."));
+      setLoading(false);
+      setProgress(0);
+    }
+  }, intervalMs);
+}, [BACKEND_URL]); // Tambahkan dependency agar BACKEND_URL selalu up-to-date
 
   const handleScanUrl = async () => {
     if (!input) return;
