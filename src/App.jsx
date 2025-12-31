@@ -19,7 +19,7 @@ import About from "./layouts/about";
 import Project from "./layouts/project";
 import AllProjects from "./layouts/AllProjects";
 import Certificates from "./layouts/Certificates";
-import Scanner from "./layouts/scanner";
+import Scanner from "./components/WebsiteSecurityScanner";
 import Timeline from "./layouts/timeline";
 
 // Analytics
