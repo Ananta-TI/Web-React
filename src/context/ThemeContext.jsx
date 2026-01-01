@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo } from "react"; // 1. Impor useMemo
 
 export const ThemeContext = createContext();
 
@@ -7,7 +7,6 @@ export function ThemeProvider({ children }) {
     window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Ambil dari localStorage atau fallback ke sistem
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme !== null) return savedTheme === "dark";
     return getSystemTheme();
@@ -23,8 +22,12 @@ export function ThemeProvider({ children }) {
     }
   }, [isDarkMode]);
 
+  // 2. Bungkus value dengan useMemo
+  // Ini mencegah pembuatan objek baru setiap render
+  const value = useMemo(() => ({ isDarkMode, setIsDarkMode }), [isDarkMode]);
+
   return (
-    <ThemeContext.Provider value={{ isDarkMode, setIsDarkMode }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

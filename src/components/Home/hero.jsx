@@ -20,7 +20,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 ${
+      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 style={{ position: 'relative' }} ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
@@ -63,7 +63,7 @@ export default function Hero() {
               src={isDarkMode ? "../img/logo1.avif" : "../img/logo3.avif"} 
               alt="Ananta Firdaus"
               // ATRIBUT LCP KRITIS
-              fetchpriority="high" 
+              fetchPriority="high" 
               loading="eager" 
               className="object-cover w-full h-full"
             />

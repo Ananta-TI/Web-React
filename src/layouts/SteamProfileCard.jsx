@@ -9,52 +9,44 @@ const formatPlaytime = (minutes) => {
 };
 
 // --- DATA MANUAL FRAME ---
-// Karena API tidak menyediakan Frame, kita harus pasang manual URL-nya di sini berdasarkan SteamID.
-// Kamu bisa cari URL frame (PNG/WebM) dari Steam Points Shop atau inspect element profile kamu.
 const MANUAL_FRAMES = {
-  "76561199745356826": "https://shared.fastly.steamstatic.com/community_assets/images/items/4101120/688f97fa743ac41b68ab10d5236a02f01ecb9725.png", // Contoh Frame Dota 2
-  // Tambahkan ID lain jika punya frame
+  "76561199745356826": "https://shared.fastly.steamstatic.com/community_assets/images/items/4101120/688f97fa743ac41b68ab10d5236a02f01ecb9725.png",
 };
+
 // Helper untuk mendapatkan class warna text berdasarkan status
 const getStatusColorClass = (profile) => {
-  // 1. Priority Utama: In-Game (Hijau Steam)
   if (profile.gameextrainfo) {
-    return "text-emerald-500 font-bold drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"; 
+    return "text-emerald-500 font-bold drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]";
   }
-
-  // 2. Status Biasa
   switch (profile.personastate) {
-    case 0: return "text-gray-500"; // Offline
-    case 1: return "text-blue-400 font-semibold"; // Online
-    case 2: return "text-red-500"; // Busy
-    case 3: return "text-amber-500"; // Away
-    case 4: return "text-blue-300"; // Snooze
-    default: return "text-blue-400"; // Looking to trade/play
+    case 0: return "text-gray-500";
+    case 1: return "text-blue-400 font-semibold";
+    case 2: return "text-red-500";
+    case 3: return "text-amber-500";
+    case 4: return "text-blue-300";
+    default: return "text-blue-400";
   }
 };
 
-// Helper Text (yang kamu buat tadi)
+// Helper Text
 const getStatusText = (profile) => {
   if (profile.gameextrainfo) return `Playing ${profile.gameextrainfo}`;
   const states = ["Offline", "Online", "Busy", "Away", "Snooze", "Looking to Trade", "Looking to Play"];
   return states[profile.personastate] || "Offline";
 };
+
 export default function SteamProfileCard({
   steamIds = ["76561199745356826", "76561199166544214", "76561198773672138"],
   compact = false,
 }) {
-  // 1. AMBIL CONTEXT DARK MODE
   const { isDarkMode } = useContext(ThemeContext);
 
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
-
-  // --- CAROUSEL STATE ---
   const [topGames, setTopGames] = useState([]);
   const [activeGameIndex, setActiveGameIndex] = useState(0);
   const [achievementsCache, setAchievementsCache] = useState({});
   const [loadingAch, setLoadingAch] = useState(false);
-
   const [expandedGames, setExpandedGames] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -69,6 +61,8 @@ export default function SteamProfileCard({
 
   const API_KEY = "F10E38DFF1FBB84407DF02D50B49A8CF";
   const PROXY_URL = "https://api.codetabs.com/v1/proxy?quest=";
+  const CACHE_KEY = 'steamProfileData';
+  const CACHE_DURATION = 60 * 60 * 1000; // 1 jam
 
   const fetchWithProxy = (url) =>
     fetch(`${PROXY_URL}${encodeURIComponent(url)}`).then((r) => {
@@ -76,25 +70,48 @@ export default function SteamProfileCard({
       return r.json();
     });
 
-useEffect(() => {
+  // --- useEffect UTAMA dengan LOGIKA CACHING ---
+  useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
 
+    // 1. CEK CACHE TERLEBIH DAHULU
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      try {
+        const { data, timestamp } = JSON.parse(cachedData);
+        
+        // TAMBAHKAN PEMERIKSAAN KEAMANAN YANG PALING PENTING DI SINI
+        // Pastikan 'data' ada, 'data.profile' ada, dan 'data.stats' ada
+        if (data && data.profile && data.stats && Date.now() - timestamp < CACHE_DURATION) {
+          // Cache valid dan strukturnya benar, gunakan data dari cache
+          if (mounted) {
+            setProfile(data.profile);
+            setStats(data.stats);
+            setRecentlyPlayed(data.recentlyPlayed);
+            setFriendsCount(data.friendsCount);
+            setTopGames(data.stats.games.slice(0, 5));
+            setLoading(false);
+          }
+          return; // Stop, tidak perlu fetch API
+        }
+      } catch (error) {
+        console.error("Gagal membaca cache Steam, mungkin data rusak:", error);
+        // Hapus cache yang rusak agar bisa di-fetch ulang
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+
+    // 2. JIKA TIDAK ADA CACHE ATAU KADALUWARSA, LAKUKAN FETCH
     async function fetchData() {
       try {
         const mainSteamId = steamIds[0];
-
-        // 1. Fetch Profile & Friends (Cuma dari Main Account)
         const profileReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${mainSteamId}`);
         const friendReq = fetchWithProxy(`https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${API_KEY}&steamid=${mainSteamId}&relationship=friend`);
-
-        // 2. Fetch Owned Games (Dari SEMUA Akun)
         const gamesPromises = steamIds.map((id) =>
           fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${id}&include_appinfo=true&include_played_free_games=true`)
         );
-        
-        // 3. Fetch Recently Played (Dari SEMUA Akun)
         const recentPromises = steamIds.map((id) =>
           fetchWithProxy(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${API_KEY}&steamid=${id}`)
         );
@@ -108,20 +125,16 @@ useEffect(() => {
 
         if (!mounted) return;
 
-        // --- Setup Profile Data ---
         const profileData = profileRes.response?.players?.[0];
         if (profileData && MANUAL_FRAMES[profileData.steamid]) {
-            profileData.avatarFrame = MANUAL_FRAMES[profileData.steamid];
+          profileData.avatarFrame = MANUAL_FRAMES[profileData.steamid];
         }
         setProfile(profileData);
         setFriendsCount(friendRes.friendslist?.friends?.length || 0);
 
-        // --- Pisahkan Response ---
-        // Array slice: bagian awal adalah Owned Games, bagian akhir adalah Recent Games
         const ownedGamesResponses = allGamesRes.slice(0, steamIds.length);
         const recentGamesResponses = allGamesRes.slice(steamIds.length);
 
-        // --- MERGE OWNED GAMES (Total Playtime seumur hidup) ---
         const mergedGamesMap = new Map();
         ownedGamesResponses.forEach((res) => {
           (res.response?.games || []).forEach((game) => {
@@ -133,13 +146,10 @@ useEffect(() => {
           });
         });
 
-        // --- MERGE RECENTLY PLAYED (Logic Baru) ---
         const mergedRecentMap = new Map();
         recentGamesResponses.forEach((res) => {
-          // Cek apakah response valid dan punya array games
           (res.response?.games || []).forEach((game) => {
             if (mergedRecentMap.has(game.appid)) {
-              // Jika game sudah ada (misal main Dota di Akun 1 & Akun 2), jumlahkan jam main 2 minggunya
               mergedRecentMap.get(game.appid).playtime_2weeks += game.playtime_2weeks;
             } else {
               mergedRecentMap.set(game.appid, { ...game });
@@ -147,19 +157,27 @@ useEffect(() => {
           });
         });
 
-        // Sorting & Set State
         const finalGamesList = Array.from(mergedGamesMap.values()).sort((a, b) => b.playtime_forever - a.playtime_forever);
-        
-        // PENTING: Sort ulang Recently Played berdasarkan jam main 2 minggu terakhir
         const finalRecentList = Array.from(mergedRecentMap.values()).sort((a, b) => b.playtime_2weeks - a.playtime_2weeks);
 
-        setStats({
+        const statsData = {
           games: finalGamesList,
           total_count: finalGamesList.length,
-        });
+        };
 
+        setStats(statsData);
         setTopGames(finalGamesList.slice(0, 5));
-        setRecentlyPlayed(finalRecentList); 
+        setRecentlyPlayed(finalRecentList);
+
+        // 3. SIMPAN HASIL FETCH KE LOCAL STORAGE
+        const dataToCache = {
+          profile: profileData,
+          stats: statsData,
+          recentlyPlayed: finalRecentList,
+          friendsCount: friendRes.friendslist?.friends?.length || 0,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
 
       } catch (err) {
         console.error(err);
@@ -173,32 +191,25 @@ useEffect(() => {
     return () => {
       mounted = false;
     };
-  }, [steamIds]);
+  }, [steamIds]); // Dependency tetap steamIds
 
+  // useEffect untuk Achievement (tidak perlu diubah)
   useEffect(() => {
     if (topGames.length === 0) return;
-
     const currentGame = topGames[activeGameIndex];
-
-    if (achievementsCache[currentGame.appid] !== undefined) {
-      return;
-    }
+    if (achievementsCache[currentGame.appid] !== undefined) return;
 
     setLoadingAch(true);
-
     async function findAchievementData() {
       let foundData = null;
-
       for (const steamId of steamIds) {
         try {
           const res = await fetchWithProxy(
             `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${currentGame.appid}&key=${API_KEY}&steamid=${steamId}`
           );
-
           if (res.playerstats && res.playerstats.achievements && res.playerstats.achievements.length > 0) {
             const all = res.playerstats.achievements;
             const unlocked = all.filter((a) => a.achieved === 1).length;
-
             foundData = {
               current: unlocked,
               total: all.length,
@@ -206,41 +217,29 @@ useEffect(() => {
               found: true,
               sourceAccount: steamId,
             };
-
             if (res.playerstats.success) break;
           }
         } catch (err) {
           continue;
         }
       }
-
       setAchievementsCache((prev) => ({
         ...prev,
         [currentGame.appid]: foundData || { found: false },
       }));
-
       setLoadingAch(false);
     }
-
     findAchievementData();
   }, [activeGameIndex, topGames, steamIds]);
 
-  const handlePrev = () => {
-    setActiveGameIndex((prev) => (prev === 0 ? topGames.length - 1 : prev - 1));
-  };
+  const handlePrev = () => setActiveGameIndex((prev) => (prev === 0 ? topGames.length - 1 : prev - 1));
+  const handleNext = () => setActiveGameIndex((prev) => (prev === topGames.length - 1 ? 0 : prev + 1));
 
-  const handleNext = () => {
-    setActiveGameIndex((prev) => (prev === topGames.length - 1 ? 0 : prev + 1));
-  };
-
-  // --- SKELETON LOADING (Dynamic Theme) ---
+  // --- SKELETON LOADING ---
   if (loading) {
     return (
       <div className={`w-full max-w-2xl p-6 rounded-xl shadow-xl animate-pulse flex gap-4 border
-        ${isDarkMode 
-            ? "bg-zinc-800 border-gray-700" 
-            : "bg-white border-gray-200"
-        }`}>
+        ${isDarkMode ? "bg-zinc-800 border-gray-700" : "bg-white border-gray-200"}`}>
         <div className={`w-24 h-24 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>
         <div className="flex-1 space-y-3">
           <div className={`h-6 rounded w-1/3 ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}></div>

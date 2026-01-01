@@ -229,7 +229,7 @@ export default function Footer() {
             <div className="flex justify-center lg:justify-start">
               <ProfileCard
                 name="Ananta Firdaus"
-                title="Software Engineer"
+                title="Web Developer"
                 handle="Ananta-TI"
                 status="Online"
                 contactText="Contact Me"

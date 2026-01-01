@@ -1,5 +1,5 @@
 import { useEffect, useRef, useContext, useState } from "react";
-import { createTimeline, utils, createSpring } from "animejs";
+import { createTimeline, utils, spring } from "animejs";
 import { ThemeContext } from "../../context/ThemeContext";
 
 export default function LayeredAnimations() {
@@ -27,7 +27,7 @@ export default function LayeredAnimations() {
     const shapeEls = containerRef.current.querySelectorAll(".shape");
     const triangleEl = containerRef.current.querySelector("polygon");
     const points = triangleEl.getAttribute("points").split(" ").map(v => +v);
-    const eases = ["inOutQuad", "inOutCirc", "inOutSine", createSpring()];
+    const eases = ["inOutQuad", "inOutCirc", "inOutSine", spring()];
 
     const createKeyframes = (value) => {
       const keyframes = [];

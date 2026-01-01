@@ -437,3 +437,38 @@ html {
   z-index: 9999;
   /* Ini akan membuat elemen berada di luar alur normal scroll */
 }
+
+/* 1. Tambahkan transisi dasar untuk perubahan warna */
+body {
+  transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. Buat elemen semu untuk efek lingkaran */
+/* Kita akan memanfaatkan ::before pada tombol */
+.theme-toggle-btn {
+  position: relative;
+  overflow: hidden; /* Penting untuk memotong lingkaran */
+}
+
+.theme-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--circle-bg-color); /* Warna lingkaran akan diatur via JS */
+  transform: translate(-50%, -50%);
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1), 
+              height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1; /* Letakkan di belakang konten tombol */
+}
+
+/* 3. Aktifkan animasi saat tema berubah */
+/* Kita akan menambahkan kelas secara dinamis dengan React */
+body.theme-changing .theme-toggle-btn::before {
+  width: 300vmax; /* Ukuran yang sangat besar untuk menutupi layar */
+  height: 300vmax;
+}

@@ -45,6 +45,25 @@ export default function Header() {
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
+useEffect(() => {
+  if (isThemeChanging) {
+    document.body.classList.add('theme-changing');
+    // Atur warna lingkaran berdasarkan tema baru
+    const root = document.documentElement;
+    if (isDarkMode) { // Ini adalah nilai tema SEBELUM berubah
+      root.style.setProperty('--circle-bg-color', 'rgb(243,244,246)'); // Warna terang
+    } else {
+      root.style.setProperty('--circle-bg-color', 'rgb(39,39,42)'); // Warna gelap
+    }
+  } else {
+    document.body.classList.remove('theme-changing');
+  }
+  
+  // Bersihkan saat komponen unmount
+  return () => {
+    document.body.classList.remove('theme-changing');
+  };
+}, [isThemeChanging, isDarkMode]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -172,7 +191,7 @@ export default function Header() {
     // Reset flag setelah animasi selesai
     setTimeout(() => {
       setIsThemeChanging(false);
-    }, 600);
+    }, 700);
   };
 
   const handleNavigation = (link) => {
@@ -504,16 +523,16 @@ export default function Header() {
               {/* Bottom Buttons */}
               <div className="flex mt-auto space-x-3">
                 <button
-                  onClick={handleDarkModeToggle}
-                  disabled={isThemeChanging}
-                  className={`p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95 ${
-                    isThemeChanging ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  style={{
-                    borderColor: isDarkMode ? "#d1d5db" : "#52525b",
-                    backgroundColor: isDarkMode ? "transparent" : "transparent",
-                  }}
-                >
+                 onClick={handleDarkModeToggle}
+  disabled={isThemeChanging}
+  className={`theme-toggle-btn p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95 ${ // Tambahkan kelas theme-toggle-btn
+    isThemeChanging ? "opacity-50 cursor-not-allowed" : ""
+  }`}
+  style={{
+    borderColor: isDarkMode ? "#d1d5db" : "#52525b",
+    backgroundColor: isDarkMode ? "transparent" : "transparent",
+  }}
+>
                   <svg
                     viewBox="0 0 240 240"
                     fill="none"

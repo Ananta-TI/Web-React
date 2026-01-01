@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const Noise = ({
-  patternSize = 250, // Ukuran tile (lebih kecil lebih ringan)
+  patternSize = 100, // Ukuran tile (lebih kecil lebih ringan)
   patternAlpha = 15, // Transparansi
   className,
 }) => {
