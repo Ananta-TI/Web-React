@@ -1,28 +1,68 @@
-import React, { useContext } from "react"; // Added useContext to the import
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, AlertTriangle } from "lucide-react";
-import { ThemeContext } from "../../context/ThemeContext";
+import React, { useContext } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  CheckCircle,
+  Info,
+  AlertTriangle,
+  XCircle,
+  Loader2,
+} from "lucide-react"
+import { ThemeContext } from "../../context/ThemeContext"
 
-const Toast = ({ message, type, isVisible }) => {
-    const theme = useContext(ThemeContext);
-    const isDarkMode = theme?.isDarkMode ?? true;
+const ICONS = {
+  success: CheckCircle,
+  info: Info,
+  warning: AlertTriangle,
+  error: XCircle,
+  loading: Loader2,
+}
+
+const Toast = ({ message, type = "info", isVisible }) => {
+  const theme = useContext(ThemeContext)
+  const isDarkMode = theme?.isDarkMode ?? true
+  const Icon = ICONS[type]
+
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          initial={{ opacity: 0, y: 16, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 ${
-            type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
-          }`}
+          exit={{ opacity: 0, y: 16, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className={`
+fixed top-4 left-1/2 -translate-x-1/2
+            flex items-center gap-3
+            px-4 py-3 rounded-xl border shadow-lg
+            backdrop-blur-md
+            ${
+              isDarkMode
+                ? "bg-zinc-900/90 border-zinc-800 text-zinc-100"
+                : "bg-white/90 border-zinc-200 text-zinc-900"
+            }
+          `}
         >
-          {type === "success" ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-          <span className="font-medium">{message}</span>
+          <Icon
+            className={`w-4 h-4 ${
+              type === "success" && "text-emerald-500"
+            } ${
+              type === "info" && "text-blue-500"
+            } ${
+              type === "warning" && "text-amber-500"
+            } ${
+              type === "error" && "text-red-500"
+            } ${
+              type === "loading" && "animate-spin text-zinc-400"
+            }`}
+          />
+
+          <span className="text-sm font-medium leading-snug">
+            {message}
+          </span>
         </motion.div>
       )}
     </AnimatePresence>
-  );
-};
+  )
+}
 
-export default Toast;
+export default Toast

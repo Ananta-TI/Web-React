@@ -59,7 +59,7 @@ export default function Preloader() {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none transition-colors duration-500"
+      className="fixed inset-0 z-[9999]  flex items-center justify-center pointer-events-none transition-colors duration-500"
       style={{ 
           backgroundColor: bgColor, 
           color: textColor 
@@ -81,7 +81,7 @@ export default function Preloader() {
       {dimension.width > 0 && (
         <>
             <motion.div 
-                className="flex items-center text-4xl md:text-6xl font-light tracking-tighter relative z-10"
+                className="flex items-center  text-4xl md:text-6xl font-light tracking-tighter relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.3 } }}
