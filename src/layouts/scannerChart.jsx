@@ -27,7 +27,7 @@ export default function ScanStatsDashboard() {
   // State Data
   const [statusData, setStatusData] = useState([]);
   const [typeData, setTypeData] = useState([]);
-  const [trendData, setTrendData] = useState([]);
+  const [trendData, setTrendData] = useState([]); // Will now contain URL and File data separately
   const [totalScans, setTotalScans] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTimeRange, setActiveTimeRange] = useState('all');
@@ -111,8 +111,10 @@ export default function ScanStatsDashboard() {
         { name: "File", value: t.file, color: 0x8b5cf6 },
       ]);
 
-      // 3. OLAH DATA: Trend Timeline (Area Chart)
-      const timelineMap = {};
+      // 3. OLAH DATA: Trend Timeline (Area Chart) - MODIFIED TO SEPARATE URL AND FILE SCANS
+      const urlTimelineMap = {};
+      const fileTimelineMap = {};
+      
       data.forEach((item) => {
         const dateStr = item.created_at || item.timestamp || item.date;
         if (!dateStr) return;
@@ -122,14 +124,26 @@ export default function ScanStatsDashboard() {
         dateObj.setHours(0, 0, 0, 0); 
         const timestamp = dateObj.getTime();
 
-        timelineMap[timestamp] = (timelineMap[timestamp] || 0) + 1;
+        // Separate data by type
+        if (item.type === "url") {
+          urlTimelineMap[timestamp] = (urlTimelineMap[timestamp] || 0) + 1;
+        } else if (item.type === "file") {
+          fileTimelineMap[timestamp] = (fileTimelineMap[timestamp] || 0) + 1;
+        }
       });
 
+      // Get all unique dates from both maps
+      const allDates = new Set([
+        ...Object.keys(urlTimelineMap),
+        ...Object.keys(fileTimelineMap)
+      ]);
+
       // Convert to array and sort by time
-      const sortedTrend = Object.keys(timelineMap)
-        .map((key) => ({
-          date: parseInt(key),
-          value: timelineMap[key],
+      const sortedTrend = Array.from(allDates)
+        .map((dateStr) => ({
+          date: parseInt(dateStr),
+          urlCount: urlTimelineMap[dateStr] || 0,
+          fileCount: fileTimelineMap[dateStr] || 0,
         }))
         .sort((a, b) => a.date - b.date);
       
@@ -336,7 +350,7 @@ export default function ScanStatsDashboard() {
     }
   }, [typeData, isDarkMode, loading, chartError]);
 
-  // --- CHART 3: AREA PULSE CHART (Trend/Timeline) ---
+  // --- CHART 3: AREA PULSE CHART (Trend/Timeline) - MODIFIED TO SHOW URL AND FILE SEPARATELY ---
   useLayoutEffect(() => {
     if (loading || chartError) return;
     
@@ -413,56 +427,126 @@ export default function ScanStatsDashboard() {
         fontSize: 12,
       });
 
-      // Series with enhanced gradient
-      const series = chart.series.push(
+      // Create URL series with enhanced gradient
+      const urlSeries = chart.series.push(
         am5xy.SmoothedXLineSeries.new(root, {
-          name: "Scans",
+          name: "URL Scans",
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: "value",
+          valueYField: "urlCount",
           valueXField: "date",
           tooltip: am5.Tooltip.new(root, {
-            labelText: "[bold]{valueY}[/] Scans",
+            labelText: "[bold]{valueY}[/] URL Scans",
           })
         })
       );
 
-      // Enhanced styling with neon effect
-      series.strokes.template.setAll({
+      // URL series styling
+      urlSeries.strokes.template.setAll({
         strokeWidth: 3,
-        stroke: am5.color(isDarkMode ? 0x6366f1 : 0x3b82f6),
-        shadowColor: am5.color(isDarkMode ? 0x6366f1 : 0x3b82f6),
+        stroke: am5.color(0x3b82f6), // Blue for URL
+        shadowColor: am5.color(0x3b82f6),
         shadowBlur: 10,
         shadowOpacity: 0.5,
       });
 
-      series.fills.template.setAll({
-        fillOpacity: 1,
+      urlSeries.fills.template.setAll({
+        fillOpacity: 0.2,
         visible: true,
         fillGradient: am5.RadialGradient.new(root, {
           stops: [
-            { color: am5.color(isDarkMode ? 0x6366f1 : 0x3b82f6), opacity: 0.6 },
-            { color: am5.color(isDarkMode ? 0x6366f1 : 0x3b82f6), opacity: 0.1 },
+            { color: am5.color(0x3b82f6), opacity: 0.6 },
+            { color: am5.color(0x3b82f6), opacity: 0.1 },
           ],
           rotation: 90,
         }),
       });
 
-      // Add bullet points
-      series.bullets.push(function() {
+      // Add bullet points for URL series
+      urlSeries.bullets.push(function() {
         return am5.Bullet.new(root, {
           sprite: am5.Circle.new(root, {
             radius: 5,
-            fill: am5.color(isDarkMode ? 0x6366f1 : 0x3b82f6),
+            fill: am5.color(0x3b82f6),
             stroke: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc),
             strokeWidth: 2
           })
         });
       });
 
-      series.data.setAll(trendData);
+      // Create File series with enhanced gradient
+      const fileSeries = chart.series.push(
+        am5xy.SmoothedXLineSeries.new(root, {
+          name: "File Scans",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "fileCount",
+          valueXField: "date",
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "[bold]{valueY}[/] File Scans",
+          })
+        })
+      );
 
-      series.appear(1000);
+      // File series styling
+      fileSeries.strokes.template.setAll({
+        strokeWidth: 3,
+        stroke: am5.color(0x8b5cf6), // Purple for File
+        shadowColor: am5.color(0x8b5cf6),
+        shadowBlur: 10,
+        shadowOpacity: 0.5,
+      });
+
+      fileSeries.fills.template.setAll({
+        fillOpacity: 0.2,
+        visible: true,
+        fillGradient: am5.RadialGradient.new(root, {
+          stops: [
+            { color: am5.color(0x8b5cf6), opacity: 0.6 },
+            { color: am5.color(0x8b5cf6), opacity: 0.1 },
+          ],
+          rotation: 90,
+        }),
+      });
+
+      // Add bullet points for File series
+      fileSeries.bullets.push(function() {
+        return am5.Bullet.new(root, {
+          sprite: am5.Circle.new(root, {
+            radius: 5,
+            fill: am5.color(0x8b5cf6),
+            stroke: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc),
+            strokeWidth: 2
+          })
+        });
+      });
+
+      // Set data for both series
+      urlSeries.data.setAll(trendData);
+      fileSeries.data.setAll(trendData);
+
+      // Add legend
+      const legend = chart.children.push(am5.Legend.new(root, {
+        centerX: am5.percent(50),
+        x: am5.percent(50)
+      }));
+      
+      legend.data.setAll([urlSeries, fileSeries]);
+      
+      legend.labels.template.setAll({ 
+        fill: am5.color(isDarkMode ? 0xe4e4e7 : 0x27272a),
+        fontSize: 12
+      });
+      
+      legend.markers.template.setAll({
+        width: 12,
+        height: 12,
+        cornerRadius: 3
+      });
+
+      // Animate series
+      urlSeries.appear(1000);
+      fileSeries.appear(1000);
       chart.appear(1000, 100);
       
       return () => {
@@ -672,7 +756,7 @@ export default function ScanStatsDashboard() {
           </div>
         </div>
 
-        {/* Activity Pulse Chart */}
+        {/* Activity Pulse Chart - MODIFIED TITLE AND DESCRIPTION */}
         <div className={`lg:col-span-2 group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
         }`}>
@@ -683,10 +767,10 @@ export default function ScanStatsDashboard() {
               <div className="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
                 <TrendingUp className="w-4 h-4" />
               </div>
-              Activity Pulse
+              Scan Activity Timeline
             </h3>
             <p className={`text-xs sm:text-sm font-mono mb-4 sm:mb-6 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-              {activeTimeRange === 'all' ? 'Complete scan frequency timeline' : 'Real-time scan frequency timeline'}
+              {activeTimeRange === 'all' ? 'Complete scan frequency timeline separated by type' : 'Real-time scan frequency timeline separated by type'}
             </p>
             
             {loading ? (
