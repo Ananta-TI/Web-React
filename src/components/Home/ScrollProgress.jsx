@@ -163,7 +163,7 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
       {isScrollable() && shouldRender && (
         <motion.div
           ref={containerRef}
-          className={`fixed z-[60] ${positionClasses}`}
+          className={`fixed z-[40] ${positionClasses}`}
           initial={{ opacity: 0, scale: 0.8, x: isVertical ? -30 : 0, y: isVertical ? 0 : 30 }}
           animate={{ 
             opacity: isVisible ? 1 : 0,
