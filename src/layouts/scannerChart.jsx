@@ -8,7 +8,8 @@ import {
   AlertTriangle, 
   BarChart3,
   Zap,
-  Layers
+  Layers,
+  EyeOff
 } from "lucide-react";
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
@@ -73,19 +74,39 @@ export default function ScanStatsDashboard() {
       const data = await response.json();
 
       // 1. OLAH DATA: Status Counts (Pie Chart)
-      const counts = { Harmless: 0, Suspicious: 0, Malicious: 0 };
-      data.forEach((row) => {
-        const status =
-          row?.stats?.malicious > 0 ? "Malicious"
-          : row?.stats?.suspicious > 0 ? "Suspicious"
-          : "Harmless";
-        counts[status]++;
-      });
+      const counts = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
+     data.forEach((row) => {
+  // Ambil angka dari stats
+  const m = row?.stats?.malicious || 0;
+  const s = row?.stats?.suspicious || 0;
+  const h = row?.stats?.harmless || 0;
+  const u = row?.stats?.undetected || 0;
+
+  let status;
+  
+  if (m > 0) {
+    status = "Malicious";
+  } else if (s > 0) {
+    status = "Suspicious";
+  } else if (h > 0) {
+    // PRIORITASKAN HARMLESS DI SINI
+    status = "Harmless";
+  } else if (u > 0) {
+    // Undetected hanya jika Harmless juga 0
+    status = "Undetected";
+  } else {
+    status = "Harmless"; // Default tetap harmless jika semua nol
+  }
+
+  counts[status]++;
+  // ... sisa logika timeline
+});
 
       setStatusData([
         { name: "Harmless", value: counts.Harmless, itemStyle: { color: "#10b981" } },
         { name: "Suspicious", value: counts.Suspicious, itemStyle: { color: "#f59e0b" } },
         { name: "Malicious", value: counts.Malicious, itemStyle: { color: "#ef4444" } },
+        { name: "Undetected", value: counts.Undetected, itemStyle: { color: "#6b7280" } },
       ]);
 
       // 2. OLAH DATA: Type Counts (Bar Chart)
@@ -137,7 +158,7 @@ export default function ScanStatsDashboard() {
       // 4. OLAH DATA: Status Trend Timeline (New Area Chart)
       const statusTimelineMap = {};
       
-      data.forEach((item) => {
+data.forEach((item) => {
         const dateStr = item.created_at || item.timestamp || item.date;
         if (!dateStr) return;
 
@@ -146,13 +167,26 @@ export default function ScanStatsDashboard() {
         const timestamp = dateObj.getTime();
 
         if (!statusTimelineMap[timestamp]) {
-          statusTimelineMap[timestamp] = { Harmless: 0, Suspicious: 0, Malicious: 0 };
+          statusTimelineMap[timestamp] = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
         }
 
-        const status =
-          item?.stats?.malicious > 0 ? "Malicious"
-          : item?.stats?.suspicious > 0 ? "Suspicious"
-          : "Harmless";
+        // --- LOGIKA PERBAIKAN ---
+        let status;
+        const stats = item?.stats;
+
+        if (stats?.malicious > 0) {
+          status = "Malicious";
+        } else if (stats?.suspicious > 0) {
+          status = "Suspicious";
+        } else if (stats?.harmless > 0) {
+          // Jika ada antivirus yang bilang aman, masuk Harmless
+          status = "Harmless";
+        } else if (stats?.undetected > 0) {
+          // Jika tidak ada yang bilang aman/bahaya, baru masuk Undetected
+          status = "Undetected";
+        } else {
+          status = "Harmless"; // Default fallback
+        }
         
         statusTimelineMap[timestamp][status]++;
       });
@@ -165,6 +199,7 @@ export default function ScanStatsDashboard() {
           harmlessCount: statusTimelineMap[dateStr].Harmless || 0,
           suspiciousCount: statusTimelineMap[dateStr].Suspicious || 0,
           maliciousCount: statusTimelineMap[dateStr].Malicious || 0,
+          undetectedCount: statusTimelineMap[dateStr].Undetected || 0,
         }))
         .sort((a, b) => new Date(a.date) - new Date(b.date));
       
@@ -326,7 +361,7 @@ export default function ScanStatsDashboard() {
         }
       },
       legend: {
-        data: ['Harmless', 'Suspicious', 'Malicious'],
+        data: ['Harmless', 'Suspicious', 'Malicious', 'Undetected'],
         textStyle: { color: isDarkMode ? '#e4e4e7' : '#374151' },
         bottom: '0%',
         itemGap: 20
@@ -525,7 +560,67 @@ export default function ScanStatsDashboard() {
           animationDelay: 600,
           progressive: 1000,
           progressiveThreshold: 3000
-        }
+        },
+    {
+  name: 'Undetected',
+  type: 'line',
+  smooth: true,
+  smoothMonotone: 'x',
+  sampling: 'lttb',
+  symbol: 'circle',
+  symbolSize: 8,
+  lineStyle: {
+    width: 3,
+    // Efek Silver Glow
+    shadowColor: isDarkMode ? 'rgba(161, 161, 170, 0.4)' : 'rgba(113, 113, 122, 0.3)', 
+    shadowBlur: 10,
+    shadowOffsetY: 5,
+    color: isDarkMode ? '#d4d4d8' : '#71717a' // Zinc 300 (Dark) atau Zinc 600 (Light)
+  },
+  itemStyle: {
+    color: isDarkMode ? '#f4f4f5' : '#52525b', // Zinc 100 atau Zinc 700
+    borderColor: isDarkMode ? '#18181b' : '#fff',
+    borderWidth: 2
+  },
+  areaStyle: { 
+    // Gradien dari Abu-abu Terang ke Transparan
+    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      { 
+        offset: 0, 
+        color: isDarkMode ? 'rgba(161, 161, 170, 0.3)' : 'rgba(113, 113, 122, 0.2)' 
+      },
+      { 
+        offset: 1, 
+        color: 'transparent' 
+      }
+    ]),
+    shadowColor: 'rgba(161, 161, 170, 0.1)',
+    shadowBlur: 20
+  },
+  emphasis: {
+    itemStyle: {
+      color: '#fff',
+      borderColor: '#a1a1aa',
+      borderWidth: 3,
+      shadowBlur: 15,
+      shadowColor: 'rgba(255, 255, 255, 0.5)'
+    },
+    areaStyle: {
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: 'rgba(161, 161, 170, 0.5)' },
+        { offset: 1, color: 'rgba(161, 161, 170, 0.1)' }
+      ])
+    }
+  },
+  data: statusTrendData.map(d => d.undetectedCount),
+  animationDuration: 2000,
+  animationEasing: 'cubicOut',
+  animationDelay: 600,
+  progressive: 1000,
+  progressiveThreshold: 3000
+}
+        
+
       ]
     };
   }, [statusTrendData, isDarkMode]);
@@ -579,10 +674,11 @@ export default function ScanStatsDashboard() {
 
         {/* Stats Cards */}
         <div className="mt-8 grid font-mono font-bold grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"> 
-          <StatCard icon={Activity} label="Total Scans" value={totalScans} color="blue" isDarkMode={isDarkMode} />
+          {/* <StatCard icon={Activity} label="Total Scans" value={totalScans} color="blue" isDarkMode={isDarkMode} /> */}
           <StatCard icon={Shield} label="Harmless" value={statusData.find((d) => d.name === "Harmless")?.value || 0} color="green" isDarkMode={isDarkMode} />
           <StatCard icon={AlertTriangle} label="Suspicious" value={statusData.find((d) => d.name === "Suspicious")?.value || 0} color="amber" isDarkMode={isDarkMode} />
           <StatCard icon={Zap} label="Malicious" value={statusData.find((d) => d.name === "Malicious")?.value || 0} color="red" isDarkMode={isDarkMode} />
+          <StatCard icon={EyeOff} label="Undetected" value={statusData.find((d) => d.name === "Undetected")?.value || 0} color="silver" isDarkMode={isDarkMode} />
         </div>
       </div>
 
@@ -667,7 +763,8 @@ const StatCard = ({ icon: Icon, label, value, color, isDarkMode }) => {
     blue: "from-blue-500 to-blue-600",
     green: "from-green-500 to-green-600",
     amber: "from-amber-500 to-amber-600",
-    red: "from-red-500 to-red-600"
+    red: "from-red-500 to-red-600",
+    silver: "from-gray-400 to-gray-500"
   };
   
   return (
@@ -692,7 +789,8 @@ const IconWrapper = ({ children, color }) => {
   const colorClasses = {
     "blue-purple": "from-blue-500 to-purple-600",
     "purple-pink": "from-purple-500 to-pink-600",
-    "indigo-purple": "from-indigo-500 to-purple-600"
+    "indigo-purple": "from-indigo-500 to-purple-600",
+    "silver": "from-gray-400 to-gray-500"
   };
   
   return (
