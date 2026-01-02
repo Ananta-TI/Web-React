@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { ThemeContext } from "../../context/ThemeContext";
-import { motion, AnimatePresence } from "framer-motion"; // <<=== Tambahan
+import { motion, AnimatePresence } from "framer-motion";
 
 const ScrollIndicator = ({ tickDensity = 2 }) => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -16,6 +16,14 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
   
   const isScrollable = useCallback(() => {
     return document.documentElement.scrollHeight > window.innerHeight;
+  }, []);
+
+  // Deteksi Mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const updateScroll = useCallback(() => {
@@ -43,99 +51,81 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
   const scrollToPercentage = useCallback((percentage) => {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const targetScroll = (percentage / 100) * maxScroll;
-    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    window.scrollTo({ top: targetScroll, behavior: isDragging ? 'auto' : 'smooth' });
+  }, [isDragging]);
+
+  // FIX: Fungsi pembantu untuk mendapatkan persentase posisi berdasarkan arah (V/H)
+  const getPos = useCallback((e) => {
+    if (!trackRef.current) return 0;
+    const rect = trackRef.current.getBoundingClientRect();
+    const isTouch = e.type.includes('touch');
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+    if (window.innerWidth < 768) { // Mobile (Horizontal)
+      return ((clientX - rect.left) / rect.width) * 100;
+    } else { // Desktop (Vertical)
+      return ((clientY - rect.top) / rect.height) * 100;
+    }
   }, []);
 
   const handleDragStart = useCallback((e) => {
-    e.preventDefault();
     setIsDragging(true);
-    
-    if (trackRef.current) {
-      const rect = trackRef.current.getBoundingClientRect();
-      const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-      const relativeY = y - rect.top;
-      let percentage = (relativeY / rect.height) * 100;
-      scrollToPercentage(Math.min(100, Math.max(0, percentage)));
-    }
-  }, [scrollToPercentage]);
+    const percentage = getPos(e);
+    scrollToPercentage(Math.min(100, Math.max(0, percentage)));
+  }, [getPos, scrollToPercentage]);
 
   const handleDragMove = useCallback((e) => {
-    if (!isDragging || !trackRef.current) return;
-    const rect = trackRef.current.getBoundingClientRect();
-    const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    const relativeY = y - rect.top;
-    let percentage = (relativeY / rect.height) * 100;
-    window.scrollTo({
-      top: (Math.min(100, Math.max(0, percentage)) / 100) * 
-      (document.documentElement.scrollHeight - window.innerHeight),
-      behavior: 'auto'
-    });
-  }, [isDragging]);
+    if (!isDragging) return;
+    if (e.cancelable) e.preventDefault(); // Penting untuk mobile drag
+    const percentage = getPos(e);
+    scrollToPercentage(Math.min(100, Math.max(0, percentage)));
+  }, [isDragging, getPos, scrollToPercentage]);
 
   const handleDragEnd = useCallback(() => setIsDragging(false), []);
 
   const handleTrackClick = useCallback((e) => {
-    if (!trackRef.current) return;
-    const rect = trackRef.current.getBoundingClientRect();
-    const relativeY = e.clientY - rect.top;
-    scrollToPercentage(Math.min(100, Math.max(0, (relativeY / rect.height) * 100)));
-  }, [scrollToPercentage]);
+    const percentage = getPos(e);
+    scrollToPercentage(Math.min(100, Math.max(0, percentage)));
+  }, [getPos, scrollToPercentage]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!trackRef.current) return;
-    const rect = trackRef.current.getBoundingClientRect();
-    const relativeY = e.clientY - rect.top;
-    setHoverPosition(Math.min(100, Math.max(0, (relativeY / rect.height) * 100)));
-  }, []);
+    const percentage = getPos(e);
+    setHoverPosition(Math.min(100, Math.max(0, percentage)));
+  }, [getPos]);
 
-  const handleMouseEnter = () => setIsHovering(true);
-  const handleMouseLeave = () => setIsHovering(false);
-
-  const throttle = (callback) => {
+  // Throttle Scroll
+  useEffect(() => {
     let ticking = false;
-    return (...args) => {
+    const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          callback(...args);
+          updateScroll();
           ticking = false;
         });
         ticking = true;
       }
     };
-  };
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = throttle(updateScroll);
-    const handleResize = () => updateScroll();
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleScroll);
     updateScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [updateScroll]);
 
   useEffect(() => {
     if (isDragging) {
-      const move = (e) => handleDragMove(e);
-      const end = () => handleDragEnd();
-      window.addEventListener('mousemove', move);
-      window.addEventListener('mouseup', end);
-      window.addEventListener('touchmove', move);
-      window.addEventListener('touchend', end);
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDragMove, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
       return () => {
-        window.removeEventListener('mousemove', move);
-        window.removeEventListener('mouseup', end);
-        window.removeEventListener('touchmove', move);
-        window.removeEventListener('touchend', end);
+        window.removeEventListener('mousemove', handleDragMove);
+        window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('touchmove', handleDragMove);
+        window.removeEventListener('touchend', handleDragEnd);
       };
     }
   }, [isDragging, handleDragMove, handleDragEnd]);
@@ -167,38 +157,36 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
           initial={{ opacity: 0, scale: 0.8, x: isVertical ? -30 : 0, y: isVertical ? 0 : 30 }}
           animate={{ 
             opacity: isVisible ? 1 : 0,
-            scale: isVisible ? 1 : 0.9,
+            scale: isVisible ? 1 : 1,
             x: isVisible ? 0 : (isVertical ? -20 : 0),
             y: isVisible ? 0 : (isVertical ? 0 : 20),
             transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }
           }}
-          exit={{ opacity: 0, scale: 0.85, x: isVertical ? -20 : 0, y: isVertical ? 0 : 20, transition: { duration: 0.35 } }}
+          exit={{ opacity: 0, scale: 0.85, x: isVertical ? -20 : 0, y: isVertical ? 0 : 20 }}
         >
-
+          {/* Tampilan Frame (Tetap sesuai aslinya) */}
           <div className={`relative w-full h-full overflow-hidden ${isDarkMode ? 'bg-white' : 'bg-black'} rounded-md shadow-lg border ${isDarkMode ? 'border-zinc-700' : 'border-zinc-800'}`}>
             <div
               ref={trackRef}
               className={`absolute inset-2 cursor-pointer ${isDarkMode ? 'bg-white' : 'bg-zinc-900'} rounded-sm`}
               onClick={handleTrackClick}
               onMouseMove={handleMouseMove}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
             >
+              {/* Tick Marks */}
               <div className={`absolute inset-0 ${isVertical ? 'flex flex-col justify-between py-1' : 'flex justify-between px-1'}`}>
-                {tickMarks.map((tick) => {
-                  const isMajor = tick % 10 === 0;
-                  const isMedium = tick % 5 === 0 && !isMajor;
-                  return (
-                    <div 
-                      key={tick}
-                      className={`${isDarkMode ? 'bg-black' : 'bg-white'} ${
-                        isMajor ? 'opacity-100' : isMedium ? 'opacity-30' : 'opacity-40'
-                      } ${isVertical ? 'w-full h-px' : 'h-full w-px'}`}
-                    />
-                  );
-                })}
+                {tickMarks.map((tick) => (
+                  <div 
+                    key={tick}
+                    className={`${isDarkMode ? 'bg-black' : 'bg-white'} ${
+                      tick % 10 === 0 ? 'opacity-100' : tick % 5 === 0 ? 'opacity-30' : 'opacity-40'
+                    } ${isVertical ? 'w-full h-px' : 'h-full w-px'}`}
+                  />
+                ))}
               </div>
 
+              {/* Hover Line */}
               {isHovering && !isDragging && (
                 <div 
                   className={`absolute ${isVertical ? 'left-0 right-0 h-0.5 bg-red-500' : 'top-0 bottom-0 w-0.5 bg-red-500'} transition-all duration-150`}
@@ -206,6 +194,7 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
                 />
               )}
 
+              {/* Scroll Line & Knob */}
               <div 
                 className={`absolute ${isVertical ? 'left-0 right-0 h-0.5' : 'top-0 bottom-0 w-0.5'} bg-red-500`}
                 style={isVertical ? { top: `${scrollPercentage}%` } : { left: `${scrollPercentage}%` }}
@@ -221,11 +210,13 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
             </div>
           </div>
 
+          {/* Label Persentase */}
           <div 
-            className={`absolute text-sm font-mono ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-            style={isVertical ? { top: `${scrollPercentage}%`, right: "-2.5rem" } : { left: `${scrollPercentage}%`, top: "2rem" }}
+            className={`absolute text-sm font-mono ${isDarkMode ? 'text-white' : 'text-black'}`}
+            style={isVertical 
+              ? { top: `${scrollPercentage}%`, right: "-2.5rem" } 
+              : { left: `${scrollPercentage}%`, top: "2rem" }
+            }
           >
             {Math.round(scrollPercentage)}%
           </div>

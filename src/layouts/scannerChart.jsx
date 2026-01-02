@@ -1,8 +1,4 @@
-import { useEffect, useState, useLayoutEffect, useRef, useContext } from "react";
-import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import * as am5percent from "@amcharts/amcharts5/percent";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { 
@@ -10,13 +6,12 @@ import {
   Activity, 
   Shield, 
   AlertTriangle, 
-  FileText, 
-  Globe, 
   BarChart3,
   Zap,
-  Sparkles,
   Layers
 } from "lucide-react";
+import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -27,33 +22,27 @@ export default function ScanStatsDashboard() {
   // State Data
   const [statusData, setStatusData] = useState([]);
   const [typeData, setTypeData] = useState([]);
-  const [trendData, setTrendData] = useState([]); // Will now contain URL and File data separately
+  const [trendData, setTrendData] = useState([]);
+  const [statusTrendData, setStatusTrendData] = useState([]); // New state for status trend data
   const [totalScans, setTotalScans] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [chartError, setChartError] = useState(false);
 
-  // Refs for Chart Containers
-  const chart1Ref = useRef(null); // Pie
-  const chart2Ref = useRef(null); // Bar Type
-  const chart3Ref = useRef(null); // Area Pulse (Trend)
-
   useEffect(() => {
     fetchStats();
   }, [activeTimeRange]);
 
-  async function fetchStats() {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     setChartError(false);
     
     try {
-      // Calculate date range based on activeTimeRange
       const now = new Date();
       let startDate = new Date();
       
       switch (activeTimeRange) {
         case 'all':
-          // Don't set any date filter - get all data
           startDate = null;
           break;
         case '7d':
@@ -63,7 +52,7 @@ export default function ScanStatsDashboard() {
           startDate.setDate(now.getDate() - 30);
           break;
         default:
-          startDate = null; // Default to all data
+          startDate = null;
       }
       
       let url = `${SUPABASE_URL}/rest/v1/scan_history?select=*`;
@@ -94,9 +83,9 @@ export default function ScanStatsDashboard() {
       });
 
       setStatusData([
-        { name: "Harmless", value: counts.Harmless, color: 0x10b981 },
-        { name: "Suspicious", value: counts.Suspicious, color: 0xf59e0b },
-        { name: "Malicious", value: counts.Malicious, color: 0xef4444 },
+        { name: "Harmless", value: counts.Harmless, itemStyle: { color: "#10b981" } },
+        { name: "Suspicious", value: counts.Suspicious, itemStyle: { color: "#f59e0b" } },
+        { name: "Malicious", value: counts.Malicious, itemStyle: { color: "#ef4444" } },
       ]);
 
       // 2. OLAH DATA: Type Counts (Bar Chart)
@@ -107,11 +96,11 @@ export default function ScanStatsDashboard() {
       });
 
       setTypeData([
-        { name: "URL", value: t.url, color: 0x3b82f6 },
-        { name: "File", value: t.file, color: 0x8b5cf6 },
+        { name: "URL", value: t.url, itemStyle: { color: "#3b82f6" } },
+        { name: "File", value: t.file, itemStyle: { color: "#8b5cf6" } },
       ]);
 
-      // 3. OLAH DATA: Trend Timeline (Area Chart) - MODIFIED TO SEPARATE URL AND FILE SCANS
+      // 3. OLAH DATA: Trend Timeline for Type (Area Chart)
       const urlTimelineMap = {};
       const fileTimelineMap = {};
       
@@ -120,11 +109,9 @@ export default function ScanStatsDashboard() {
         if (!dateStr) return;
 
         const dateObj = new Date(dateStr);
-        // Group by day instead of hour for better visualization with all data
         dateObj.setHours(0, 0, 0, 0); 
         const timestamp = dateObj.getTime();
 
-        // Separate data by type
         if (item.type === "url") {
           urlTimelineMap[timestamp] = (urlTimelineMap[timestamp] || 0) + 1;
         } else if (item.type === "file") {
@@ -132,22 +119,56 @@ export default function ScanStatsDashboard() {
         }
       });
 
-      // Get all unique dates from both maps
       const allDates = new Set([
         ...Object.keys(urlTimelineMap),
         ...Object.keys(fileTimelineMap)
       ]);
 
-      // Convert to array and sort by time
       const sortedTrend = Array.from(allDates)
         .map((dateStr) => ({
-          date: parseInt(dateStr),
+          date: new Date(parseInt(dateStr)).toLocaleDateString(),
           urlCount: urlTimelineMap[dateStr] || 0,
           fileCount: fileTimelineMap[dateStr] || 0,
         }))
-        .sort((a, b) => a.date - b.date);
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
       
       setTrendData(sortedTrend);
+
+      // 4. OLAH DATA: Status Trend Timeline (New Area Chart)
+      const statusTimelineMap = {};
+      
+      data.forEach((item) => {
+        const dateStr = item.created_at || item.timestamp || item.date;
+        if (!dateStr) return;
+
+        const dateObj = new Date(dateStr);
+        dateObj.setHours(0, 0, 0, 0); 
+        const timestamp = dateObj.getTime();
+
+        if (!statusTimelineMap[timestamp]) {
+          statusTimelineMap[timestamp] = { Harmless: 0, Suspicious: 0, Malicious: 0 };
+        }
+
+        const status =
+          item?.stats?.malicious > 0 ? "Malicious"
+          : item?.stats?.suspicious > 0 ? "Suspicious"
+          : "Harmless";
+        
+        statusTimelineMap[timestamp][status]++;
+      });
+
+      const allStatusDates = Object.keys(statusTimelineMap);
+      
+      const sortedStatusTrend = allStatusDates
+        .map((dateStr) => ({
+          date: new Date(parseInt(dateStr)).toLocaleDateString(),
+          harmlessCount: statusTimelineMap[dateStr].Harmless || 0,
+          suspiciousCount: statusTimelineMap[dateStr].Suspicious || 0,
+          maliciousCount: statusTimelineMap[dateStr].Malicious || 0,
+        }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      setStatusTrendData(sortedStatusTrend);
       setTotalScans(data.length);
 
     } catch (error) {
@@ -156,408 +177,358 @@ export default function ScanStatsDashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [activeTimeRange]);
 
-  // --- CHART 1: PIE CHART (Status) ---
-  useLayoutEffect(() => {
-    if (statusData.length === 0 || loading || chartError) return;
-
-    let root = null;
-    try {
-      root = am5.Root.new(chart1Ref.current);
-      if (!root) {
-        console.error("Failed to create am5 root");
-        return;
-      }
-      
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      const chart = root.container.children.push(
-        am5percent.PieChart.new(root, {
-          layout: root.verticalLayout,
-          innerRadius: am5.percent(50),
-          radius: am5.percent(90)
-        })
-      );
-
-      const series = chart.series.push(
-        am5percent.PieSeries.new(root, {
-          valueField: "value",
-          categoryField: "name",
-          alignLabels: false
-        })
-      );
-
-      series.labels.template.setAll({
-        textType: "circular",
-        centerX: 0,
-        centerY: 0,
-        fontSize: 12,
-        fill: am5.color(isDarkMode ? 0xffffff : 0x000000)
-      });
-
-      series.slices.template.setAll({
-        strokeWidth: 2,
-        stroke: am5.color(isDarkMode ? 0x27272a : 0xffffff),
-        cornerRadius: 5,
-        tooltipText: "{category}: {value}",
-        shadowColor: am5.color(0x000000),
-        shadowBlur: 10,
-        shadowOffsetX: 0,
-        shadowOffsetY: 0,
-        shadowOpacity: 0.2
-      });
-
-      series.data.setAll(statusData);
-      statusData.forEach((item, index) => {
-        series.slices.getIndex(index).set("fill", am5.color(item.color));
-      });
-
-      // Add legend with enhanced styling
-      const legend = chart.children.push(
-        am5.Legend.new(root, {
-          centerX: am5.percent(50),
-          x: am5.percent(50),
-          marginTop: 15
-        })
-      );
-      
-      legend.labels.template.setAll({ 
-        fill: am5.color(isDarkMode ? 0xe4e4e7 : 0x27272a),
-        fontSize: 12
-      });
-      
-      legend.markers.template.setAll({
-        width: 12,
-        height: 12,
-        cornerRadius: 3
-      });
-      
-      legend.data.setAll(series.dataItems);
-
-      series.appear(1000, 100);
-      
-      return () => {
-        if (root) root.dispose();
-      };
-    } catch (error) {
-      console.error("Error creating pie chart:", error);
-      setChartError(true);
-      if (root) root.dispose();
-    }
-  }, [statusData, isDarkMode, loading, chartError]);
-
-  // --- CHART 2: BAR CHART (Type) ---
-  useLayoutEffect(() => {
-    if (typeData.length === 0 || loading || chartError) return;
-
-    let root = null;
-    try {
-      root = am5.Root.new(chart2Ref.current);
-      if (!root) {
-        console.error("Failed to create am5 root");
-        return;
-      }
-      
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      const chart = root.container.children.push(
-        am5xy.XYChart.new(root, {
-          panX: false,
-          panY: false,
-          wheelX: "none",
-          wheelY: "none",
-          layout: root.verticalLayout
-        })
-      );
-
-      // Add background gradient
-      chart.plotContainer.get("background").setAll({
-        fillGradient: am5.LinearGradient.new(root, {
-          stops: [
-            { color: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc), opacity: 0.2 },
-            { color: am5.color(isDarkMode ? 0x334155 : 0xf1f5f9), opacity: 0.2 }
-          ],
-          rotation: 90
-        }),
-        fillOpacity: 0.5
-      });
-
-      const xRenderer = am5xy.AxisRendererX.new(root, {});
-      xRenderer.labels.template.setAll({
-        fill: am5.color(isDarkMode ? 0xe4e4e7 : 0x27272a),
-        fontSize: 12
-      });
-
-      const xAxis = chart.xAxes.push(
-        am5xy.CategoryAxis.new(root, {
-          categoryField: "name",
-          renderer: xRenderer
-        })
-      );
-      xAxis.data.setAll(typeData);
-
-      const yRenderer = am5xy.AxisRendererY.new(root, {});
-      yRenderer.labels.template.setAll({
-        fill: am5.color(isDarkMode ? 0xa1a1aa : 0x52525b),
-        fontSize: 12
-      });
-
-      const yAxis = chart.yAxes.push(
-        am5xy.ValueAxis.new(root, { renderer: yRenderer })
-      );
-
-      const series = chart.series.push(
-        am5xy.ColumnSeries.new(root, {
-          xAxis: xAxis,
-          yAxis: yAxis,
-          valueYField: "value",
-          categoryXField: "name"
-        })
-      );
-
-      series.columns.template.setAll({
-        cornerRadiusTL: 8,
-        cornerRadiusTR: 8,
-        tooltipText: "{categoryX}: {valueY}",
-        width: am5.percent(60),
-        shadowColor: am5.color(0x000000),
-        shadowBlur: 5,
-        shadowOffsetX: 0,
-        shadowOffsetY: 2,
-        shadowOpacity: 0.2
-      });
-
-      series.columns.template.adapters.add("fill", (fill, target) => {
-        const dataItem = target.dataItem;
-        if (dataItem) {
-          const index = series.dataItems.indexOf(dataItem);
-          return am5.color(typeData[index].color);
-        }
-        return fill;
-      });
-
-      series.data.setAll(typeData);
-      series.appear(1000);
-      
-      return () => {
-        if (root) root.dispose();
-      };
-    } catch (error) {
-      console.error("Error creating bar chart:", error);
-      setChartError(true);
-      if (root) root.dispose();
-    }
-  }, [typeData, isDarkMode, loading, chartError]);
-
-  // --- CHART 3: AREA PULSE CHART (Trend/Timeline) - MODIFIED TO SHOW URL AND FILE SEPARATELY ---
-  useLayoutEffect(() => {
-    if (loading || chartError) return;
+  // --- ECHARTS OPTIONS ---
+   const pieChartOption = useMemo(() => {
+    const total = statusData.reduce((sum, item) => sum + item.value, 0);
     
-    let root = null;
-    try {
-      root = am5.Root.new(chart3Ref.current);
-      if (!root) {
-        console.error("Failed to create am5 root");
-        return;
+    return {
+      backgroundColor: 'transparent',
+      legend: {
+        orient: 'horizontal',
+        bottom: '0%',
+        textStyle: { color: isDarkMode ? '#e4e4e7' : '#374151' },
+        itemGap: 20,
+        icon: 'circle'
+      },
+      graphic: [
+        {
+          type: 'text',
+          left: 'center',
+          top: '42%',
+          style: {
+            text: total.toString(),
+            fontSize: 36,
+            fontWeight: 'bold',
+            fill: isDarkMode ? '#e4e4e7' : '#111827',
+            textAlign: 'center'
+          }
+        },
+        {
+          type: 'text',
+          left: 'center',
+          top: '52%',
+          style: {
+            text: 'Total Scans',
+            fontSize: 14,
+            fill: isDarkMode ? '#9ca3af' : '#6b7280',
+            textAlign: 'center'
+          }
+        }
+      ],
+      series: [
+        {
+          name: 'Status',
+          type: 'pie',
+          radius: ['50%', '70%'],
+          center: ['50%', '45%'],
+          roseType: 'area',
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: isDarkMode ? '#1f2937' : '#fff',
+            borderWidth: 2,
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowOffsetY: 5
+          },
+          label: { 
+            show: true,
+            position: 'outside',
+            formatter: '{b}: {d}%',
+            fontSize: 12,
+            color: isDarkMode ? '#e4e4e7' : '#111827'
+          },
+          labelLine: {
+            length: 15,
+            length2: 10,
+            maxSurfaceAngle: 80
+          },
+          emphasis: {
+            label: { show: true, fontSize: 16, fontWeight: 'bold' },
+            itemStyle: { 
+              shadowBlur: 20, 
+              shadowOffsetX: 0, 
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              borderWidth: 3
+            }
+          },
+          animationType: 'expansion',
+          animationEasing: 'elasticOut',
+          animationDelay: function (idx) {
+            return Math.random() * 200;
+          },
+          data: statusData,
+        }
+      ]
+    };
+  }, [statusData, isDarkMode]);
+
+  const barChartOption = useMemo(() => ({
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+      borderColor: 'transparent',
+      textStyle: { color: isDarkMode ? '#e4e4e7' : '#111827' }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: typeData.map(d => d.name),
+      axisLine: { lineStyle: { color: isDarkMode ? '#4b5563' : '#d1d5db' } },
+      axisTick: { show: false },
+      axisLabel: { color: isDarkMode ? '#9ca3af' : '#6b7280' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: isDarkMode ? '#374151' : '#e5e7eb' } },
+      axisLabel: { color: isDarkMode ? '#9ca3af' : '#6b7280' }
+    },
+    series: [
+      {
+        type: 'bar',
+        data: typeData,
+        itemStyle: {
+          borderRadius: [8, 8, 0, 0]
+        }
       }
-      
-      root.setThemes([am5themes_Animated.new(root)]);
+    ]
+  }), [typeData, isDarkMode]);
 
-      const chart = root.container.children.push(
-        am5xy.XYChart.new(root, {
-          panX: true,
-          panY: true,
-          wheelX: "panX",
-          wheelY: "zoomX",
-          pinchZoomX: true,
-          layout: root.verticalLayout,
-          paddingLeft: 0
-        })
-      );
-
-      // Add background gradient
-      chart.plotContainer.get("background").setAll({
-        fillGradient: am5.LinearGradient.new(root, {
-          stops: [
-            { color: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc), opacity: 0.2 },
-            { color: am5.color(isDarkMode ? 0x334155 : 0xf1f5f9), opacity: 0.2 }
-          ],
-          rotation: 90
-        }),
-        fillOpacity: 0.5
-      });
-
-      // Cursor
-      const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-        behavior: "none"
-      }));
-      cursor.lineY.set("visible", false);
-
-      // Axis X (Time) - Adjust base interval based on data range
-      const baseInterval = activeTimeRange === 'all' 
-        ? { timeUnit: "day", count: 1 } 
-        : { timeUnit: "hour", count: 1 };
-
-      const xAxis = chart.xAxes.push(
-        am5xy.DateAxis.new(root, {
-          maxDeviation: 0.2,
-          baseInterval: baseInterval,
-          renderer: am5xy.AxisRendererX.new(root, {
-            minGridDistance: 50
-          }),
-          tooltip: am5.Tooltip.new(root, {})
-        })
-      );
-
-      xAxis.get("renderer").labels.template.setAll({
-        fill: am5.color(isDarkMode ? 0xa1a1aa : 0x52525b),
-        fontSize: 12,
-      });
-
-      // Axis Y (Count)
-      const yAxis = chart.yAxes.push(
-        am5xy.ValueAxis.new(root, {
-          renderer: am5xy.AxisRendererY.new(root, {})
-        })
-      );
-
-      yAxis.get("renderer").labels.template.setAll({
-        fill: am5.color(isDarkMode ? 0xa1a1aa : 0x52525b),
-        fontSize: 12,
-      });
-
-      // Create URL series with enhanced gradient
-      const urlSeries = chart.series.push(
-        am5xy.SmoothedXLineSeries.new(root, {
-          name: "URL Scans",
-          xAxis: xAxis,
-          yAxis: yAxis,
-          valueYField: "urlCount",
-          valueXField: "date",
-          tooltip: am5.Tooltip.new(root, {
-            labelText: "[bold]{valueY}[/] URL Scans",
-          })
-        })
-      );
-
-      // URL series styling
-      urlSeries.strokes.template.setAll({
-        strokeWidth: 3,
-        stroke: am5.color(0x3b82f6), // Blue for URL
-        shadowColor: am5.color(0x3b82f6),
-        shadowBlur: 10,
-        shadowOpacity: 0.5,
-      });
-
-      urlSeries.fills.template.setAll({
-        fillOpacity: 0.2,
-        visible: true,
-        fillGradient: am5.RadialGradient.new(root, {
-          stops: [
-            { color: am5.color(0x3b82f6), opacity: 0.6 },
-            { color: am5.color(0x3b82f6), opacity: 0.1 },
-          ],
-          rotation: 90,
-        }),
-      });
-
-      // Add bullet points for URL series
-      urlSeries.bullets.push(function() {
-        return am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            radius: 5,
-            fill: am5.color(0x3b82f6),
-            stroke: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc),
-            strokeWidth: 2
-          })
-        });
-      });
-
-      // Create File series with enhanced gradient
-      const fileSeries = chart.series.push(
-        am5xy.SmoothedXLineSeries.new(root, {
-          name: "File Scans",
-          xAxis: xAxis,
-          yAxis: yAxis,
-          valueYField: "fileCount",
-          valueXField: "date",
-          tooltip: am5.Tooltip.new(root, {
-            labelText: "[bold]{valueY}[/] File Scans",
-          })
-        })
-      );
-
-      // File series styling
-      fileSeries.strokes.template.setAll({
-        strokeWidth: 3,
-        stroke: am5.color(0x8b5cf6), // Purple for File
-        shadowColor: am5.color(0x8b5cf6),
-        shadowBlur: 10,
-        shadowOpacity: 0.5,
-      });
-
-      fileSeries.fills.template.setAll({
-        fillOpacity: 0.2,
-        visible: true,
-        fillGradient: am5.RadialGradient.new(root, {
-          stops: [
-            { color: am5.color(0x8b5cf6), opacity: 0.6 },
-            { color: am5.color(0x8b5cf6), opacity: 0.1 },
-          ],
-          rotation: 90,
-        }),
-      });
-
-      // Add bullet points for File series
-      fileSeries.bullets.push(function() {
-        return am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            radius: 5,
-            fill: am5.color(0x8b5cf6),
-            stroke: am5.color(isDarkMode ? 0x1e293b : 0xf8fafc),
-            strokeWidth: 2
-          })
-        });
-      });
-
-      // Set data for both series
-      urlSeries.data.setAll(trendData);
-      fileSeries.data.setAll(trendData);
-
-      // Add legend
-      const legend = chart.children.push(am5.Legend.new(root, {
-        centerX: am5.percent(50),
-        x: am5.percent(50)
-      }));
-      
-      legend.data.setAll([urlSeries, fileSeries]);
-      
-      legend.labels.template.setAll({ 
-        fill: am5.color(isDarkMode ? 0xe4e4e7 : 0x27272a),
-        fontSize: 12
-      });
-      
-      legend.markers.template.setAll({
-        width: 12,
-        height: 12,
-        cornerRadius: 3
-      });
-
-      // Animate series
-      urlSeries.appear(1000);
-      fileSeries.appear(1000);
-      chart.appear(1000, 100);
-      
-      return () => {
-        if (root) root.dispose();
-      };
-    } catch (error) {
-      console.error("Error creating area chart:", error);
-      setChartError(true);
-      if (root) root.dispose();
-    }
-  }, [trendData, isDarkMode, loading, chartError, activeTimeRange]);
+  // Updated area chart to show status trends over time
+  const areaChartOption = useMemo(() => {
+    return {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+        borderColor: 'transparent',
+        textStyle: { color: isDarkMode ? '#e4e4e7' : '#111827' },
+        extraCssText: 'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); border-radius: 8px;',
+        formatter: function(params) {
+          let result = `<div style="font-weight:bold;margin-bottom:5px;">${params[0].axisValue}</div>`;
+          params.forEach(param => {
+            result += `<div style="display:flex;align-items:center;">
+              <span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${param.color};"></span>
+              ${param.seriesName}: ${param.value}
+            </div>`;
+          });
+          return result;
+        }
+      },
+      legend: {
+        data: ['Harmless', 'Suspicious', 'Malicious'],
+        textStyle: { color: isDarkMode ? '#e4e4e7' : '#374151' },
+        bottom: '0%',
+        itemGap: 20
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '15%',
+        top: '10%',
+        containLabel: true
+      },
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0,
+          end: 100,
+          zoomLock: false,
+          moveOnMouseMove: true,
+          moveOnMouseWheel: true,
+          preventDefaultMouseMove: true,
+          filterMode: 'filter',
+          throttle: 50,
+          rangeMode: ['percent', 'percent']
+        },
+      ],
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: statusTrendData.map(d => d.date),
+        axisLine: { lineStyle: { color: isDarkMode ? '#4b5563' : '#d1d5db' } },
+        axisTick: { show: false },
+        axisLabel: { 
+          color: isDarkMode ? '#9ca3af' : '#6b7280',
+          fontSize: 10,
+          rotate: 45
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { 
+          lineStyle: { 
+            color: isDarkMode ? '#374151' : '#e5e7eb',
+            type: 'dashed'
+          } 
+        },
+        axisLabel: { 
+          color: isDarkMode ? '#9ca3af' : '#6b7280',
+          fontSize: 12
+        }
+      },
+      series: [
+        {
+          name: 'Harmless',
+          type: 'line',
+          smooth: true,
+          smoothMonotone: 'x',
+          sampling: 'lttb',
+          symbol: 'circle',
+          symbolSize: 8,
+          lineStyle: {
+            width: 3,
+            shadowColor: 'rgba(16, 185, 129, 0.5)',
+            shadowBlur: 10,
+            shadowOffsetY: 5
+          },
+          itemStyle: {
+            color: '#10b981',
+            borderColor: isDarkMode ? '#1f2937' : '#fff',
+            borderWidth: 2
+          },
+          areaStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(16, 185, 129, 0.5)' },
+              { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
+            ]),
+            shadowColor: 'rgba(16, 185, 129, 0.2)',
+            shadowBlur: 20
+          },
+          emphasis: {
+            itemStyle: {
+              color: '#10b981',
+              borderColor: isDarkMode ? '#1f2937' : '#fff',
+              borderWidth: 3,
+              shadowBlur: 10,
+              shadowColor: 'rgba(16, 185, 129, 0.8)'
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(16, 185, 129, 0.7)' },
+                { offset: 1, color: 'rgba(16, 185, 129, 0.1)' }
+              ])
+            }
+          },
+          data: statusTrendData.map(d => d.harmlessCount),
+          animationDuration: 2000,
+          animationEasing: 'cubicOut',
+          progressive: 1000,
+          progressiveThreshold: 3000
+        },
+        {
+          name: 'Suspicious',
+          type: 'line',
+          smooth: true,
+          smoothMonotone: 'x',
+          sampling: 'lttb',
+          symbol: 'circle',
+          symbolSize: 8,
+          lineStyle: {
+            width: 3,
+            shadowColor: 'rgba(245, 158, 11, 0.5)',
+            shadowBlur: 10,
+            shadowOffsetY: 5
+          },
+          itemStyle: {
+            color: '#f59e0b',
+            borderColor: isDarkMode ? '#1f2937' : '#fff',
+            borderWidth: 2
+          },
+          areaStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(245, 158, 11, 0.5)' },
+              { offset: 1, color: 'rgba(245, 158, 11, 0.05)' }
+            ]),
+            shadowColor: 'rgba(245, 158, 11, 0.2)',
+            shadowBlur: 20
+          },
+          emphasis: {
+            itemStyle: {
+              color: '#f59e0b',
+              borderColor: isDarkMode ? '#1f2937' : '#fff',
+              borderWidth: 3,
+              shadowBlur: 10,
+              shadowColor: 'rgba(245, 158, 11, 0.8)'
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(245, 158, 11, 0.7)' },
+                { offset: 1, color: 'rgba(245, 158, 11, 0.1)' }
+              ])
+            }
+          },
+          data: statusTrendData.map(d => d.suspiciousCount),
+          animationDuration: 2000,
+          animationEasing: 'cubicOut',
+          animationDelay: 300,
+          progressive: 1000,
+          progressiveThreshold: 3000
+        },
+        {
+          name: 'Malicious',
+          type: 'line',
+          smooth: true,
+          smoothMonotone: 'x',
+          sampling: 'lttb',
+          symbol: 'circle',
+          symbolSize: 8,
+          lineStyle: {
+            width: 3,
+            shadowColor: 'rgba(239, 68, 68, 0.5)',
+            shadowBlur: 10,
+            shadowOffsetY: 5
+          },
+          itemStyle: {
+            color: '#ef4444',
+            borderColor: isDarkMode ? '#1f2937' : '#fff',
+            borderWidth: 2
+          },
+          areaStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(239, 68, 68, 0.5)' },
+              { offset: 1, color: 'rgba(239, 68, 68, 0.05)' }
+            ]),
+            shadowColor: 'rgba(239, 68, 68, 0.2)',
+            shadowBlur: 20
+          },
+          emphasis: {
+            itemStyle: {
+              color: '#ef4444',
+              borderColor: isDarkMode ? '#1f2937' : '#fff',
+              borderWidth: 3,
+              shadowBlur: 10,
+              shadowColor: 'rgba(239, 68, 68, 0.8)'
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(239, 68, 68, 0.7)' },
+                { offset: 1, color: 'rgba(239, 68, 68, 0.1)' }
+              ])
+            }
+          },
+          data: statusTrendData.map(d => d.maliciousCount),
+          animationDuration: 2000,
+          animationEasing: 'cubicOut',
+          animationDelay: 600,
+          progressive: 1000,
+          progressiveThreshold: 3000
+        }
+      ]
+    };
+  }, [statusTrendData, isDarkMode]);
 
   return (
     <section className={`relative w-full min-h-screen py-12 sm:py-20 overflow-hidden ${
@@ -606,157 +577,54 @@ export default function ScanStatsDashboard() {
           </div>
         </div>
 
-        {/* Stats Cards with enhanced design */}
+        {/* Stats Cards */}
         <div className="mt-8 grid font-mono font-bold grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"> 
-          {/* Card Total */}
-          <div className={`group relative cursor-target overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-          }`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-500/20 to-transparent rounded-bl-full"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                  <Activity className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">{totalScans}</div>
-              <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Total Scans</div>
-            </div>
-          </div>
-          
-          {/* Card Harmless */}
-          <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-          }`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-500/20 to-transparent rounded-bl-full"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white">
-                  <Shield className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
-                {statusData.find((d) => d.name === "Harmless")?.value || 0}
-              </div>
-              <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Harmless</div>
-            </div>
-          </div>
-          
-          {/* Card Suspicious */}
-          <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-          }`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-500/20 to-transparent rounded-bl-full"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
-                {statusData.find((d) => d.name === "Suspicious")?.value || 0}
-              </div>
-              <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Suspicious</div>
-            </div>
-          </div>
-          
-          {/* Card Malicious */}
-          <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
-            isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-          }`}>
-            <div className="absolute  top-0 right-0 w-16 h-16 bg-gradient-to-br from-red-500/20 to-transparent rounded-bl-full"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white">
-                  <Zap className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
-                {statusData.find((d) => d.name === "Malicious")?.value || 0}
-              </div>
-              <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Malicious</div>
-            </div>
-          </div>
+          <StatCard icon={Activity} label="Total Scans" value={totalScans} color="blue" isDarkMode={isDarkMode} />
+          <StatCard icon={Shield} label="Harmless" value={statusData.find((d) => d.name === "Harmless")?.value || 0} color="green" isDarkMode={isDarkMode} />
+          <StatCard icon={AlertTriangle} label="Suspicious" value={statusData.find((d) => d.name === "Suspicious")?.value || 0} color="amber" isDarkMode={isDarkMode} />
+          <StatCard icon={Zap} label="Malicious" value={statusData.find((d) => d.name === "Malicious")?.value || 0} color="red" isDarkMode={isDarkMode} />
         </div>
       </div>
 
-      {/* Chart containers with enhanced design */}
+      {/* Chart containers */}
       <div className="container mx-auto px-4 sm:px-6 grid gap-6 lg:grid-cols-2 relative z-10"> 
         {/* Pie Chart (Status) */}
-        <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
-          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-        }`}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
-          <div className="relative z-10">
-            <h3 className="text-xl sm:text-2xl font-semibold font-lyrae mb-4 sm:mb-6 flex items-center gap-2"> 
-              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              Status Distribution
-            </h3>
-            {loading ? (
-              <div className="h-[300px] sm:h-[350px] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500"></div>
-              </div>
-            ) : chartError ? (
-              <div className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center">
-                <div className="text-red-500 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <p className={`text-sm ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Failed to load chart data</p>
-                <button 
-                  onClick={fetchStats}
-                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div ref={chart1Ref} style={{ width: "100%", height: "350px" }}></div>
-            )}
-          </div>
-        </div>
+        <ChartContainer
+          title="Status Distribution"
+          icon={BarChart3}
+          iconColor="blue-purple"
+          loading={loading}
+          error={chartError}
+          onRetry={fetchStats}
+          isDarkMode={isDarkMode}
+        >
+          <ReactECharts 
+            option={pieChartOption} 
+            style={{ height: '350px' }}
+            loading={loading}
+            notMerge={true}
+          />
+        </ChartContainer>
 
         {/* Bar Chart (Type) */}
-        <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
-          isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
-        }`}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
-          <div className="relative z-10">
-            <h3 className="text-xl sm:text-2xl font-semibold font-lyrae mb-4 sm:mb-6 flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white">
-                <Layers className="w-4 h-4" />
-              </div>
-              Scan Type Overview
-            </h3>
-            {loading ? (
-              <div className="h-[300px] sm:h-[350px] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-purple-500"></div>
-              </div>
-            ) : chartError ? (
-              <div className="h-[300px] sm:h-[350px] flex flex-col items-center justify-center">
-                <div className="text-red-500 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <p className={`text-sm ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Failed to load chart data</p>
-                <button 
-                  onClick={fetchStats}
-                  className="mt-4 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div ref={chart2Ref} style={{ width: "100%", height: "350px" }}></div>
-            )}
-          </div>
-        </div>
+        <ChartContainer
+          title="Scan Type Overview"
+          icon={Layers}
+          iconColor="purple-pink"
+          loading={loading}
+          error={chartError}
+          onRetry={fetchStats}
+          isDarkMode={isDarkMode}
+        >
+          <ReactECharts 
+            option={barChartOption} 
+            style={{ height: '350px' }}
+            loading={loading}
+            notMerge={true}
+          />
+        </ChartContainer>
 
-        {/* Activity Pulse Chart - MODIFIED TITLE AND DESCRIPTION */}
+        {/* Status Trend Chart */}
         <div className={`lg:col-span-2 group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
           isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
         }`}>
@@ -764,44 +632,111 @@ export default function ScanStatsDashboard() {
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-500/10 to-transparent rounded-tr-full"></div>
           <div className="relative z-10">
             <h3 className="text-xl sm:text-2xl font-semibold font-lyrae mb-2 flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <IconWrapper color="indigo-purple">
                 <TrendingUp className="w-4 h-4" />
-              </div>
-              Scan Activity Timeline
+              </IconWrapper>
+              Status Trend Timeline
             </h3>
             <p className={`text-xs sm:text-sm font-mono mb-4 sm:mb-6 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-              {activeTimeRange === 'all' ? 'Complete scan frequency timeline separated by type' : 'Real-time scan frequency timeline separated by type'}
+              {activeTimeRange === 'all' ? 'Complete status trend timeline separated by scan result' : 'Recent status trend timeline separated by scan result'}
             </p>
             
-            {loading ? (
-              <div className="h-[350px] sm:h-[450px] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-indigo-500"></div>
-              </div>
-            ) : chartError ? (
-              <div className="h-[350px] sm:h-[450px] flex flex-col items-center justify-center">
-                <div className="text-red-500 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <p className={`text-sm ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Failed to load chart data</p>
-                <button 
-                  onClick={fetchStats}
-                  className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : trendData.length === 0 ? (
-              <div className="h-[350px] sm:h-[450px] flex items-center justify-center">
-                 <p className={isDarkMode ? "text-zinc-400" : "text-gray-600"}>No activity recorded yet</p>
-              </div>
-            ) : (
-              <div ref={chart3Ref} style={{ width: "100%", height: "450px" }}></div>
-            )}
+            {loading ? <ChartSkeleton isDarkMode={isDarkMode} /> : chartError ? <ErrorDisplay onRetry={fetchStats} isDarkMode={isDarkMode} /> : statusTrendData.length === 0 ? <NoDataDisplay isDarkMode={isDarkMode} /> : 
+              <ReactECharts 
+                option={areaChartOption} 
+                style={{ height: '450px' }}
+                loading={loading}
+                notMerge={true}
+                onEvents={{
+                  dataZoom: (params) => {
+                    console.log('Zoom event:', params);
+                  }
+                }}
+              />
+            }
           </div>
         </div>
       </div>
     </section>
   );
 }
+
+// --- Helper Components (tidak berubah) ---
+const StatCard = ({ icon: Icon, label, value, color, isDarkMode }) => {
+  const colorClasses = {
+    blue: "from-blue-500 to-blue-600",
+    green: "from-green-500 to-green-600",
+    amber: "from-amber-500 to-amber-600",
+    red: "from-red-500 to-red-600"
+  };
+  
+  return (
+    <div className={`group cursor-target relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300 ${
+      isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
+    }`}>
+      <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${colorClasses[color]}/20 to-transparent rounded-bl-full`}></div>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-2">
+          <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClasses[color]} text-white`}>
+            <Icon className="w-4 h-4" />
+          </div>
+        </div>
+        <div className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}>{value}</div>
+        <div className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>{label}</div>
+      </div>
+    </div>
+  );
+};
+
+const IconWrapper = ({ children, color }) => {
+  const colorClasses = {
+    "blue-purple": "from-blue-500 to-purple-600",
+    "purple-pink": "from-purple-500 to-pink-600",
+    "indigo-purple": "from-indigo-500 to-purple-600"
+  };
+  
+  return (
+    <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClasses[color]} text-white`}>
+      {children}
+    </div>
+  );
+};
+
+const ChartContainer = ({ title, icon: Icon, iconColor, loading, error, onRetry, children, isDarkMode }) => (
+  <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
+    isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
+  }`}>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
+    <div className="relative z-10">
+      <h3 className="text-xl sm:text-2xl font-semibold font-lyrae mb-4 sm:mb-6 flex items-center gap-2">
+        <IconWrapper color={iconColor}>
+          <Icon className="w-4 h-4" />
+        </IconWrapper>
+        {title}
+      </h3>
+      {loading ? <ChartSkeleton isDarkMode={isDarkMode} /> : error ? <ErrorDisplay onRetry={onRetry} isDarkMode={isDarkMode} /> : children}
+    </div>
+  </div>
+);
+
+const ChartSkeleton = ({ isDarkMode }) => (
+  <div className={`animate-pulse rounded-xl h-96 ${isDarkMode ? "bg-zinc-800" : "bg-gray-200"}`}></div>
+);
+
+const ErrorDisplay = ({ onRetry, isDarkMode }) => (
+  <div className="h-[350px] flex flex-col items-center justify-center">
+    <div className="text-red-500 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+    </div>
+    <p className={`text-sm ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Failed to load chart data</p>
+    <button onClick={onRetry} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Retry</button>
+  </div>
+);
+
+const NoDataDisplay = ({ isDarkMode }) => (
+  <div className="h-[350px] sm:h-[450px] flex items-center justify-center">
+     <p className={isDarkMode ? "text-zinc-400" : "text-gray-600"}>No activity recorded yet</p>
+  </div>
+);
