@@ -191,7 +191,7 @@ useEffect(() => {
     // Reset flag setelah animasi selesai
     setTimeout(() => {
       setIsThemeChanging(false);
-    }, 700);
+    }, 10);
   };
 
   const handleNavigation = (link) => {
@@ -216,7 +216,7 @@ useEffect(() => {
         // Navigate ke route lain
         navigate(link);
       }
-    }, 300); // Sesuaikan dengan durasi animasi close
+    }, 100); // Sesuaikan dengan durasi animasi close
   };
 
   const getViewportHeight = () => {

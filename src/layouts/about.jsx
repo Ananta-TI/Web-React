@@ -80,7 +80,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* <div
+      <div
         className="w-full max-w-7xl mx-auto px-4 mt-1
                 grid grid-cols-1 lg:grid-cols-7 gap-2 auto-rows-[minmax(120px,auto)]">
         <div className="col-span-1 lg:col-span-3">
@@ -94,7 +94,7 @@ const About = () => {
             steamIds={["76561199745356826", "76561199166544214","76561198773672138"]}
           />
         </div>
-      </div> */}
+      </div>
 
       {/* AnimatedBeamDemo Section */}
       <div className="dark px-4 sm:px-0">

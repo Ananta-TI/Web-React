@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { FolderOpen, X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -10,70 +10,91 @@ const Certificates = () => {
 
   const [filteredCertificates, setFilteredCertificates] = useState([]);
   const [selectedCert, setSelectedCert] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // ✅ Data sertifikat
- const certificates = [
-  { image: "sertifikat/1.jpg",  year: "2024" },
-  { image: "sertifikat/2.jpg",  year: "2025" },
-  { image: "sertifikat/3.jpeg",  year: "2025" },
-  { image: "sertifikat/4.jpeg",  year: "2025" },
-  { image: "sertifikat/5.jpeg",  year: "2025" },
-  { image: "sertifikat/6.jpeg",  year: "2025" },
-  { image: "sertifikat/7.jpg",  year: "2025" },
-  { image: "sertifikat/8.png",  year: "2025" },
-  { image: "sertifikat/9.png",  year: "2025" },
-  { image: "sertifikat/10.png", year: "2025" },
-  { image: "sertifikat/11.jpg", year: "2025" },
-  { image: "sertifikat/12.jpg", year: "2025" },
-  { image: "sertifikat/13.jpg", year: "2025" },
-  { image: "sertifikat/14.jpg", year: "2025" },
-  { image: "sertifikat/15.png", year: "2025" },
-  { image: "sertifikat/16.png", year: "2025" },
-  { image: "sertifikat/17.png", year: "2025" },
-  { image: "sertifikat/18.png", year: "2025" },
-];
+  const certificates = [
+    { image: "sertifikat/1.jpg", year: "2024" },
+    { image: "sertifikat/2.jpg", year: "2025" },
+    { image: "sertifikat/3.jpeg", year: "2025" },
+    { image: "sertifikat/4.jpeg", year: "2025" },
+    { image: "sertifikat/5.jpeg", year: "2025" },
+    { image: "sertifikat/6.jpeg", year: "2025" },
+    { image: "sertifikat/7.jpg", year: "2025" },
+    { image: "sertifikat/8.png", year: "2025" },
+    { image: "sertifikat/9.png", year: "2025" },
+    { image: "sertifikat/10.png", year: "2025" },
+    { image: "sertifikat/11.jpg", year: "2025" },
+    { image: "sertifikat/12.jpg", year: "2025" },
+    { image: "sertifikat/13.jpg", year: "2025" },
+    { image: "sertifikat/14.jpg", year: "2025" },
+    { image: "sertifikat/15.png", year: "2025" },
+    { image: "sertifikat/16.png", year: "2025" },
+    { image: "sertifikat/17.png", year: "2025" },
+    { image: "sertifikat/18.png", year: "2025" },
+  ];
 
-useEffect(() => {
-  if (selectedCert) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
+  useEffect(() => {
+    if (selectedCert) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-  return () => {
-    document.body.style.overflow = "";
-  };
-}, [selectedCert]);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedCert]);
 
   // 🔝 Scroll ke atas saat halaman dibuka
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-setFilteredCertificates(shuffleArray(certificates));
+    setFilteredCertificates(shuffleArray(certificates));
+    
+    // Trigger animasi waterfall setelah komponen dimuat
+    setTimeout(() => setIsLoaded(true), 100);
   }, []);
 
   // 🔮 Variants animasi
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+  };
+
+  // Varians untuk efek waterfall
+  const waterfallVariants = {
+    hidden: { 
+      opacity: 0,
+      y: -50,
+      scale: 0.8,
+      rotateZ: Math.random() * 10 - 5 // Rotasi acak antara -5 dan 5 derajat
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      rotateZ: 0,
+      transition: { 
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94], // Custom ease untuk efek jatuh yang lebih natural
+      }
+    },
   };
 
   const cardVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
   };
-function shuffleArray(arr) {
-  return arr
-    .map((item) => ({ item, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ item }) => item);
-}
+
+  function shuffleArray(arr) {
+    return arr
+      .map((item) => ({ item, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ item }) => item);
+  }
 
   return (
     <motion.div
-      // initial={{ opacity: 0, y: 20 }}
-      // animate={{ opacity: 1, y: 0 }}
-      // exit={{ opacity: 0, y: -20 }}
-      // transition={{ duration: 0.4, ease: "easeInOut" }}
       className={`min-h-screen transition-colors duration-500 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
@@ -121,51 +142,57 @@ function shuffleArray(arr) {
         </div>
       </div>
 
-      {/* ===== Certificates Masonry ===== */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 ">
+      {/* ===== Certificates Masonry with Waterfall Effect ===== */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate="visible"
+          animate={isLoaded ? "visible" : "hidden"}
           className="columns-1 sm:columns-2 lg:columns-3 gap-2 space-y-2"
         >
-          {filteredCertificates.map((cert, index) => (
-            <motion.div
-              key={index}
-              variants={cardVariants}
-              whileHover={{ y: -6 }}
-              className="overflow-hidden rounded-xl bg-zinc-800/30 hover:bg-zinc-800/50 transition duration-300 cursor-target"
-            >
-              {/* Image */}
-              <div className="relative w-full h-full overflow-hidden ">
-                <img
-                  src={cert.image}
-                  alt={cert.title}
-                  className="w-full h-full rounded-t-xl transition-transform duration-500 hover:scale-[1.02] "
-                  onClick={() => setSelectedCert(cert)}
-                  loading="lazy"
-                />
-              </div>
-            </motion.div>
-          ))}
+          <AnimatePresence>
+            {filteredCertificates.map((cert, index) => (
+              <motion.div
+                key={index}
+                variants={waterfallVariants}
+                whileHover={{ y: -6 }}
+                className="overflow-hidden rounded-xl bg-zinc-800/30 hover:bg-zinc-800/50 transition duration-300 cursor-target"
+                style={{
+                  // Delay untuk efek waterfall bertahap
+                  transitionDelay: `${index * 0.05}s`,
+                }}
+              >
+                {/* Image */}
+                <div className="relative w-full h-full overflow-hidden">
+                  <img
+                    src={cert.image}
+                    alt={cert.title}
+                    className="w-full h-full rounded-t-xl transition-transform duration-500 hover:scale-[1.02]"
+                    onClick={() => setSelectedCert(cert)}
+                    loading="lazy"
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
 
       {/* ===== Modal Preview with Advanced 3D Tilt ===== */}
       {createPortal(
-  selectedCert && (
-    <TiltedModal
-      cert={selectedCert}
-      onClose={() => setSelectedCert(null)}
-      isDarkMode={isDarkMode}
-    />
-  ),
-  document.body
-)}
-
+        selectedCert && (
+          <TiltedModal
+            cert={selectedCert}
+            onClose={() => setSelectedCert(null)}
+            isDarkMode={isDarkMode}
+          />
+        ),
+        document.body
+      )}
     </motion.div>
   );
 };
+
 const TiltedModal = ({ cert, onClose, isDarkMode }) => {
   const ref = useRef(null);
 
@@ -255,7 +282,6 @@ const TiltedModal = ({ cert, onClose, isDarkMode }) => {
         onMouseMove={handleMouse}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        // onClick={(e) => e.stopPropagation()} // Klik gambar -> tidak close
       >
         {/* Tombol Close */}
         <button

@@ -1,12 +1,7 @@
 import React, { useContext } from "react"
+import { createPortal } from "react-dom" // Tambahkan ini
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  CheckCircle,
-  Info,
-  AlertTriangle,
-  XCircle,
-  Loader2,
-} from "lucide-react"
+import { CheckCircle, Info, AlertTriangle, XCircle, Loader2 } from "lucide-react"
 import { ThemeContext } from "../../context/ThemeContext"
 
 const ICONS = {
@@ -18,50 +13,42 @@ const ICONS = {
 }
 
 const Toast = ({ message, type = "info", isVisible }) => {
-  const theme = useContext(ThemeContext)
-  const isDarkMode = theme?.isDarkMode ?? true
+  const { isDarkMode } = useContext(ThemeContext) || { isDarkMode: true }
   const Icon = ICONS[type]
 
-  return (
+  // Render hanya jika di sisi client
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 16, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 16, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={{ opacity: 0, y: -20, x: "-50%", scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+          exit={{ opacity: 0, y: -20, x: "-50%", scale: 0.95 }}
           className={`
-fixed top-4 left-1/2 -translate-x-1/2
+            fixed top-10 left-1/2 z-[9999]
             flex items-center gap-3
-            px-4 py-3 rounded-xl border shadow-lg
-            backdrop-blur-md
-            ${
-              isDarkMode
-                ? "bg-zinc-900/90 border-zinc-800 text-zinc-100"
-                : "bg-white/90 border-zinc-200 text-zinc-900"
+            px-4 py-3 rounded-xl border shadow-2xl
+            backdrop-blur-md min-w-[200px]
+            ${isDarkMode
+                ? "bg-zinc-900/95 border-zinc-700 text-zinc-100"
+                : "bg-white/95 border-zinc-200 text-zinc-900"
             }
           `}
         >
-          <Icon
-            className={`w-4 h-4 ${
-              type === "success" && "text-emerald-500"
-            } ${
-              type === "info" && "text-blue-500"
-            } ${
-              type === "warning" && "text-amber-500"
-            } ${
-              type === "error" && "text-red-500"
-            } ${
-              type === "loading" && "animate-spin text-zinc-400"
+          <Icon className={`w-4 h-4 ${
+              type === "success" ? "text-emerald-500" :
+              type === "info" ? "text-blue-500" :
+              type === "warning" ? "text-amber-500" :
+              type === "error" ? "text-red-500" : "text-zinc-400 animate-spin"
             }`}
           />
-
-          <span className="text-sm font-medium leading-snug">
-            {message}
-          </span>
+          <span className="text-sm font-medium">{message}</span>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body // Toast dipindah ke body agar selalu di paling depan
   )
 }
 

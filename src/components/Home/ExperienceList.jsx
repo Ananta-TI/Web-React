@@ -8,26 +8,13 @@ const experiences = [
     duration: "React, Supabase, Tailwind • Agile Team Project",
     category: "Web",
   },
+
   {
-    title: "Developer of Personal Finance Management App",
-    duration: "React, Tailwind • Solo Project",
-    category: "Web",
-  },
-  {
-    title: "AI Project: Weather Prediction with LSTM",
-    duration: "Python, Jupyter Notebook • Real-time Weather API",
-    category: "AI",
-  },
-  {
-    title: "Game Developer – Tarzan: Hutan Penyelamat (RPG Maker MV)",
+    title: "Game Developer – Tarzan: Penyelamat Hutan(Unity) ",
     duration: "Quest system, timer, plugin scripting",
     category: "Game",
   },
-  {
-    title: "Unity Game Project – TechnoVerse: Dunia Masa Depan",
-    duration: "Future-themed collaborative education game",
-    category: "Game",
-  },
+
   {
     title: "RPL Project – Krisis Pangan",
     duration: "Business process, use case diagram, ERD",

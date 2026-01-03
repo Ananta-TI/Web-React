@@ -69,7 +69,7 @@ const Word = ({ children, progress, range, isHighlighted, isDarkMode }) => {
   const dynamicOpacity = useTransform(progress, range, [0.1, 1]);
 
   const colorClass = isHighlighted
-    ? "text-[#c1ff72] dark:text-[#c1ff72]" 
+    ? isDarkMode ? " dark:text-[#c1ff72]" : "text-[#f50a0a]"
     : isDarkMode 
       ? "text-white" 
       : "text-gray-900";
