@@ -191,18 +191,20 @@ const thinkAndRespond = (userMessage) => {
     scrollToBottom();
   }, [messages]);
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      const welcomeMessage = {
-        id: messages.length + 1,
-        text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'} Ananta. Ada yang bisa saya bantu hari ini? 😊`,
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, welcomeMessage]);
-    }
-  };
+const toggleChat = () => {
+  setIsOpen(!isOpen);
+  
+  // Tambahkan pengecekan: Jika chat dibuka DAN pesan masih kosong (0)
+  if (!isOpen && messages.length === 0) {
+    const welcomeMessage = {
+      id: 1, // Gunakan ID statis untuk pesan pertama
+      text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'} Ananta. Ada yang bisa saya bantu hari ini? 😊`,
+      sender: "bot",
+      timestamp: new Date(),
+    };
+    setMessages([welcomeMessage]);
+  }
+};
 
   const handleSuggestionClick = (suggestion) => {
     setInputValue(suggestion);
@@ -239,20 +241,18 @@ const thinkAndRespond = (userMessage) => {
     console.log("Chatbot model loaded:", TRAINED_MODEL);
   }, []);
 
-  return (
-    <div className="fixed bottom-50 right-6 z-10">
+ return (
+    <div className="fixed bottom-15 right-4 md:bottom-6 md:right-6 z-40">
       {/* Chat Button */}
       <motion.button
         onClick={toggleChat}
-        className={`w-14 h-14 rounded-full flex cursor-target items-center justify-center shadow-lg transition-colors relative ${
-          isDarkMode
-            ? "bg-transparent text-white"
-            : "bg-transparent  text-black"
+        className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-2xl transition-all relative ${
+          isDarkMode ? "bg-zinc-800 text-white border border-zinc-700" : "bg-white text-black border border-gray-200"
         }`}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
-        {isOpen ? <X size={24} /> : <AlienIcon size={58} />}
+        {isOpen ? <X size={28} /> : <AlienIcon size={45} className="md:w-[58px]" />}
       </motion.button>
 
       {/* Chat Window */}
@@ -262,145 +262,105 @@ const thinkAndRespond = (userMessage) => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className={`absolute bottom-20 right-0 w-96 h-[36rem] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
-              isDarkMode ? "bg-zinc-800 border border-zinc-700" : "bg-white border-gray-200"
-            }`}
+            // Penyesuaian Lebar & Tinggi Responsif
+            className={`absolute bottom-20 right-0 
+              w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] 
+              h-[70vh] md:h-[36rem] max-h-[600px]
+              rounded-2xl shadow-2xl overflow-hidden flex flex-col 
+              ${isDarkMode ? "bg-zinc-800 border border-zinc-700" : "bg-white border-gray-200"}`}
           >
             {/* Header */}
             <div className={`p-4 flex items-center justify-between ${
               isDarkMode ? "bg-zinc-900 border-b border-zinc-700" : "bg-gray-50 border-b border-gray-200"
             }`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 flex items-center justify-center">
                   <Bot size={20} className="text-white" />
                 </div>
-                <div>
-                  <h3 className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                    Asisten Virtual Ananta
+                <div className="overflow-hidden">
+                  <h3 className={`font-semibold truncate text-sm md:text-base ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    Asisten Ananta
                   </h3>
-                  <p className={`text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
-                    Trained with Personal Data
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <p className={`text-[10px] md:text-xs truncate ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+                      Online | AI Based
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => setIsSoundEnabled(!isSoundEnabled)}
-                  className={`p-2 rounded-full transition-colors ${
-                    isSoundEnabled
-                      ? "text-green-500"
-                      : "text-gray-400"
-                  }`}
-                  title={isSoundEnabled ? "Matikan suara" : "Aktifkan suara"}
+                  className={`p-2 rounded-lg transition-colors ${isSoundEnabled ? "text-blue-500" : "text-gray-400"}`}
                 >
-                  {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  {isSoundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
                 </button>
                 <button
-                  onClick={() => {
-                    setMessages([{
-                      id: 1,
-                      text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'} Ananta. Ada yang bisa saya bantu hari ini? 😊`,
-                      sender: "bot",
-                      timestamp: new Date(),
-                    }]);
-                    setContext({ lastTopic: null, lastEntities: [] }); // Reset konteks
-                  }}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDarkMode ? "hover:bg-zinc-800 text-zinc-300" : "hover:bg-gray-200 text-gray-600"
-                  }`}
-                  title="Reset chat"
+                  onClick={toggleChat}
+                  className="p-2 md:hidden text-gray-400" // Tombol close tambahan untuk mobile
                 >
-                  <Sparkles size={16} />
+                  <X size={20} />
                 </button>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {/* Messages Area - Flex Grow agar dinamis */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex items-start gap-2 ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex items-end gap-2 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {message.sender === "bot" && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Bot size={16} className="text-white" />
+                    <div className="w-7 h-7 rounded-full bg-zinc-200 flex-shrink-0 flex items-center justify-center mb-1">
+                      <Bot size={14} className="text-zinc-700" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[75%] px-3 py-2 rounded-2xl ${
+                    className={`max-w-[85%] md:max-w-[75%] px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
                       message.sender === "user"
-                        ? isDarkMode
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-500 text-white"
+                        ? "bg-blue-600 text-white rounded-br-none"
                         : isDarkMode
-                        ? "bg-zinc-700 text-white"
-                        : "bg-gray-100 text-gray-900"
+                        ? "bg-zinc-700 text-zinc-100 rounded-bl-none"
+                        : "bg-gray-100 text-gray-800 rounded-bl-none"
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-line">{message.text}</p>
-                    <p className={`text-xs mt-1 ${
-                      message.sender === "user"
-                        ? "text-blue-100"
-                        : isDarkMode
-                        ? "text-zinc-400"
-                        : "text-gray-500"
-                    }`}>
-                      {message.timestamp.toLocaleTimeString('id-ID', {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <p className="leading-relaxed">{message.text}</p>
+                    <p className={`text-[10px] mt-1.5 opacity-70 ${message.sender === "user" ? "text-right" : "text-left"}`}>
+                      {message.timestamp.toLocaleTimeString('id-ID', { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
-                  
-                  {message.sender === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-zinc-600 flex items-center justify-center">
-                      <User size={16} className="text-white" />
-                    </div>
-                  )}
                 </div>
               ))}
               
               {isTyping && (
                 <div className="flex items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Bot size={16} className="text-white" />
+                  <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center">
+                    <Bot size={14} className="text-white" />
                   </div>
-                  <div className={`px-3 py-2 rounded-2xl ${
-                    isDarkMode ? "bg-zinc-700" : "bg-gray-100"
-                  }`}>
+                  <div className={`px-4 py-3 rounded-2xl rounded-bl-none ${isDarkMode ? "bg-zinc-700" : "bg-gray-100"}`}>
                     <div className="flex space-x-1">
-                      <div className={`w-2 h-2 rounded-full ${
-                        isDarkMode ? "bg-zinc-400" : "bg-gray-400"
-                      } animate-pulse`} style={{ animationDelay: "0ms" }}></div>
-                      <div className={`w-2 h-2 rounded-full ${
-                        isDarkMode ? "bg-zinc-400" : "bg-gray-400"
-                      } animate-pulse`} style={{ animationDelay: "200ms" }}></div>
-                      <div className={`w-2 h-2 rounded-full ${
-                        isDarkMode ? "bg-zinc-400" : "bg-gray-400"
-                      } animate-pulse`} style={{ animationDelay: "400ms" }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                     </div>
-                    <p className={`text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"} mt-1`}>
-                    sedang mengetik...
-                    </p>
                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Suggestions */}
-            <div className="flex flex-wrap gap-2 px-4 pb-2">
+            {/* Quick Suggestions - Horizontal Scroll on Mobile */}
+            <div className="flex overflow-x-auto no-scrollbar gap-2 px-4 pb-3 pt-1">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className={`text-xs px-2 py-1 rounded-full transition-all hover:scale-105 ${
+                  className={`whitespace-nowrap text-[11px] md:text-xs px-3 py-1.5 rounded-full border transition-all active:scale-95 ${
                     isDarkMode
-                      ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-300"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      ? "bg-zinc-800 border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm"
                   }`}
                 >
                   {suggestion}
@@ -408,30 +368,29 @@ const thinkAndRespond = (userMessage) => {
               ))}
             </div>
 
-            {/* Input */}
-            <div className={`p-3 border-t ${
-              isDarkMode ? "border-zinc-700" : "border-gray-200"
-            }`}>
-              <div className="flex items-center gap-2">
+            {/* Input Area */}
+            <div className={`p-3 md:p-4 border-t ${isDarkMode ? "border-zinc-700 bg-zinc-900/50" : "border-gray-100 bg-white"}`}>
+              <div className="flex items-center gap-2 bg-transparent">
                 <input
                   ref={inputRef}
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Tanyakan apa saja tentang Ananta..."
-                  className={`flex-1 px-3 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  placeholder="Tulis pesan..."
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all ${
                     isDarkMode
-                      ? "bg-zinc-700 text-white placeholder-zinc-400"
-                      : "bg-gray-100 text-gray-900 placeholder-gray-500"
+                      ? "bg-zinc-800 text-white placeholder-zinc-500"
+                      : "bg-gray-100 text-gray-900 placeholder-gray-400"
                   }`}
                 />
                 <button
                   onClick={handleSendMessage}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isDarkMode
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-blue-500 hover:bg-blue-600 text-white"
+                  disabled={!inputValue.trim()}
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-md ${
+                    inputValue.trim() 
+                      ? "bg-blue-600 hover:bg-blue-700 text-white scale-100" 
+                      : "bg-gray-300 text-gray-500 scale-95 cursor-not-allowed"
                   }`}
                 >
                   <Send size={18} />
@@ -444,5 +403,4 @@ const thinkAndRespond = (userMessage) => {
     </div>
   );
 };
-
 export default Chatbot;
