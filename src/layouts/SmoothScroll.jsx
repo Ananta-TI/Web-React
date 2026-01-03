@@ -52,3 +52,4 @@ const SmoothScroll = ({ children }) => {
 
 export default SmoothScroll;
 // test
+// test1
