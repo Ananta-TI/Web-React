@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../../context/ThemeContext";
 // Import library Fuse untuk pencarian pintar (fuzzy matching)
 import Fuse from 'fuse.js'; 
-import chatbotModel from '../../data/chatbot_model.json';
+import ChatbotModel from '../../data/chatbot_model.json';
 import AlienIcon from './AlienIcon';
 
 const Chatbot = () => {
   const { isDarkMode } = useContext(ThemeContext);
-  const TRAINED_MODEL = chatbotModel;
+  const TRAINED_MODEL = ChatbotModel;
   
   const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
