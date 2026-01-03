@@ -11,6 +11,7 @@ import ScrollProgress from "./components/Home/ScrollProgress";
 import TargetCursor from "./components/Shared/TargetCursor";
 import Preloader from "./components/Preloader"; // Pastikan ini komponen Preloader "Curtain" tadi
 import SmoothScrollWrapper from "./layouts/GSAPSmoothScrollWrapper";
+import Chatbot from "./components/Chatbot/Chatbot";
 
 // Import Halaman
 import Hero from "./components/Home/hero";
@@ -119,7 +120,8 @@ function App() {
 
       {/* Komponen overlay UI */}
       {!isLoading && <ScrollProgress />}
-      
+            {!isLoading && <Chatbot />}
+
       <SpeedInsights />
       <Analytics />
     </ThemeProvider>

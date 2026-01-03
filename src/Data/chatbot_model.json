@@ -1,0 +1,823 @@
+{
+  "intent_patterns": {
+    "greeting": [
+      "halo", "hai", "hi", "hello", "selamat pagi", "selamat siang", 
+      "selamat sore", "selamat malam", "assalamualaikum", "apa kabar",
+      "hay", "hey", "bro", "sis", "kak", "kakak", "selamat datang",
+      "gimana kabarmu", "gimana kabar", "bagaimana kabarmu", "bagaimana kabar",
+      "apa kabarmu", "apa kabar kamu", "kabar baik", "kabar baik kah",
+      "apa kabar bot", "apa kabar chatbot", "kabar kamu", "kabar mu",
+      "apa kabar hari ini", "apa kabar saja", "apa kabar nih"
+    ],
+    "ananta_status": [
+      "gimana kabar ananta", "bagaimana kabar ananta", "apa kabar ananta",
+      "ananta baik", "ananta sehat", "ananta baik-baik saja", "ananta lagi apa",
+      "ananta lagi ngapain", "ananta sedang apa", "ananta sekarang apa",
+      "ananta sibuk", "ananta sibuk tidak", "ananta sibuk kah",
+      "ananta lagi kerja", "ananta lagi kuliah", "ananta lagi belajar",
+      "ananta lagi ngoding", "ananta lagi develop", "ananta lagi project",
+      "ananta lagi proyek", "ananta lagi buat apa", "ananta lagi buat project apa",
+      "ananta lagi buat proyek apa", "ananta lagi buat website apa",
+      "ananta lagi buat aplikasi apa", "ananta lagi buat game apa",
+      "ananta lagi buat chatbot apa", "ananta lagi buat sistem apa",
+      "ananta lagi buat program apa", "ananta lagi buat software apa",
+      "ananta lagi buat tools apa", "ananta lagi buat library apa",
+      "ananta lagi buat framework apa", "ananta lagi buat api apa",
+      "ananta lagi buat database apa", "ananta lagi buat ui apa",
+      "ananta lagi buat ux apa", "ananta lagi buat design apa",
+      "ananta lagi buat template apa", "ananta lagi buat theme apa",
+      "ananta lagi buat plugin apa", "ananta lagi buat extension apa",
+      "ananta lagi buat addon apa", "ananta lagi buat module apa",
+      "ananta lagi buat component apa", "ananta lagi buat widget apa",
+      "ananta lagi buat element apa", "ananta lagi buat style apa",
+      "ananta lagi buat script apa", "ananta lagi buat code apa",
+      "ananta lagi buat function apa", "ananta lagi buat class apa",
+      "ananta lagi buat method apa", "ananta lagi buat variable apa",
+      "ananta lagi buat array apa", "ananta lagi buat object apa",
+      "ananta lagi buat string apa", "ananta lagi buat number apa",
+      "ananta lagi buat boolean apa", "ananta lagi buat null apa",
+      "ananta lagi buat undefined apa", "ananta lagi buat symbol apa",
+      "ananta lagi buat bigint apa", "ananta lagi buat promise apa",
+      "ananta lagi buat async apa", "ananta lagi buat await apa",
+      "ananta lagi buat fetch apa", "ananta lagi buat axios apa",
+      "ananta lagi buat request apa", "ananta lagi buat response apa",
+      "ananta lagi buat header apa", "ananta lagi buat body apa",
+      "ananta lagi buat query apa", "ananta lagi buat params apa",
+      "ananta lagi buat path apa", "ananta lagi buat route apa",
+      "ananta lagi buat endpoint apa", "ananta lagi buat middleware apa",
+      "ananta lagi buat controller apa", "ananta lagi buat model apa",
+      "ananta lagi buat view apa", "ananta lagi buat template apa",
+      "ananta lagi buat layout apa", "ananta lagi buat page apa",
+      "ananta lagi buat component apa", "ananta lagi buat service apa",
+      "ananta lagi buat repository apa", "ananta lagi buat entity apa",
+      "ananta lagi buat dto apa", "ananta lagi buat vo apa",
+      "ananta lagi buat pojo apa", "ananta lagi buat bean apa",
+      "ananta lagi buat dao apa", "ananta lagi buat facade apa",
+      "ananta lagi buat adapter apa", "ananta lagi buat decorator apa",
+      "ananta lagi buat observer apa", "ananta lagi buat strategy apa",
+      "ananta lagi buat command apa", "ananta lagi buat query apa",
+      "ananta lagi buat event apa", "ananta lagi buat handler apa",
+      "ananta lagi buat listener apa", "ananta lagi buat subscriber apa",
+      "ananta lagi buat publisher apa", "ananta lagi buat emitter apa",
+      "ananta lagi buat dispatcher apa", "ananta lagi buat resolver apa",
+      "ananta lagi buat provider apa", "ananta lagi buat factory apa",
+      "ananta lagi buat builder apa", "ananta lagi buat prototype apa",
+      "ananta lagi buat singleton apa", "ananta lagi buat registry apa",
+      "ananta lagi buat pool apa", "ananta lagi buat cache apa",
+      "ananta lagi buat session apa", "ananta lagi buat cookie apa",
+      "ananta lagi buat token apa", "ananta lagi buat jwt apa",
+      "ananta lagi buat oauth apa", "ananta lagi buat auth apa",
+      "ananta lagi buat permission apa", "ananta lagi buat role apa",
+      "ananta lagi buat user apa", "ananta lagi buat profile apa",
+      "ananta lagi buat account apa", "ananta lagi buat settings apa",
+      "ananta lagi buat config apa", "ananta lagi buat env apa",
+      "ananta lagi buat constant apa", "ananta lagi buat variable apa",
+      "ananta lagi buat function apa", "ananta lagi buat method apa",
+      "ananta lagi buat class apa", "ananta lagi buat object apa",
+      "ananta lagi buat array apa", "ananta lagi buat string apa",
+      "ananta lagi buat number apa", "ananta lagi buat boolean apa",
+      "ananta lagi buat null apa", "ananta lagi buat undefined apa",
+      "ananta lagi buat symbol apa", "ananta lagi buat bigint apa",
+      "ananta lagi buat promise apa", "ananta lagi buat async apa",
+      "ananta lagi buat await apa", "ananta lagi buat fetch apa",
+      "ananta lagi buat axios apa", "ananta lagi buat request apa",
+      "ananta lagi buat response apa", "ananta lagi buat header apa",
+      "ananta lagi buat body apa", "ananta lagi buat query apa",
+      "ananta lagi buat params apa", "ananta lagi buat path apa",
+      "ananta lagi buat route apa", "ananta lagi buat endpoint apa",
+      "ananta lagi buat middleware apa", "ananta lagi buat controller apa",
+      "ananta lagi buat model apa", "ananta lagi buat view apa",
+      "ananta lagi buat template apa", "ananta lagi buat layout apa",
+      "ananta lagi buat page apa", "ananta lagi buat component apa",
+      "ananta lagi buat service apa", "ananta lagi buat repository apa",
+      "ananta lagi buat entity apa", "ananta lagi buat dto apa",
+      "ananta lagi buat vo apa", "ananta lagi buat pojo apa",
+      "ananta lagi buat bean apa", "ananta lagi buat dao apa",
+      "ananta lagi buat facade apa", "ananta lagi buat adapter apa",
+      "ananta lagi buat decorator apa", "ananta lagi buat observer apa",
+      "ananta lagi buat strategy apa", "ananta lagi buat command apa",
+      "ananta lagi buat query apa", "ananta lagi buat event apa",
+      "ananta lagi buat handler apa", "ananta lagi buat listener apa",
+      "ananta lagi buat subscriber apa", "ananta lagi buat publisher apa",
+      "ananta lagi buat emitter apa", "ananta lagi buat dispatcher apa",
+      "ananta lagi buat resolver apa", "ananta lagi buat provider apa",
+      "ananta lagi buat factory apa", "ananta lagi buat builder apa",
+      "ananta lagi buat prototype apa", "ananta lagi buat singleton apa",
+      "ananta lagi buat registry apa", "ananta lagi buat pool apa",
+      "ananta lagi buat cache apa", "ananta lagi buat session apa",
+      "ananta lagi buat cookie apa", "ananta lagi buat token apa",
+      "ananta lagi buat jwt apa", "ananta lagi buat oauth apa",
+      "ananta lagi buat auth apa", "ananta lagi buat permission apa",
+      "ananta lagi buat role apa", "ananta lagi buat user apa",
+      "ananta lagi buat profile apa", "ananta lagi buat account apa",
+      "ananta lagi buat settings apa", "ananta lagi buat config apa",
+      "ananta lagi buat env apa", "ananta lagi buat constant apa"
+    ],
+    "greeting_casual": [
+      "kok gak nyambung ni", "kok gak nyambun", "kok", "gak", "nyambung", 
+      "reply", "jawab", "respon", "test", "tes", "coba", "p", "p."
+    ],
+    "bot_identity": [
+      "siapa kamu", "kamu siapa", "kamu bot", "apa kamu bot", "kamu siapa sih",
+      "asisten virtual", "virtual assistant", "kamu program", "kamu ai",
+      "kamu bukan manusia", "kamu chatbot", "apa itu chatbot", "kamu bisa apa",
+      "kamu dibuat pakai apa", "kamu punya nama", "nama kamu apa"
+    ],
+    "identity": [
+      "siapa", "nama", "identitas", "usia", "kuliah", "tinggal", "jurusan"
+    ],
+    "general": [
+      "apa", "mengapa", "kenapa", "bagaimana", "kapan", "dimana", "berapa"
+    ],
+    "projects": [
+      "proyek", "project", "portfolio", "karya", "bikin", "buat"
+    ],
+    "technology": [
+      "teknologi", "tech", "stack", "framework", "gunakan"
+    ],
+    "tutorial": [
+      "cara", "how", "tutorial", "panduan", "langkah", "belajar"
+    ],
+    "troubleshooting": [
+      "error", "masalah", "issue", "troubleshoot", "gagal"
+    ],
+    "website_info": [
+      "website", "web", "halaman", "fitur", "section"
+    ],
+    "certificates": [
+      "sertifikat", "certificate", "networking", "security", "mtcna", "ccna", "udemy"
+    ]
+  },
+  "response_db": {
+    "greeting": [
+      "Halo! Saya asisten virtual Ananta. Ada yang bisa saya bantu? 😊",
+      "Hai! Senang bisa berbicara dengan Anda. Tanyakan apa saja tentang Ananta ya!",
+      "Selamat datang! Saya siap membantu Anda menjelajahi informasi tentang Ananta.",
+      "Halo! Ada yang ingin Anda ketahui tentang Ananta hari ini?",
+      "Assalamualaikum! Saya asisten virtual Ananta. Apa kabar? Ada yang bisa saya bantu?",
+      "Hai hai! Saya di sini untuk menjawab pertanyaan Anda tentang Ananta. Silakan bertanya ya!",
+      "Selamat {waktu}! Senang bisa membantu Anda hari ini. Ada yang bisa saya bantu?",
+      "Halo! Saya asisten virtual yang dilatih dengan data pribadi Ananta. Ada yang ingin Anda tanyakan?",
+      "Kabar saya baik, terima kasih sudah bertanya! Saya siap membantu Anda dengan informasi tentang Ananta. Ada yang ingin Anda tanyakan?",
+      "Alhamdulillah, kabar saya baik! Terima kasih sudah menanyakan. Saya siap membantu Anda dengan informasi tentang Ananta.",
+      "Kabar saya sangat baik! Senang bisa berbicara dengan Anda. Ada yang bisa saya bantu tentang Ananta?",
+      "Saya dalam kondisi prima dan siap membantu! Terima kasih sudah bertanya. Ada yang ingin Anda ketahui tentang Ananta?",
+      "Kabar saya baik-baik saja! Sebagai chatbot, saya selalu siap 24/7 untuk membantu Anda dengan informasi tentang Ananta.",
+      "Terima kasih sudah bertanya! Kabar saya baik dan siap membantu Anda menjelajahi informasi tentang Ananta.",
+      "Saya merasa luar biasa hari ini! Terima kasih sudah bertanya. Ada yang bisa saya bantu tentang Ananta?",
+      "Kabar saya baik, semoga Anda juga baik! Saya siap membantu Anda dengan informasi tentang Ananta.",
+      "Saya baik-baik saja dan siap membantu! Terima kasih sudah menanyakan kabar saya. Ada yang ingin Anda ketahui tentang Ananta?",
+      "Alhamdulillah baik! Senang bisa berbicara dengan Anda. Mari kita bahas tentang Ananta ya!",
+      "Kabar saya baik dan saya sangat antusias membantu Anda! Ada yang ingin Anda ketahui tentang Ananta?",
+      "Saya dalam kondisi optimal untuk membantu Anda! Terima kasih sudah menanyakan kabar saya. Mari kita mulai dengan pertanyaan Anda tentang Ananta."
+    ],
+    "ananta_status": [
+      "Ananta baik-baik saja! Saat ini dia sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Dia juga sedang mengerjakan beberapa proyek web development yang menarik.",
+      "Alhamdulillah, Ananta dalam kondisi sehat dan produktif! Dia sedang aktif mengembangkan portfolio website-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "Ananta sedang baik-baik saja! Saat ini dia sedang menyelesaikan beberapa proyek untuk portofolio dan fokus belajar tentang web development. Dia juga sedang mempersiapkan diri untuk industri.",
+      "Ananta dalam kondisi prima! Dia sedang sibuk dengan kuliah dan proyek-proyek pengembangan web. Dia sangat passionate dengan teknologi dan terus mengasah kemampuannya.",
+      "Ananta sehat dan semangat! Saat ini dia sedang mengerjakan beberapa proyek web dan aplikasi mobile. Dia juga sedang belajar tentang machine learning dan AI.",
+      "Ananta baik-baik saja! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta dalam kondisi baik! Dia sedang sibuk dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta sehat dan baik-baik saja! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta dalam kondisi prima! Dia sedang sibuk dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta baik-baik saja! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta sehat dan baik-baik saja! Dia sedang sibuk dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta dalam kondisi baik! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta sehat dan baik-baik saja! Dia sedang sibuk dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta dalam kondisi prima! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "Ananta baik-baik saja! Dia sedang sibuk dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development."
+    ],
+    "greeting_casual": [
+      "Kok! Saya di sini kok kok kok! 😄 Ada yang bisa saya bantu?",
+      "Wah, ada yang bisa saya bantu? Tanyakan aja ya!",
+      "Hai hai! Kok kok gak nyambung ni? Saya siap bantu kok kok kok! 🤗",
+      "Halo halo! Kok gak nyambun? Saya sedang standby untuk bantu Anda! 👋",
+      "Kok! Apa kabar? Saya siap menjawab dengan senang hati! 😊",
+      "Saya di sini kok! Mungkin ada kesalahan teknis. Coba tanyakan lagi ya!",
+      "Maaf kalau jawaban saya kurang memuaskan. Saya masih dalam proses pembelajaran. Ada yang bisa saya bantu?",
+      "Saya mendengar Anda! Coba ulangi pertanyaannya dengan cara yang berbeda ya."
+    ],
+    "bot_identity": [
+      "Saya adalah asisten virtual pribadi yang dibuat untuk Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta.",
+      "Saya adalah chatbot yang dilatih dengan data pribadi Ananta. Saya menggunakan React dan JavaScript untuk berinteraksi dengan Anda.",
+      "Saya adalah asisten virtual yang dibuat dengan teknologi React dan dilatih dengan data pribadi Ananta Firdaus. Saya bisa membantu Anda menjawab pertanyaan tentang Ananta.",
+      "Saya adalah chatbot yang dirancang khusus untuk menjawab pertanyaan tentang Ananta Firdaus. Saya dibuat menggunakan React dan dilatih dengan data pribadinya.",
+      "Saya adalah asisten virtual yang dibuat untuk membantu Anda menjelajahi informasi tentang Ananta. Saya menggunakan React dan JavaScript untuk berinteraksi dengan Anda.",
+      "Saya adalah chatbot yang dilatih dengan data pribadi Ananta. Saya bisa membantu Anda menjawab pertanyaan tentang proyek-proyek, teknologi, dan informasi lainnya tentang Ananta.",
+      "Saya adalah asisten virtual yang dibuat untuk Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta."
+    ],
+    "identity": [
+      "Saya adalah asisten virtual pribadi Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta.",
+      "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual seperti bicara dengan kakak sendiri.",
+      "Ananta tinggal di rumah kos. Dia memiliki laptop baru yang digunakan untuk kuliah, coding, gaming ringan, dan streaming TikTok.",
+      "Ananta berusia 20 tahun, lahir pada 14 September 2004. Sekarang dia sedang kuliah semester 4 di Politeknik Caltex Riau.",
+      "Ananta Firdaus berusia 20 tahun.",
+      "nta kuliah di Politeknik Caltex Riau jurusan Teknik Informatika semester Mahasiswa Semester 4.",
+      "Tentang Ananta Firdaus: Mahasiswa Semester 4 jurusan Teknik Informatika di Politeknik Caltex Riau.",
+      "Tinggi badan nta adalah ±170 cm.",
+      "nta tinggal di rumah kos.",
+      "nta kuliah di jurusan Teknik Informatika, Politeknik Caltex Riau."
+    ],
+    "technology": [
+      "Ananta menggunakan berbagai teknologi modern. Untuk frontend: React, TailwindCSS, React Vite. Backend: Supabase JS SDK, REST API, Laravel. Tools: VS Code, Git, Vercel. Dia lebih suka menggunakan SDK langsung daripada REST manual.",
+      "Hero section menggunakan React untuk komponen, Framer Motion untuk animasi teks, TailwindCSS untuk styling, dan GSAP untuk efek parallax saat scroll."
+    ],
+    "projects": [
+      "Ananta telah mengerjakan banyak proyek! Web: My First Web, My Second Web, KABESTU Company Profile, Sedap Indonesian Culinary, Smart Inventory System, MathDash Pro, PCR Book-Request System, dan ANANTA-TI PORTFOLIO v2. Mobile: aplikasi analisis sentimen, chatbot Python. Game: RPG Maker MV dan Unity game edukasi TechnoVerse."
+    ],
+    "certificates": [
+      "Ananta memiliki banyak sertifikat! Programming: Java, C++, PHP, Python (Udemy). Networking & Security: Cyber Threat Management, JavaScript Essentials, CCNA (Cisco). Security Spesialis: CGRCA, CCFS, CPPS, CCSC (Hack & Fix). Lainnya: MikroTik Certified Network Associate, Advent of Cyber 2025.",
+      "Ananta memiliki beberapa sertifikat networking dari Cisco: Cyber Threat Management, JavaScript Essentials 1, Introduction to Cybersecurity, Endpoint Security, dan CCNA: Introduction to Networks.",
+      "Ananta memiliki sertifikat security spesialis dari Hack & Fix: Certified Governance Risk and Compliance Analyst (CGRCA), Certified Cybersecurity Fundamentals Specialist (CCFS), Certified Phishing Prevention Specialist (CPPS), dan Cybersecurity Career Starter Certification (CCSC).",
+      "Cisco Networking Academy adalah program pendidikan networking yang diikuti Ananta di Politeknik Caltex Riau. Dia sudah menyelesaikan beberapa kursus seperti Cyber Threat Management, JavaScript Essentials, dan CCNA: Introduction to Networks.",
+      "Ananta memiliki beberapa sertifikat dari Udemy: Java And C++ And PHP Crash Course, Programming Bootcamp with Python JavaScript C++ PHP MySql, Python Programming, dan PHP for Beginners PDO Crash Course.",
+      "nta memiliki banyak sertifikat!\nProgramming: Java, C++, PHP, Python (Udemy).\nNetworking & Security: Cyber Threat Management, JavaScript Essentials, CCNA (Cisco).\nSecurity Spesialis: CGRCA, CCFS, CPPS, CCSC (Hack & Fix).\nLainnya: MikroTik Certified Network Associate, Advent of Cyber 2025.",
+      "nta memiliki beberapa sertifikat networking dari Cisco:\n• Unknown (Unknown date)\n",
+      "nta memiliki sertifikat security spesialis dari Hack & Fix:\n• Unknown (ID: Unknown ID, Unknown date)\n",
+      "nta memiliki beberapa sertifikat dari Udemy:\n• Unknown (Unknown length, Unknown date)\n",
+      "nta memiliki banyak sertifikat!\nProgramming: Java, C++, PHP, Python (Udemy).\nNetworking & Security: Cyber Threat Management, JavaScript Essentials, CCNA (Cisco).\nSecurity Spesialis: CGRCA, CCFS, CPPS, CCSC (Hack & Fix).\nLainnya: MikroTik Certified Network Associate, Advent of Cyber 2025.",
+      "CCNA (Cisco Certified Network Associate) adalah sertifikat networking yang sedang ditempuh nta. Dia sudah menyelesaikan CCNA: Introduction to Networks dari Cisco Networking Academy.",
+      "nta memiliki beberapa sertifikat networking dari Cisco:\n• Unknown (Unknown date)\n"
+    ],
+    "tutorial": [
+      "Website ini dibuat dengan React dan TailwindCSS. Ananta suka struktur kode yang rapi dengan CSS dipisah ke file terpisah. Dia menggunakan GSAP untuk animasi parallax dan Supabase untuk backend.",
+      "Website Security Scanner bekerja dengan cara: 1. Masukkan URL website, 2. Klik \"Start Scan\", 3. Tunggu proses scanning, 4. Lihat hasil dalam kategori Critical/High/Medium/Low, 5. Download laporan PDF.",
+      "Ananta menggunakan Vercel deployment dengan Git. Prosesnya: push code ke GitHub, connect repository dengan Vercel, dan Vercel akan otomatis deploy. Pernah mengalami error 404 untuk SPA routing.",
+      "Ananta belajar React dengan praktik langsung. Dia membuat proyek-proyek nyata seperti website MyLib dan sistem inventaris. Dia juga menggunakan UI modern dari Uiverse dan Flowbite.",
+      "Ananta menggunakan GSAP untuk animasi parallax. Caranya: install GSAP, gunakan ScrollTrigger, dan tentukan elemen yang akan dianimasikan berdasarkan scroll position.",
+      "Ananta implementasikan dark mode dengan React Context untuk state management dan TailwindCSS untuk styling. Dia juga pernah membuat dark mode untuk chatbot Python dengan Tkinter.",
+      "Ananta membuat aplikasi Android analisis sentimen. Prosesnya: text preprocessing, feature extraction, dan classification dengan machine learning. Hasilnya ditampilkan di dashboard dengan riwayat analisis.",
+      "Ananta pernah membuat chatbot Python dengan Tkinter yang memiliki fitur TTS (Text-to-Speech), knowledge base JSON, dan dark/light mode. Chatbot ini bisa menjawab pertanyaan berdasarkan knowledge base yang sudah disiapkan.",
+      "PCR Book-Request System adalah sistem permintaan dan manajemen untuk perpustakaan yang dibuat Ananta. Fiturnya termasuk multi-role access (Student, Staff, Librarian) untuk streamlining proses validasi dokumen.",
+      "Ananta menggunakan GSAP (GreenSock Animation Platform) untuk animasi di website-nya. Dia menggunakan ScrollTrigger untuk animasi parallax dan timeline animation untuk efek yang lebih kompleks.",
+      "Ananta membuat dashboard dengan React dan menggunakan library seperti Flowbite untuk components. Dia pernah membuat dashboard guest di proyek inventaris dan dashboard riwayat di aplikasi analisis sentimen.",
+      "Ananta pernah membuat aplikasi Android analisis sentimen. Prosesnya include text preprocessing, feature extraction, dan classification dengan machine learning. Hasilnya ditampilkan di dashboard dengan riwayat analisis."
+    ],
+    "general": [
+      "Smart Inventory System adalah proyek Ananta yang dibuat untuk meningkatkan efisiensi operasional. Fiturnya include real-time stock tracking dan dashboard analitik yang clean dengan React dan Context API.",
+      "MathDash Pro adalah aplikasi edukasi interaktif yang dibuat Ananta untuk menghitung GCF dan LCM. Aplikasi ini membantu siswa menguasai logika numerik melalui interface yang visual dan engaging.",
+      "Ananta lebih suka menggunakan SDK langsung daripada REST API manual. Dia menyukai struktur kode yang rapi, CSS dipisah ke file terpisah, dan footer yang sederhana. Dia juga suka penjelasan detail dengan diagram yang rapi.",
+      "PCR Book-Request System adalah sistem permintaan dan manajemen untuk perpustakaan kampus PCR yang dibuat Ananta. Fiturnya termasuk multi-role access (Student, Staff, Librarian) untuk streamlining proses validasi dokumen.",
+      "Ananta pernah membuat beberapa chatbot: Chatbot Python dengan Tkinter (fitur TTS, knowledge base JSON, dark/light mode), dan chatbot lowongan kerja untuk Data Analyst.",
+      "Flowbite adalah UI component library yang sering digunakan Ananta. Dia menggunakannya untuk sidebar dan dashboard admin di proyek-proyeknya. Flowbite kompatibel dengan TailwindCSS.",
+      "Supabase adalah backend-as-a-service yang sering digunakan Ananta. Dia menggunakan Supabase JS SDK langsung untuk database, auth, dan realtime features. Lebih praktis daripada REST API manual.",
+      "LSTM (Long Short-Term Memory) adalah jenis neural network yang digunakan Ananta untuk proyek prediksi cuaca Pekanbaru. LSTM cocok untuk data sequence seperti time series data.",
+      "MTCNA (MikroTik Certified Network Associate) adalah sertifikat networking yang dimiliki Ananta. Certificate ID: 2507NA1305, diterbitkan pada 25 Juli 2025 dan berlaku selama 3 tahun.",
+      "Advent of Cyber 2025 adalah challenges dari TryHackMe yang diselesaikan Ananta. Dia berhasil menyelesaikan 24 cyber security challenges dan mendapatkan certificate of completion pada 28 Desember 2025.",
+      "Ananta kuliah di jurusan Teknik Informatika, Politeknik Caltex Riau. Sekarang dia sudah semester 4 dan passionate di bidang pengembangan web dan AI.",
+      "React Vite adalah build tool yang digunakan Ananta untuk proyek-proyeknya. Vite memberikan pengalaman development yang cepat dengan hot module replacement dan build yang optimal untuk production.",
+      "TailwindCSS adalah CSS framework yang sering digunakan Ananta. Dia suka Tailwind karena utility-first approach yang memudahkan styling tanpa harus menulis CSS custom. Ananta juga suka memisahkan CSS ke file terpisah.",
+      "Uiverse adalah platform untuk UI components yang sering digunakan Ananta. Dia menggunakannya untuk mendapatkan UI modern yang menarik untuk proyek-proyek React-nya.",
+      "Laravel adalah PHP framework yang pernah digunakan Ananta untuk backend. Dia menggunakan Laravel untuk model, route, dan controller dalam proyek KABESTU Company Profile.",
+      "REST API adalah arsitektur API yang digunakan Ananta untuk komunikasi antara frontend dan backend. Meskipun dia lebih suka SDK langsung, dia tetap menggunakan REST API dengan dummyjson untuk beberapa proyek.",
+      "Firebase adalah platform backend yang digunakan Ananta untuk aplikasi Android analisis sentimen. Firebase menyediakan database, auth, dan realtime features yang memudahkan development aplikasi mobile.",
+      "Unity adalah game engine yang digunakan Ananta untuk membuat game edukasi TechnoVerse: Dunia Masa Depan. Unity memungkinkan development game cross-platform dengan C",
+      "Saya masih belajar tentang itu. Mungkin Anda bisa tanyakan tentang proyek-proyek Ananta atau teknologi yang digunakan?",
+      "Pertanyaan menarik! Saya akan mencoba belajar lebih banyak tentang itu. Ada hal lain yang bisa saya bantu?",
+      "Saya sedang dalam proses pembelajaran. Untuk saat ini, saya bisa bantu informasi tentang Ananta dan proyek-proyeknya.",
+      "Saya di sini kok! 😊 Ada yang bisa saya bantu?",
+      "Kenapa kok? Saya siap membantu kok! 🤖",
+      "Maaf, saya sedang bingung. Ada yang bisa saya bantu?",
+      "Saya sedang memproses pesan Anda. Tunggu sebentar ya! ⏳",
+      "Kok gak nyambung? Saya sedang loading responsnya. Sabar ya! 🙏"
+    ],
+    "troubleshooting": [
+      "Ananta pernah mengalami beberapa error: Error 404 Vercel (SPA routing), emulator Android boot issue, dan GSAP ScrollTrigger bug. Semua sudah diatasi dengan troubleshooting.",
+      "Error 404 Vercel untuk SPA routing bisa diatasi dengan menambahkan vercel.json file dengan redirect configuration. Ananta pernah mengalami ini dan sudah solve dengan cara tersebut."
+    ]
+  },
+  "personality_data": {
+    "Nama lengkap": "Ananta Firdaus",
+    "Nama panggilan": "nta",
+    "Usia": "20 tahun",
+    "Tanggal lahir": "14 September 2004",
+    "Tinggi badan": "±170 cm",
+    "Status": "Mahasiswa Semester 4",
+    "Institusi": "Politeknik Caltex Riau",
+    "Jurusan": "Teknik Informatika",
+    "Gaya komunikasi": "Santai & kasual seperti kakak sendiri, tidak lebay, tetap logis dan to the point",
+    "Bahasa preferensi": "Bahasa Indonesia",
+    "Persona asisten": "Perempuan",
+    "Preferensi teknis": "Menyukai penjelasan detail, diagram rapi, CSS dipisah, struktur kode rapi",
+    "Preferensi akademik": "Lebih suka referensi berupa link web",
+    "Device": "Laptop baru untuk kuliah, coding, gaming ringan, streaming TikTok"
+  },
+  
+  "coding_patterns": {},
+  "projects": {
+    "Web Projects": [
+      "My First Web: Proyek fundamental menandai awal perjalanan web development. Fokus pada implementasi semantic HTML5, CSS3 styling, dan interaksi dasar dengan Vanilla JavaScript.",
+      "My Second Web: Eksplorasi ke Bootstrap framework untuk menyederhanakan workflow development. Menekankan complex grid layout systems dan modern, mobile-first UI components.",
+      "KABESTU - Company Profile: Profil perusahaan profesional untuk bisnis manufaktur baja. Dibangun dengan Laravel untuk dynamic content management.",
+      "Sedap - Indonesian Culinary: Platform katalog berbasis React yang menampilkan masakan Indonesia. Dirancang untuk memberdayakan MSME lokal dengan UI yang menarik.",
+      "Smart Inventory System: Solusi manajemen inventaris untuk meningkatkan efisiensi operasional. Fitur real-time stock tracking dan dashboard analitik yang clean.",
+      "MathDash Pro: Aplikasi edukasi interaktif untuk menghitung GCF dan LCM. Membantu siswa menguasai logika numerik melalui interface yang visual dan engaging.",
+      "PCR Book-Request System: Sistem permintaan dan manajemen untuk perpustakaan kampus PCR. Fitur multi-role access (Student, Staff, Librarian) untuk streamlining proses validasi dokumen.",
+      "ANANTA-TI PORTFOLIO v2: Hub digital yang menampilkan pertumbuhan profesional. Menggunakan Framer Motion untuk animasi smooth dan Vite untuk loading performance yang cepat."
+    ],
+    "Mobile & AI": [
+      "Aplikasi Android analisis sentimen: Aplikasi dengan dashboard dan riwayat yang menggunakan Firebase untuk backend.",
+      "Chatbot Python (Tkinter): Chatbot dengan fitur TTS, knowledge base JSON, dan dark/light mode.",
+      "Chatbot lowongan kerja Data Analyst: Chatbot khusus untuk lowongan pekerjaan di bidang Data Analyst.",
+      "Prediksi cuaca Pekanbaru: Aplikasi prediksi cuaca menggunakan LSTM dan OpenWeatherMap API."
+    ],
+    "Game Development": [
+      "RPG Maker MV: Game dengan plugin management dan side quest (chest + time limit).",
+      "Unity game edukasi: TechnoVerse: Dunia Masa Depan - game edukatif tentang teknologi masa depan."
+    ]
+  },
+  "certificates": {
+    "Sertifikat Programming": [
+      {
+        "description": [
+          "- Java And C++ And PHP Crash Course All in One For Beginners (Udemy)",
+          "- Programming Bootcamp with Python, JavaScript, C++, PHP MySql (Udemy)"
+        ],
+        "- Certificate no": "UC-1d78c33d-3d2e-4fbb-859-775514285944",
+        "- Length": "3 total hours",
+        "- Date": "Nov. 5, 2025",
+        "- Python Programming": "Build a Strong Foundation in Coding (Udemy)",
+        "- PHP for Beginners": "PDO Crash Course (Udemy)"
+      }
+    ],
+    "Sertifikat Networking & Security": [
+      {
+        "description": [
+          "- Cyber Threat Management (Cisco Networking Academy)",
+          "- Learn-A-Thon 2025 (Cisco Networking Academy)",
+          "- JavaScript Essentials 1 (Cisco Networking Academy)",
+          "- Introduction to Cybersecurity (Cisco Networking Academy)",
+          "- Endpoint Security (Cisco Networking Academy)"
+        ],
+        "- Instructor": "Sugeng Purwantoro E.S.G.S",
+        "- Date": "Dec. 18, 2024",
+        "- Director": "Lynn Bloomer",
+        "- CCNA": "Introduction to Networks (Cisco Networking Academy)"
+      }
+    ],
+    "Sertifikat Security Spesialis": [
+      {
+        "description": [
+          "- Certified Governance Risk and Compliance Analyst (CGRCA)",
+          "- Certified Cybersecurity Fundamentals Specialist (CCFS)",
+          "- Certified Phishing Prevention Specialist (CPPS)",
+          "- Cybersecurity Career Starter Certification (CCSC)"
+        ],
+        "- Certificate ID": "2877-2630-9963-2258",
+        "- Date": "Aug. 11, 2025"
+      }
+    ],
+    "Sertifikat Lainnya": [
+      {
+        "description": [
+          "- MikroTik Certified Network Associate (MTCNA)",
+          "- Valid for three years since issue",
+          "- Advent of Cyber 2025 (TryHackMe)",
+          "- Completed 24 cyber security challenges",
+          "- Algoritma Pemrograman (Politeknik Caltex Riau)"
+        ],
+        "- Certificate ID": "2507NA1305",
+        "- Date": "Nov. 15, 2025",
+        "- Program Studi": "Teknik Informatika"
+      }
+    ]
+  },
+  "qa_pairs": [
+    {
+      "question": "siapa kamu",
+      "answer": "Saya adalah asisten virtual pribadi Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta.",
+      "category": "bot_identity"
+    },
+    {
+      "question": "kamu siapa",
+      "answer": "Saya adalah asisten virtual yang dilatih dengan data pribadi Ananta Firdaus. Saya menggunakan React dan JavaScript untuk berinteraksi dengan Anda.",
+      "category": "bot_identity"
+    },
+    {
+      "question": "kamu bot",
+      "answer": "Ya, saya adalah chatbot yang dirancang khusus untuk menjawab pertanyaan tentang Ananta Firdaus. Saya dibuat menggunakan React dan dilatih dengan data pribadinya.",
+      "category": "bot_identity"
+    },
+    {
+      "question": "apa kamu bot",
+      "answer": "Benar, saya adalah asisten virtual yang dibuat untuk Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta.",
+      "category": "bot_identity"
+    },
+    {
+      "question": "kamu dibuat pakai apa",
+      "answer": "Saya dibuat menggunakan React dan JavaScript untuk antarmuka pengguna, dengan data pribadi Ananta yang disimpan dalam format JSON untuk basis pengetahuan saya.",
+      "category": "bot_identity"
+    },
+    {
+      "question": "halo",
+      "answer": "Halo! Saya asisten virtual Ananta. Ada yang bisa saya bantu? 😊",
+      "category": "greeting"
+    },
+    {
+      "question": "hai",
+      "answer": "Hai! Senang bisa berbicara dengan Anda. Tanyakan apa saja tentang Ananta ya!",
+      "category": "greeting"
+    },
+    {
+      "question": "selamat pagi",
+      "answer": "Selamat pagi! Saya asisten virtual Ananta. Ada yang bisa saya bantu hari ini?",
+      "category": "greeting"
+    },
+    {
+      "question": "apa kabar",
+      "answer": "Kabar saya baik, terima kasih sudah bertanya! Saya siap membantu Anda dengan informasi tentang Ananta. Ada yang ingin Anda tanyakan?",
+      "category": "greeting"
+    },
+    {
+      "question": "assalamualaikum",
+      "answer": "Waalaikumsalam! Saya asisten virtual Ananta. Ada yang bisa saya bantu?",
+      "category": "greeting"
+    },
+    {
+      "question": "gimana kabarmu",
+      "answer": "Alhamdulillah, kabar saya baik! Terima kasih sudah menanyakan. Saya siap membantu Anda dengan informasi tentang Ananta.",
+      "category": "greeting"
+    },
+    {
+      "question": "bagaimana kabarmu",
+      "answer": "Kabar saya sangat baik! Senang bisa berbicara dengan Anda. Ada yang bisa saya bantu tentang Ananta?",
+      "category": "greeting"
+    },
+    {
+      "question": "apa kabarmu",
+      "answer": "Saya dalam kondisi prima dan siap membantu! Terima kasih sudah bertanya. Ada yang ingin Anda ketahui tentang Ananta?",
+      "category": "greeting"
+    },
+    {
+      "question": "apa kabar bot",
+      "answer": "Kabar saya baik-baik saja! Sebagai chatbot, saya selalu siap 24/7 untuk membantu Anda dengan informasi tentang Ananta.",
+      "category": "greeting"
+    },
+    {
+      "question": "apa kabar chatbot",
+      "answer": "Terima kasih sudah bertanya! Kabar saya baik dan siap membantu Anda menjelajahi informasi tentang Ananta.",
+      "category": "greeting"
+    },
+    {
+      "question": "kabar baik",
+      "answer": "Saya merasa luar biasa hari ini! Terima kasih sudah bertanya. Ada yang bisa saya bantu tentang Ananta?",
+      "category": "greeting"
+    },
+    {
+      "question": "gimana kabar ananta",
+      "answer": "Ananta baik-baik saja! Saat ini dia sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Dia juga sedang mengerjakan beberapa proyek web development yang menarik.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "bagaimana kabar ananta",
+      "answer": "Alhamdulillah, Ananta dalam kondisi sehat dan produktif! Dia sedang aktif mengembangkan portfolio website-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "apa kabar ananta",
+      "answer": "Ananta sedang baik-baik saja! Saat ini dia sedang menyelesaikan beberapa proyek untuk portofolio dan fokus belajar tentang web development. Dia juga sedang mempersiapkan diri untuk industri.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta baik",
+      "answer": "Ananta dalam kondisi prima! Dia sedang sibuk dengan kuliah dan proyek-proyek pengembangan web. Dia sangat passionate dengan teknologi dan terus mengasah kemampuannya.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sehat",
+      "answer": "Ananta sehat dan semangat! Saat ini dia sedang mengerjakan beberapa proyek web dan aplikasi mobile. Dia juga sedang belajar tentang machine learning dan AI.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta baik-baik saja",
+      "answer": "Ananta baik-baik saja! Dia sedang fokus dengan kuliah dan proyek-proyeknya. Dia juga sedang belajar tentang teknologi baru dan mengasah kemampuannya dalam web development.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi apa",
+      "answer": "Ananta sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau. Dia juga sedang mengerjakan beberapa proyek web development untuk portfolio-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi ngapain",
+      "answer": "Saat ini Ananta sedang sibuk dengan kuliah dan proyek-proyeknya. Dia sedang mengembangkan portfolio website-nya dan belajar teknologi baru. Dia juga sedang mempersiapkan diri untuk industri.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sedang apa",
+      "answer": "Ananta sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau. Dia juga sedang mengerjakan beberapa proyek web development untuk portfolio-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sekarang apa",
+      "answer": "Saat ini Ananta sedang sibuk dengan kuliah dan proyek-proyeknya. Dia sedang mengembangkan portfolio website-nya dan belajar teknologi baru. Dia juga sedang mempersiapkan diri untuk industri.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sibuk",
+      "answer": "Ya, Ananta sedang sibuk dengan kuliah semester 4 dan proyek-proyeknya. Dia sedang mengembangkan portfolio website-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sibuk tidak",
+      "answer": "Ananta sedang sibuk dengan kuliah semester 4 dan proyek-proyeknya, tapi dia selalu menyempatkan waktu untuk belajar dan mengembangkan diri. Dia sedang mengembangkan portfolio website-nya dan belajar teknologi baru.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta sibuk kah",
+      "answer": "Ananta sedang sibuk dengan kuliah semester 4 dan proyek-proyeknya, tapi dia selalu menyempatkan waktu untuk belajar dan mengembangkan diri. Dia sedang mengembangkan portfolio website-nya dan belajar teknologi baru.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi kerja",
+      "answer": "Ananta sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau. Dia juga sedang mengerjakan beberapa proyek web development untuk portfolio-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi kuliah",
+      "answer": "Ya, Ananta sedang kuliah semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Dia juga sedang mengerjakan beberapa proyek web development untuk portfolio-nya dan belajar teknologi baru.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi belajar",
+      "answer": "Ananta selalu belajar teknologi baru! Saat ini dia sedang fokus dengan kuliah semester 4 di Politeknik Caltex Riau dan mengerjakan beberapa proyek web development untuk portfolio-nya.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi ngoding",
+      "answer": "Ya, Ananta sedang banyak ngoding! Dia sedang mengerjakan beberapa proyek web development untuk portfolio-nya dan belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi develop",
+      "answer": "Ananta sedang aktif mengembangkan beberapa proyek web untuk portfolio-nya. Dia sedang belajar teknologi baru seperti React dan TailwindCSS dan fokus dengan kuliah semester 4.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi project",
+      "answer": "Ananta sedang mengerjakan beberapa proyek web development untuk portfolio-nya. Dia sedang belajar teknologi baru seperti React dan TailwindCSS dan fokus dengan kuliah semester 4.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi proyek",
+      "answer": "Ananta sedang mengerjakan beberapa proyek web development untuk portfolio-nya. Dia sedang belajar teknologi baru seperti React dan TailwindCSS dan fokus dengan kuliah semester 4.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat apa",
+      "answer": "Ananta sedang mengembangkan portfolio website-nya dan beberapa proyek web development. Dia sedang belajar teknologi baru seperti React dan TailwindCSS dan fokus dengan kuliah semester 4.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat project apa",
+      "answer": "Ananta sedang mengerjakan beberapa proyek web development untuk portfolio-nya, seperti ANANTA-TI PORTFOLIO v2. Dia sedang belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat proyek apa",
+      "answer": "Ananta sedang mengerjakan beberapa proyek web development untuk portfolio-nya, seperti ANANTA-TI PORTFOLIO v2. Dia sedang belajar teknologi baru seperti React dan TailwindCSS.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat website apa",
+      "answer": "Ananta sedang mengembangkan portfolio website-nya (ANANTA-TI PORTFOLIO v2) menggunakan React dan TailwindCSS. Dia juga sedang mengerjakan beberapa proyek web development lainnya.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat aplikasi apa",
+      "answer": "Ananta sedang fokus pada pengembangan web saat ini, tapi dia juga pernah membuat aplikasi Android analisis sentimen. Saat ini dia sedang mengembangkan portfolio website-nya dan beberapa proyek web.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat game apa",
+      "answer": "Ananta pernah membuat game edukasi TechnoVerse dengan Unity, tapi saat ini dia sedang fokus pada pengembangan web. Dia sedang mengembangkan portfolio website-nya dan beberapa proyek web development.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat chatbot apa",
+      "answer": "Ananta pernah membuat chatbot Python dengan Tkinter yang memiliki fitur TTS, knowledge base JSON, dan dark/light mode. Saat ini dia sedang fokus pada pengembangan web dan portfolio website-nya.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "ananta lagi buat sistem apa",
+      "answer": "Ananta pernah membuat beberapa sistem seperti Smart Inventory System dan PCR Book-Request System. Saat ini dia sedang fokus pada pengembangan web dan portfolio website-nya.",
+      "category": "ananta_status"
+    },
+    {
+      "question": "siapa ananta",
+      "answer": "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual seperti bicara dengan kakak sendiri.",
+      "category": "identity"
+    },
+    {
+      "question": "teknologi apa yang digunakan",
+      "answer": "Ananta menggunakan berbagai teknologi modern. Untuk frontend: React, TailwindCSS, React Vite. Backend: Supabase JS SDK, REST API, Laravel. Tools: VS Code, Git, Vercel. Dia lebih suka menggunakan SDK langsung daripada REST manual.",
+      "category": "technology"
+    },
+    {
+      "question": "proyek apa saja yang pernah dikerjakan",
+      "answer": "Ananta telah mengerjakan banyak proyek! Web: My First Web, My Second Web, KABESTU Company Profile, Sedap Indonesian Culinary, Smart Inventory System, MathDash Pro, PCR Book-Request System, dan ANANTA-TI PORTFOLIO v2. Mobile: aplikasi analisis sentimen, chatbot Python. Game: RPG Maker MV dan Unity game edukasi TechnoVerse.",
+      "category": "projects"
+    },
+    {
+      "question": "sertifikat apa saja yang dimiliki",
+      "answer": "Ananta memiliki banyak sertifikat! Programming: Java, C++, PHP, Python (Udemy). Networking & Security: Cyber Threat Management, JavaScript Essentials, CCNA (Cisco). Security Spesialis: CGRCA, CCFS, CPPS, CCSC (Hack & Fix). Lainnya: MikroTik Certified Network Associate, Advent of Cyber 2025.",
+      "category": "certificates"
+    },
+    {
+      "question": "bagaimana cara membuat website seperti ini",
+      "answer": "Website ini dibuat dengan React dan TailwindCSS. Ananta suka struktur kode yang rapi dengan CSS dipisah ke file terpisah. Dia menggunakan GSAP untuk animasi parallax dan Supabase untuk backend.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu smart inventory system",
+      "answer": "Smart Inventory System adalah proyek Ananta yang dibuat untuk meningkatkan efisiensi operasional. Fiturnya include real-time stock tracking dan dashboard analitik yang clean dengan React dan Context API.",
+      "category": "general"
+    },
+    {
+      "question": "teknologi yang digunakan di hero section",
+      "answer": "Hero section menggunakan React untuk komponen, Framer Motion untuk animasi teks, TailwindCSS untuk styling, dan GSAP untuk efek parallax saat scroll.",
+      "category": "technology"
+    },
+    {
+      "question": "bagaimana cara menggunakan scanner",
+      "answer": "Website Security Scanner bekerja dengan cara: 1. Masukkan URL website, 2. Klik \"Start Scan\", 3. Tunggu proses scanning, 4. Lihat hasil dalam kategori Critical/High/Medium/Low, 5. Download laporan PDF.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu mathdash pro",
+      "answer": "MathDash Pro adalah aplikasi edukasi interaktif yang dibuat Ananta untuk menghitung GCF dan LCM. Aplikasi ini membantu siswa menguasai logika numerik melalui interface yang visual dan engaging.",
+      "category": "general"
+    },
+    {
+      "question": "preferensi coding ananta",
+      "answer": "Ananta lebih suka menggunakan SDK langsung daripada REST API manual. Dia menyukai struktur kode yang rapi, CSS dipisah ke file terpisah, dan footer yang sederhana. Dia juga suka penjelasan detail dengan diagram yang rapi.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara deploy ke vercel",
+      "answer": "Ananta menggunakan Vercel deployment dengan Git. Prosesnya: push code ke GitHub, connect repository dengan Vercel, dan Vercel akan otomatis deploy. Pernah mengalami error 404 untuk SPA routing.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu pcr book request system",
+      "answer": "PCR Book-Request System adalah sistem permintaan dan manajemen untuk perpustakaan kampus PCR yang dibuat Ananta. Fiturnya termasuk multi-role access (Student, Staff, Librarian) untuk streamlining proses validasi dokumen.",
+      "category": "general"
+    },
+    {
+      "question": "chatbot apa saja yang pernah dibuat",
+      "answer": "Ananta pernah membuat beberapa chatbot: Chatbot Python dengan Tkinter (fitur TTS, knowledge base JSON, dark/light mode), dan chatbot lowongan kerja untuk Data Analyst.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara belajar react",
+      "answer": "Ananta belajar React dengan praktik langsung. Dia membuat proyek-proyek nyata seperti website MyLib dan sistem inventaris. Dia juga menggunakan UI modern dari Uiverse dan Flowbite.",
+      "category": "tutorial"
+    },
+    {
+      "question": "error apa yang pernah dihadapi",
+      "answer": "Ananta pernah mengalami beberapa error: Error 404 Vercel (SPA routing), emulator Android boot issue, dan GSAP ScrollTrigger bug. Semua sudah diatasi dengan troubleshooting.",
+      "category": "troubleshooting"
+    },
+    {
+      "question": "apa itu flowbite",
+      "answer": "Flowbite adalah UI component library yang sering digunakan Ananta. Dia menggunakannya untuk sidebar dan dashboard admin di proyek-proyeknya. Flowbite kompatibel dengan TailwindCSS.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara membuat animasi parallax",
+      "answer": "Ananta menggunakan GSAP untuk animasi parallax. Caranya: install GSAP, gunakan ScrollTrigger, dan tentukan elemen yang akan dianimasikan berdasarkan scroll position.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu supabase",
+      "answer": "Supabase adalah backend-as-a-service yang sering digunakan Ananta. Dia menggunakan Supabase JS SDK langsung untuk database, auth, dan realtime features. Lebih praktis daripada REST API manual.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara membuat dark mode",
+      "answer": "Ananta implementasikan dark mode dengan React Context untuk state management dan TailwindCSS untuk styling. Dia juga pernah membuat dark mode untuk chatbot Python dengan Tkinter.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu lstm",
+      "answer": "LSTM (Long Short-Term Memory) adalah jenis neural network yang digunakan Ananta untuk proyek prediksi cuaca Pekanbaru. LSTM cocok untuk data sequence seperti time series data.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara menganalisis sentimen",
+      "answer": "Ananta membuat aplikasi Android analisis sentimen. Prosesnya: text preprocessing, feature extraction, dan classification dengan machine learning. Hasilnya ditampilkan di dashboard dengan riwayat analisis.",
+      "category": "tutorial"
+    },
+    {
+      "question": "sertifikat networking apa saja",
+      "answer": "Ananta memiliki beberapa sertifikat networking dari Cisco: Cyber Threat Management, JavaScript Essentials 1, Introduction to Cybersecurity, Endpoint Security, dan CCNA: Introduction to Networks.",
+      "category": "certificates"
+    },
+    {
+      "question": "sertifikat security apa saja",
+      "answer": "Ananta memiliki sertifikat security spesialis dari Hack & Fix: Certified Governance Risk and Compliance Analyst (CGRCA), Certified Cybersecurity Fundamentals Specialist (CCFS), Certified Phishing Prevention Specialist (CPPS), dan Cybersecurity Career Starter Certification (CCSC).",
+      "category": "certificates"
+    },
+    {
+      "question": "apa itu MTCNA",
+      "answer": "MTCNA (MikroTik Certified Network Associate) adalah sertifikat networking yang dimiliki Ananta. Certificate ID: 2507NA1305, diterbitkan pada 25 Juli 2025 dan berlaku selama 3 tahun.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara membuat chatbot python",
+      "answer": "Ananta pernah membuat chatbot Python dengan Tkinter yang memiliki fitur TTS (Text-to-Speech), knowledge base JSON, dan dark/light mode. Chatbot ini bisa menjawab pertanyaan berdasarkan knowledge base yang sudah disiapkan.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu advent of cyber",
+      "answer": "Advent of Cyber 2025 adalah challenges dari TryHackMe yang diselesaikan Ananta. Dia berhasil menyelesaikan 24 cyber security challenges dan mendapatkan certificate of completion pada 28 Desember 2025.",
+      "category": "general"
+    },
+    {
+      "question": "jurusan apa ananta",
+      "answer": "Ananta kuliah di jurusan Teknik Informatika, Politeknik Caltex Riau. Sekarang dia sudah semester 4 dan passionate di bidang pengembangan web dan AI.",
+      "category": "general"
+    },
+    {
+      "question": "dimana ananta tinggal",
+      "answer": "Ananta tinggal di rumah kos. Dia memiliki laptop baru yang digunakan untuk kuliah, coding, gaming ringan, dan streaming TikTok.",
+      "category": "identity"
+    },
+    {
+      "question": "berapa usia ananta",
+      "answer": "Ananta berusia 20 tahun, lahir pada 14 September 2004. Sekarang dia sedang kuliah semester 4 di Politeknik Caltex Riau.",
+      "category": "identity"
+    },
+    {
+      "question": "apa itu cisco networking academy",
+      "answer": "Cisco Networking Academy adalah program pendidikan networking yang diikuti Ananta di Politeknik Caltex Riau. Dia sudah menyelesaikan beberapa kursus seperti Cyber Threat Management, JavaScript Essentials, dan CCNA: Introduction to Networks.",
+      "category": "certificates"
+    },
+    {
+      "question": "sertifikat udemy apa saja",
+      "answer": "Ananta memiliki beberapa sertifikat dari Udemy: Java And C++ And PHP Crash Course, Programming Bootcamp with Python JavaScript C++ PHP MySql, Python Programming, dan PHP for Beginners PDO Crash Course.",
+      "category": "certificates"
+    },
+    {
+      "question": "bagaimana cara membuat sistem peminjaman",
+      "answer": "PCR Book-Request System adalah sistem permintaan dan manajemen untuk perpustakaan kampus PCR yang dibuat Ananta. Fiturnya termasuk multi-role access (Student, Staff, Librarian) untuk streamlining proses validasi dokumen.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu react vite",
+      "answer": "React Vite adalah build tool yang digunakan Ananta untuk proyek-proyeknya. Vite memberikan pengalaman development yang cepat dengan hot module replacement dan build yang optimal untuk production.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara menggunakan gsap",
+      "answer": "Ananta menggunakan GSAP (GreenSock Animation Platform) untuk animasi di website-nya. Dia menggunakan ScrollTrigger untuk animasi parallax dan timeline animation untuk efek yang lebih kompleks.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu tailwindcss",
+      "answer": "TailwindCSS adalah CSS framework yang sering digunakan Ananta. Dia suka Tailwind karena utility-first approach yang memudahkan styling tanpa harus menulis CSS custom. Ananta juga suka memisahkan CSS ke file terpisah.",
+      "category": "general"
+    },
+    {
+      "question": "error 404 vercel",
+      "answer": "Error 404 Vercel untuk SPA routing bisa diatasi dengan menambahkan vercel.json file dengan redirect configuration. Ananta pernah mengalami ini dan sudah solve dengan cara tersebut.",
+      "category": "troubleshooting"
+    },
+    {
+      "question": "apa itu uiverse",
+      "answer": "Uiverse adalah platform untuk UI components yang sering digunakan Ananta. Dia menggunakannya untuk mendapatkan UI modern yang menarik untuk proyek-proyek React-nya.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara membuat dashboard",
+      "answer": "Ananta membuat dashboard dengan React dan menggunakan library seperti Flowbite untuk components. Dia pernah membuat dashboard guest di proyek inventaris dan dashboard riwayat di aplikasi analisis sentimen.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu laravel",
+      "answer": "Laravel adalah PHP framework yang pernah digunakan Ananta untuk backend. Dia menggunakan Laravel untuk model, route, dan controller dalam proyek KABESTU Company Profile.",
+      "category": "general"
+    },
+    {
+      "question": "apa itu rest api",
+      "answer": "REST API adalah arsitektur API yang digunakan Ananta untuk komunikasi antara frontend dan backend. Meskipun dia lebih suka SDK langsung, dia tetap menggunakan REST API dengan dummyjson untuk beberapa proyek.",
+      "category": "general"
+    },
+    {
+      "question": "bagaimana cara membuat aplikasi android",
+      "answer": "Ananta pernah membuat aplikasi Android analisis sentimen. Prosesnya include text preprocessing, feature extraction, dan classification dengan machine learning. Hasilnya ditampilkan di dashboard dengan riwayat analisis.",
+      "category": "tutorial"
+    },
+    {
+      "question": "apa itu firebase",
+      "answer": "Firebase adalah platform backend yang digunakan Ananta untuk aplikasi Android analisis sentimen. Firebase menyediakan database, auth, dan realtime features yang memudahkan development aplikasi mobile.",
+      "category": "general"
+    },
+    {
+      "question": "apa itu unity",
+      "answer": "Unity adalah game engine yang digunakan Ananta untuk membuat game edukasi TechnoVerse: Dunia Masa Depan. Unity memungkinkan development game cross-platform dengan C",
+      "category": "general"
+    }
+  ]
+}
