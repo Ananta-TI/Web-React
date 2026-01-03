@@ -198,7 +198,7 @@ const toggleChat = () => {
   if (!isOpen && messages.length === 0) {
     const welcomeMessage = {
       id: 1, // Gunakan ID statis untuk pesan pertama
-      text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'} Ananta. Ada yang bisa saya bantu hari ini? 😊`,
+      text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'}. Ada yang bisa saya bantu hari ini? 😊`,
       sender: "bot",
       timestamp: new Date(),
     };
