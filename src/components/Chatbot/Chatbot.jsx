@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../../context/ThemeContext";
 // Import library Fuse untuk pencarian pintar (fuzzy matching)
 import Fuse from 'fuse.js'; 
-import ChatbotModel from '../../data/chatbot_model.json';
+import ChatbotModel from '../../Data/chatbot_model.json';
 import AlienIcon from './AlienIcon';
 
 const Chatbot = () => {
