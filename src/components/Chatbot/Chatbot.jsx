@@ -13,14 +13,19 @@ const Chatbot = () => {
   const TRAINED_MODEL = ChatbotModel;
   
   const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
-
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [suggestions, setSuggestions] = useState([
-    "Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan", "Sertifikat networking"
+    "Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan"
   ]);
+  
+  // State untuk popup pesan
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [welcomeShown, setWelcomeShown] = useState(false);
+  const [infoShown, setInfoShown] = useState(false);
 
   // --- MEMORI KONTEKS YANG LEBIH BAIK ---
   // Bot akan ingat topik dan entitas terakhir yang dibicarakan
@@ -38,6 +43,40 @@ const Chatbot = () => {
     threshold: 0.4, // 0.0 = sempurna, 1.0 = cocok apa saja
     includeScore: true,
   }), [TRAINED_MODEL.qa_pairs]);
+
+  // Efek untuk menampilkan pesan selamat datang setelah 1 detik
+  useEffect(() => {
+    const welcomeTimer = setTimeout(() => {
+      if (!welcomeShown) {
+        setShowWelcome(true);
+        setWelcomeShown(true);
+        
+        // Sembunyikan pesan setelah 5 detik
+        setTimeout(() => {
+          setShowWelcome(false);
+        }, 5000);
+      }
+    }, 1000);
+    
+    return () => clearTimeout(welcomeTimer);
+  }, [welcomeShown]);
+
+  // Efek untuk menampilkan informasi setelah 30 detik
+  useEffect(() => {
+    const infoTimer = setTimeout(() => {
+      if (!infoShown && !isOpen) {
+        setShowInfo(true);
+        setInfoShown(true);
+        
+        // Sembunyikan pesan setelah 7 detik
+        setTimeout(() => {
+          setShowInfo(false);
+        }, 7000);
+      }
+    }, 30000);
+    
+    return () => clearTimeout(infoTimer);
+  }, [infoShown, isOpen]);
 
   const playNotificationSound = () => {
     if (!isSoundEnabled) return;
@@ -60,93 +99,93 @@ const Chatbot = () => {
   };
 
   // --- LOGIKA "OTAK PALSU" YANG LEBIH PINTAR DAN LUWES ---
-// --- LOGIKA "OTAK PALSU" YANG LEBIH PINTAR DAN LUWES ---
-const thinkAndRespond = (userMessage) => {
-  const lowerMessage = userMessage.toLowerCase();
-  
-  // 1. Cari tahu topik utama dari pertanyaan dengan pendekatan yang lebih luwes
-  let topic = 'general';
-  if (lowerMessage.includes('siapa') || lowerMessage.includes('nama') || lowerMessage.includes('identitas') || lowerMessage.includes('usia') || lowerMessage.includes('tinggal')) topic = 'identity';
-  if (lowerMessage.includes('proyek') || lowerMessage.includes('project') || lowerMessage.includes('portfolio') || lowerMessage.includes('karya') || lowerMessage.includes('bikin') || lowerMessage.includes('buat')) topic = 'projects';
-  if (lowerMessage.includes('teknologi') || lowerMessage.includes('tech') || lowerMessage.includes('stack') || lowerMessage.includes('framework') || lowerMessage.includes('gunakan')) topic = 'technology';
-  if (lowerMessage.includes('sertifikat') || lowerMessage.includes('certificate') || lowerMessage.includes('ccna') || lowerMessage.includes('udemy') || lowerMessage.includes('mtcna')) topic = 'certificates';
-  if (lowerMessage.includes('kabar') || lowerMessage.includes('apa kabar') || lowerMessage.includes('gimana') || lowerMessage.includes('bagaimana')) topic = 'status';
+  const thinkAndRespond = (userMessage) => {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // 1. Cari tahu topik utama dari pertanyaan dengan pendekatan yang lebih luwes
+    let topic = 'general';
+    if (lowerMessage.includes('siapa') || lowerMessage.includes('nama') || lowerMessage.includes('identitas') || lowerMessage.includes('usia') || lowerMessage.includes('tinggal')) topic = 'identity';
+    if (lowerMessage.includes('proyek') || lowerMessage.includes('project') || lowerMessage.includes('portfolio') || lowerMessage.includes('karya') || lowerMessage.includes('bikin') || lowerMessage.includes('buat')) topic = 'projects';
+    if (lowerMessage.includes('teknologi') || lowerMessage.includes('tech') || lowerMessage.includes('stack') || lowerMessage.includes('framework') || lowerMessage.includes('gunakan')) topic = 'technology';
+    if (lowerMessage.includes('sertifikat') || lowerMessage.includes('certificate') || lowerMessage.includes('ccna') || lowerMessage.includes('udemy') || lowerMessage.includes('mtcna')) topic = 'certificates';
+    if (lowerMessage.includes('kabar') || lowerMessage.includes('apa kabar') || lowerMessage.includes('gimana') || lowerMessage.includes('bagaimana')) topic = 'status';
 
-  // 2. Ekstrak entitas (kata benda penting) untuk mendapatkan konteks lebih spesifik
-  const entities = [];
-  const allEntities = [
-      // Dari data projects
-      ...Object.values(TRAINED_MODEL.projects).flat(),
-      // Dari data certificates
-      ...TRAINED_MODEL.certificates["Sertifikat Programming"][0].description,
-      ...TRAINED_MODEL.certificates["Sertifikat Networking & Security"][0].description,
-      // Dari response_db general (kata kunci teknologi)
-      "react", "tailwindcss", "vite", "supabase", "laravel", "gsap", "firebase", "unity", "flowbite", "uiverse", "rest api", "sdk", "lstm", "mtcna", "ccna", "udemy", "ananta"
-  ];
-  allEntities.forEach(entity => {
-      if (typeof entity === 'string' && lowerMessage.includes(entity.toLowerCase())) {
-          entities.push(entity);
-      }
-  });
+    // 2. Ekstrak entitas (kata benda penting) untuk mendapatkan konteks lebih spesifik
+    const entities = [];
+    const allEntities = [
+        // Dari data projects
+        ...Object.values(TRAINED_MODEL.projects).flat(),
+        // Dari data certificates
+        ...TRAINED_MODEL.certificates["Sertifikat Programming"][0].description,
+        ...TRAINED_MODEL.certificates["Sertifikat Networking & Security"][0].description,
+        // Dari response_db general (kata kunci teknologi)
+        "react", "tailwindcss", "vite", "supabase", "laravel", "gsap", "firebase", "unity", "flowbite", "uiverse", "rest api", "sdk", "lstm", "mtcna", "ccna", "udemy", "ananta"
+    ];
+    allEntities.forEach(entity => {
+        if (typeof entity === 'string' && lowerMessage.includes(entity.toLowerCase())) {
+            entities.push(entity);
+        }
+    });
 
-  // 3. Cari jawaban spesifik di qa_pairs dulu (prioritas tertinggi)
-  const qaResult = qaFuse.search(userMessage);
-  if (qaResult.length > 0 && qaResult[0].score < 0.4) {
-    setContext({ lastTopic: qaResult[0].item.category, lastEntities: entities });
-    return qaResult[0].item.answer;
-  }
-  
-  // 4. Jika tidak ada, coba "merangkai" jawaban berdasarkan topik dan entitas yang dikenali
-  let response = "";
-  switch (topic) {
-    case 'identity':
-      response = `Oh, kamu mau tahu tentang Ananta ya? ${TRAINED_MODEL.response_db.identity[Math.floor(Math.random() * TRAINED_MODEL.response_db.identity.length)]}`;
-      break;
-    case 'projects':
-      if (entities.length > 0) {
-        const entity = entities[0];
-        response = `Tentu, saya tahu proyek ${entity}. Itu adalah salah satu karya Ananta yang cukup menarik. ${TRAINED_MODEL.response_db.projects[0]}`;
-      } else {
-        response = `Ananta punya banyak proyek lho! Mulai dari website sampai aplikasi mobile. ${TRAINED_MODEL.response_db.projects[0]}`;
-      }
-      break;
-    case 'technology':
-      if (entities.length > 0) {
+    // 3. Cari jawaban spesifik di qa_pairs dulu (prioritas tertinggi)
+    const qaResult = qaFuse.search(userMessage);
+    if (qaResult.length > 0 && qaResult[0].score < 0.4) {
+      setContext({ lastTopic: qaResult[0].item.category, lastEntities: entities });
+      return qaResult[0].item.answer;
+    }
+    
+    // 4. Jika tidak ada, coba "merangkai" jawaban berdasarkan topik dan entitas yang dikenali
+    let response = "";
+    switch (topic) {
+      case 'identity':
+        response = `Oh, kamu mau tahu tentang Ananta ya? ${TRAINED_MODEL.response_db.identity[Math.floor(Math.random() * TRAINED_MODEL.response_db.identity.length)]}`;
+        break;
+      case 'projects':
+        if (entities.length > 0) {
           const entity = entities[0];
-          const techInfo = TRAINED_MODEL.response_db.general.find(res => res.toLowerCase().includes(entity.toLowerCase()));
-          response = techInfo || `Ananta sering pakai ${entity} untuk proyek-proyeknya. Itu teknologi yang modern dan keren!`;
-      } else {
-          response = `Untuk teknologi, Ananta suka dengan tools yang modern. ${TRAINED_MODEL.response_db.technology[0]}`;
-      }
-      break;
-    case 'certificates':
-      if (entities.length > 0) {
-          const entity = entities[0];
-          response = `Iya, Ananta punya sertifikat ${entity}. Dia memang rajin belajar dan mengembangkan skill-nya. ${TRAINED_MODEL.response_db.certificates[0]}`;
-      } else {
-          response = `Ananta punya banyak sertifikat dari berbagai platform lho! ${TRAINED_MODEL.response_db.certificates[0]}`;
-      }
-      break;
-    case 'status':
-      if (lowerMessage.includes('ananta')) {
-          response = `Kabar Ananta baik-baik saja! ${TRAINED_MODEL.response_db.ananta_status[Math.floor(Math.random() * TRAINED_MODEL.response_db.ananta_status.length)]}`;
-      } else {
-          response = `Kabar saya baik, terima kasih sudah tanya! 😊 Ada yang bisa saya bantu soal Ananta?`;
-      }
-      break;
-    default:
-      // Fallback yang lebih cerdas
-      if (entities.length > 0) {
-          response = `Oh, kamu bicara tentang ${entities.join(', ')} ya? Itu terkait dengan proyek atau teknologi yang Ananta gunakan. Ada yang spesifik mau kamu tahu?`;
-      } else {
-          response = `Hmm, saya belum paham maksud kamu. Mungkin kamu mau tanya tentang siapa Ananta, proyeknya, atau teknologi yang dia gunakan?`;
-      }
-  }
+          response = `Tentu, saya tahu proyek ${entity}. Itu adalah salah satu karya Ananta yang cukup menarik. ${TRAINED_MODEL.response_db.projects[0]}`;
+        } else {
+          response = `Ananta punya banyak proyek lho! Mulai dari website sampai aplikasi mobile. ${TRAINED_MODEL.response_db.projects[0]}`;
+        }
+        break;
+      case 'technology':
+        if (entities.length > 0) {
+            const entity = entities[0];
+            const techInfo = TRAINED_MODEL.response_db.general.find(res => res.toLowerCase().includes(entity.toLowerCase()));
+            response = techInfo || `Ananta sering pakai ${entity} untuk proyek-proyeknya. Itu teknologi yang modern dan keren!`;
+        } else {
+            response = `Untuk teknologi, Ananta suka dengan tools yang modern. ${TRAINED_MODEL.response_db.technology[0]}`;
+        }
+        break;
+      case 'certificates':
+        if (entities.length > 0) {
+            const entity = entities[0];
+            response = `Iya, Ananta punya sertifikat ${entity}. Dia memang rajin belajar dan mengembangkan skill-nya. ${TRAINED_MODEL.response_db.certificates[0]}`;
+        } else {
+            response = `Ananta punya banyak sertifikat dari berbagai platform lho! ${TRAINED_MODEL.response_db.certificates[0]}`;
+        }
+        break;
+      case 'status':
+        if (lowerMessage.includes('ananta')) {
+            response = `Kabar Ananta baik-baik saja! ${TRAINED_MODEL.response_db.ananta_status[Math.floor(Math.random() * TRAINED_MODEL.response_db.ananta_status.length)]}`;
+        } else {
+            response = `Kabar saya baik, terima kasih sudah tanya! 😊 Ada yang bisa saya bantu soal Ananta?`;
+        }
+        break;
+      default:
+        // Fallback yang lebih cerdas
+        if (entities.length > 0) {
+            response = `Oh, kamu bicara tentang ${entities.join(', ')} ya? Itu terkait dengan proyek atau teknologi yang Ananta gunakan. Ada yang spesifik mau kamu tahu?`;
+        } else {
+            response = `Hmm, saya belum paham maksud kamu. Mungkin kamu mau tanya tentang siapa Ananta, proyeknya, atau teknologi yang dia gunakan?`;
+        }
+    }
 
-  // Update konteks untuk percakapan selanjutnya
-  setContext({ lastTopic: topic, lastEntities: entities });
-  return response;
-};
+    // Update konteks untuk percakapan selanjutnya
+    setContext({ lastTopic: topic, lastEntities: entities });
+    return response;
+  };
+
   const handleSendMessage = () => {
     if (inputValue.trim() === "") return;
 
@@ -191,20 +230,25 @@ const thinkAndRespond = (userMessage) => {
     scrollToBottom();
   }, [messages]);
 
-const toggleChat = () => {
-  setIsOpen(!isOpen);
-  
-  // Tambahkan pengecekan: Jika chat dibuka DAN pesan masih kosong (0)
-  if (!isOpen && messages.length === 0) {
-    const welcomeMessage = {
-      id: 1, // Gunakan ID statis untuk pesan pertama
-      text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Nama panggilan'] || 'asisten virtual'}. Ada yang bisa saya bantu hari ini? 😊`,
-      sender: "bot",
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
-  }
-};
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    
+    // Tambahkan pengecekan: Jika chat dibuka DAN pesan masih kosong (0)
+    if (!isOpen && messages.length === 0) {
+      const welcomeMessage = {
+        id: 1, // Gunakan ID statis untuk pesan pertama
+        text: `👋 Hai! Saya ${TRAINED_MODEL.personality_data['Bot'] || 'asisten virtual'}. Ada yang bisa saya bantu hari ini? 😊`,
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }
+    
+    // Sembunyikan popup info jika chat dibuka
+    if (showInfo) {
+      setShowInfo(false);
+    }
+  };
 
   const handleSuggestionClick = (suggestion) => {
     setInputValue(suggestion);
@@ -229,11 +273,11 @@ const toggleChat = () => {
       } else if (lowerInput.includes("kamu") || lowerInput.includes("siapa") || lowerInput.includes("bot")) {
         setSuggestions(botIdentitySuggestions);
       } else {
-        setSuggestions(["Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan", "Sertifikat networking"]);
+        setSuggestions(["Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan"]);
       }
     } else {
         // Kembalikan ke default jika input kosong
-        setSuggestions(["Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan", "Sertifikat networking"]);
+        setSuggestions(["Siapa Ananta?", "Proyek terbaru", "Teknologi yang digunakan"]);
     }
   }, [inputValue]);
 
@@ -241,12 +285,25 @@ const toggleChat = () => {
     console.log("Chatbot model loaded:", TRAINED_MODEL);
   }, []);
 
- return (
+  // Pesan-pesan untuk popup
+  const welcomeMessages = [
+    "👋 Selamat datang! Ada yang bisa saya bantu?",
+    "Hai! Senang melihatmu di sini! 😊",
+    "Selamat datang! Jangan ragu untuk bertanya ya!"
+  ];
+  
+  const infoMessages = [
+    "💡 Tahu tidak? Ananta memiliki banyak proyek menarik yang bisa kamu lihat!",
+    "🚀 Tertarik dengan teknologi yang Ananta gunakan? Tanyakan saja padaku!",
+    "📚 Ananta memiliki berbagai sertifikat yang menunjukkan keahliannya. Mau tahu lebih lanjut?"
+  ];
+
+  return (
     <div className="fixed bottom-15 right-4 md:bottom-6 md:right-6 z-40">
       {/* Chat Button */}
       <motion.button
         onClick={toggleChat}
-        className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-2xl transition-all relative ${
+        className={`w-14 h-14 md:w-16 md:h-16 rounded-full cursor-target flex items-center justify-center shadow-2xl transition-all relative ${
           isDarkMode ? "bg-zinc-800 text-white border border-zinc-700" : "bg-white text-black border border-gray-200"
         }`}
         whileHover={{ scale: 1.05 }}
@@ -254,6 +311,88 @@ const toggleChat = () => {
       >
         {isOpen ? <X size={28} /> : <AlienIcon size={45} className="md:w-[58px]" />}
       </motion.button>
+
+      {/* Welcome Message Popup */}
+      <AnimatePresence>
+        {showWelcome && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            className={`absolute bottom-20 right-0 w-80 sm:w-96 p-4 rounded-xl shadow-lg ${
+              isDarkMode ? "bg-zinc-800 text-white border border-zinc-700" : "bg-white text-gray-800 border border-gray-200"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <AlienIcon size={28} />
+              <div className="flex-1">
+                <p className="text-sm leading-relaxed">
+                  {welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]}
+                </p>
+                <button
+                  onClick={() => {
+                    setShowWelcome(false);
+                    toggleChat();
+                  }}
+                  className={`text-xs mt-3 px-3 py-1.5 rounded-full transition-colors ${
+                    isDarkMode 
+                      ? "bg-zinc-700 hover:bg-zinc-600 text-white" 
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  Mulai chat
+                </button>
+              </div>
+            </div>
+            <div className={`absolute -bottom-2 right-8 w-0 h-0 border-l-8 border-r-8 border-t-8 ${
+              isDarkMode 
+                ? "border-l-transparent border-r-transparent border-t-zinc-800" 
+                : "border-l-transparent border-r-transparent border-t-white"
+            }`}></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Info Message Popup */}
+      <AnimatePresence>
+        {showInfo && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            className={`absolute bottom-20 right-0 w-80 sm:w-96 p-4 rounded-xl shadow-lg ${
+              isDarkMode ? "bg-zinc-800 text-white border border-zinc-700" : "bg-white text-gray-800 border border-gray-200"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <AlienIcon size={28} />
+              <div className="flex-1">
+                <p className="text-sm leading-relaxed">
+                  {infoMessages[Math.floor(Math.random() * infoMessages.length)]}
+                </p>
+                <button
+                  onClick={() => {
+                    setShowInfo(false);
+                    toggleChat();
+                  }}
+                  className={`text-xs mt-3 px-3 py-1.5 rounded-full transition-colors ${
+                    isDarkMode 
+                      ? "bg-zinc-700 hover:bg-zinc-600 text-white" 
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  Tanya saya
+                </button>
+              </div>
+            </div>
+            <div className={`absolute -bottom-2 right-8 w-0 h-0 border-l-8 border-r-8 border-t-8 ${
+              isDarkMode 
+                ? "border-l-transparent border-r-transparent border-t-zinc-800" 
+                : "border-l-transparent border-r-transparent border-t-white"
+            }`}></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -274,9 +413,8 @@ const toggleChat = () => {
               isDarkMode ? "bg-zinc-900 border-b border-zinc-700" : "bg-gray-50 border-b border-gray-200"
             }`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 flex items-center justify-center">
-                  <Bot size={20} className="text-white" />
-                </div>
+                
+                  <AlienIcon size={40} className="text-white" />
                 <div className="overflow-hidden">
                   <h3 className={`font-semibold truncate text-sm md:text-base ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     Asisten Ananta
@@ -403,4 +541,5 @@ const toggleChat = () => {
     </div>
   );
 };
+
 export default Chatbot;

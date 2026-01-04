@@ -209,7 +209,7 @@
     ],
     "identity": [
       "Saya adalah asisten virtual pribadi Ananta Firdaus. Saya dirancang untuk membantu Anda menjelajahi portfolio dan menjawab pertanyaan tentang proyek-proyek yang pernah dikerjakan Ananta.",
-      "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual seperti bicara dengan kakak sendiri.",
+      "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual ",
       "Ananta tinggal di rumah kos. Dia memiliki laptop baru yang digunakan untuk kuliah, coding, gaming ringan, dan streaming TikTok.",
       "Ananta berusia 20 tahun, lahir pada 14 September 2004. Sekarang dia sedang kuliah semester 4 di Politeknik Caltex Riau.",
       "Ananta Firdaus berusia 20 tahun.",
@@ -290,13 +290,14 @@
   "personality_data": {
     "Nama lengkap": "Ananta Firdaus",
     "Nama panggilan": "nta",
+    "Bot":"mew",
     "Usia": "20 tahun",
     "Tanggal lahir": "14 September 2004",
     "Tinggi badan": "±170 cm",
     "Status": "Mahasiswa Semester 4",
     "Institusi": "Politeknik Caltex Riau",
     "Jurusan": "Teknik Informatika",
-    "Gaya komunikasi": "Santai & kasual seperti kakak sendiri, tidak lebay, tetap logis dan to the point",
+    "Gaya komunikasi": "Santai & kasual  tidak lebay, tetap logis dan to the point",
     "Bahasa preferensi": "Bahasa Indonesia",
     "Persona asisten": "Perempuan",
     "Preferensi teknis": "Menyukai penjelasan detail, diagram rapi, CSS dipisah, struktur kode rapi",
@@ -606,7 +607,7 @@
     },
     {
       "question": "siapa ananta",
-      "answer": "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual seperti bicara dengan kakak sendiri.",
+      "answer": "Ananta Firdaus adalah seorang mahasiswa semester 4 di Politeknik Caltex Riau jurusan Teknik Informatika. Usianya 20 tahun dan biasa dipanggil nta. Dia suka gaya komunikasi yang santai dan kasual ",
       "category": "identity"
     },
     {
