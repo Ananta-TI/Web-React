@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
+import DecryptedText from "../Shared/DecryptedText.jsx";
 
 const Header = ({ isDarkMode }) => {
   return (
@@ -9,12 +10,20 @@ const Header = ({ isDarkMode }) => {
         <div className="flex items-center mt-10 mb-2 justify-between">
           <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isDarkMode ? "bg-none text-zinc-300" : "bg-none text-gray-600"}`}>
             <ShieldCheck className="w-5 h-5 text-red-500" />
-            <span className="font-medium">SecurityScanner <span className="text-red-600">Ultimate</span></span>
+            <span className="font-medium ">SecurityScanner <span className="text-red-600">Ultimate</span></span>
           </div>
         </div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-3">Security Scanner</h1>
-          <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Scan URL, file, atau hash dengan lebih mudah dan cepat.</p>
+<h2 className="text-3xl sm:text-4xl mt-6 sm:mt-10 px-4 sm:px-8 md:px-20 lg:px-60 md:text-7xl font-lyrae font-bold transition-colors duration-500">
+          <DecryptedText
+            text="Security Scanner"
+            speed={100}
+            maxIterations={105}
+            sequential
+            animateOn="view"
+          />
+        </h2>          
+        <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Scan URL, file, atau hash dengan lebih mudah dan cepat.</p>
         </motion.div>
       </div>
     </div>

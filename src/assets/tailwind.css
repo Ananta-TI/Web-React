@@ -45,22 +45,22 @@
     font-display: swap;
 }
 @font-face {
-    font-family: Ceraso;
+    font-family: "Ceraso";
     src: url('/fonts/Ceraso otf.otf');
     font-display: swap;
 }
 @font-face {
-    font-family: Darksame;
+    font-family: "Darksame";
     src: url('/fonts/DarksameRegular.ttf');
     font-display: swap;
 }
 @font-face {
-    font-family: Skullines;
+    font-family: 'Skullines';
     src: url('/fonts/SkullinesDemo-Regular.otf');
     font-display: swap;
 }
 @font-face {
-    font-family: Jena;
+    font-family: 'Jena';
     src: url('/fonts/JenaGotisch.ttf');
     font-display: swap;
 }
@@ -71,7 +71,7 @@
     
 }
 @font-face {
-    font-family: Calculator;
+    font-family: 'Calculator';
     src: url('/fonts/Calculator.ttf');
     font-display: swap;
 }
