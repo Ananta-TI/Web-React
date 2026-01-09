@@ -146,6 +146,20 @@ const allProjects = [
     status: "Completed",
     featured: true,
   },
+  {
+    title: "POSEIDON - WebGIS Riau",
+    description:
+      "WebGIS Riau v1.0 Digital Map of Flood and Inundation Distribution.A geospatial visualization platform that maps flood- and inundation-prone areas in Riau Province based on historical data and field surveys.",
+    demo: "https://gis-project-khaki.vercel.app/",
+    repo: "https://github.com/Ananta-TI/GIS-Project.git",
+    tags: ["React", "Vite", "Framer Motion", "Tailwind","Gsap"],
+    category: "Web Development",
+    image: "img/Poseidon.png",
+    color: "from-blue-600 to-cyan-500",
+    year: "2025",
+    status: "In Progress",
+    featured: true,
+  },
 ];
 
 
