@@ -85,9 +85,9 @@ const About = () => {
                 grid grid-cols-1 lg:grid-cols-7 gap-2 auto-rows-[minmax(120px,auto)]">
         <div className="col-span-1 lg:col-span-3">
           <Tetris />
-          <div className="mt-1">
+          {/* <div className="mt-1">
             <DiscordProfileCard userId="900690698133700638" />
-          </div>
+          </div> */}
         </div>
         <div className="col-span-1 lg:col-span-4">
           <SteamProfileCard 

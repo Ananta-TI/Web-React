@@ -20,12 +20,15 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export default function ScanStatsDashboard() {
   const { isDarkMode } = useContext(ThemeContext);
   
-  // State Data
-  const [statusData, setStatusData] = useState([]);
-  const [typeData, setTypeData] = useState([]);
-  const [trendData, setTrendData] = useState([]);
-  const [statusTrendData, setStatusTrendData] = useState([]); // New state for status trend data
-  const [totalScans, setTotalScans] = useState(0);
+  // Menggabungkan state agar tidak re-render berkali-kali saat set data
+  const [dashboardData, setDashboardData] = useState({
+    statusData: [],
+    typeData: [],
+    trendData: [], // Masih disiapkan jika nanti butuh chart Type Trend lagi
+    statusTrendData: [],
+    totalScans: 0
+  });
+
   const [loading, setLoading] = useState(true);
   const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [chartError, setChartError] = useState(false);
@@ -73,138 +76,88 @@ export default function ScanStatsDashboard() {
       
       const data = await response.json();
 
-      // 1. OLAH DATA: Status Counts (Pie Chart)
+      // --- OPTIMASI LOGIKA: HANYA 1 KALI LOOP ---
       const counts = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
-     data.forEach((row) => {
-  // Ambil angka dari stats
-  const m = row?.stats?.malicious || 0;
-  const s = row?.stats?.suspicious || 0;
-  const h = row?.stats?.harmless || 0;
-  const u = row?.stats?.undetected || 0;
+      const typeCounts = { url: 0, file: 0 };
+      const statusTimelineMap = {}; 
+      // Jika trendData (Type Trend) masih dibutuhkan di masa depan:
+      const typeTimelineMap = {};
 
-  let status;
-  
-  if (m > 0) {
-    status = "Malicious";
-  } else if (s > 0) {
-    status = "Suspicious";
-  } else if (h > 0) {
-    // PRIORITASKAN HARMLESS DI SINI
-    status = "Harmless";
-  } else if (u > 0) {
-    // Undetected hanya jika Harmless juga 0
-    status = "Undetected";
-  } else {
-    status = "Harmless"; // Default tetap harmless jika semua nol
-  }
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        
+        // 1. Hitung Status (Pie Chart & Cards)
+        const stats = item?.stats || {};
+        let status;
+        if (stats.malicious > 0) status = "Malicious";
+        else if (stats.suspicious > 0) status = "Suspicious";
+        else if (stats.harmless > 0) status = "Harmless";
+        else if (stats.undetected > 0) status = "Undetected";
+        else status = "Harmless"; // Default
 
-  counts[status]++;
-  // ... sisa logika timeline
-});
+        counts[status]++;
 
-      setStatusData([
+        // 2. Hitung Type (Bar Chart)
+        if (item.type === "url") typeCounts.url++;
+        else if (item.type === "file") typeCounts.file++;
+
+        // 3. Persiapan Timeline Data
+        const dateStr = item.created_at || item.timestamp || item.date;
+        if (dateStr) {
+          const dateObj = new Date(dateStr);
+          dateObj.setHours(0, 0, 0, 0);
+          const timestamp = dateObj.getTime();
+
+          // Grouping Status per Tanggal
+          if (!statusTimelineMap[timestamp]) {
+            statusTimelineMap[timestamp] = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
+          }
+          statusTimelineMap[timestamp][status]++;
+
+          // Grouping Type per Tanggal (Optional jika mau dipakai)
+          /*
+          if (!typeTimelineMap[timestamp]) {
+             typeTimelineMap[timestamp] = { url: 0, file: 0 };
+          }
+          if (item.type === "url") typeTimelineMap[timestamp].url++;
+          else if (item.type === "file") typeTimelineMap[timestamp].file++;
+          */
+        }
+      }
+
+      // Format Data untuk State
+      const finalStatusData = [
         { name: "Harmless", value: counts.Harmless, itemStyle: { color: "#10b981" } },
         { name: "Suspicious", value: counts.Suspicious, itemStyle: { color: "#f59e0b" } },
         { name: "Malicious", value: counts.Malicious, itemStyle: { color: "#ef4444" } },
         { name: "Undetected", value: counts.Undetected, itemStyle: { color: "#6b7280" } },
-      ]);
+      ];
 
-      // 2. OLAH DATA: Type Counts (Bar Chart)
-      const t = { url: 0, file: 0 };
-      data.forEach((row) => {
-        if (row.type === "url") t.url++;
-        else if (row.type === "file") t.file++;
-      });
+      const finalTypeData = [
+        { name: "URL", value: typeCounts.url, itemStyle: { color: "#3b82f6" } },
+        { name: "File", value: typeCounts.file, itemStyle: { color: "#8b5cf6" } },
+      ];
 
-      setTypeData([
-        { name: "URL", value: t.url, itemStyle: { color: "#3b82f6" } },
-        { name: "File", value: t.file, itemStyle: { color: "#8b5cf6" } },
-      ]);
-
-      // 3. OLAH DATA: Trend Timeline for Type (Area Chart)
-      const urlTimelineMap = {};
-      const fileTimelineMap = {};
-      
-      data.forEach((item) => {
-        const dateStr = item.created_at || item.timestamp || item.date;
-        if (!dateStr) return;
-
-        const dateObj = new Date(dateStr);
-        dateObj.setHours(0, 0, 0, 0); 
-        const timestamp = dateObj.getTime();
-
-        if (item.type === "url") {
-          urlTimelineMap[timestamp] = (urlTimelineMap[timestamp] || 0) + 1;
-        } else if (item.type === "file") {
-          fileTimelineMap[timestamp] = (fileTimelineMap[timestamp] || 0) + 1;
-        }
-      });
-
-      const allDates = new Set([
-        ...Object.keys(urlTimelineMap),
-        ...Object.keys(fileTimelineMap)
-      ]);
-
-      const sortedTrend = Array.from(allDates)
-        .map((dateStr) => ({
-          date: new Date(parseInt(dateStr)).toLocaleDateString(),
-          urlCount: urlTimelineMap[dateStr] || 0,
-          fileCount: fileTimelineMap[dateStr] || 0,
+      // Sorting Timeline
+      const sortedStatusTrend = Object.keys(statusTimelineMap)
+        .map((ts) => ({
+          date: new Date(parseInt(ts)).toLocaleDateString(),
+          harmlessCount: statusTimelineMap[ts].Harmless || 0,
+          suspiciousCount: statusTimelineMap[ts].Suspicious || 0,
+          maliciousCount: statusTimelineMap[ts].Malicious || 0,
+          undetectedCount: statusTimelineMap[ts].Undetected || 0,
+          timestamp: parseInt(ts) // simpan timestamp untuk sorting yang akurat
         }))
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      setTrendData(sortedTrend);
+        .sort((a, b) => a.timestamp - b.timestamp);
 
-      // 4. OLAH DATA: Status Trend Timeline (New Area Chart)
-      const statusTimelineMap = {};
-      
-data.forEach((item) => {
-        const dateStr = item.created_at || item.timestamp || item.date;
-        if (!dateStr) return;
-
-        const dateObj = new Date(dateStr);
-        dateObj.setHours(0, 0, 0, 0); 
-        const timestamp = dateObj.getTime();
-
-        if (!statusTimelineMap[timestamp]) {
-          statusTimelineMap[timestamp] = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
-        }
-
-        // --- LOGIKA PERBAIKAN ---
-        let status;
-        const stats = item?.stats;
-
-        if (stats?.malicious > 0) {
-          status = "Malicious";
-        } else if (stats?.suspicious > 0) {
-          status = "Suspicious";
-        } else if (stats?.harmless > 0) {
-          // Jika ada antivirus yang bilang aman, masuk Harmless
-          status = "Harmless";
-        } else if (stats?.undetected > 0) {
-          // Jika tidak ada yang bilang aman/bahaya, baru masuk Undetected
-          status = "Undetected";
-        } else {
-          status = "Harmless"; // Default fallback
-        }
-        
-        statusTimelineMap[timestamp][status]++;
+      // SET SEMUA DATA SEKALIGUS (Batch Update)
+      setDashboardData({
+        statusData: finalStatusData,
+        typeData: finalTypeData,
+        trendData: [], // Kosongkan jika tidak dipakai, atau isi logika typeTimelineMap
+        statusTrendData: sortedStatusTrend,
+        totalScans: data.length
       });
-
-      const allStatusDates = Object.keys(statusTimelineMap);
-      
-      const sortedStatusTrend = allStatusDates
-        .map((dateStr) => ({
-          date: new Date(parseInt(dateStr)).toLocaleDateString(),
-          harmlessCount: statusTimelineMap[dateStr].Harmless || 0,
-          suspiciousCount: statusTimelineMap[dateStr].Suspicious || 0,
-          maliciousCount: statusTimelineMap[dateStr].Malicious || 0,
-          undetectedCount: statusTimelineMap[dateStr].Undetected || 0,
-        }))
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      setStatusTrendData(sortedStatusTrend);
-      setTotalScans(data.length);
 
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -216,7 +169,7 @@ data.forEach((item) => {
 
   // --- ECHARTS OPTIONS ---
    const pieChartOption = useMemo(() => {
-    const total = statusData.reduce((sum, item) => sum + item.value, 0);
+    const total = dashboardData.statusData.reduce((sum, item) => sum + item.value, 0);
     
     return {
       backgroundColor: 'transparent',
@@ -291,14 +244,11 @@ data.forEach((item) => {
           },
           animationType: 'expansion',
           animationEasing: 'elasticOut',
-          animationDelay: function (idx) {
-            return Math.random() * 200;
-          },
-          data: statusData,
+          data: dashboardData.statusData,
         }
       ]
     };
-  }, [statusData, isDarkMode]);
+  }, [dashboardData.statusData, isDarkMode]);
 
   const barChartOption = useMemo(() => ({
     tooltip: {
@@ -316,7 +266,7 @@ data.forEach((item) => {
     },
     xAxis: {
       type: 'category',
-      data: typeData.map(d => d.name),
+      data: dashboardData.typeData.map(d => d.name),
       axisLine: { lineStyle: { color: isDarkMode ? '#4b5563' : '#d1d5db' } },
       axisTick: { show: false },
       axisLabel: { color: isDarkMode ? '#9ca3af' : '#6b7280' }
@@ -331,15 +281,14 @@ data.forEach((item) => {
     series: [
       {
         type: 'bar',
-        data: typeData,
+        data: dashboardData.typeData,
         itemStyle: {
           borderRadius: [8, 8, 0, 0]
         }
       }
     ]
-  }), [typeData, isDarkMode]);
+  }), [dashboardData.typeData, isDarkMode]);
 
-  // Updated area chart to show status trends over time
   const areaChartOption = useMemo(() => {
     return {
       backgroundColor: 'transparent',
@@ -384,13 +333,12 @@ data.forEach((item) => {
           preventDefaultMouseMove: true,
           filterMode: 'filter',
           throttle: 50,
-          rangeMode: ['percent', 'percent']
         },
       ],
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: statusTrendData.map(d => d.date),
+        data: dashboardData.statusTrendData.map(d => d.date),
         axisLine: { lineStyle: { color: isDarkMode ? '#4b5563' : '#d1d5db' } },
         axisTick: { show: false },
         axisLabel: { 
@@ -419,211 +367,72 @@ data.forEach((item) => {
           name: 'Harmless',
           type: 'line',
           smooth: true,
-          smoothMonotone: 'x',
-          sampling: 'lttb',
-          symbol: 'circle',
-          symbolSize: 8,
-          lineStyle: {
-            width: 3,
-            shadowColor: 'rgba(16, 185, 129, 0.5)',
-            shadowBlur: 10,
-            shadowOffsetY: 5
-          },
-          itemStyle: {
-            color: '#10b981',
-            borderColor: isDarkMode ? '#1f2937' : '#fff',
-            borderWidth: 2
-          },
+          symbol: 'none', // Optimasi: Hilangkan titik jika data banyak agar render cepat
+          lineStyle: { width: 3, shadowColor: 'rgba(16, 185, 129, 0.5)', shadowBlur: 10 },
+          itemStyle: { color: '#10b981' },
           areaStyle: { 
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(16, 185, 129, 0.5)' },
               { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
-            ]),
-            shadowColor: 'rgba(16, 185, 129, 0.2)',
-            shadowBlur: 20
+            ])
           },
-          emphasis: {
-            itemStyle: {
-              color: '#10b981',
-              borderColor: isDarkMode ? '#1f2937' : '#fff',
-              borderWidth: 3,
-              shadowBlur: 10,
-              shadowColor: 'rgba(16, 185, 129, 0.8)'
-            },
-            areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: 'rgba(16, 185, 129, 0.7)' },
-                { offset: 1, color: 'rgba(16, 185, 129, 0.1)' }
-              ])
-            }
-          },
-          data: statusTrendData.map(d => d.harmlessCount),
-          animationDuration: 2000,
-          animationEasing: 'cubicOut',
-          progressive: 1000,
-          progressiveThreshold: 3000
+          data: dashboardData.statusTrendData.map(d => d.harmlessCount),
         },
         {
           name: 'Suspicious',
           type: 'line',
           smooth: true,
-          smoothMonotone: 'x',
-          sampling: 'lttb',
-          symbol: 'circle',
-          symbolSize: 8,
-          lineStyle: {
-            width: 3,
-            shadowColor: 'rgba(245, 158, 11, 0.5)',
-            shadowBlur: 10,
-            shadowOffsetY: 5
-          },
-          itemStyle: {
-            color: '#f59e0b',
-            borderColor: isDarkMode ? '#1f2937' : '#fff',
-            borderWidth: 2
-          },
+          symbol: 'none',
+          lineStyle: { width: 3, shadowColor: 'rgba(245, 158, 11, 0.5)', shadowBlur: 10 },
+          itemStyle: { color: '#f59e0b' },
           areaStyle: { 
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(245, 158, 11, 0.5)' },
               { offset: 1, color: 'rgba(245, 158, 11, 0.05)' }
-            ]),
-            shadowColor: 'rgba(245, 158, 11, 0.2)',
-            shadowBlur: 20
+            ])
           },
-          emphasis: {
-            itemStyle: {
-              color: '#f59e0b',
-              borderColor: isDarkMode ? '#1f2937' : '#fff',
-              borderWidth: 3,
-              shadowBlur: 10,
-              shadowColor: 'rgba(245, 158, 11, 0.8)'
-            },
-            areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: 'rgba(245, 158, 11, 0.7)' },
-                { offset: 1, color: 'rgba(245, 158, 11, 0.1)' }
-              ])
-            }
-          },
-          data: statusTrendData.map(d => d.suspiciousCount),
-          animationDuration: 2000,
-          animationEasing: 'cubicOut',
-          animationDelay: 300,
-          progressive: 1000,
-          progressiveThreshold: 3000
+          data: dashboardData.statusTrendData.map(d => d.suspiciousCount),
         },
         {
           name: 'Malicious',
           type: 'line',
           smooth: true,
-          smoothMonotone: 'x',
-          sampling: 'lttb',
-          symbol: 'circle',
-          symbolSize: 8,
-          lineStyle: {
-            width: 3,
-            shadowColor: 'rgba(239, 68, 68, 0.5)',
-            shadowBlur: 10,
-            shadowOffsetY: 5
-          },
-          itemStyle: {
-            color: '#ef4444',
-            borderColor: isDarkMode ? '#1f2937' : '#fff',
-            borderWidth: 2
-          },
+          symbol: 'none',
+          lineStyle: { width: 3, shadowColor: 'rgba(239, 68, 68, 0.5)', shadowBlur: 10 },
+          itemStyle: { color: '#ef4444' },
           areaStyle: { 
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(239, 68, 68, 0.5)' },
               { offset: 1, color: 'rgba(239, 68, 68, 0.05)' }
-            ]),
-            shadowColor: 'rgba(239, 68, 68, 0.2)',
-            shadowBlur: 20
+            ])
           },
-          emphasis: {
-            itemStyle: {
-              color: '#ef4444',
-              borderColor: isDarkMode ? '#1f2937' : '#fff',
-              borderWidth: 3,
-              shadowBlur: 10,
-              shadowColor: 'rgba(239, 68, 68, 0.8)'
-            },
-            areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: 'rgba(239, 68, 68, 0.7)' },
-                { offset: 1, color: 'rgba(239, 68, 68, 0.1)' }
-              ])
-            }
-          },
-          data: statusTrendData.map(d => d.maliciousCount),
-          animationDuration: 2000,
-          animationEasing: 'cubicOut',
-          animationDelay: 600,
-          progressive: 1000,
-          progressiveThreshold: 3000
+          data: dashboardData.statusTrendData.map(d => d.maliciousCount),
         },
-    {
-  name: 'Undetected',
-  type: 'line',
-  smooth: true,
-  smoothMonotone: 'x',
-  sampling: 'lttb',
-  symbol: 'circle',
-  symbolSize: 8,
-  lineStyle: {
-    width: 3,
-    // Efek Silver Glow
-    shadowColor: isDarkMode ? 'rgba(161, 161, 170, 0.4)' : 'rgba(113, 113, 122, 0.3)', 
-    shadowBlur: 10,
-    shadowOffsetY: 5,
-    color: isDarkMode ? '#d4d4d8' : '#71717a' // Zinc 300 (Dark) atau Zinc 600 (Light)
-  },
-  itemStyle: {
-    color: isDarkMode ? '#f4f4f5' : '#52525b', // Zinc 100 atau Zinc 700
-    borderColor: isDarkMode ? '#18181b' : '#fff',
-    borderWidth: 2
-  },
-  areaStyle: { 
-    // Gradien dari Abu-abu Terang ke Transparan
-    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-      { 
-        offset: 0, 
-        color: isDarkMode ? 'rgba(161, 161, 170, 0.3)' : 'rgba(113, 113, 122, 0.2)' 
-      },
-      { 
-        offset: 1, 
-        color: 'transparent' 
-      }
-    ]),
-    shadowColor: 'rgba(161, 161, 170, 0.1)',
-    shadowBlur: 20
-  },
-  emphasis: {
-    itemStyle: {
-      color: '#fff',
-      borderColor: '#a1a1aa',
-      borderWidth: 3,
-      shadowBlur: 15,
-      shadowColor: 'rgba(255, 255, 255, 0.5)'
-    },
-    areaStyle: {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        { offset: 0, color: 'rgba(161, 161, 170, 0.5)' },
-        { offset: 1, color: 'rgba(161, 161, 170, 0.1)' }
-      ])
-    }
-  },
-  data: statusTrendData.map(d => d.undetectedCount),
-  animationDuration: 2000,
-  animationEasing: 'cubicOut',
-  animationDelay: 600,
-  progressive: 1000,
-  progressiveThreshold: 3000
-}
-        
-
+        {
+          name: 'Undetected',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          lineStyle: {
+            width: 3,
+            shadowColor: isDarkMode ? 'rgba(161, 161, 170, 0.4)' : 'rgba(113, 113, 122, 0.3)', 
+            shadowBlur: 10,
+            color: isDarkMode ? '#d4d4d8' : '#71717a'
+          },
+          itemStyle: {
+            color: isDarkMode ? '#f4f4f5' : '#52525b',
+          },
+          areaStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: isDarkMode ? 'rgba(161, 161, 170, 0.3)' : 'rgba(113, 113, 122, 0.2)' },
+              { offset: 1, color: 'transparent' }
+            ]),
+          },
+          data: dashboardData.statusTrendData.map(d => d.undetectedCount),
+        }
       ]
     };
-  }, [statusTrendData, isDarkMode]);
+  }, [dashboardData.statusTrendData, isDarkMode]);
 
   return (
     <section className={`relative w-full min-h-screen py-12 sm:py-20 overflow-hidden ${
@@ -631,9 +440,7 @@ data.forEach((item) => {
     }`}>
       <div className="container mx-auto px-4 cursor-none sm:px-6 text-center mb-8 sm:mb-12 relative z-10"> 
         <h2 className={`text-4xl sm:text-5xl font-bold font-lyrae mb-2 sm:mb-4  ${
-          isDarkMode 
-            ? "text-white" 
-            : "text-black"
+          isDarkMode ? "text-white" : "text-black"
         } bg-clip-text`}> 
           <DecryptedText
             text="Scan Statistics"
@@ -658,9 +465,7 @@ data.forEach((item) => {
                 onClick={() => setActiveTimeRange(range)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   activeTimeRange === range
-                    ? isDarkMode 
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                      : "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
                     : isDarkMode
                       ? "text-zinc-400 hover:text-white"
                       : "text-gray-600 hover:text-gray-900"
@@ -674,11 +479,10 @@ data.forEach((item) => {
 
         {/* Stats Cards */}
         <div className="mt-8 grid font-mono font-bold grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"> 
-          {/* <StatCard icon={Activity} label="Total Scans" value={totalScans} color="blue" isDarkMode={isDarkMode} /> */}
-          <StatCard icon={Shield} label="Harmless" value={statusData.find((d) => d.name === "Harmless")?.value || 0} color="green" isDarkMode={isDarkMode} />
-          <StatCard icon={AlertTriangle} label="Suspicious" value={statusData.find((d) => d.name === "Suspicious")?.value || 0} color="amber" isDarkMode={isDarkMode} />
-          <StatCard icon={Zap} label="Malicious" value={statusData.find((d) => d.name === "Malicious")?.value || 0} color="red" isDarkMode={isDarkMode} />
-          <StatCard icon={EyeOff} label="Undetected" value={statusData.find((d) => d.name === "Undetected")?.value || 0} color="silver" isDarkMode={isDarkMode} />
+          <StatCard icon={Shield} label="Harmless" value={dashboardData.statusData.find((d) => d.name === "Harmless")?.value || 0} color="green" isDarkMode={isDarkMode} />
+          <StatCard icon={AlertTriangle} label="Suspicious" value={dashboardData.statusData.find((d) => d.name === "Suspicious")?.value || 0} color="amber" isDarkMode={isDarkMode} />
+          <StatCard icon={Zap} label="Malicious" value={dashboardData.statusData.find((d) => d.name === "Malicious")?.value || 0} color="red" isDarkMode={isDarkMode} />
+          <StatCard icon={EyeOff} label="Undetected" value={dashboardData.statusData.find((d) => d.name === "Undetected")?.value || 0} color="silver" isDarkMode={isDarkMode} />
         </div>
       </div>
 
@@ -697,8 +501,10 @@ data.forEach((item) => {
           <ReactECharts 
             option={pieChartOption} 
             style={{ height: '350px' }}
-            loading={loading}
+            showLoading={loading} // PERBAIKAN: Gunakan showLoading, bukan loading
+            loadingOption={{ maskColor: 'transparent', textColor: isDarkMode ? '#fff' : '#333' }}
             notMerge={true}
+            lazyUpdate={true} // OPTIMASI: Lazy update
           />
         </ChartContainer>
 
@@ -715,8 +521,10 @@ data.forEach((item) => {
           <ReactECharts 
             option={barChartOption} 
             style={{ height: '350px' }}
-            loading={loading}
+            showLoading={loading} // PERBAIKAN
+            loadingOption={{ maskColor: 'transparent', textColor: isDarkMode ? '#fff' : '#333' }}
             notMerge={true}
+            lazyUpdate={true} // OPTIMASI
           />
         </ChartContainer>
 
@@ -737,17 +545,14 @@ data.forEach((item) => {
               {activeTimeRange === 'all' ? 'Complete status trend timeline separated by scan result' : 'Recent status trend timeline separated by scan result'}
             </p>
             
-            {loading ? <ChartSkeleton isDarkMode={isDarkMode} /> : chartError ? <ErrorDisplay onRetry={fetchStats} isDarkMode={isDarkMode} /> : statusTrendData.length === 0 ? <NoDataDisplay isDarkMode={isDarkMode} /> : 
+            {loading ? <ChartSkeleton isDarkMode={isDarkMode} /> : chartError ? <ErrorDisplay onRetry={fetchStats} isDarkMode={isDarkMode} /> : dashboardData.statusTrendData.length === 0 ? <NoDataDisplay isDarkMode={isDarkMode} /> : 
               <ReactECharts 
                 option={areaChartOption} 
                 style={{ height: '450px' }}
-                loading={loading}
+                showLoading={loading} // PERBAIKAN
+                loadingOption={{ maskColor: 'transparent', textColor: isDarkMode ? '#fff' : '#333' }}
                 notMerge={true}
-                onEvents={{
-                  dataZoom: (params) => {
-                    console.log('Zoom event:', params);
-                  }
-                }}
+                lazyUpdate={true} // OPTIMASI
               />
             }
           </div>
@@ -757,7 +562,8 @@ data.forEach((item) => {
   );
 }
 
-// --- Helper Components (tidak berubah) ---
+// --- Helper Components Tetap Sama (Kecuali perbaikan loading prop di ChartContainer) ---
+
 const StatCard = ({ icon: Icon, label, value, color, isDarkMode }) => {
   const colorClasses = {
     blue: "from-blue-500 to-blue-600",
@@ -800,6 +606,7 @@ const IconWrapper = ({ children, color }) => {
   );
 };
 
+// ChartContainer Helper: Menghapus passing 'loading' yang tidak perlu ke elemen div
 const ChartContainer = ({ title, icon: Icon, iconColor, loading, error, onRetry, children, isDarkMode }) => (
   <div className={`group relative overflow-hidden rounded-xl sm:rounded-3xl p-6 sm:p-8 transform hover:shadow-2xl transition-all duration-300 ${
     isDarkMode ? "bg-zinc-800/50 border border-zinc-700 shadow-xl" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0 shadow-lg backdrop-blur-sm"
@@ -812,7 +619,13 @@ const ChartContainer = ({ title, icon: Icon, iconColor, loading, error, onRetry,
         </IconWrapper>
         {title}
       </h3>
-      {loading ? <ChartSkeleton isDarkMode={isDarkMode} /> : error ? <ErrorDisplay onRetry={onRetry} isDarkMode={isDarkMode} /> : children}
+      {/* NOTE: Konten anak (children) di sini adalah ReactECharts.
+         Kita membiarkan ReactECharts menangani loadingnya sendiri lewat 'showLoading'.
+         Jika error, tampilkan error. Jika loading, chart skeleton sudah ada di komponen luar,
+         tapi di sini kita render children langsung agar ECharts bisa inisialisasi.
+      */}
+      {error ? <ErrorDisplay onRetry={onRetry} isDarkMode={isDarkMode} /> : children}
+      {/* Jika ingin skeleton full saat loading: {loading ? <ChartSkeleton/> : children} */}
     </div>
   </div>
 );

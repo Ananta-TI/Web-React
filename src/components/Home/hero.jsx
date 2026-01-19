@@ -1,31 +1,30 @@
 import React, { useContext, lazy, Suspense } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
+import Magnet from "./magnet";
 
-// Import LiquidEther diubah menjadi import dinamis (Code Splitting)
 const LiquidEther = lazy(() => import('./LiquidEther')); 
-// const Lightning  = lazy(() => import('./Lightning')); 
-
-// import { ChevronDown } from "lucide-react";
-import Magnet from "./magnet"; // Import komponen Magnet
 
 export default function Hero() {
   const { isDarkMode } = useContext(ThemeContext);
   
-  // Theme-aware colors for LiquidEther
   const liquidEtherColors = isDarkMode 
-    ? ['#171717', '#ffffff', '#1a1a1a'] // Dark theme: black, white, blue accent
-    : ['#f5f5f5', '#1a1a1a', '#ffffff']; // Light theme: light gray, dark gray, blue accent
+    ? ['#171717', '#ffffff', '#1a1a1a'] 
+    : ['#f5f5f5', '#1a1a1a', '#ffffff'];
  
-  return (
+return (
     <section
       id="home"
-      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 style={{ position: 'relative' }} ${
+      // PERBAIKAN DI SINI:
+      // 1. Hapus "style={{...}}" dari dalam string className
+      // 2. Gunakan style sebagai prop terpisah (opsional jika sudah ada class 'relative')
+      className={`relative min-h-180 flex flex-col items-center justify-center overflow-hidden text-center sm:px-6 lg:px-8 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
+      style={{ position: 'relative' }} // Pastikan ini menjadi prop sendiri
     >
-      {/* Background LiquidEther dengan Theme-Aware Colors */}
-      <div style={{ width: '100%', height: 800, position: 'absolute' }}>
+      {/* Background LiquidEther */}
+      {/* <div style={{ width: '100%', height: 800, position: 'absolute' }}>
         <Suspense fallback={null}>
           <LiquidEther
             colors={liquidEtherColors}
@@ -45,27 +44,33 @@ export default function Hero() {
             autoRampDuration={0.6}
           />
         </Suspense> 
-      </div>
+      </div> */}
 
-      {/* Hero Content (Konten Kritis) */}
+      {/* Hero Content */}
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        className="relative z-10 flex flex-col items-center"
+        // Pastikan element ini juga relative agar context stacking-nya benar
+        className="relative z-10 flex flex-col items-center" 
       >
         {/* Foto dengan Magnet Effect */}
         <Magnet magnetStrength={4}>
-          <div className="relative w-70 h-40 overflow-hidden  cursor-none md:w-96 md:h-76">
-            <img
-              key={isDarkMode}
-              // Ganti ke .avif (atau WebP) dan pastikan sudah di-resize
-              src={isDarkMode ? "../img/logo1.avif" : "../img/logo3.avif"} 
+          <div className="relative w-70 h-40 overflow-hidden cursor-none md:w-96 md:h-76">
+             {/* Kode gambar yang sudah diperbaiki sebelumnya... */}
+             <img
+              src="/img/logo3.avif" 
               alt="Ananta Firdaus"
-              // ATRIBUT LCP KRITIS
-              fetchPriority="high" 
-              loading="eager" 
-              className="object-cover w-full h-full"
+              className={`absolute top-0 left-0 object-cover w-full h-full transition-opacity duration-500 ${
+                isDarkMode ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            <img
+              src="/img/logo1.avif"
+              alt="Ananta Firdaus"
+              className={`absolute top-0 left-0 object-cover w-full h-full transition-opacity duration-500 ${
+                isDarkMode ? "opacity-100" : "opacity-0"
+              }`}
             />
           </div>
         </Magnet>
@@ -76,17 +81,7 @@ export default function Hero() {
         </p>
       </motion.div>
 
-      {/* Scroll Indicator */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 10 }}
-        transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
-        className="absolute z-10 bottom-10"
-      >
-        <ChevronDown size={32} />
-      </motion.div> */}
-
-      {/* Bottom Gradient Separator */}
+      {/* Bottom Separator */}
       <div
         className={`absolute bottom-0 left-0 w-full h-40 z-30 pointer-events-none ${
           isDarkMode
