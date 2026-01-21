@@ -2,7 +2,7 @@ import React, { useContext, lazy, Suspense } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import Magnet from "./magnet";
-import Particles from "./Particles";
+import Particles from "./particles";
 
 const LiquidEther = lazy(() => import('./LiquidEther')); 
 
