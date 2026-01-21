@@ -2,6 +2,7 @@ import React, { useContext, lazy, Suspense } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import Magnet from "./magnet";
+import Particles from "./Particles";
 
 const LiquidEther = lazy(() => import('./LiquidEther')); 
 
@@ -45,6 +46,22 @@ return (
           />
         </Suspense> 
       </div> */}
+
+
+ <Particles
+        particleCount={200}
+        particleSpread={8}
+        speed={0.1}
+        particleColors={["#ffffff", "#ffffff", "#ffffff"]}
+        moveParticlesOnHover={true}
+        particleHoverFactor={2}
+        alphaParticles={true}
+        particleBaseSize={120}
+        sizeRandomness={5.2}
+        cameraDistance={25}
+        disableRotation={false}
+        className="absolute inset-0 z-20 w-full h-full"
+      />
 
       {/* Hero Content */}
       <motion.div

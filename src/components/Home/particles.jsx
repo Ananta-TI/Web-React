@@ -93,53 +93,109 @@ const Particles = ({
   const containerRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
-useEffect(() => {
-  const container = containerRef.current;
-  if (!container) return;
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  const renderer = new Renderer({ depth: false, alpha: true });
-  const gl = renderer.gl;
-  container.appendChild(gl.canvas);
-  gl.clearColor(0, 0, 0, 0);
+    const renderer = new Renderer({ depth: false, alpha: true });
+    const gl = renderer.gl;
+    container.appendChild(gl.canvas);
+    gl.clearColor(0, 0, 0, 0);
 
-  const camera = new Camera(gl, { fov: 15 });
-  camera.position.set(0, 0, cameraDistance);
+    const camera = new Camera(gl, { fov: 15 });
+    camera.position.set(0, 0, cameraDistance);
 
-  const resize = () => {
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    renderer.setSize(width, height);
-    camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
-  };
-  window.addEventListener("resize", resize, false);
-  resize();
+    const resize = () => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      renderer.setSize(width, height);
+      camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+    };
+    window.addEventListener("resize", resize, false);
+    resize();
 
-  // 🖱️ Mouse handler
-  const handleMouseMove = (e) => {
-    const rect = container.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-    mouseRef.current = { x, y };
-  };
+    // 🖱️ Mouse handler (untuk desktop)
+    const handleMouseMove = (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseRef.current = { x, y };
+    };
 
-  // 📱 Gyro handler
-  const handleOrientation = (e) => {
-    // e.gamma = left/right, e.beta = front/back
-    const x = e.gamma / 45; // normalisasi (-45..45)
-    const y = e.beta / 45;  // normalisasi (-45..45)
-    mouseRef.current = { x, y };
-  };
+    // 📱 Gyro handler (untuk mobile) - SUDAH DIPERBAIKI
+    const handleOrientation = (e) => {
+      // Pastikan event memiliki nilai gamma dan beta
+      if (e.gamma === null || e.beta === null) return;
 
-  if (moveParticlesOnHover) {
-    // Desktop pakai mouse
-    container.addEventListener("mousemove", handleMouseMove);
+      // Normalisasi nilai gamma (-90 ke 90) dan beta (-180 ke 180) ke rentang -1 hingga 1
+      let x = e.gamma / 90;  // Kiri/Kanan
+      let y = e.beta / 90;   // Depan/Belakang
 
-    // Mobile pakai gyro
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener("deviceorientation", handleOrientation, true);
+      // Batasi nilai agar tidak pernah lebih dari -1 atau 1
+      x = Math.max(-1, Math.min(1, x));
+      y = Math.max(-1, Math.min(1, y));
+      
+      // Tambahkan "dead zone" untuk mencegah getaran saat perangkat diam
+      const deadZone = 0.1;
+      if (Math.abs(x) < deadZone) x = 0;
+      if (Math.abs(y) < deadZone) y = 0;
+
+      mouseRef.current = { x, y };
+    };
+    
+    // Fungsi untuk meminta izin gyroscope (khusus iOS 13+)
+    const requestOrientationPermission = async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const response = await DeviceOrientationEvent.requestPermission();
+          if (response === 'granted') {
+            window.addEventListener("deviceorientation", handleOrientation, true);
+          }
+        } catch (error) {
+          console.error("Izin gyroscope ditolak atau terjadi error:", error);
+        }
+      } else {
+        // Untuk perangkat yang tidak memerlukan izin (Android lama, desktop)
+        window.addEventListener("deviceorientation", handleOrientation, true);
+      }
+    };
+
+    // Deteksi apakah perangkat adalah mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (moveParticlesOnHover) {
+      if (isMobile) {
+        // Untuk mobile, coba meminta izin dan buat tombol jika perlu
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          // Buat tombol untuk meminta izin (harus lewat interaksi pengguna)
+          const requestButton = document.createElement('button');
+          requestButton.textContent = 'Aktifkan Gerakan';
+          requestButton.style.position = 'absolute';
+          requestButton.style.bottom = '20px';
+          requestButton.style.right = '20px';
+          requestButton.style.zIndex = '1000';
+          requestButton.style.padding = '10px 15px';
+          requestButton.style.borderRadius = '8px';
+          requestButton.style.border = 'none';
+          requestButton.style.backgroundColor = 'rgba(0,0,0,0.5)';
+          requestButton.style.color = 'white';
+          requestButton.style.cursor = 'pointer';
+          
+          requestButton.addEventListener('click', () => {
+            requestOrientationPermission();
+            // Sembunyikan tombol setelah diklik
+            requestButton.style.display = 'none'; 
+          });
+          container.appendChild(requestButton);
+        } else {
+          // Jika tidak perlu izin, langsung aktifkan
+          requestOrientationPermission();
+        }
+      } else {
+        // Untuk desktop, gunakan mouse
+        container.addEventListener("mousemove", handleMouseMove);
+      }
     }
-  }
-
 
     const count = particleCount;
     const positions = new Float32Array(count * 3);
@@ -215,17 +271,26 @@ useEffect(() => {
 
     animationFrameId = requestAnimationFrame(update);
 
-  return () => {
-    window.removeEventListener("resize", resize);
-    if (moveParticlesOnHover) {
-      container.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("deviceorientation", handleOrientation);
-    }
-    cancelAnimationFrame(animationFrameId);
-    if (container.contains(gl.canvas)) {
-      container.removeChild(gl.canvas);
-    }
-  };
+    return () => {
+      window.removeEventListener("resize", resize);
+      if (moveParticlesOnHover) {
+        if (isMobile) {
+          window.removeEventListener("deviceorientation", handleOrientation);
+        } else {
+          container.removeEventListener("mousemove", handleMouseMove);
+        }
+      }
+      cancelAnimationFrame(animationFrameId);
+      // Hapus canvas dari DOM untuk mencegah memory leak
+      if (container.contains(gl.canvas)) {
+        container.removeChild(gl.canvas);
+      }
+      // Hapus tombol izin jika ada
+      const permissionButton = container.querySelector('button');
+      if (permissionButton) {
+        container.removeChild(permissionButton);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     particleCount,
@@ -244,6 +309,7 @@ useEffect(() => {
     <div
       ref={containerRef}
       className={`particles-container ${className}`}
+      style={{ width: '100%', height: '100%', position: 'absolute' }}
     />
   );
 };
