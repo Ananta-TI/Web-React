@@ -233,7 +233,7 @@ export default function Footer() {
                 handle="Ananta-TI"
                 status="Online"
                 contactText="Contact Me"
-                avatarUrl="../img/me.png"
+                avatarUrl="../img/m3.png"
                 showUserInfo={false}
                 enableTilt={true}
                 enableMobileTilt={true}
