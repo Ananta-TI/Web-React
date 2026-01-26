@@ -359,7 +359,7 @@ export default function TetrioProfileCard({
 
             <div className="flex-1 w-full text-center sm:text-left">
               <a
-                href={`https://tetr.io/u/${profile.username}`}
+                href={`https://ch.tetr.io/u/${profile.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`text-2xl font-bold transition-colors truncate block ${isDarkMode ? "text-white hover:text-[#66c0f4]" : "text-gray-900 hover:text-blue-600"}`}
