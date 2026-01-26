@@ -108,10 +108,13 @@ export async function fetchTetrioProfile(userId = "") {
   const cleanProfile = {
     id: u._id,
     username: u.username,
+    role: u.role,
     country: u.country,
     avatar: u.avatar_revision
       ? `https://tetr.io/user-content/avatars/${u._id}.jpg?rv=${u.avatar_revision}`
       : null,
+    badges: u.badges || [],
+    connections: u.connections || {},
     xp: u.xp ?? null,
     join_ts: u.ts ?? null,
     join_relative: u.ts ? relativeTime(u.ts) : null,
@@ -122,6 +125,8 @@ export async function fetchTetrioProfile(userId = "") {
     winrate: winrate,
     friend_count: u.friend_count ?? null,
     supporter: !!u.supporter,
+    ar: u.ar ?? null,
+    ar_counts: u.ar_counts ?? {},
     // league
     league: league
       ? {
@@ -183,6 +188,30 @@ export async function fetchTetrioAchievements(userId = "") {
 }
 
 /**
+ * Fetch achievement info with details including icon
+ */
+export async function fetchAchievementInfo(achievementId) {
+  if (!achievementId) throw new Error("achievementId is required");
+  
+  const url = `${TETRIO_API}/achievements/${achievementId}`;
+  const data = await proxyGet(url);
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || "Failed fetching achievement info");
+  }
+  
+  return data.data;
+}
+
+/**
+ * Get achievement icon URL
+ */
+export function getAchievementIconUrl(achievementId) {
+  if (!achievementId) return null;
+  return `https://tetr.io/res/achievements/${achievementId}.png`;
+}
+
+/**
  * Fetch league summary dengan detail lengkap
  */
 export async function fetchTetrioLeague(userId = "") {
@@ -222,95 +251,36 @@ export async function fetchTetrioLeague(userId = "") {
 }
 
 /**
- * Fetch zen mode summary
+ * Fetch personal records for a specific game mode
  */
-export async function fetchTetrioZen(userId = "") {
+export async function fetchPersonalRecords(userId, gameMode) {
+  if (!userId) throw new Error("userId is required");
+  if (!gameMode) throw new Error("gameMode is required");
+  
+  const url = `${TETRIO_API}/users/${userId}/summaries/${gameMode}`;
+  const data = await proxyGet(url);
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || `Failed fetching ${gameMode} records`);
+  }
+  
+  return data.data;
+}
+
+/**
+ * Fetch historical league data
+ */
+export async function fetchHistoricalLeagueData(userId) {
   if (!userId) throw new Error("userId is required");
   
-  const url = `${TETRIO_API}/users/${userId}/summaries/zen`;
+  const url = `${TETRIO_API}/users/${userId}/summaries/league`;
   const data = await proxyGet(url);
   
   if (!data.success) {
-    throw new Error(data.error?.message || "Failed fetching zen data");
+    throw new Error(data.error?.message || "Failed fetching historical league data");
   }
   
-  return {
-    level: data.data.level ?? null,
-    score: data.data.score ?? null,
-  };
-}
-
-/**
- * Fetch single achievement info + leaderboard (top 100)
- */
-export async function fetchAchievementInfo(achievementId) {
-  if (typeof achievementId !== "number" && typeof achievementId !== "string") {
-    throw new Error("achievementId is required");
-  }
-
-  const url = `${TETRIO_API}/achievements/${achievementId}`;
-  const data = await proxyGet(url);
-
-  if (!data.success) {
-    throw new Error(data.error?.message || "Failed fetching achievement info");
-  }
-
-  const ach = data.data;
-  return {
-    achievement: ach.achievement ?? null,
-    leaderboard: ach.leaderboard ?? [],
-    cutoffs: ach.cutoffs ?? {},
-  };
-}
-
-/**
- * Fetch achievement leaderboard with pagination
- */
-export async function fetchAchievementLeaderboard(achievementId, options = {}) {
-  if (typeof achievementId !== "number" && typeof achievementId !== "string") {
-    throw new Error("achievementId is required");
-  }
-
-  const { after, before, limit = 25 } = options;
-
-  if (after && before) {
-    throw new Error("after and before cannot be used together");
-  }
-
-  if (limit < 1 || limit > 100) {
-    throw new Error("limit must be between 1 and 100");
-  }
-
-  let url = `${TETRIO_API}/achievements/${achievementId}/entries`;
-  const params = new URLSearchParams();
-
-  if (after) params.append("after", after);
-  if (before) params.append("before", before);
-  if (limit) params.append("limit", limit);
-
-  if (params.toString()) {
-    url += `?${params.toString()}`;
-  }
-
-  const data = await proxyGet(url);
-
-  if (!data.success) {
-    throw new Error(data.error?.message || "Failed fetching achievement leaderboard");
-  }
-
-  return {
-    entries: (data.data?.entries ?? []).map((entry) => ({
-      user: entry.u ?? null,
-      score: entry.v ?? null,
-      additionalScore: entry.a ?? null,
-      updatedAt: entry.t ?? null,
-      extra: entry.x ?? null,
-      prisecter: entry.p ?? null,
-    })),
-    pagination: {
-      cursor: data.data?.entries?.[data.data.entries.length - 1]?.p ?? null,
-    },
-  };
+  return data.data.past ?? {};
 }
 
 /**
