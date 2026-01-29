@@ -5,6 +5,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { TextReveal } from "../components/Shared/TextReveal";
 import GithubGraph from "../components/GithubGraph";
 import GithubCard from "../components/GithubCard";
+// import WakaTimeCard from "../components/WakaTimeCard.jsx";
 import { AnimatedBeamDemo } from "../components/AnimatedBeamDemo";
 import ExperienceList from "../components/Home/ExperienceList";
 import Tetris from "./TetrioProfileCard.jsx";
@@ -95,6 +96,12 @@ const About = () => {
           />
         </div>
       </div>
+
+
+
+      {/* <div className="col-span-2 lg:col-span-4">
+         <WakaTimeCard />
+        </div> */}
 
       {/* AnimatedBeamDemo Section */}
       <div className="dark px-4 sm:px-0">
