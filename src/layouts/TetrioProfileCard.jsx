@@ -398,63 +398,127 @@ export default function TetrioProfileCard({
             <>
              
 
-              {/* GAME MODES CAROUSEL */}
-              <div className="relative group">
-                <button onClick={handlePrevGameMode} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 bg-black/50 hover:bg-[#66c0f4] rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg">❮</button>
-                <button onClick={handleNextGameMode} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 bg-black/50 hover:bg-[#66c0f4] rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg">❯</button>
+             {/* GAME MODES CAROUSEL */}
+<div className="relative group">
+  <button 
+    onClick={handlePrevGameMode} 
+    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-20 p-2 backdrop-blur-md bg-white/10 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg border border-white/20"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+  <button 
+    onClick={handleNextGameMode} 
+    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-20 p-2 backdrop-blur-md bg-white/10 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-all shadow-lg border border-white/20"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
 
-                <div className={`relative overflow-hidden rounded-lg border transition-all min-h-[140px] ${isDarkMode ? "bg-[#101216] border-gray-800" : "bg-white border-gray-200 shadow-sm"}`}>
-                  
-                  {isDarkMode && (
-                      <div className="absolute inset-0 overflow-hidden opacity-20">
-                        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 blur-xl scale-150 transition-transform duration-700 will-change-transform"></div>
-                      </div>
-                  )}
+  <div className={`relative overflow-hidden rounded-2xl transition-all min-h-[140px] backdrop-blur-xl shadow-2xl border ${isDarkMode ? "bg-white/5 border-white/10" : "bg-black/10 border-white/20"}`}>
+    
+    {/* Dynamic gradient background that follows the profile rank color */}
+    <div className="absolute inset-0 overflow-hidden">
+      <div 
+        className="absolute inset-0 blur-3xl scale-150 transition-transform duration-700 will-change-transform opacity-40"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${rankColor.replace('bg-', '#').replace('600', '') || '#66c0f4'}, transparent 70%)`
+        }}
+      ></div>
+      
+      {/* Secondary gradient for depth */}
+      <div 
+        className="absolute inset-0 blur-2xl scale-125 transition-transform duration-700 will-change-transform opacity-20"
+        style={{
+          background: `radial-gradient(circle at 80% 20%, ${activeGameMode?.color || '#66c0f4'}, transparent 60%)`
+        }}
+      ></div>
+    </div>
 
-                  <div className="relative p-4 flex flex-col gap-3 z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${activeGameMode?.color}`}>
-                          {activeGameMode?.icon}
-                        </div>
-                        <div>
-                          <div className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDarkMode ? "text-[#66c0f4]" : "text-blue-600"}`}>
-                            Game Mode
-                          </div>
-                          <div className={`font-bold text-lg leading-tight line-clamp-1 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                            {activeGameMode?.name}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                            {activeGameMode?.stat}
-                        </div>
-                        <div className="text-[10px] text-gray-500 uppercase">{activeGameMode?.statLabel}</div>
-                      </div>
-                    </div>
+    {/* Glass effect overlay with animated gradient */}
+    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5"></div>
+    
+    {/* Animated particles for extra visual effect */}
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-white/20 blur-sm animate-pulse"
+          style={{
+            width: `${Math.random() * 6 + 2}px`,
+            height: `${Math.random() * 6 + 2}px`,
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${Math.random() * 4 + 2}s`
+          }}
+        ></div>
+      ))}
+    </div>
 
-                    <div className="h-8 flex flex-col justify-center">
-                      <div className={`w-full rounded-lg p-2 border ${isDarkMode ? "bg-[#000000]/40 border-white/5" : "bg-gray-100 border-gray-200"}`}>
-                        <div className="flex justify-between text-[10px] text-gray-500 mb-1">
-                          <span className={`font-semibold ${isDarkMode ? "text-[#66c0f4]" : "text-blue-600"}`}>Rank</span>
-                          <span>{activeGameMode?.rank}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    {/* Animated border effect */}
+    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div className="flex justify-center gap-1.5 mt-2">
-                  {gameModes.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveGameModeIndex(idx)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeGameModeIndex ? "bg-[#66c0f4] w-4" : isDarkMode ? "bg-gray-600 hover:bg-gray-400" : "bg-gray-300 hover:bg-gray-400"}`}
-                    />
-                  ))}
-                </div>
-              </div>
+    <div className="relative p-4 flex flex-col gap-3 z-10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold backdrop-blur-md shadow-lg transform transition-all duration-300 hover:scale-110 hover:rotate-6`} 
+               style={{ 
+                 background: `linear-gradient(135deg, ${rankColor.replace('bg-', '#').replace('600', '') || '#66c0f4'}, ${activeGameMode?.color || '#4a90e2'})`,
+                 boxShadow: `0 4px 20px ${rankColor.replace('bg-', '#').replace('600', '') || '#66c0f4'}40`
+               }}>
+            {activeGameMode?.icon}
+          </div>
+          <div>
+            <div className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 transition-colors duration-300`} 
+                 style={{ color: rankColor.replace('bg-', '#').replace('600', '') || (isDarkMode ? "#66c0f4" : "#2563eb") }}>
+              Game Mode
+            </div>
+            <div className={`font-bold text-lg leading-tight line-clamp-1 transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              {activeGameMode?.name}
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-900"}`}
+               style={{ textShadow: isDarkMode ? `0 0 10px ${rankColor.replace('bg-', '#').replace('600', '') || '#66c0f4'}40` : 'none' }}>
+            {activeGameMode?.stat}
+          </div>
+          <div className="text-[10px] text-gray-500 uppercase">{activeGameMode?.statLabel}</div>
+        </div>
+      </div>
+
+      <div className="h-8 flex flex-col justify-center">
+        <div className={`w-full rounded-lg p-2 backdrop-blur-md border transition-all duration-300 ${isDarkMode ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-white/20 border-white/30 hover:bg-white/30"}`}>
+          <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+            <span className="font-semibold transition-colors duration-300" style={{ color: rankColor.replace('bg-', '#').replace('600', '') || (isDarkMode ? "#66c0f4" : "#2563eb") }}>Rank</span>
+            <span className="transition-colors duration-300" style={{ color: rankColor.replace('bg-', '#').replace('600', '') || (isDarkMode ? "#66c0f4" : "#2563eb") }}>{activeGameMode?.rank}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className="flex justify-center gap-1.5 mt-2">
+    {gameModes.map((mode, idx) => (
+      <button
+        key={idx}
+        onClick={() => setActiveGameModeIndex(idx)}
+        className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeGameModeIndex ? "w-4" : "w-1.5"}`}
+        style={{
+          backgroundColor: idx === activeGameModeIndex 
+            ? (rankColor.replace('bg-', '#').replace('600', '') || (isDarkMode ? "#66c0f4" : "#2563eb"))
+            : (isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2) text-gray-400"),
+          boxShadow: idx === activeGameModeIndex 
+            ? `0 0 10px ${rankColor.replace('bg-', '#').replace('600', '') || (isDarkMode ? "#66c0f4" : "#2563eb")}60`
+            : "none"
+        }}
+      />
+    ))}
+  </div>
+</div>
  {/* STATS SECTION - NOW AS INDIVIDUAL CARDS */}
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-3">
