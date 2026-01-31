@@ -319,7 +319,7 @@ const SteamProfileCard = ({
                       <div className="absolute inset-0 overflow-hidden opacity-20">
                         <img
                           key={activeGame.appid}
-                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
+                          src={`https://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
                           className="w-full h-full object-cover blur-xl scale-150 transition-transform duration-700 will-change-transform"
                           alt=""
                           loading="lazy"
@@ -331,7 +331,7 @@ const SteamProfileCard = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <img
-                          src={`http://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
+                          src={`https://media.steampowered.com/steamcommunity/public/images/apps/${activeGame.appid}/${activeGame.img_icon_url}.jpg`}
                           alt={activeGame.name}
                           loading="lazy"
                           className="w-12 h-12 rounded shadow-lg"

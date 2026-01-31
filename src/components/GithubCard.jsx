@@ -61,7 +61,7 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
     >
       {/* Avatar */}
       <img
-        src={profile.avatar_url}
+        src={`${profile.avatar_url}&s=80`}
         alt="Avatar"
         className="
           w-20 h-20
