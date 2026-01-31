@@ -1,27 +1,27 @@
-// src/App.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
-// Import Components
+// 1. Tetap gunakan Static Import untuk komponen yang muncul di atas (LCP)
 import Header from "./layouts/Header";
 import Footer from "./layouts/footer";
 import ScrollProgress from "./components/Home/ScrollProgress";
 import TargetCursor from "./components/Shared/TargetCursor";
-import Preloader from "./components/Preloader"; // Pastikan ini komponen Preloader "Curtain" tadi
+import Preloader from "./components/Preloader";
 import SmoothScrollWrapper from "./layouts/GSAPSmoothScrollWrapper";
-import Chatbot from "./components/Chatbot/Chatbot";
-
-// Import Halaman
 import Hero from "./components/Home/hero";
-import Hero2 from "./components/Shared/TextPressure";
-import About from "./layouts/about";
-import Project from "./layouts/project";
-import AllProjects from "./layouts/AllProjects";
-import Certificates from "./layouts/Certificates";
-import Scanner from "./components/WebsiteSecurityScanner";
-import Timeline from "./layouts/timeline";
+
+// 2. LAZY LOADING untuk komponen berat (Menghancurkan Chunk 8MB)
+const Hero2 = lazy(() => import("./components/Shared/TextPressure"));
+const About = lazy(() => import("./layouts/about"));
+const Project = lazy(() => import("./layouts/project"));
+const AllProjects = lazy(() => import("./layouts/AllProjects"));
+const Certificates = lazy(() => import("./layouts/Certificates"));
+const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
+const Timeline = lazy(() => import("./layouts/timeline"));
+const Chatbot = lazy(() => import("./components/Chatbot/Chatbot"));
+
 
 // Analytics
 import { Analytics } from "@vercel/analytics/react";
@@ -33,74 +33,53 @@ import "./assets/tailwind.css";
 const SESSION_KEY = 'has_loaded_once';
 
 function App() {
-  // 1. STATE MANAGEMENT
-  // Cek apakah user baru pertama kali buka atau refresh
   const [isLoading, setIsLoading] = useState(() => {
     return sessionStorage.getItem(SESSION_KEY) !== 'true';
   });
 
-  const location = useLocation(); // Untuk reset scroll saat pindah page (opsional)
+  const location = useLocation();
 
-  // 2. LOGIKA TIMER PRELOADER
   useEffect(() => {
     if (isLoading) {
-      // Kunci Scroll SEGERA saat loading dimulai
       document.body.style.overflow = 'hidden';
-      document.body.style.height = '100vh'; // Extra proteksi biar gak bisa scroll
-      window.scrollTo(0, 0); // Pastikan posisi di paling atas
+      document.body.style.height = '100vh';
+      window.scrollTo(0, 0);
 
-      // Simulasi loading time (Misal 2.5 detik cukup, 6 detik terlalu lama buat UX)
-      // Sesuaikan durasi ini dengan durasi animasi kata-kata di Preloader kamu
       const timer = setTimeout(() => {
         setIsLoading(false);
         sessionStorage.setItem(SESSION_KEY, 'true');
-      }, 3500); // 3.5 detik (Waktu baca teks preloader)
+      }, 3500);
 
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
 
-  // 3. HANDLE SAAT PRELOADER SELESAI ANIMASI (PENTING!)
-  // Fungsi ini akan dipanggil oleh AnimatePresence SETELAH animasi exit selesai
   const onPreloaderExitComplete = () => {
-    document.body.style.overflow = ''; // Hapus style inline (kembali ke CSS default)
+    document.body.style.overflow = '';
     document.body.style.height = ''; 
     document.body.style.cursor = 'default';
-    
-    // Trigger refresh GSAP/ScrollTrigger jika perlu, biar ukurannya pas
-    // ScrollTrigger.refresh(); 
   };
 
   return (
     <ThemeProvider>
-      {/* Target Cursor tetap jalan di atas segalanya */}
       <TargetCursor spinDuration={1.1} hideDefaultCursor={true} parallaxOn={true} />
 
-      {/* ANITMATE PRESENCE:
-         mode="wait": Menunggu exit selesai baru unmount total.
-         onExitComplete: Ini rahasia agar tidak bentrok. Scroll baru dibuka disini.
-      */}
       <AnimatePresence mode="wait" onExitComplete={onPreloaderExitComplete}>
         {isLoading && <Preloader key="preloader" />}
       </AnimatePresence>
 
-      {/* HEADER: 
-         Opsional: Bisa disembunyikan saat isLoading jika mau, 
-         tapi biasanya Header dibiarkan di belakang preloader.
-      */}
       {!isLoading && <Header />}
 
-      {/* SMOOTH SCROLL WRAPPER:
-         Render konten tetap berjalan di background supaya layout siap.
-      */}
       <SmoothScrollWrapper>
         <main className="relative z-0 min-h-screen w-full cursor-none bg-background text-foreground">
+          {/* 3. SUSPENSE: Menangani loading state saat komponen lazy diunduh */}
+          <Suspense fallback={<div className="h-screen w-full bg-background" />}>
             <Routes location={location} key={location.pathname}>
               <Route
                 path="/"
                 element={
                   <>
-                    <Hero />
+                    <Hero /> {/* Render cepat karena static import */}
                     <Hero2 />
                     <About />
                     <Project />
@@ -112,15 +91,17 @@ function App() {
               <Route path="/all-projects" element={<AllProjects />} />
               <Route path="/certificates" element={<Certificates />} />
             </Routes>
-        <Footer />
+          </Suspense>
+          <Footer />
         </main>
-        
-        {/* Footer dimasukkan dalam wrapper scroll agar ikut smooth scroll */}
       </SmoothScrollWrapper>
 
-      {/* Komponen overlay UI */}
       {!isLoading && <ScrollProgress />}
-            {!isLoading && <Chatbot />}
+      {!isLoading && (
+        <Suspense fallback={null}>
+          <Chatbot />
+        </Suspense>
+      )}
 
       <SpeedInsights />
       <Analytics />
