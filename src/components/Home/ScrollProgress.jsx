@@ -165,10 +165,10 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
           exit={{ opacity: 0, scale: 0.85, x: isVertical ? -20 : 0, y: isVertical ? 0 : 20 }}
         >
           {/* Tampilan Frame (Tetap sesuai aslinya) */}
-          <div className={`relative w-full h-full overflow-hidden ${isDarkMode ? 'bg-white' : 'bg-black'} rounded-md shadow-lg border ${isDarkMode ? 'border-zinc-700' : 'border-zinc-800'}`}>
+          <div className={`relative w-full h-full overflow-hidden ${isDarkMode ? 'bg-[#dad5d0]' : 'bg-[#2f2e2d]'} rounded-md shadow-lg border ${isDarkMode ? 'border-zinc-700' : 'border-zinc-800'}`}>
             <div
               ref={trackRef}
-              className={`absolute inset-2 cursor-pointer ${isDarkMode ? 'bg-white' : 'bg-zinc-900'} rounded-sm`}
+              className={`absolute inset-2 cursor-pointer ${isDarkMode ? 'bg-[#dad5d0]' : 'bg-[#2f2e2d]'} rounded-sm`}
               onClick={handleTrackClick}
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsHovering(true)}
