@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 const Noise = ({
-  patternSize = 100, // Ukuran tile (lebih kecil lebih ringan)
-  patternAlpha = 15, // Transparansi
+  patternSize = 50, // Ukuran tile (lebih kecil lebih ringan)
+  patternAlpha = 25, // Transparansi
   className,
 }) => {
   const [noiseDataUri, setNoiseDataUri] = useState("");

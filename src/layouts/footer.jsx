@@ -204,7 +204,7 @@ export default function Footer() {
         />
 
         {/* Noise Component */}
-        <Noise patternAlpha={isDarkMode ? 50 : 70} />
+        <Noise patternAlpha={isDarkMode ? 35 : 70} />
 
         {/* --- FADE OUT TOP --- */}
         {/* Layer ini ditaruh paling bawah (di kode) agar menimpa Noise & Background */}

@@ -79,7 +79,7 @@ function App() {
                 path="/"
                 element={
                   <>
-                    <Hero /> {/* Render cepat karena static import */}
+                    <Hero isAppLoading={isLoading} />
                     <Hero2 />
                     <About />
                     <Project />
@@ -99,7 +99,7 @@ function App() {
       {!isLoading && <ScrollProgress />}
       {!isLoading && (
         <Suspense fallback={null}>
-          <Chatbot />
+          {/* <Chatbot /> */}
         </Suspense>
       )}
 
