@@ -97,7 +97,16 @@ const Particles = ({
     const container = containerRef.current;
     if (!container) return;
 
-    const renderer = new Renderer({ depth: false, alpha: true });
+    // --- OPTIMASI DI SINI ---
+    // Tambahkan parameter `dpr` untuk membatasi resolusi render.
+    // Math.min(window.devicePixelRatio, 1.5) berarti maksimal render di 1.5x, 
+    // meskipun layar user support 3x. Ini menghemat GPU signifikan.
+    const renderer = new Renderer({ 
+      depth: false, 
+      alpha: true, 
+      dpr: Math.min(window.devicePixelRatio, 1.5) 
+    });
+    
     const gl = renderer.gl;
     container.appendChild(gl.canvas);
     gl.clearColor(0, 0, 0, 0);
@@ -114,7 +123,6 @@ const Particles = ({
     window.addEventListener("resize", resize, false);
     resize();
 
-    // 🖱️ Mouse handler (untuk desktop)
     const handleMouseMove = (e) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -122,20 +130,13 @@ const Particles = ({
       mouseRef.current = { x, y };
     };
 
-    // 📱 Gyro handler (untuk mobile) - SUDAH DIPERBAIKI
     const handleOrientation = (e) => {
-      // Pastikan event memiliki nilai gamma dan beta
       if (e.gamma === null || e.beta === null) return;
-
-      // Normalisasi nilai gamma (-90 ke 90) dan beta (-180 ke 180) ke rentang -1 hingga 1
-      let x = e.gamma / 90;  // Kiri/Kanan
-      let y = e.beta / 90;   // Depan/Belakang
-
-      // Batasi nilai agar tidak pernah lebih dari -1 atau 1
+      let x = e.gamma / 90;
+      let y = e.beta / 90;
       x = Math.max(-1, Math.min(1, x));
       y = Math.max(-1, Math.min(1, y));
       
-      // Tambahkan "dead zone" untuk mencegah getaran saat perangkat diam
       const deadZone = 0.1;
       if (Math.abs(x) < deadZone) x = 0;
       if (Math.abs(y) < deadZone) y = 0;
@@ -197,11 +198,11 @@ const Particles = ({
       }
     }
 
-    const count = particleCount;
+   const count = particleCount;
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
     const colors = new Float32Array(count * 3);
-    const palette = particleColors && particleColors.length > 0 ? particleColors : defaultColors;
+    const palette = particleColors;
 
     for (let i = 0; i < count; i++) {
       let x, y, z, len;
@@ -240,7 +241,7 @@ const Particles = ({
 
     const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
 
-    let animationFrameId;
+ let animationFrameId;
     let lastTime = performance.now();
     let elapsed = 0;
 
@@ -303,6 +304,7 @@ const Particles = ({
     sizeRandomness,
     cameraDistance,
     disableRotation,
+    particleColors // Pastikan dependencies lengkap
   ]);
 
   return (

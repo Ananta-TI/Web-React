@@ -3,12 +3,12 @@ import { ThemeContext } from "../context/ThemeContext";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { motion } from "framer-motion";
 import { 
-  TrendingUp, Shield, AlertTriangle, Zap, EyeOff, 
-  BarChart3, Layers, Filter, Activity
+  Shield, AlertTriangle, Zap, EyeOff, 
+  BarChart3, Filter
 } from "lucide-react";
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, PieChart, Pie, Cell, Legend, ComposedChart, Line,Bar
+  Area, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, PieChart, Pie, Cell, Legend, ComposedChart, Line, Bar
 } from 'recharts';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -18,19 +18,34 @@ const COLORS = {
   Harmless: "#10b981",
   Suspicious: "#f59e0b",
   Malicious: "#ef4444",
-  Undetected: "#6366f1",
+  Undetected: "#ffffff",
   URL: "#3b82f6",
   FILE: "#8b5cf6"
 };
 
+// --- HELPER PENGAMAN ---
+// Mencegah error "Received NaN" jika data belum siap
+const safePercentage = (value, total, decimals = 0) => {
+  if (!total || total === 0) return 0;
+  const num = Number(value) || 0;
+  const pct = (num / total) * 100;
+  return isNaN(pct) ? 0 : (decimals === 0 ? Math.round(pct) : pct.toFixed(decimals));
+};
+
 export default function ScanStatsDashboard() {
   const { isDarkMode } = useContext(ThemeContext);
-  const [loading, setLoading] = useState(true);
   const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [data, setData] = useState({ stats: [], types: [], trend: [], total: 0 });
+  
+  // --- STATE PENGAMAN RENDER ---
+  // Grafik tidak akan dirender sampai komponen benar-benar "nempel" di layar
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchStats = useCallback(async () => {
-    setLoading(true);
     try {
       let startDate = null;
       if (activeTimeRange !== 'all') {
@@ -69,8 +84,6 @@ export default function ScanStatsDashboard() {
       });
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
   }, [activeTimeRange]);
 
@@ -78,6 +91,9 @@ export default function ScanStatsDashboard() {
 
   const axisColor = isDarkMode ? '#71717a' : '#52525b';
   const gridColor = isDarkMode ? '#27272a' : '#e4e4e7';
+
+  // JIKA BELUM MOUNTED, TAMPILKAN PLACEHOLDER KOSONG (SOLUSI ERROR WIDTH -1)
+  if (!isMounted) return <div className="w-full min-h-screen" />;
 
   return (
     <section className={`w-full min-h-screen py-16 transition-colors duration-500 ${isDarkMode ? "text-zinc-100" : "text-zinc-900"}`}>
@@ -89,14 +105,10 @@ export default function ScanStatsDashboard() {
             <h2 className="text-6xl font-bold font-lyrae">
               <DecryptedText text="Scan Statistics"
                speed={100}
-            maxIterations={105}
-            sequential
-            animateOn="view" />
+               maxIterations={105}
+               sequential
+               animateOn="view" />
             </h2>
-            {/* <div className="flex items-center gap-2 text-indigo-500 mb-2 font-mono text-sm tracking-widest uppercase">
-              <Activity size={16} />
-              <span>System Analytics Terminal</span>
-            </div> */}
           </div>
           
           <div className={`flex cursor-target backdrop-blur-md p-1 rounded-xl border ${isDarkMode ? "bg-zinc-800/30 border-zinc-700/50" : "bg-white/50 border-zinc-200"}`}>
@@ -127,32 +139,37 @@ export default function ScanStatsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Main Timeline Chart */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-6 min-w-0">
             <ChartWrapper isDarkMode={isDarkMode} title="Neural Threat Detection Timeline" subtitle="Detection density over temporal distribution">
-              <div className="h-[400px] w-full mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={data.trend}>
-                    <defs>
-                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                    <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
-                    <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
-                    <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
-                    <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px', color: axisColor}} />
-                    <Area type="monotone" dataKey="total" fill="url(#areaGradient)" stroke="#6366f1" strokeWidth={2} name="Global Volume" />
-                    <Bar dataKey="Malicious" fill={COLORS.Malicious} barSize={8} radius={[4, 4, 0, 0]} name="Malicious" />
-                    <Line type="stepAfter" dataKey="Suspicious" stroke={COLORS.Suspicious} strokeWidth={2} dot={false} name="Suspicious" />
-                  </ComposedChart>
-                </ResponsiveContainer>
+              <div className="h-[400px] w-full mt-4" style={{ minHeight: '400px' }}>
+                {data.trend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={data.trend}>
+                      <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                      <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
+                      <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
+                      <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
+                      <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px', color: axisColor}} />
+                      <Area type="monotone" dataKey="total" fill="url(#areaGradient)" stroke="#10b981" strokeWidth={2} name="Global Volume" />
+                      <Bar dataKey="Malicious" fill={COLORS.Malicious} barSize={8} radius={[4, 4, 0, 0]} name="Malicious" />
+                      <Line type="stepAfter" dataKey="Suspicious" stroke={COLORS.Suspicious} strokeWidth={2} dot={false} name="Suspicious" />
+                      <Line type="stepAfter" dataKey="Undetected" stroke={COLORS.Undetected} strokeWidth={2} dot={false} name="Undetected" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-zinc-500 text-sm animate-pulse">Initializing Neural Net...</div>
+                )}
               </div>
             </ChartWrapper>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-              {/* Origin Protocol - Modern Vertical Progress */}
+              {/* Origin Protocol */}
               <ChartWrapper className="cursor-target" isDarkMode={isDarkMode} title="Origin Protocol" subtitle="Vector analysis by source type">
                 <div className="flex items-center justify-around h-[250px] ">
                   {data.types.map((type) => (
@@ -160,7 +177,7 @@ export default function ScanStatsDashboard() {
                       <div className={`w-12 h-40 rounded-2xl relative overflow-hidden ${isDarkMode ? "bg-zinc-800/50" : "bg-zinc-200/50"}`}>
                         <motion.div 
                           initial={{ height: 0 }}
-                          animate={{ height: data.total > 0 ? `${(type.value / data.total) * 100}%` : 0 }}
+                          animate={{ height: `${safePercentage(type.value, data.total)}%` }}
                           transition={{ duration: 1.5, ease: "easeOut" }}
                           className="absolute bottom-0 w-full rounded-t-xl"
                           style={{ 
@@ -189,7 +206,7 @@ export default function ScanStatsDashboard() {
                 </div>
               </ChartWrapper>
 
-              {/* Risk Distribution - Donut with Central Label */}
+              {/* Risk Distribution - DENGAN SAFE PERCENTAGE */}
               <ChartWrapper className="cursor-target" isDarkMode={isDarkMode} title="Risk Distribution" subtitle="Composition of scanned entities">
                 <div className="h-[250px] w-full relative">
                   <ResponsiveContainer width="100%" height="100%">
@@ -214,7 +231,7 @@ export default function ScanStatsDashboard() {
                       HEALTH
                     </span>
                     <span className={`text-3xl font-black ${isDarkMode ? "text-white" : "text-zinc-900"}`}>
-                      {data.total > 0 ? Math.round((data.stats.find(s => s.name === "Harmless")?.value / data.total) * 100) : 0}%
+                      {safePercentage(data.stats.find(s => s.name === "Harmless")?.value, data.total)}%
                     </span>
                   </div>
                 </div>
@@ -236,8 +253,9 @@ export default function ScanStatsDashboard() {
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[s.name] }} />
                       <span className={`text-sm font-medium ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}>{s.name}</span>
                     </div>
+                    {/* DENGAN SAFE PERCENTAGE */}
                     <span className={`text-sm font-mono font-bold ${isDarkMode ? "text-zinc-200" : "text-zinc-900"}`}>
-                      {data.total > 0 ? ((s.value / data.total) * 100).toFixed(1) : 0}%
+                      {safePercentage(s.value, data.total, 1)}%
                     </span>
                   </div>
                 ))}
@@ -268,13 +286,12 @@ export default function ScanStatsDashboard() {
   );
 }
 
-// Pastikan menambahkan 'className' di dalam destructuring props
 function StatNode({ icon: Icon, label, value, color, isDarkMode, className = "" }) {
   return (
     <div className={`
       p-6 rounded-2xl border transition-all group 
       ${isDarkMode ? "bg-zinc-900/40 border-zinc-800 hover:border-zinc-700" : "bg-white border-zinc-200 hover:border-zinc-300 shadow-sm"}
-      ${className} // <-- Class cursor-target kamu akan masuk di sini
+      ${className}
     `}>
       <div className="flex items-center gap-4">
         <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${isDarkMode ? "bg-zinc-800" : "bg-zinc-100"}`} style={{ color }}>
@@ -290,7 +307,6 @@ function StatNode({ icon: Icon, label, value, color, isDarkMode, className = "" 
 }
 
 function ChartWrapper({ title, subtitle, children, isDarkMode , className = ""}) {
-  
   return (
     <div className={`p-8 rounded-3xl border backdrop-blur-sm relative transition-all duration-500 ${className} ${isDarkMode ? "bg-zinc-900/30 border-zinc-800/50" : "bg-white border-zinc-200 shadow-lg"}`}>
       <div className="mb-6">
