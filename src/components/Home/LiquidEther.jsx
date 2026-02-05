@@ -10,7 +10,7 @@ export default function LiquidEther({
   iterationsPoisson = 32,
   dt = 0.014,
   BFECC = true,
-  resolution = 0.5,
+  resolution = 0.25,
   isBounce = false,
   colors = ['#5227FF', '#e34c26', '#B19EEF'],
   style = {},

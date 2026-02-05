@@ -40,6 +40,7 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
     
     setScrollPercentage(clampedPercentage);
     
+    // Auto-hide logika (opsional, bisa dihapus jika ingin selalu tampil)
     if (clampedPercentage <= 1 || clampedPercentage >= 99) {
       setIsVisible(false);
     } else {
@@ -54,19 +55,15 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
     window.scrollTo({ top: targetScroll, behavior: isDragging ? 'auto' : 'smooth' });
   }, [isDragging]);
 
-  // FIX: Fungsi pembantu untuk mendapatkan persentase posisi berdasarkan arah (V/H)
+  // FIX: Selalu ambil posisi Horizontal (X axis) karena desain baru horizontal semua
   const getPos = useCallback((e) => {
     if (!trackRef.current) return 0;
     const rect = trackRef.current.getBoundingClientRect();
     const isTouch = e.type.includes('touch');
     const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
 
-    if (window.innerWidth < 768) { // Mobile (Horizontal)
-      return ((clientX - rect.left) / rect.width) * 100;
-    } else { // Desktop (Vertical)
-      return ((clientY - rect.top) / rect.height) * 100;
-    }
+    // Hitung berdasarkan lebar (Horizontal)
+    return ((clientX - rect.left) / rect.width) * 100;
   }, []);
 
   const handleDragStart = useCallback((e) => {
@@ -77,7 +74,7 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
 
   const handleDragMove = useCallback((e) => {
     if (!isDragging) return;
-    if (e.cancelable) e.preventDefault(); // Penting untuk mobile drag
+    if (e.cancelable) e.preventDefault(); 
     const percentage = getPos(e);
     scrollToPercentage(Math.min(100, Math.max(0, percentage)));
   }, [isDragging, getPos, scrollToPercentage]);
@@ -142,11 +139,13 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
   const tickMarks = [];
   for (let i = 0; i <= 100; i += tickDensity) tickMarks.push(i);
 
+  // --- MODIFIKASI POSISI ---
   const positionClasses = isMobile 
-    ? 'bottom-4 left-1/2 -translate-x-1/2 w-[90vw] h-8' 
-    : 'left-8 top-1/2 -translate-y-1/2 h-[40vh] w-8';
+    ? 'bottom-6 left-1/2 -translate-x-1/2 w-[90vw] h-10' // Mobile: Tengah Bawah
+    : 'bottom-8 right-8 w-70 h-8'; // Desktop: Kanan Bawah Horizontal
 
-  const isVertical = !isMobile;
+  // Desktop sekarang HORIZONTAL juga
+  const isVertical = false; 
 
   return (
     <AnimatePresence>
@@ -154,34 +153,34 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
         <motion.div
           ref={containerRef}
           className={`fixed z-[40] ${positionClasses}`}
-          initial={{ opacity: 0, scale: 0.8, x: isVertical ? -30 : 0, y: isVertical ? 0 : 30 }}
+          // Animasi muncul dari bawah
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ 
             opacity: isVisible ? 1 : 0,
-            scale: isVisible ? 1 : 1,
-            x: isVisible ? 0 : (isVertical ? -20 : 0),
-            y: isVisible ? 0 : (isVertical ? 0 : 20),
-            transition: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }
+            scale: isVisible ? 1 : 0.95,
+            y: isVisible ? 0 : 20,
+            transition: { duration: 0.4, ease: "easeOut" }
           }}
-          exit={{ opacity: 0, scale: 0.85, x: isVertical ? -20 : 0, y: isVertical ? 0 : 20 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
         >
-          {/* Tampilan Frame (Tetap sesuai aslinya) */}
-          <div className={`relative w-full h-full overflow-hidden ${isDarkMode ? 'bg-[#dad5d0]' : 'bg-[#2f2e2d]'} rounded-md shadow-lg border ${isDarkMode ? 'border-zinc-700' : 'border-zinc-800'}`}>
+          {/* Tampilan Frame */}
+          <div className={`relative w-full h-full overflow-hidden ${isDarkMode ? 'bg-[#dad5d0]' : 'bg-[#2f2e2d]'} rounded-md shadow-xl border ${isDarkMode ? 'border-zinc-400' : 'border-zinc-700'}`}>
             <div
               ref={trackRef}
-              className={`absolute inset-2 cursor-pointer ${isDarkMode ? 'bg-[#dad5d0]' : 'bg-[#2f2e2d]'} rounded-sm`}
+              className={`absolute inset-2 cursor-pointer ${isDarkMode ? 'bg-[#e5e0db]' : 'bg-[#3a3938]'} rounded-sm`}
               onClick={handleTrackClick}
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
-              {/* Tick Marks */}
-              <div className={`absolute inset-0 ${isVertical ? 'flex flex-col justify-between py-1' : 'flex justify-between px-1'}`}>
+              {/* Tick Marks (Horizontal) */}
+              <div className="absolute inset-0 flex justify-between px-1">
                 {tickMarks.map((tick) => (
                   <div 
                     key={tick}
                     className={`${isDarkMode ? 'bg-black' : 'bg-white'} ${
-                      tick % 10 === 0 ? 'opacity-100' : tick % 5 === 0 ? 'opacity-30' : 'opacity-40'
-                    } ${isVertical ? 'w-full h-px' : 'h-full w-px'}`}
+                      tick % 10 === 0 ? 'opacity-80 h-full' : tick % 5 === 0 ? 'opacity-40 h-2/3 self-center' : 'opacity-20 h-1/2 self-center'
+                    } w-px`}
                   />
                 ))}
               </div>
@@ -189,19 +188,19 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
               {/* Hover Line */}
               {isHovering && !isDragging && (
                 <div 
-                  className={`absolute ${isVertical ? 'left-0 right-0 h-0.5 bg-red-500' : 'top-0 bottom-0 w-0.5 bg-red-500'} transition-all duration-150`}
-                  style={isVertical ? { top: `${hoverPosition}%` } : { left: `${hoverPosition}%` }}
+                  className="absolute top-0 bottom-0 w-0.5 bg-red-500/50 transition-all duration-150"
+                  style={{ left: `${hoverPosition}%` }}
                 />
               )}
 
               {/* Scroll Line & Knob */}
               <div 
-                className={`absolute ${isVertical ? 'left-0 right-0 h-0.5' : 'top-0 bottom-0 w-0.5'} bg-red-500`}
-                style={isVertical ? { top: `${scrollPercentage}%` } : { left: `${scrollPercentage}%` }}
+                className="absolute top-0 bottom-0 w-0.5 bg-red-600 z-10"
+                style={{ left: `${scrollPercentage}%` }}
               >
                 <div 
-                  className={`absolute ${isVertical ? 'w-2 h-2 -left-1 -top-1' : 'w-2 h-2 -top-1 -left-1'} bg-red-500 rounded-full ${
-                    isDragging ? 'scale-125 cursor-grabbing' : 'cursor-grab hover:scale-110'
+                  className={`absolute w-3 h-3 -top-1.5 -left-1.5 bg-red-600 rounded-full shadow-md border border-white/20 ${
+                    isDragging ? 'scale-125 cursor-grabbing ring-2 ring-red-400' : 'cursor-grab hover:scale-110'
                   }`} 
                   onMouseDown={handleDragStart}
                   onTouchStart={handleDragStart}
@@ -210,13 +209,14 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
             </div>
           </div>
 
-          {/* Label Persentase */}
+          {/* Label Persentase (Pindah ke ATAS bar agar tidak tertutup karena di bottom screen) */}
           <div 
-            className={`absolute text-sm font-mono ${isDarkMode ? 'text-white' : 'text-black'}`}
-            style={isVertical 
-              ? { top: `${scrollPercentage}%`, right: "-2.5rem" } 
-              : { left: `${scrollPercentage}%`, top: "2rem" }
-            }
+            className={`absolute -top-8 text-sm font-bold font-mono ${isDarkMode ? 'text-zinc-200' : 'text-zinc-800'} bg-transparent backdrop-blur-sm px-2 rounded`}
+            style={{ 
+              left: `${scrollPercentage}%`, 
+              transform: 'translateX(-50%)',
+              transition: 'left  linear' // Agar angka bergerak smooth mengikuti knob
+            }}
           >
             {Math.round(scrollPercentage)}%
           </div>

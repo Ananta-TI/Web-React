@@ -23,7 +23,7 @@ const Header = ({ isDarkMode }) => {
             animateOn="view"
           />
         </h2>          
-        <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Scan URL, file, atau hash dengan lebih mudah dan cepat.</p>
+        <p className={`text-lg font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>Scan URLs, files, or hashes more easily and quickly.</p>
         </motion.div>
       </div>
     </div>

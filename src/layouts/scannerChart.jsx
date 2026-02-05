@@ -14,17 +14,7 @@ import {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const COLORS = {
-  Harmless: "#10b981",
-  Suspicious: "#f59e0b",
-  Malicious: "#ef4444",
-  Undetected: "#ffffff",
-  URL: "#3b82f6",
-  FILE: "#8b5cf6"
-};
-
 // --- HELPER PENGAMAN ---
-// Mencegah error "Received NaN" jika data belum siap
 const safePercentage = (value, total, decimals = 0) => {
   if (!total || total === 0) return 0;
   const num = Number(value) || 0;
@@ -36,10 +26,21 @@ export default function ScanStatsDashboard() {
   const { isDarkMode } = useContext(ThemeContext);
   const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [data, setData] = useState({ stats: [], types: [], trend: [], total: 0 });
-  
-  // --- STATE PENGAMAN RENDER ---
-  // Grafik tidak akan dirender sampai komponen benar-benar "nempel" di layar
   const [isMounted, setIsMounted] = useState(false);
+
+  // --- DEFINISI WARNA (DIPINDAHKAN KE DALAM) ---
+  // Agar bisa mengakses 'isDarkMode' secara reaktif
+  const COLORS = {
+    Harmless: "#10b981",
+    Suspicious: "#f59e0b",
+    Malicious: "#ef4444",
+    // Fix: Menggunakan warna solid berdasarkan tema
+    // Light Mode: Zinc-400 (biar kelihatan di background putih)
+    // Dark Mode: Zinc-600 (biar kelihatan di background gelap)
+    Undetected: isDarkMode ? '#ffffff' : '#52525b', 
+    URL: "#3b82f6",
+    FILE: "#8b5cf6"
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -65,6 +66,7 @@ export default function ScanStatsDashboard() {
 
       rawData.forEach(item => {
         const s = item.stats || {};
+        // Logika penentuan status
         const status = s.malicious > 0 ? "Malicious" : s.suspicious > 0 ? "Suspicious" : s.harmless > 0 ? "Harmless" : "Undetected";
         
         counts[status]++;
@@ -92,7 +94,6 @@ export default function ScanStatsDashboard() {
   const axisColor = isDarkMode ? '#71717a' : '#52525b';
   const gridColor = isDarkMode ? '#27272a' : '#e4e4e7';
 
-  // JIKA BELUM MOUNTED, TAMPILKAN PLACEHOLDER KOSONG (SOLUSI ERROR WIDTH -1)
   if (!isMounted) return <div className="w-full min-h-screen" />;
 
   return (
@@ -206,7 +207,7 @@ export default function ScanStatsDashboard() {
                 </div>
               </ChartWrapper>
 
-              {/* Risk Distribution - DENGAN SAFE PERCENTAGE */}
+              {/* Risk Distribution */}
               <ChartWrapper className="cursor-target" isDarkMode={isDarkMode} title="Risk Distribution" subtitle="Composition of scanned entities">
                 <div className="h-[250px] w-full relative">
                   <ResponsiveContainer width="100%" height="100%">
@@ -253,7 +254,6 @@ export default function ScanStatsDashboard() {
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[s.name] }} />
                       <span className={`text-sm font-medium ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}>{s.name}</span>
                     </div>
-                    {/* DENGAN SAFE PERCENTAGE */}
                     <span className={`text-sm font-mono font-bold ${isDarkMode ? "text-zinc-200" : "text-zinc-900"}`}>
                       {safePercentage(s.value, data.total, 1)}%
                     </span>

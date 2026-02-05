@@ -103,95 +103,66 @@ useEffect(() => {
 
   const handleToggleSidebar = () => setIsOpen((prev) => !prev);
 
-  const handleDarkModeToggle = () => {
-    // Cegah multiple clicks saat animasi berjalan
+const handleDarkModeToggle = async (event) => {
+  document.body.classList.add('is-transitioning'); // Tambah class
+    // 1. Cegah spam klik
     if (isThemeChanging) return;
-    
     setIsThemeChanging(true);
-    
-    // Custom animasi blur circle
-    const customAnimation = `
-      ::view-transition-group(root) {
-        animation-timing-function: var(--expo-out);
-      }
 
-      ::view-transition-new(root) {
-        mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="20" cy="20" r="18" fill="white" filter="url(%23blur)"/></svg>') center / 0 no-repeat;
-        animation: scale 1s;
-        animation-fill-mode: both;
-      }
-
-      ::view-transition-old(root),
-      .dark::view-transition-old(root) {
-        animation: none;
-        animation-fill-mode: both;
-        z-index: -1;
-      }
-
-      .dark::view-transition-new(root) {
-        animation: scale 1s;
-        animation-fill-mode: both;
-      }
-
-      @keyframes scale {
-        to {
-          mask-size: 200vmax;
-        }
-      }
-    `;
-
-    // Inject CSS animation
-    const styleId = "theme-transition-styles";
-    let styleElement = document.getElementById(styleId);
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
-    }
-    styleElement.textContent = customAnimation;
-
-    // Gunakan View Transition API jika tersedia
+    // 2. Cek support browser
     if (!document.startViewTransition) {
-      // Fallback untuk browser yang tidak support View Transition
       setIsDarkMode((prev) => !prev);
-      setIsOpen(false); // Tutup sidebar
+      setIsOpen(false);
       setIsThemeChanging(false);
       return;
     }
 
-    // Dapatkan posisi tombol untuk animasi circle
-    const buttonRect = event.currentTarget.getBoundingClientRect();
-    const x = buttonRect.left + buttonRect.width / 2;
-    const y = buttonRect.top + buttonRect.height / 2;
-    const maxRadius = Math.hypot(
-      Math.max(buttonRect.left, window.innerWidth - buttonRect.left),
-      Math.max(buttonRect.top, window.innerHeight - buttonRect.top)
+    // 3. Ambil koordinat tombol untuk titik tengah lingkaran
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    // 4. Hitung radius terjauh agar lingkaran memenuhi layar
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
     );
 
-    document.startViewTransition(() => {
+    // 5. Mulai Transisi
+    const transition = document.startViewTransition(() => {
+      // Perubahan state terjadi DI SINI
       setIsDarkMode((prev) => !prev);
-      setIsOpen(false); // Tutup sidebar
-    }).ready;
+      setIsOpen(false); 
+    });
 
-    // Animasi circle yang meluas dari tombol
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${maxRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 600,
-        easing: "ease-in-out",
-        pseudoElement: "::view-transition-new(root)",
-      }
-    );
+    // 6. Tunggu DOM siap, lalu jalankan animasi
+    try {
+      await transition.ready;
 
-    // Reset flag setelah animasi selesai
-    setTimeout(() => {
+      // LOGIKA YANG DIPERBAIKI:
+      // Kita selalu menganimasikan view BARU (::view-transition-new)
+      // agar clip-path membesar dari 0 ke Full.
+      // Tidak peduli itu dark->light atau light->dark, efeknya sama: "Expand"
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 1000,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)", // Kuncinya di sini
+        }
+      );
+    } catch (error) {
+      console.error("Animasi gagal:", error);
+    } finally {
       setIsThemeChanging(false);
-    }, 10);
+    }
+    document.body.classList.remove('is-transitioning'); // Hapus class
   };
 
   const handleNavigation = (link) => {
