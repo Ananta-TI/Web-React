@@ -32,7 +32,11 @@ const Certificates = () => {
     { image: "sertifikat/16.png", year: "2025" },
     { image: "sertifikat/17.png", year: "2025" },
     { image: "sertifikat/18.png", year: "2025" },
-    { image: "sertifikat/19.png", year: "2023" },
+    { image: "sertifikat/19.png", year: "2025" },
+    { image: "sertifikat/20.png", year: "2025" },
+    { image: "sertifikat/21.png", year: "2025" },
+    { image: "sertifikat/22.png", year: "2025" },
+    { image: "sertifikat/23.png", year: "2025" },
   ];
 
   useEffect(() => {
