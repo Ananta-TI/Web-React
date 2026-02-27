@@ -74,6 +74,7 @@
     font-family: 'Calculator';
     src: url('/fonts/Calculator.ttf');
     font-display: swap;
+    
 }
 @theme {
     /* --font-barlow: "Barlow", sans-serif; */
@@ -103,4 +104,5 @@
 
 body {
     font-family: var(--font-barlow);
+
 }

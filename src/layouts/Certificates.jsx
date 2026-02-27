@@ -37,6 +37,7 @@ const Certificates = () => {
     { image: "sertifikat/21.png", year: "2025" },
     { image: "sertifikat/22.png", year: "2025" },
     { image: "sertifikat/23.png", year: "2025" },
+    { image: "sertifikat/24.png", year: "2024" },
   ];
 
   useEffect(() => {
