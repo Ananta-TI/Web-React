@@ -40,11 +40,11 @@ const getStatusColor = (status) => {
 
 // --- COMPONENT UTAMA ---
 const SteamProfileCard = ({
-  steamIds = ["76561199745356826", "76561199166544214", "76561198773672138"],
+  steamIds = ["76561199745356826", "76561199166544214", "76561198773672138","76561198735338945"],
   compact = false,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
-
+  
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [topGames, setTopGames] = useState([]);
@@ -59,18 +59,18 @@ const SteamProfileCard = ({
   
   // Ref untuk debounce achievement fetch
   const achievementTimeoutRef = useRef(null);
-
+  
   const API_KEY = "F10E38DFF1FBB84407DF02D50B49A8CF";
   const PROXY_URL = "https://api.codetabs.com/v1/proxy?quest=";
-  const CACHE_KEY = 'steamProfileData';
-  const CACHE_DURATION = 60 * 60 * 1000; // 1 jam
-
+  const CACHE_KEY = `steamProfileData_${steamIds.join("_")}`;
+  const CACHE_DURATION =  1000; // 1 jam
+  
   const fetchWithProxy = useCallback((url) =>
     fetch(`${PROXY_URL}${encodeURIComponent(url)}`).then((r) => {
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     }), []);
-
+    
   // --- 1. FETCH DATA UTAMA (Memoized) ---
   useEffect(() => {
     let mounted = true;
