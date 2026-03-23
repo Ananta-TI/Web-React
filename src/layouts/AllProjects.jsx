@@ -160,6 +160,20 @@ const allProjects = [
     status: "In Progress",
     featured: true,
   },
+  {
+    title: "NANTAGACOR88 - Online Gambling",
+    description:
+      "A React-based web project that simulates an interactive gacha/slot system with animations, visual effects, and probability mechanisms. It serves as a demonstration of advanced React techniques and engaging UI design.",
+    demo: "https://nantagacor88.vercel.app/",
+    repo: "https://github.com/Ananta-TI/nantaGacor88.git",
+    tags: ["React", "Vite", "Framer Motion", "Tailwind"],
+    category: "Web Development",
+    image: "img/nantagacor88.png",
+    color: "from-blue-600 to-cyan-500",
+    year: "2026",
+    status: "In Progress",
+    featured: true,
+  },
 ];
 
 
