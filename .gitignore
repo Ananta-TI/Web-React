@@ -26,3 +26,4 @@ dist-ssr
 src/layouts/sidebar
 .vercel
 .env
+.env*.local
