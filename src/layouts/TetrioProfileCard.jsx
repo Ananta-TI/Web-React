@@ -65,6 +65,11 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
 
   if (error || !profile) return <div className="text-red-500 p-4 border rounded-xl bg-red-500/10">Error: {error}</div>;
 
+  // ✅ FIXED v2: Gunakan nullish coalescing (??) alih-alih logical OR (||)
+  const qpData = profile.quickplay;
+  const qpDisplay = qpData?.displayValue ?? "—";  // ← Ganti || dengan ??
+  const qpRank = qpData?.rank ?? -1;               // ← Ganti || dengan ??
+  
   const rankColor = getRankColor(profile.league?.rank);
   const textColor = isDarkMode ? "text-gray-100" : "text-gray-900";
   const bgCard = isDarkMode ? "bg-zinc-800 border-gray-700 border-b-0" : "bg-white border-black border-b-0";
@@ -73,7 +78,13 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
   return (
     // Menggunakan h-full agar mengisi col-span-3 secara responsif
     <div className={`w-full h-full flex flex-col rounded-xl overflow-hidden border shadow-lg ${bgCard} ${textColor} text-sm transition-all relative`}>
-      
+      {/* TITLE */}
+      <div className="px-4 pt-4 pb-2 border-b border-gray-500/10">
+        <h1 className={`text-3xl font-bold font-lyrae tracking-widest ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          Tetr.io
+        </h1>
+      </div>
+
       {/* HEADER SECTION - Tanpa banner yang memakan tempat */}
       <div className="p-4 border-b border-gray-500/10 flex items-center gap-4">
         {/* Avatar Area */}
@@ -133,7 +144,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
       {/* MAIN CONTENT AREA - Area scroll untuk Records dan History */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
         
-{/* RECORDS SECTION */}
+        {/* RECORDS SECTION */}
         <section>
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
             🏆 Best Records
@@ -217,14 +228,24 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
               
               <div className="flex justify-between items-start mb-2 z-10">
                 <h4 className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Quick Play</h4>
-                {profile.quickplay?.rank && (
+                {/* ✅ FIXED: Parse rank sebagai integer & cek != -1 */}
+                {qpRank && qpRank !== -1 && (
                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${isDarkMode ? "bg-green-500/20 text-green-300" : "bg-green-200 text-green-700"}`}>
-                    #{profile.quickplay.rank}
+                    #{Math.round(qpRank).toLocaleString()}
                   </span>
                 )}
               </div>
+              
               <div className="text-xl sm:text-2xl font-black z-10 tracking-tight mt-auto">
-                {profile.quickplay?.record?.alt ? `${profile.quickplay.record.alt}m` : "—"}
+                {/* ✅ FIXED: Gunakan ?? untuk handle nilai 0 */}
+                {qpDisplay !== "—" ? `${qpDisplay}m` : "—"}
+
+                {/* Career Best dengan sanitasi lengkap */}
+                {(qpData?.careerBest ?? 0) > 0 && qpData?.careerBest !== qpDisplay && (
+                  <div className="text-[9px] opacity-60 mt-1">
+                    Best: {qpData.careerBest}m
+                  </div>
+                )}
               </div>
             </div>
 
@@ -250,6 +271,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
 
           </div>
         </section>
+
         {/* MATCH HISTORY SECTION */}
         <section>
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Recent Matches</h3>
@@ -296,7 +318,6 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
 
 // Helpers
 function getRankColor(rank) {
-  // Tambahkan pengecekan tipe data string di sini
   if (!rank || typeof rank !== "string") return "bg-gray-600 text-white"; 
   
   const r = rank.toLowerCase();

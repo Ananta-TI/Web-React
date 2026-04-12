@@ -20,7 +20,7 @@ export default function Hero({ isAppLoading }) {
       {/* Bungkus Particles dengan Suspense agar tidak memblokir render utama */}
       <Suspense fallback={null}>
         <Particles
-          particleCount={window.innerWidth < 768 ? 30 : 60} // KURANGI SEDIKIT JUMLAH PARTIKEL (Opsional, tapi disarankan)
+          particleCount={200} // KURANGI SEDIKIT JUMLAH PARTIKEL (Opsional, tapi disarankan)
           particleSpread={10}
           speed={0.1}
           particleColors={["#ffffff", "#ffffff", "#ffffff"]}

@@ -1,4 +1,4 @@
-// tetrioApi.js
+// tetrioApi.js - EXTENDED COMPLEX VERSION
 const TETRIO_API = "https://ch.tetr.io/api";
 const BASE_URL = "https://api.codetabs.com/v1/proxy?quest=";
 
@@ -15,10 +15,16 @@ export async function fetchTetrioProfile(userId = "") {
     user: `${TETRIO_API}/users/${userId}`,
     league: `${TETRIO_API}/users/${userId}/summaries/league`,
     zenith: `${TETRIO_API}/users/${userId}/summaries/zenith`,
+    zenithex: `${TETRIO_API}/users/${userId}/summaries/zenithex`,
     blitz: `${TETRIO_API}/users/${userId}/summaries/blitz`,
     _40l: `${TETRIO_API}/users/${userId}/summaries/40l`,
     zen: `${TETRIO_API}/users/${userId}/summaries/zen`,
     achievements: `${TETRIO_API}/users/${userId}/summaries/achievements`,
+    // ✅ EXTENDED: Tambah scoreflow untuk tracking progression
+    scoreflow_40l: `${TETRIO_API}/labs/scoreflow/${userId}/40l`,
+    scoreflow_blitz: `${TETRIO_API}/labs/scoreflow/${userId}/blitz`,
+    scoreflow_zenith: `${TETRIO_API}/labs/scoreflow/${userId}/zenith`,
+    scoreflow_zen: `${TETRIO_API}/labs/scoreflow/${userId}/zen`,
   };
 
   const calls = Object.entries(endpoints).map(async ([k, url]) => {
@@ -39,29 +45,82 @@ export async function fetchTetrioProfile(userId = "") {
   const league = data.league.success ? data.league.data : null;
   const zen_mode = data.zen.success ? data.zen.data : null;
   const zenith = data.zenith.success ? data.zenith.data : null;
+  const zenithex = data.zenithex.success ? data.zenithex.data : null;
   const blitz = data.blitz.success ? data.blitz.data : null;
   const _40l = data._40l.success ? data._40l.data : null;
   const achievements = data.achievements.success ? data.achievements.data : null;
 
-  const gamesplayed = typeof u.gamesplayed === "number" ? u.gamesplayed : null;
-  const gameswon = typeof u.gameswon === "number" ? u.gameswon : null;
-  const winrate = gamesplayed && gamesplayed > 0 && gameswon >= 0 ? Number(((gameswon / gamesplayed) * 100).toFixed(1)) : null;
+  // Scoreflow data
+  const scoreflow_40l = data.scoreflow_40l.success ? data.scoreflow_40l.data : null;
+  const scoreflow_blitz = data.scoreflow_blitz.success ? data.scoreflow_blitz.data : null;
+  const scoreflow_zenith = data.scoreflow_zenith.success ? data.scoreflow_zenith.data : null;
+  const scoreflow_zen = data.scoreflow_zen.success ? data.scoreflow_zen.data : null;
 
-  // Ekstraksi Data Mendalam yang Aman (Support API Baru 'results.stats' & API Lama 'endcontext')
+  const gamesplayed = u.gamesplayed ?? null;
+  const gameswon = u.gameswon ?? null;
+  const winrate = gamesplayed > 0 ? Number(((gameswon / gamesplayed) * 100).toFixed(1)) : null;
+
+  // 40L Stats
   const sprintStats = _40l?.record?.results?.stats || _40l?.record?.endcontext || {};
-  const blitzStats = blitz?.record?.results?.stats || blitz?.record?.endcontext || {};
-
-  // Ambil nilai utama untuk records
   const sprintTime = sprintStats.finaltime || sprintStats.finalTime || _40l?.record?.time;
+
+  // Blitz Stats
+  const blitzStats = blitz?.record?.results?.stats || blitz?.record?.endcontext || {};
   const blitzScore = blitzStats.score || blitz?.record?.score;
 
-  const latest = [];
-  if (league?.rank) latest.push({ type: "rank", text: `Achieved ${league.rank.toUpperCase()} rank in Tetra League`, meta: { rank: league.rank, tr: league.tr } });
-  if (zenith?.best?.record?.alt) latest.push({ type: "quickplay_pb", text: `New Quick Play PB: ${zenith.best.record.alt} m`, meta: { alt: zenith.best.record.alt } });
-  if (blitzScore) latest.push({ type: "blitz_pb", text: `Blitz PB: ${Number(blitzScore).toLocaleString()} pts` });
-  if (sprintTime) latest.push({ type: "40l_record", text: `40L Record Time: ${formatTime(parseFloat(sprintTime))}` });
+  // ✅ Quick Play - altitude di results.stats.zenith.altitude
+  const qpCurrentAlt = zenith?.record?.results?.stats?.zenith?.altitude ?? 0;
+  const qpCareerAlt = zenith?.best?.record?.results?.stats?.zenith?.altitude ?? 0;
+  const qpHighestAlt = Math.max(qpCurrentAlt, qpCareerAlt);
+
+  // Zen Mode Stats
+  const zenStats = zen_mode ? {
+    level: zen_mode.level,
+    score: zen_mode.score,
+    levelProgress: (zen_mode.level % 1) * 100, // Progress ke level berikutnya
+  } : null;
+
+  // ✅ Advanced Stats Calculation
+  const stats = {
+    totalGamesPlayed: gamesplayed,
+    totalGamesWon: gameswon,
+    winrate: winrate,
+    totalPlaytime: u.gametime,
+    xp: u.xp,
+    rank: u.role,
+    // League stats
+    leagueGamesPlayed: league?.gamesplayed ?? 0,
+    leagueGamesWon: league?.gameswon ?? 0,
+    leagueWinrate: league?.gamesplayed > 0 ? ((league?.gameswon / league?.gamesplayed) * 100).toFixed(1) : 0,
+    // Achievement stats
+    achievementCount: achievements ? achievements.length : 0,
+    achievementRating: u.ar ?? 0,
+    // Ranking
+    globalRank: league?.standing ?? -1,
+    countryRank: league?.standing_local ?? -1,
+    percentileRank: league?.percentile_rank ?? 1,
+  };
+
+  // ✅ Scoreflow processing - extract PBs count
+  const processScoreflow = (scoreflow) => {
+    if (!scoreflow || !scoreflow.points) return { pbCount: 0, totalRecords: 0, avgScore: 0 };
+    const pbCount = scoreflow.points.filter(p => p[1] === 1).length;
+    const totalRecords = scoreflow.points.length;
+    const avgScore = scoreflow.points.length > 0 
+      ? scoreflow.points.reduce((sum, p) => sum + p[2], 0) / scoreflow.points.length 
+      : 0;
+    return { pbCount, totalRecords, avgScore };
+  };
+
+  const scoreflowStats = {
+    _40l: processScoreflow(scoreflow_40l),
+    blitz: processScoreflow(scoreflow_blitz),
+    zenith: processScoreflow(scoreflow_zenith),
+    zen: processScoreflow(scoreflow_zen),
+  };
 
   return {
+    // User info
     id: u._id,
     username: u.username,
     role: u.role,
@@ -71,10 +130,18 @@ export async function fetchTetrioProfile(userId = "") {
     xp: u.xp ?? null,
     join_relative: u.ts ? relativeTime(u.ts) : null,
     play_time_readable: u.gametime >= 0 ? secondsToHuman(u.gametime) : null,
+    
+    // Overall stats
     gamesplayed,
     gameswon,
     winrate,
     supporter: !!u.supporter,
+    stats,
+    scoreflowStats,
+    achievementCount: achievements ? achievements.length : 0,
+    achievements,
+    
+    // League
     league: league ? {
       rank: league.rank,
       bestrank: league.bestrank ?? null,
@@ -84,30 +151,64 @@ export async function fetchTetrioProfile(userId = "") {
       apm: league.apm ?? null,
       pps: league.pps ?? null,
       vs: league.vs ?? null,
+      gamesplayed: league.gamesplayed ?? 0,
+      gameswon: league.gameswon ?? 0,
+      standing: league.standing ?? -1,
+      standing_local: league.standing_local ?? -1,
+      past: league.past ?? {},
     } : null,
-    zen: zen_mode ? { level: zen_mode.level, score: zen_mode.score } : null,
-    quickplay: zenith ? { record: zenith.record, rank: zenith.rank } : null,
     
-    // Data mendalam untuk Sprint 40L
+    // Zen Mode
+    zen: zenStats,
+    
+    // Quick Play
+    quickplay: zenith ? {
+      rank: zenith.rank ?? -1,
+      displayValue: qpHighestAlt,
+      careerBest: qpCareerAlt,
+      currentAlt: qpCurrentAlt,
+      record: zenith.record,
+      best: zenith.best,
+    } : null,
+
+    // Expert QP
+    expertqp: zenithex ? {
+      displayValue: zenithex.record?.results?.stats?.zenith?.altitude ?? 
+                   zenithex.best?.record?.results?.stats?.zenith?.altitude ?? 0,
+      rank: zenithex.rank !== -1 ? zenithex.rank : (zenithex.best?.rank ?? -1),
+      record: zenithex.record,
+      best: zenithex.best,
+    } : null,
+
+    // 40 Lines
     lines40: _40l ? {
       rank: _40l.rank,
       time: sprintTime,
       finesse: sprintStats.finesse?.faults,
       kpp: sprintStats.kpp,
       pps: sprintStats.pps ? parseFloat(sprintStats.pps).toFixed(2) : null,
+      apm: sprintStats.apm ? parseFloat(sprintStats.apm).toFixed(2) : null,
+      lines: sprintStats.lines,
     } : null,
 
-    // Data mendalam untuk Blitz
+    // Blitz
     blitz: blitz ? {
       rank: blitz.rank,
       score: blitzScore,
-      sps: blitzScore ? Math.round(blitzScore / 120) : null, // Score per second (Blitz = 120s)
+      sps: blitzScore ? Math.round(blitzScore / 120) : null,
       quads: blitzStats.clears?.quads || blitzStats.quads,
       finesse: blitzStats.finesse?.faults,
+      apm: blitzStats.apm ? parseFloat(blitzStats.apm).toFixed(2) : null,
+      pps: blitzStats.pps ? parseFloat(blitzStats.pps).toFixed(2) : null,
     } : null,
     
-    achievements,
-    latest,
+    // Scoreflow data
+    scoreflows: {
+      _40l: scoreflow_40l,
+      blitz: scoreflow_blitz,
+      zenith: scoreflow_zenith,
+      zen: scoreflow_zen,
+    },
   };
 }
 
@@ -119,14 +220,13 @@ export async function fetchHistoricalLeagueData(userId) {
   return data.data.past ?? {};
 }
 
-// Tambahkan fungsi ini di bawah fetchHistoricalLeagueData
 export async function fetchLeagueFlow(userId) {
   if (!userId) throw new Error("userId is required");
   const url = `${TETRIO_API}/labs/leagueflow/${userId}`;
   try {
     const data = await proxyGet(url);
     if (!data.success) return null;
-    return data.data; // { startTime, points: [...] }
+    return data.data;
   } catch (e) {
     return null;
   }
