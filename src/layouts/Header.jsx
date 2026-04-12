@@ -13,6 +13,7 @@ import {
   Folder,
   Award,
   History,
+  Palette,
   ScanText 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -299,7 +300,7 @@ const handleDarkModeToggle = async (event) => {
 
               {/* Navigation Links */}
               <nav className="mt-6 md:mt-10 mb-1 space-y-6 md:space-y-8">
-                {["/all-projects", "/certificates","/Scanner"].includes(
+                {["/all-projects", "/certificates","/Scanner","/art"].includes(
                   location.pathname
                 ) ? (
                   <>
@@ -350,6 +351,21 @@ const handleDarkModeToggle = async (event) => {
                         <ScanText size={32} strokeWidth={2} />
                       </motion.button>
                     )}
+                    {location.pathname !== "/art" && (
+                      <motion.button
+                        onClick={() => handleNavigation("/art")}
+                        className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl touch-manipulation active:scale-95 transition-transform flex items-center justify-between gap-2 w-full text-left"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { delay: 0.2 },
+                        }}
+                      >
+                        <span>Art</span>
+                        <Palette size={32} strokeWidth={2} />
+                      </motion.button>
+                    )}
 
                     <motion.button
                       onClick={() => {
@@ -392,6 +408,11 @@ const handleDarkModeToggle = async (event) => {
                       name: "Scanner",
                       link: "/Scanner",
                       style: <ScanText  size={32} strokeWidth={2} />,
+                    },
+                    {
+                      name: "Art",
+                      link: "/art",
+                      style: <Palette  size={32} strokeWidth={2} />,
                     },
                     {
                       name: "Contact",

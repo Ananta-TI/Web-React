@@ -568,7 +568,8 @@ cursor-target
         className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center relative z-10"
       >
         <button
-          onClick={() => navigate("/all-projects")}
+          onClick={() => {navigate("/all-projects");
+          window.scrollTo(0, 0)}}
           className={`cursor-target
     relative px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base uppercase border-b-0 font-lyrae font-semibold rounded-lg
      bg-transparent transition-all duration-500 overflow-hidden

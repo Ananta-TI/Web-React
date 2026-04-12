@@ -11,6 +11,7 @@ import TargetCursor from "./components/Shared/TargetCursor";
 import Preloader from "./components/Preloader";
 import SmoothScrollWrapper from "./layouts/GSAPSmoothScrollWrapper";
 import Hero from "./components/Home/hero";
+import ScrollToTop from "./components/Shared/ScrollToTop";
 
 // 2. LAZY LOADING untuk komponen berat (Menghancurkan Chunk 8MB)
 const Hero2 = lazy(() => import("./components/Shared/TextPressure"));
@@ -21,6 +22,7 @@ const Certificates = lazy(() => import("./layouts/Certificates"));
 const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
 const Timeline = lazy(() => import("./layouts/timeline"));
 const Chatbot = lazy(() => import("./components/Chatbot/Chatbot"));
+const Art = lazy(() => import("./layouts/Art"))
 
 
 // Analytics
@@ -74,6 +76,7 @@ function App() {
         <main className="relative z-0 min-h-screen w-full cursor-none bg-background text-foreground">
           {/* 3. SUSPENSE: Menangani loading state saat komponen lazy diunduh */}
           <Suspense fallback={<div className="h-screen w-full bg-background" />}>
+            <ScrollToTop />
             <Routes location={location} key={location.pathname}>
               <Route
                 path="/"
@@ -86,10 +89,12 @@ function App() {
                   </>
                 }
               />
+              
               <Route path="/Scanner" element={<Scanner />} />
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/all-projects" element={<AllProjects />} />
               <Route path="/certificates" element={<Certificates />} />
+              <Route path="/art" element={<Art />} /> 
             </Routes>
           </Suspense>
           <Footer />

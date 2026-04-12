@@ -179,25 +179,44 @@ const allProjects = [
 
   // Get unique categories
   const categories = ["All", ...new Set(allProjects.map(project => project.category))];
+// Di dalam AllProjects.jsx
+useEffect(() => {
+  // Delay 100ms memberikan waktu bagi konten untuk ter-render sempurna
+  const timer = setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant' // Gunakan instant agar tidak balapan dengan smooth scroll
+    });
+  }, 100);
 
+  return () => clearTimeout(timer);
+}, []);
   // Filter projects based on search and category
-  useEffect(() => {
-    let filtered = allProjects;
-  window.scrollTo({ top: 0, behavior: "smooth" });
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter(project => project.category === selectedCategory);
-    }
+// ✅ 1. Gunakan useEffect khusus untuk mount pertama kali
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []); // Array kosong artinya hanya jalan sekali saat halaman dibuka
 
-    if (searchTerm) {
-      filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
+// ✅ 2. Filter projects (Hapus window.scrollTo dari sini)
+useEffect(() => {
+  let filtered = allProjects;
+  // window.scrollTo(0,0); <--- HAPUS INI agar saat ngetik/filter tidak mental ke atas
+  
+  if (selectedCategory !== "All") {
+    filtered = filtered.filter(project => project.category === selectedCategory);
+  }
 
-    setFilteredProjects(filtered);
-  }, [searchTerm, selectedCategory]);
+  if (searchTerm) {
+    filtered = filtered.filter(project =>
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }
+
+  setFilteredProjects(filtered);
+}, [searchTerm, selectedCategory]);
 
   const handleBackToHome = () => {
     navigate('/');

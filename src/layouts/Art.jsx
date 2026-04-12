@@ -4,41 +4,84 @@ import { ThemeContext } from "../context/ThemeContext";
 import { FolderOpen, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-const Certificates = () => {
+const Art = () => {
   const theme = useContext(ThemeContext);
   const isDarkMode = theme?.isDarkMode ?? true;
 
-  const [filteredCertificates, setFilteredCertificates] = useState([]);
+  const [filteredArt, setFilteredArt] = useState([]);
   const [selectedCert, setSelectedCert] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // ✅ Data sertifikat
-  const certificates = [
-    { image: "sertifikat/1.jpg", year: "2024" },
-    { image: "sertifikat/2.jpg", year: "2025" },
-    { image: "sertifikat/3.jpeg", year: "2025" },
-    { image: "sertifikat/4.jpeg", year: "2025" },
-    { image: "sertifikat/5.jpeg", year: "2025" },
-    { image: "sertifikat/6.jpeg", year: "2025" },
-    { image: "sertifikat/7.jpg", year: "2025" },
-    { image: "sertifikat/8.png", year: "2025" },
-    { image: "sertifikat/9.png", year: "2025" },
-    { image: "sertifikat/10.png", year: "2025" },
-    { image: "sertifikat/11.jpg", year: "2025" },
-    { image: "sertifikat/12.jpg", year: "2025" },
-    { image: "sertifikat/13.jpg", year: "2025" },
-    { image: "sertifikat/14.jpg", year: "2025" },
-    { image: "sertifikat/15.png", year: "2025" },
-    { image: "sertifikat/16.png", year: "2025" },
-    { image: "sertifikat/17.png", year: "2025" },
-    { image: "sertifikat/18.png", year: "2025" },
-    { image: "sertifikat/19.png", year: "2025" },
-    { image: "sertifikat/20.png", year: "2025" },
-    { image: "sertifikat/21.png", year: "2025" },
-    { image: "sertifikat/22.png", year: "2025" },
-    { image: "sertifikat/23.png", year: "2025" },
-    { image: "sertifikat/24.png", year: "2024" },
-  ];
+// ✅ Data art
+const Art = [
+  { image: "art/1.jpg", year: "2024" },
+  { image: "art/2.jpg", year: "2025" },
+  { image: "art/3.jpg", year: "2025" },
+  { image: "art/4.jpg", year: "2025" },
+  { image: "art/5.jpg", year: "2025" },
+  { image: "art/6.jpg", year: "2025" },
+  { image: "art/7.jpg", year: "2025" },
+  { image: "art/8.jpg", year: "2025" },
+  { image: "art/9.jpg", year: "2025" },
+  { image: "art/10.jpg", year: "2025" },
+  { image: "art/11.jpg", year: "2025" },
+  { image: "art/12.jpg", year: "2025" },
+  { image: "art/13.jpg", year: "2025" },
+  { image: "art/14.jpg", year: "2025" },
+  { image: "art/15.jpg", year: "2025" },
+  { image: "art/16.jpg", year: "2025" },
+  { image: "art/17.jpg", year: "2025" },
+  { image: "art/18.jpg", year: "2025" },
+  { image: "art/19.jpg", year: "2025" },
+  { image: "art/20.jpg", year: "2025" },
+  { image: "art/21.jpg", year: "2025" },
+  { image: "art/22.jpg", year: "2025" },
+  { image: "art/23.jpg", year: "2024" },
+  { image: "art/24.jpg", year: "2025" },
+  { image: "art/25.jpg", year: "2025" },
+  { image: "art/26.jpg", year: "2025" },
+  { image: "art/27.jpg", year: "2025" },
+  { image: "art/28.jpg", year: "2025" },
+  { image: "art/29.jpg", year: "2025" },
+  { image: "art/30.jpg", year: "2025" },
+  { image: "art/31.jpg", year: "2025" },
+  { image: "art/32.jpg", year: "2025" },
+  { image: "art/33.jpg", year: "2025" },
+  { image: "art/34.jpg", year: "2025" },
+  { image: "art/35.jpg", year: "2025" },
+  { image: "art/36.jpg", year: "2025" },
+  { image: "art/37.jpg", year: "2025" },
+  { image: "art/38.jpg", year: "2025" },
+  { image: "art/39.jpg", year: "2025" },
+  { image: "art/40.jpg", year: "2025" },
+  { image: "art/41.jpg", year: "2025" },
+  { image: "art/42.jpg", year: "2025" },
+  { image: "art/43.jpg", year: "2025" },
+  { image: "art/44.jpg", year: "2025" },
+  { image: "art/45.jpg", year: "2025" },
+  { image: "art/46.jpg", year: "2025" },
+  { image: "art/47.jpg", year: "2025" },
+  { image: "art/48.jpg", year: "2025" },
+  { image: "art/49.jpg", year: "2025" },
+  { image: "art/50.jpg", year: "2025" },
+  { image: "art/51.jpg", year: "2025" },
+  { image: "art/52.jpg", year: "2025" },
+  { image: "art/53.jpg", year: "2025" },
+  { image: "art/54.jpg", year: "2025" },
+  { image: "art/55.jpg", year: "2025" },
+];
+
+  useEffect(() => {
+    if (selectedCert) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedCert]);
 // Di dalam AllProjects.jsx
 useEffect(() => {
   // Delay 100ms memberikan waktu bagi konten untuk ter-render sempurna
@@ -52,22 +95,10 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, []);
-  useEffect(() => {
-    if (selectedCert) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [selectedCert]);
-
   // 🔝 Scroll ke atas saat halaman dibuka
   useEffect(() => {
     window.scrollTo(0,0);
-    setFilteredCertificates(shuffleArray(certificates));
+    setFilteredArt(shuffleArray(Art));
     
     // Trigger animasi waterfall setelah komponen dimuat
     setTimeout(() => setIsLoaded(true), 100);
@@ -134,7 +165,7 @@ useEffect(() => {
             >
               <FolderOpen className="w-5 h-5" />
               <span className="font-medium">
-                {filteredCertificates.length} Certificates
+                {filteredArt.length} Art
               </span>
             </div>
           </div>
@@ -147,20 +178,20 @@ useEffect(() => {
             className="text-center mb-8"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
-              Certificates
+              Art & Design
             </h1>
             <p
               className={`text-lg font-mono ${
                 isDarkMode ? "text-zinc-400" : "text-gray-600"
               }`}
             >
-              A collection of certificates from courses, trainings, and competitions that I have completed.
+When code stops, creation begins. Exploring the intersection of logic and digital art.
             </p>
           </motion.div>
         </div>
       </div>
 
-      {/* ===== Certificates Masonry with Waterfall Effect ===== */}
+      {/* ===== Art Masonry with Waterfall Effect ===== */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           variants={containerVariants}
@@ -169,7 +200,7 @@ useEffect(() => {
           className="columns-1 sm:columns-2 lg:columns-3 gap-2 space-y-2"
         >
           <AnimatePresence>
-            {filteredCertificates.map((cert, index) => (
+            {filteredArt.map((cert, index) => (
               <motion.div
                 key={index}
                 variants={waterfallVariants}
@@ -331,4 +362,4 @@ const TiltedModal = ({ cert, onClose, isDarkMode }) => {
   );
 };
 
-export default Certificates;
+export default Art;
