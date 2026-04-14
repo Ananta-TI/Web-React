@@ -15,6 +15,7 @@ import ResultSummary from "./WebsiteScanner/ResultSummary";
 import NavigationTabs from "./WebsiteScanner/NavigationTabs";
 import DetectionTab from "./WebsiteScanner/DetectionTab";
 import DetailsTab from "./WebsiteScanner/DetailsTab";
+import IntelligenceTab from "./WebsiteScanner/IntelligenceTab";
 
 export default function WebsiteSecurityScanner() {
   const { isDarkMode } = useContext(ThemeContext);
@@ -45,7 +46,34 @@ export default function WebsiteSecurityScanner() {
 
   // TOAST STATE
   const [toast, setToast] = useState(null);
+const fetchAdvancedDetails = async (type, targetValue) => {
+  try {
+    setStatus(`Mengambil data intelijen untuk ${type}...`);
+    let endpoint = "";
 
+    // Tentukan endpoint berdasarkan kebutuhan
+    if (type === "ip") endpoint = `ip_addresses/${targetValue}`;
+    else if (type === "domain") endpoint = `domains/${targetValue}`;
+    else if (type === "mitre") endpoint = `files/${targetValue}/behaviour_mitre_trees`;
+    else if (type === "tactics") endpoint = `attack_tactics/${targetValue}`;
+    else if (type === "graph") endpoint = `graphs/${targetValue}`;
+
+    if (!endpoint) return;
+
+    // Hit ke Proxy Backend kita!
+    const res = await fetch(`${BACKEND_URL}/api/vt/proxy/${endpoint}`);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error?.message || "Gagal mengambil data");
+
+    console.log(`[Advanced Info ${type}]:`, data);
+    return data;
+    
+  } catch (err) {
+    console.error("Advanced Fetch Error:", err);
+    setError(err.message);
+  }
+};
   // 🔧 Fix Normalisasi URL Backend
   const BACKEND_URL = (
     import.meta.env.VITE_BACKEND_URL ||
@@ -172,125 +200,114 @@ export default function WebsiteSecurityScanner() {
   };
 
   // --- API HANDLERS ---
-  const fetchMetadata = async (type, id) => {
-    try {
-        let endpointType = 'files';
-        if (type === 'url') endpointType = 'urls';
-        else if (type === 'domain') endpointType = 'domains';
-        else if (type === 'ip-address') endpointType = 'ip_addresses';
+const fetchMetadata = async (type, id) => {
+  try {
+    let endpointType = "files";
+    if (type === "url") endpointType = "urls";
+    if (type === "domain") endpointType = "domains";
+    if (type === "ip") endpointType = "ip_addresses";
 
-        const res = await fetch(`${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`)
-        
-        console.log(`🔍 Fetching metadata from: ${BACKEND_URL}/api/vt/metadata/${endpointType}/${id}`);
-        
-        if (!res.ok) {
-            console.error(`❌ Metadata fetch failed with status: ${res.status}`);
-            return null;
-        }
-        
-        const data = await res.json();
-        return data.data;
-    } catch (err) {
-        console.error("Gagal ambil metadata:", err);
-        return null;
-    }
+    const res = await fetch(`${BACKEND_URL}/api/vt/${endpointType}/${id}`);
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    return data.data;
+  } catch {
+    return null;
   }
+};
 
-  const startPolling = useCallback(async (analysisId, type, inputName) => {
-    let attempt = 0;
-    const maxAttempts = 20;
-    const intervalMs = 5000;
+const startPolling = useCallback(async (analysisId, type, inputName) => {
+  let attempt = 0;
+  const maxAttempts = 20;
+  const intervalMs = 5000;
 
-    if (pollRef.current) clearInterval(pollRef.current);
-    if (abortRef.current) abortRef.current.abort();
+  if (pollRef.current) clearInterval(pollRef.current);
+  if (abortRef.current) abortRef.current.abort();
 
-    abortRef.current = new AbortController();
+  abortRef.current = new AbortController();
 
-    setProgress(0);
-    setStatus("Menganalisis...");
+  setProgress(0);
+  setStatus("Menganalisis...");
 
-    pollRef.current = setInterval(async () => {
-      attempt++;
+  pollRef.current = setInterval(async () => {
+    attempt++;
 
-      try {
-        const timestamp = new Date().getTime();
-        const resultUrl = `${BACKEND_URL}/api/vt/result/${analysisId}?_t=${timestamp}`;
-        
-        console.log(`🔍 Polling attempt ${attempt} ke: ${resultUrl}`);
-        
-        const res = await fetch(resultUrl, { 
-          signal: abortRef.current.signal,
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        
-        console.log(`📡 Status respons polling: ${res.status}`);
-        
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const errorText = await res.text();
-          console.error("❌ Respons bukan JSON! Menerima:", errorText.substring(0, 200));
-          
-          if (errorText.includes("<!doctype") || errorText.includes("<html")) {
-            clearInterval(pollRef.current);
-            pollRef.current = null;
-            setError("API tidak dikonfigurasi dengan benar di server. Server mengembalikan halaman HTML, bukan data JSON.");
-            setLoading(false);
-            setProgress(0);
-            return;
-          }
-          return;
-        }
-        
-        const data = await res.json();
-        console.log("✅ Data polling diterima:", data);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/vt/analyses/${analysisId}`);
+      const data = await res.json();
 
-        setProgress(Math.min(100, Math.round((attempt / maxAttempts) * 100)));
+      const vtStatus = data?.data?.attributes?.status;
 
-        if (data?.data?.attributes?.status === "completed") {
-          clearInterval(pollRef.current);
-          pollRef.current = null;
+if (!vtStatus) {
+  console.warn("Status belum tersedia:", data);
+  return;
+}
 
-          setResult(data);
-          setProgress(100);
-          setStatus("Mengambil detail...");
+      if (vtStatus === "queued") {
+        setStatus("Masih dalam antrean...");
+        return;
+      }
 
-          let targetId = null;
-          if (type === "file") targetId = data.meta?.file_info?.sha256;
-          if (type === "url") targetId = data.meta?.url_info?.id;
+      if (vtStatus === "running") {
+        setStatus("Sedang dianalisis...");
+        return;
+      }
 
-          let meta = null;
-          if (targetId) {
-            meta = await fetchMetadata(type, targetId);
-            setMetadata(meta);
-          }
-
-          await saveToHistory(data, meta, inputName, type);
-
-          setLoading(false);
-          setStatus("Selesai!");
-          setTimeout(() => setProgress(0), 800);
-        }
-
-        if (attempt >= maxAttempts) {
-          clearInterval(pollRef.current);
-          pollRef.current = null;
-          throw new Error("Waktu polling habis, scan terlalu lama.");
-        }
-
-      } catch (err) {
-        if (err.name === "AbortError") return;
+      // ✅ HANYA DI SINI AMBIL METADATA
+      if (vtStatus === "completed") {
         clearInterval(pollRef.current);
         pollRef.current = null;
-        console.error("❌ Error saat polling:", err);
-        setError("Gagal mengambil hasil scan: " + (err.message || "Kesalahan tidak diketahui."));
+
+        setResult(data);
+        setStatus("Mengambil metadata...");
+
+        let targetId = null;
+
+        if (type === "file") {
+          targetId =
+            data.meta?.file_info?.sha256 ||
+            data.data?.attributes?.sha256;
+        }
+
+        if (type === "url") {
+          targetId = data.meta?.url_info?.id;
+        }
+
+        if (targetId) {
+          const meta = await fetchMetadata(type, targetId);
+          setMetadata(meta);
+        } else {
+          console.warn("Metadata tidak tersedia");
+        }
+
         setLoading(false);
-        setProgress(0);
+        setStatus("Selesai!");
+        return;
       }
-    }, intervalMs);
-  }, [BACKEND_URL]);
+
+      if (attempt >= maxAttempts) {
+  clearInterval(pollRef.current);
+  pollRef.current = null;
+
+  setStatus("Server tidak merespons dengan benar.");
+  setError("Scan tidak pernah selesai. Kemungkinan backend bermasalah.");
+  setLoading(false);
+  return;
+}
+
+    } catch (err) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+
+      setError("Gagal polling");
+      setLoading(false);
+    }
+  }, intervalMs);
+}, [BACKEND_URL]);
+
+
 
   const handleScanUrl = async () => {
     if (!input) return;
@@ -305,13 +322,23 @@ export default function WebsiteSecurityScanner() {
       console.log("Starting scan for:", input);
       console.log("Using backend URL:", BACKEND_URL);
       
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: input }),
-      });
+      const res = await // SCAN URL
+fetch(`${BACKEND_URL}/api/vt/urls`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+  body: new URLSearchParams({ url: input }),
+});
 
       const data = await res.json();
+      const vtStatus = data?.data?.attributes?.status;
+
+if (vtStatus === "queued") {
+  setStatus("Masih dalam antrean...");
+} else if (vtStatus === "running") {
+  setStatus("Sedang dianalisis...");
+}
       console.log("Scan response:", data);
       
       if (!res.ok) {
@@ -356,7 +383,12 @@ export default function WebsiteSecurityScanner() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-
+if (!data?.data) {
+  console.error("Response aneh:", data);
+  setError("Format response tidak valid dari server.");
+  setLoading(false);
+  return;
+}
       setAnalysisId(data.data.id);
       startPolling(data.data.id, "file", selectedFile.name);
 
@@ -503,18 +535,18 @@ export default function WebsiteSecurityScanner() {
 
               <div className="min-h-[500px]">
                 {activeTab === 'detection' && (
-                  <DetectionTab
-                    stats={stats}
-                    vendorList={vendorList}
-                    showAllVendors={showAllVendors}
-                    setShowAllVendors={setShowAllVendors}
-                    isDarkMode={isDarkMode}
-                  />
+                  <DetectionTab stats={stats} vendorList={vendorList} showAllVendors={showAllVendors} setShowAllVendors={setShowAllVendors} isDarkMode={isDarkMode} />
                 )}
                 {activeTab === 'details' && (
-                  <DetailsTab
-                    metadata={metadata}
-                    isDarkMode={isDarkMode}
+                  <DetailsTab metadata={metadata} isDarkMode={isDarkMode} />
+                )}
+                {/* TAMBAHKAN INI */}
+                {activeTab === 'intelligence' && (
+                  <IntelligenceTab 
+                    id={metadata?.id} 
+                    type={metadata?.type} 
+                    isDarkMode={isDarkMode} 
+                    backendUrl={BACKEND_URL}
                   />
                 )}
               </div>

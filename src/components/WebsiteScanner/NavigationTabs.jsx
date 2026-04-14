@@ -1,10 +1,14 @@
+// NavigationTabs.jsx
 import React from "react";
 
-const NavigationTabs = ({ activeTab, setActiveTab, isDarkMode }) => {
+const NavigationTabs = ({ activeTab, setActiveTab, isDarkMode, type }) => {
+  // Tambahkan 'intelligence' ke dalam array tab
+  const tabs = ['detection', 'details', 'intelligence'];
+  
   return (
     <div className="flex justify-center">
       <div className={`p-1 rounded-xl flex gap-1 border ${isDarkMode?"bg-zinc-900 border-zinc-700":"bg-gray-100 border-gray-200"}`}>
-        {['detection', 'details'].map(tab => (
+        {tabs.map(tab => (
           <button 
             key={tab} 
             onClick={()=>setActiveTab(tab)} 
