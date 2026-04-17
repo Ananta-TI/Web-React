@@ -17,166 +17,194 @@ import DetectionTab from "./WebsiteScanner/DetectionTab";
 import DetailsTab from "./WebsiteScanner/DetailsTab";
 import IntelligenceTab from "./WebsiteScanner/IntelligenceTab";
 
+// ============= CONFIGURATION =============
+const BACKEND_CONFIG = {
+  // Try to use VITE_BACKEND_URL first, then fallback
+  getBackendUrl: () => {
+    // Check if we're on localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+
+    // For deployed version, use Vercel API
+    if (window.location.hostname.includes('vercel.app') || 
+        window.location.hostname.includes('netlify.app')) {
+      return window.location.origin; // Same origin for Vercel
+    }
+
+    // Fallback
+    return import.meta.env.VITE_BACKEND_URL || window.location.origin;
+  }
+};
+
+const POLLING_CONFIG = {
+  maxAttempts: 60,           // 5 minutes with 5s interval
+  intervalMs: 5000,          // 5 seconds
+  timeoutMs: 300000          // 5 minutes total
+};
+
+// ============= MAIN COMPONENT =============
 export default function WebsiteSecurityScanner() {
   const { isDarkMode } = useContext(ThemeContext);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, []);
 
-  // UI state
+  // ============= STATE =============
+  // UI State
   const [input, setInput] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [mode, setMode] = useState("scan");
 
+  // Loading State
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
-  const [analysisId, setAnalysisId] = useState(null);
 
+  // Result State
+  const [analysisId, setAnalysisId] = useState(null);
   const [result, setResult] = useState(null);
   const [metadata, setMetadata] = useState(null);
 
+  // UI Tabs
   const [activeTab, setActiveTab] = useState("detection");
   const [showAllVendors, setShowAllVendors] = useState(false);
-
-  // HISTORY STATE
-  const [history, setHistory] = useState([]);
   const [showHistoryTab, setShowHistoryTab] = useState(false);
+
+  // History State
+  const [history, setHistory] = useState([]);
+
+  // Toast State
+  const [toast, setToast] = useState(null);
+
+  // Refs for cleanup
   const pollRef = React.useRef(null);
   const abortRef = React.useRef(null);
+  const pollTimeoutRef = React.useRef(null);
 
-  // TOAST STATE
-  const [toast, setToast] = useState(null);
-const fetchAdvancedDetails = async (type, targetValue) => {
-  try {
-    setStatus(`Mengambil data intelijen untuk ${type}...`);
-    let endpoint = "";
+  // Get backend URL
+  const BACKEND_URL = BACKEND_CONFIG.getBackendUrl();
 
-    // Tentukan endpoint berdasarkan kebutuhan
-    if (type === "ip") endpoint = `ip_addresses/${targetValue}`;
-    else if (type === "domain") endpoint = `domains/${targetValue}`;
-    else if (type === "mitre") endpoint = `files/${targetValue}/behaviour_mitre_trees`;
-    else if (type === "tactics") endpoint = `attack_tactics/${targetValue}`;
-    else if (type === "graph") endpoint = `graphs/${targetValue}`;
-
-    if (!endpoint) return;
-
-    // Hit ke Proxy Backend kita!
-    const res = await fetch(`${BACKEND_URL}/api/vt/proxy/${endpoint}`);
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error?.message || "Gagal mengambil data");
-
-    console.log(`[Advanced Info ${type}]:`, data);
-    return data;
-    
-  } catch (err) {
-    console.error("Advanced Fetch Error:", err);
-    setError(err.message);
-  }
-};
-  // 🔧 Fix Normalisasi URL Backend
-  const BACKEND_URL = (
-    import.meta.env.VITE_BACKEND_URL ||
-    (window.location.hostname.includes("localhost")
-      ? "http://localhost:5000"
-      : "https://ananta-ti.vercel.app")
-  ).replace(/\/+$/, "");
-
-  // Debug log untuk memeriksa URL
+  // ============= LOGGING =============
   useEffect(() => {
-    console.log("Backend URL:", BACKEND_URL);
-    console.log("Current hostname:", window.location.hostname);
+    console.log('🚀 Scanner initialized');
+    console.log('Backend URL:', BACKEND_URL);
+    console.log('Dark Mode:', isDarkMode);
+    console.log('Hostname:', window.location.hostname);
+  }, [BACKEND_URL, isDarkMode]);
+
+  // ============= CLEANUP =============
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, []);
 
-  // --- HISTORY LOGIC ---
+  // ============= HISTORY MANAGEMENT =============
   useEffect(() => {
-    // 🔥 PERUBAHAN KRUSIAL: Cek sessionStorage di awal
-    const isHistoryCleared = sessionStorage.getItem('historyCleared');
-    if (isHistoryCleared === 'true') {
-      console.log("🚫 Riwayat telah dibersihkan di sesi ini. Tidak memuat dari Supabase.");
-      return; // Jangan jalankan apa-apa lagi
-    }
-
-    console.log("🚀 Memuat riwayat awal dari localStorage dan Supabase...");
-
-    // 1. Muat dari localStorage terlebih dahulu
-    const loadLocal = localStorage.getItem("scanHistory");
-    if (loadLocal) {
-      try {
-        const localHistory = JSON.parse(loadLocal);
-        setHistory(localHistory);
-        console.log("✅ Berhasil memuat riwayat dari localStorage.");
-      } catch (err) {
-        console.error("Error parsing local history:", err);
-        localStorage.removeItem("scanHistory");
+    const loadHistory = async () => {
+      const isHistoryCleared = sessionStorage.getItem('historyCleared') === 'true';
+      if (isHistoryCleared) {
+        console.log('🚫 History cleared in this session');
+        return;
       }
-    }
 
-    // 2. Lalu, muat dari Supabase dan gabungkan
-    const loadSupabase = async () => {
+      // Load from localStorage
+      const localHistory = localStorage.getItem("scanHistory");
+      if (localHistory) {
+        try {
+          const parsed = JSON.parse(localHistory);
+          setHistory(Array.isArray(parsed) ? parsed : []);
+          console.log('✅ Loaded history from localStorage');
+        } catch (err) {
+          console.error('Error parsing localStorage:', err);
+          localStorage.removeItem("scanHistory");
+        }
+      }
+
+      // Load from Supabase
       try {
-        const { data, error } = await supabase
+        const { data, error: supabaseErr } = await supabase
           .from("scan_history")
           .select("*")
           .order("created_at", { ascending: false })
           .limit(20);
 
-        if (error) throw error;
+        if (supabaseErr) {
+          console.warn('Supabase history load error:', supabaseErr);
+          return;
+        }
 
-        if (data && data.length > 0) {
+        if (data?.length > 0) {
           const formatted = data.map((d) => ({
             ...d,
             timestamp: new Date(d.created_at).getTime(),
             id: d.vt_id || d.id
           }));
-          
-          setHistory((prevHistory) => {
+
+          setHistory(prevHistory => {
             const combined = [...formatted, ...prevHistory];
-            const unique = Array.from(new Map(combined.map(item => [item.vt_id || item.id, item])).values());
-            const sortedUnique = unique.sort((a, b) => b.timestamp - a.timestamp);
-            return sortedUnique.slice(0, 20);
+            const unique = Array.from(
+              new Map(combined.map(item => [item.vt_id || item.id, item])).values()
+            );
+            const sorted = unique.sort((a, b) => b.timestamp - a.timestamp);
+            return sorted.slice(0, 20);
           });
-          console.log("✅ Berhasil memuat dan menggabungkan riwayat dari Supabase.");
+          console.log('✅ Loaded history from Supabase');
         }
       } catch (err) {
-        console.error("Error loading Supabase history:", err);
+        console.warn('Supabase load error:', err);
       }
     };
 
-    loadSupabase();
-  }, []); // Hanya berjalan sekali saat mount
+    loadHistory();
+  }, []);
 
-  // Save History (diperbaiki untuk Supabase)
-  const saveToHistory = async (resData, metaData, name, type) => {
-    // 🔥 PERUBAHAN: Jika riwayat disimpan, hapus flag 'historyCleared' dari sessionStorage
+  // ============= UTILITY FUNCTIONS =============
+  const saveToHistory = async (resData, metaData, name, scanType) => {
     sessionStorage.removeItem('historyCleared');
-    console.log("✅ Flag 'historyCleared' dihapus dari sessionStorage karena ada scan baru.");
 
     const supabaseItem = {
       vt_id: resData.data.id,
       name,
-      type,
-      stats: resData.data.attributes.stats,
+      type: scanType,
+      stats: resData.data.attributes?.stats || {},
       result: resData,
-      metadata: metaData
+      metadata: metaData,
+      created_at: new Date().toISOString()
     };
 
     const localItem = {
       ...supabaseItem,
       id: resData.data.id,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
+    // Save to Supabase (non-blocking)
     try {
       await supabase.from("scan_history").insert([supabaseItem]);
-      console.log("Successfully saved to Supabase");
+      console.log('✅ Saved to Supabase');
     } catch (err) {
-      console.warn("Supabase insert failed (non-blocking):", err);
+      console.warn('⚠️ Supabase save error:', err);
     }
 
+    // Save to localStorage
     const newList = [localItem, ...history].slice(0, 20);
     setHistory(newList);
     localStorage.setItem("scanHistory", JSON.stringify(newList));
+  };
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const clearHistory = () => {
+    console.log('🗑️ Clearing history');
+    setHistory([]);
+    localStorage.removeItem("scanHistory");
+    sessionStorage.setItem('historyCleared', 'true');
+    showToast('History cleared', 'success');
   };
 
   const restoreHistory = (item) => {
@@ -186,321 +214,492 @@ const fetchAdvancedDetails = async (type, targetValue) => {
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
-  // 🔥 PERUBAHAN: Fungsi clearHistory sekarang menggunakan sessionStorage
-  const clearHistory = () => {
-    console.log("🗑️ Membersihkan riwayat tampilan, localStorage, dan menandai di sessionStorage...");
-    setHistory([]);
-    localStorage.removeItem("scanHistory");
-    
-    // Set flag di sessionStorage agar bertahan saat refresh
-    sessionStorage.setItem('historyCleared', 'true');
-    
-    setToast({ message: "Riwayat berhasil dibersihkan", type: "success" });
-    setTimeout(() => setToast(null), 3000);
-  };
+  // ============= API CALLS =============
 
-  // --- API HANDLERS ---
-const fetchMetadata = async (type, id) => {
-  try {
-    let endpointType = "files";
-    if (type === "url") endpointType = "urls";
-    if (type === "domain") endpointType = "domains";
-    if (type === "ip") endpointType = "ip_addresses";
-
-    const res = await fetch(`${BACKEND_URL}/api/vt/${endpointType}/${id}`);
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-};
-
-const startPolling = useCallback(async (analysisId, type, inputName) => {
-  let attempt = 0;
-  const maxAttempts = 20;
-  const intervalMs = 5000;
-
-  if (pollRef.current) clearInterval(pollRef.current);
-  if (abortRef.current) abortRef.current.abort();
-
-  abortRef.current = new AbortController();
-
-  setProgress(0);
-  setStatus("Menganalisis...");
-
-  pollRef.current = setInterval(async () => {
-    attempt++;
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/vt/analyses/${analysisId}`);
-      const data = await res.json();
-
-      const vtStatus = data?.data?.attributes?.status;
-
-if (!vtStatus) {
-  console.warn("Status belum tersedia:", data);
-  return;
-}
-
-      if (vtStatus === "queued") {
-        setStatus("Masih dalam antrean...");
-        return;
-      }
-
-      if (vtStatus === "running") {
-        setStatus("Sedang dianalisis...");
-        return;
-      }
-
-      // ✅ HANYA DI SINI AMBIL METADATA
-      if (vtStatus === "completed") {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-
-        setResult(data);
-        setStatus("Mengambil metadata...");
-
-        let targetId = null;
-
-        if (type === "file") {
-          targetId =
-            data.meta?.file_info?.sha256 ||
-            data.data?.attributes?.sha256;
-        }
-
-        if (type === "url") {
-          targetId = data.meta?.url_info?.id;
-        }
-
-        if (targetId) {
-          const meta = await fetchMetadata(type, targetId);
-          setMetadata(meta);
-        } else {
-          console.warn("Metadata tidak tersedia");
-        }
-
-        setLoading(false);
-        setStatus("Selesai!");
-        return;
-      }
-
-      if (attempt >= maxAttempts) {
-  clearInterval(pollRef.current);
-  pollRef.current = null;
-
-  setStatus("Server tidak merespons dengan benar.");
-  setError("Scan tidak pernah selesai. Kemungkinan backend bermasalah.");
-  setLoading(false);
-  return;
-}
-
-    } catch (err) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-
-      setError("Gagal polling");
-      setLoading(false);
+  /**
+   * Fetch metadata for a given ID
+   */
+  const fetchMetadata = async (type, id) => {
+    if (!type || !id) {
+      console.warn('fetchMetadata: Missing type or id', { type, id });
+      return null;
     }
-  }, intervalMs);
-}, [BACKEND_URL]);
-
-
-
-  const handleScanUrl = async () => {
-    if (!input) return;
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-    setMetadata(null);
-    setShowHistoryTab(false);
 
     try {
-      console.log("Starting scan for:", input);
-      console.log("Using backend URL:", BACKEND_URL);
+      setStatus('Fetching detailed metadata...');
+
+      // Map type
+      const typeMap = {
+        'file': 'file',
+        'url': 'url',
+        'domain': 'domain',
+        'ip': 'ip'
+      };
+
+      const mappedType = typeMap[type] || type;
+      const params = new URLSearchParams({ id });
       
-      const res = await // SCAN URL
-fetch(`${BACKEND_URL}/api/vt/urls`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  body: new URLSearchParams({ url: input }),
-});
+      const url = `${BACKEND_URL}/api/vt/metadata/${mappedType}?${params}`;
+      console.log('📥 Fetching metadata:', url);
 
-      const data = await res.json();
-      const vtStatus = data?.data?.attributes?.status;
-
-if (vtStatus === "queued") {
-  setStatus("Masih dalam antrean...");
-} else if (vtStatus === "running") {
-  setStatus("Sedang dianalisis...");
-}
-      console.log("Scan response:", data);
-      
-      if (!res.ok) {
-        console.error("Scan request failed:", res.status, data);
-        throw new Error(data.error || `HTTP error! status: ${res.status}`);
-      }
-      
-      const analysisId = data.data?.id || data.analysis_id;
-      if (!analysisId) {
-        console.error("No analysis ID in response:", data);
-        throw new Error("Tidak mendapatkan analysis ID.");
-      }
-
-      console.log("Got analysis ID:", analysisId);
-      setAnalysisId(analysisId);
-      startPolling(analysisId, "url", input);
-
-    } catch (err) {
-      console.error("Scan error:", err);
-      setError(err.message || "Scan gagal dimulai.");
-      setLoading(false);
-    }
-  };
-
-  const handleScanFile = async () => {
-    if (!selectedFile) return;
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-    setMetadata(null);
-    setShowHistoryTab(false);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-
-      const res = await fetch(`${BACKEND_URL}/api/vt/scan-file`, {
-        method: "POST",
-        body: formData,
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
 
+      if (res.status === 404) {
+        console.warn('Metadata not found for:', id);
+        return null;
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Metadata fetch error:', res.status, errorData);
+        return null;
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-if (!data?.data) {
-  console.error("Response aneh:", data);
-  setError("Format response tidak valid dari server.");
-  setLoading(false);
-  return;
-}
-      setAnalysisId(data.data.id);
-      startPolling(data.data.id, "file", selectedFile.name);
+      console.log('✅ Metadata fetched:', data);
+      return data.data || data;
 
     } catch (err) {
-      setError(err.message);
-      setLoading(false);
+      console.error('❌ fetchMetadata error:', err.message);
+      return null;
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, []);
+  /**
+   * Start polling for analysis results
+   */
+  const startPolling = useCallback((id, scanType, inputName) => {
+    console.log('🔄 Starting polling for:', id, 'Type:', scanType);
 
-  const handleSearch = async () => {
-    if (!input) return;
-    setLoading(true); 
-    setError(""); 
-    setStatus("Searching DB..."); 
-    setResult(null); 
-    setMetadata(null); 
+    let attempt = 0;
+    let isCompleted = false;
+
+    // Cleanup previous polling
+    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+
+    // Set timeout for max polling duration
+    pollTimeoutRef.current = setTimeout(() => {
+      console.error('⏱️ Polling timeout exceeded');
+      if (pollRef.current) clearInterval(pollRef.current);
+      
+      setLoading(false);
+      setError('Analysis took too long. Please try again.');
+      setProgress(0);
+      setStatus('');
+    }, POLLING_CONFIG.timeoutMs);
+
+    // Start polling
+    pollRef.current = setInterval(async () => {
+      if (isCompleted) return;
+
+      attempt++;
+      const progressPercent = Math.min((attempt / POLLING_CONFIG.maxAttempts) * 100, 90);
+      setProgress(progressPercent);
+
+      try {
+        const url = `${BACKEND_URL}/api/vt/result/${id}`;
+        console.log(`[${attempt}/${POLLING_CONFIG.maxAttempts}] Polling:`, url);
+
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.warn(`Poll failed (${res.status}):`, errorData);
+          return; // Continue polling
+        }
+
+        const data = await res.json();
+        const vtStatus = data.data?.attributes?.status;
+
+        if (!vtStatus) {
+          console.warn('No status in response:', data);
+          return; // Continue polling
+        }
+
+        console.log('Status:', vtStatus, 'Attempt:', attempt);
+
+        // Handle different statuses
+        if (vtStatus === 'queued') {
+          setStatus(`Queued (${attempt}/${POLLING_CONFIG.maxAttempts})...`);
+          return;
+        }
+
+        if (vtStatus === 'running') {
+          setStatus(`Analyzing (${attempt}/${POLLING_CONFIG.maxAttempts})...`);
+          return;
+        }
+
+        if (vtStatus === 'completed') {
+          console.log('✅ Analysis completed!');
+          isCompleted = true;
+          
+          // Stop polling
+          if (pollRef.current) {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+          }
+          if (pollTimeoutRef.current) {
+            clearTimeout(pollTimeoutRef.current);
+            pollTimeoutRef.current = null;
+          }
+
+          // Update UI
+          setProgress(90);
+          setStatus('Fetching metadata...');
+          setResult(data);
+
+          // Fetch metadata
+          // For URL scans: VT analysis response contains meta.url_info.id which is
+          // the SHA-256 hash of the URL — this is the correct ID for /api/vt/metadata/url
+          // For file scans: use sha256 from attributes
+          // Fallback: use the analysis id itself
+          let targetId = id;
+
+          if (scanType === 'file') {
+            targetId = data.data?.attributes?.sha256 || id;
+          }
+
+          if (scanType === 'url') {
+            // meta.url_info.id is the URL identifier (sha256 of the url)
+            targetId = data.meta?.url_info?.id || id;
+          }
+
+          console.log('Fetching metadata for:', targetId, 'Type:', scanType);
+
+          const meta = await fetchMetadata(scanType, targetId);
+          if (meta) {
+            setMetadata(meta);
+          }
+
+          // Save to history
+          await saveToHistory(data, meta, inputName, scanType);
+
+          setProgress(100);
+          setStatus('✅ Scan completed!');
+          setLoading(false);
+
+          // Clear status after delay
+          setTimeout(() => setStatus(''), 2000);
+          return;
+        }
+
+      } catch (err) {
+        console.error(`Poll attempt ${attempt} error:`, err.message);
+      }
+
+      // Check max attempts
+      if (attempt >= POLLING_CONFIG.maxAttempts) {
+        console.error('❌ Max polling attempts reached');
+        if (pollRef.current) clearInterval(pollRef.current);
+        
+        setLoading(false);
+        setError('Analysis timeout. VirusTotal server may be slow.');
+        setProgress(0);
+        setStatus('');
+      }
+    }, POLLING_CONFIG.intervalMs);
+
+  }, [BACKEND_URL]);
+
+  /**
+   * Handle URL scan
+   */
+  const handleScanUrl = async () => {
+    if (!input.trim()) {
+      setError('Please enter a URL');
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setMetadata(null);
     setShowHistoryTab(false);
+    setProgress(0);
+
     try {
-      const res = await fetch(`${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(input)}`);
+      console.log('🔍 Scanning URL:', input);
+      setStatus('Submitting URL...');
+
+      const url = `${BACKEND_URL}/api/vt/scan`;
+      console.log('📤 POST to:', url);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ url: input.trim() })
+      });
+
+      console.log('Response status:', res.status);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Scan error:', errorData);
+        throw new Error(errorData.error || `HTTP ${res.status}`);
+      }
+
       const data = await res.json();
-      if (!res.ok || !data.data || data.data.length === 0) throw new Error("Data tidak ditemukan.");
+      console.log('Scan response:', data);
+
+      if (!data.data?.id) {
+        throw new Error('No analysis ID received');
+      }
+
+      setAnalysisId(data.data.id);
+      setProgress(10);
+      setStatus('Analysis queued, waiting for results...');
+
+      // Start polling
+      startPolling(data.data.id, 'url', input.trim());
+
+    } catch (err) {
+      console.error('❌ Scan error:', err.message);
+      setError(err.message);
+      setLoading(false);
+      setProgress(0);
+      setStatus('');
+    }
+  };
+
+  /**
+   * Handle file scan
+   */
+  const handleScanFile = async () => {
+    if (!selectedFile) {
+      setError('Please select a file');
+      return;
+    }
+
+    // Validate file size (650MB max)
+    const maxSize = 650 * 1024 * 1024;
+    if (selectedFile.size > maxSize) {
+      setError(`File too large. Maximum size: 650MB. Your file: ${(selectedFile.size / 1024 / 1024).toFixed(2)}MB`);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setMetadata(null);
+    setShowHistoryTab(false);
+    setProgress(0);
+
+    try {
+      console.log('📁 Scanning file:', selectedFile.name, `(${(selectedFile.size / 1024 / 1024).toFixed(2)}MB)`);
+      setStatus('Uploading file...');
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const url = `${BACKEND_URL}/api/vt/scan-file`;
+      console.log('📤 POST to:', url);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+
+      console.log('Response status:', res.status);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('File scan error:', errorData);
+        throw new Error(errorData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('File scan response:', data);
+
+      if (!data.data?.id) {
+        throw new Error('No analysis ID received');
+      }
+
+      setAnalysisId(data.data.id);
+      setProgress(20);
+      setStatus('File uploaded, waiting for analysis...');
+
+      // Start polling
+      startPolling(data.data.id, 'file', selectedFile.name);
+
+    } catch (err) {
+      console.error('❌ File scan error:', err.message);
+      setError(err.message);
+      setLoading(false);
+      setProgress(0);
+      setStatus('');
+    }
+  };
+
+  /**
+   * Handle search
+   */
+  const handleSearch = async () => {
+    if (!input.trim()) {
+      setError('Please enter a search query');
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setMetadata(null);
+    setShowHistoryTab(false);
+    setProgress(0);
+
+    try {
+      console.log('🔎 Searching for:', input);
+      setStatus('Searching database...');
+
+      const url = `${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(input.trim())}`;
+      console.log('📥 GET from:', url);
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`Search failed: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('Search results:', data);
+
+      if (!data.data || data.data.length === 0) {
+        throw new Error('No results found in VirusTotal database');
+      }
 
       const item = data.data[0];
       const simulatedResult = {
+        success: true,
         data: {
-          id: item.id, type: item.type,
+          id: item.id,
+          type: item.type,
           attributes: {
-            url: input, content: { title: item.attributes.meaningful_name || item.type },
-            date: item.attributes.last_analysis_date,
-            stats: item.attributes.last_analysis_stats,
-            results: item.attributes.last_analysis_results,
-            status: "completed"
+            stats: item.attributes?.last_analysis_stats || {
+              malicious: 0,
+              suspicious: 0,
+              undetected: 0,
+              harmless: 0
+            },
+            results: item.attributes?.last_analysis_results || {},
+            status: 'completed'
           }
         }
       };
+
       setResult(simulatedResult);
       setMetadata(item);
-      
-      saveToHistory(simulatedResult, item, input, 'search');
-      
-      setStatus("Selesai!");
-      setLoading(false);
-    } catch (err) { 
-      setError(`Error: ${err.message}`); 
-      setLoading(false); 
-      setProgress(0); 
-    }
-  }
+      setProgress(100);
+      setStatus('Search complete!');
 
+      // Save to history
+      await saveToHistory(simulatedResult, item, input.trim(), 'search');
+
+      setLoading(false);
+      setTimeout(() => setStatus(''), 2000);
+
+    } catch (err) {
+      console.error('❌ Search error:', err.message);
+      setError(err.message);
+      setLoading(false);
+      setProgress(0);
+      setStatus('');
+    }
+  };
+
+  /**
+   * Handle form submission
+   */
   const handleSubmit = () => {
     setActiveTab("detection");
-    if (mode === "scan") handleScanUrl();
-    else if (mode === "file") handleScanFile();
-    else handleSearch();
-  }
+    
+    if (mode === "scan") {
+      handleScanUrl();
+    } else if (mode === "file") {
+      handleScanFile();
+    } else if (mode === "search") {
+      handleSearch();
+    }
+  };
 
+  /**
+   * Clear all inputs
+   */
   const handleClear = () => {
-    setInput(""); 
-    setSelectedFile(null); 
-    setResult(null); 
-    setMetadata(null); 
-    setStatus(""); 
-    setError(""); 
+    setInput("");
+    setSelectedFile(null);
+    setResult(null);
+    setMetadata(null);
+    setStatus("");
+    setError("");
     setProgress(0);
-  }
+  };
 
+  /**
+   * Handle mode change
+   */
   const handleModeChange = (newMode) => {
-    if (newMode === "history") { 
-      setShowHistoryTab(true); 
-      setResult(null); 
+    if (newMode === "history") {
+      setShowHistoryTab(true);
+      setResult(null);
+    } else {
+      setMode(newMode);
+      setShowHistoryTab(false);
+      handleClear();
     }
-    else { 
-      setMode(newMode); 
-      setShowHistoryTab(false); 
-      handleClear(); 
-    }
-  }
+  };
 
-  // --- DATA PROCESSING ---
-  const stats = result?.data?.attributes?.stats || {};
+  // ============= DATA PROCESSING =============
+  const stats = result?.data?.attributes?.stats || {
+    malicious: 0,
+    suspicious: 0,
+    undetected: 0,
+    harmless: 0
+  };
+
   const vendorObj = result?.data?.attributes?.results || {};
-  const vendorList = Object.entries(vendorObj).map(([vendor, info]) => ({
-    vendor, category: info?.category || "unrated", result: info?.result || info?.category || "clean"
-  }));
+  const vendorList = Object.entries(vendorObj)
+    .filter(([vendor]) => vendor && vendor.trim() !== "")
+    .map(([vendor, info]) => ({
+      vendor,
+      category: info?.category || "undetected",
+      result: info?.result || info?.category || "clean"
+    }));
 
+  // ============= RENDER =============
   return (
     <div className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}>
       <Header isDarkMode={isDarkMode} />
-      
+
       <div className="container mx-auto px-4 py-10 max-w-5xl">
-          <InputSection
-            mode={mode}
-            input={input}
-            setInput={setInput}
-            selectedFile={selectedFile}
-            setSelectedFile={setSelectedFile}
-            loading={loading}
-            status={status}
-            progress={progress}
-            handleSubmit={handleSubmit}
-            handleClear={handleClear}
-            onModeChange={handleModeChange}
-            showHistoryTab={showHistoryTab}
-            isDarkMode={isDarkMode}
-          />
+        <InputSection
+          mode={mode}
+          input={input}
+          setInput={setInput}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          loading={loading}
+          status={status}
+          progress={progress}
+          handleSubmit={handleSubmit}
+          onModeChange={handleModeChange}
+          showHistoryTab={showHistoryTab}
+          isDarkMode={isDarkMode}
+        />
 
         {showHistoryTab && (
           <HistoryTab
@@ -515,6 +714,7 @@ if (!data?.data) {
           {loading && <SkeletonLoader isDarkMode={isDarkMode} />}
           {error && <ErrorDisplay error={error} onRetry={handleSubmit} isDarkMode={isDarkMode} />}
           {!loading && !error && !result && !showHistoryTab && <EmptyState isDarkMode={isDarkMode} />}
+
           {result && !showHistoryTab && (
             <div className="space-y-6">
               <ResultSummary
@@ -535,12 +735,17 @@ if (!data?.data) {
 
               <div className="min-h-[500px]">
                 {activeTab === 'detection' && (
-                  <DetectionTab stats={stats} vendorList={vendorList} showAllVendors={showAllVendors} setShowAllVendors={setShowAllVendors} isDarkMode={isDarkMode} />
+                  <DetectionTab 
+                    stats={stats} 
+                    vendorList={vendorList} 
+                    showAllVendors={showAllVendors} 
+                    setShowAllVendors={setShowAllVendors} 
+                    isDarkMode={isDarkMode} 
+                  />
                 )}
                 {activeTab === 'details' && (
                   <DetailsTab metadata={metadata} isDarkMode={isDarkMode} />
                 )}
-                {/* TAMBAHKAN INI */}
                 {activeTab === 'intelligence' && (
                   <IntelligenceTab 
                     id={metadata?.id} 
@@ -554,6 +759,7 @@ if (!data?.data) {
           )}
         </AnimatePresence>
       </div>
+
       <Toast message={toast?.message} type={toast?.type} isVisible={!!toast} />
     </div>
   );

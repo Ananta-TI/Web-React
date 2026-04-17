@@ -143,16 +143,18 @@ export default function EnhancedIntelligenceTab({
       fetchIntelData("graph", `graphs`);
     }
 
-    // ANALYSIS - Detailed analysis report
+    // ANALYSIS - Detailed last analysis data (read-only GET endpoints)
+    // NOTE: /analyse is POST-only (triggers a new scan) — we use the object
+    // endpoint directly which returns last_analysis_results + stats
     if (activeTab === "analysis") {
       if (normalizedType === "urls") {
-        fetchIntelData("analysis", `urls/${id}/analyse`);
+        fetchIntelData("analysis", `urls/${id}`);
       } else if (normalizedType === "files") {
-        fetchIntelData("analysis", `files/${id}/analyse`);
+        fetchIntelData("analysis", `files/${id}`);
       } else if (normalizedType === "domains") {
-        fetchIntelData("analysis", `domains/${id}/analyse`);
+        fetchIntelData("analysis", `domains/${id}`);
       } else if (normalizedType === "ip_addresses") {
-        fetchIntelData("analysis", `ip_addresses/${id}/analyse`);
+        fetchIntelData("analysis", `ip_addresses/${id}`);
       }
     }
   }, [activeTab, id, type, backendUrl]);
@@ -558,20 +560,71 @@ export default function EnhancedIntelligenceTab({
   const renderAnalysis = () => {
     if (!intelData.analysis) return null;
 
+    const attrs = intelData.analysis.attributes || intelData.analysis;
+    const results = attrs.last_analysis_results || attrs.results || {};
+    const stats = attrs.last_analysis_stats || attrs.stats || {};
+    const date = attrs.last_analysis_date || attrs.date;
+
+    const resultEntries = Object.entries(results);
+    const malicious = resultEntries.filter(([, v]) => v.category === "malicious");
+    const suspicious = resultEntries.filter(([, v]) => v.category === "suspicious");
+    const clean = resultEntries.filter(([, v]) =>
+      v.category === "harmless" || v.category === "undetected"
+    );
+
     return (
       <div className="space-y-4">
         <h4 className="font-bold text-lg flex items-center gap-2">
           <FiZap /> Full Analysis Report
         </h4>
-        <pre
-          className={`p-4 rounded-xl text-xs overflow-x-auto border max-h-96 overflow-y-auto ${
-            isDarkMode
-              ? "bg-zinc-900 text-green-400 border-zinc-700"
-              : "bg-gray-50 text-gray-800 border-gray-200"
-          }`}
-        >
-          {JSON.stringify(intelData.analysis, null, 2)}
-        </pre>
+
+        {/* Stats summary */}
+        {Object.keys(stats).length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Object.entries(stats).map(([key, val]) => (
+              <div
+                key={key}
+                className={`p-3 rounded-xl text-center ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
+              >
+                <p className={`text-2xl font-bold ${
+                  key === "malicious" ? "text-red-500" :
+                  key === "suspicious" ? "text-yellow-500" :
+                  key === "harmless" ? "text-green-500" : "text-blue-500"
+                }`}>{val}</p>
+                <p className="text-xs uppercase font-bold mt-1 opacity-60">{key}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {date && (
+          <p className={`text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+            Last analysis: {new Date(date * 1000).toLocaleString()}
+          </p>
+        )}
+
+        {/* Malicious & suspicious results */}
+        {(malicious.length > 0 || suspicious.length > 0) && (
+          <div className={`p-4 rounded-xl border ${isDarkMode ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200"}`}>
+            <h5 className="font-bold text-red-500 mb-3">⚠️ Flagged by {malicious.length + suspicious.length} engines</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+              {[...malicious, ...suspicious].map(([vendor, res]) => (
+                <div key={vendor} className={`p-2 rounded text-xs ${isDarkMode ? "bg-zinc-800" : "bg-white"}`}>
+                  <span className="font-bold">{vendor}</span>
+                  <span className={`ml-2 px-1 rounded text-[10px] ${
+                    res.category === "malicious" ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-600"
+                  }`}>{res.result || res.category}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {resultEntries.length === 0 && (
+          <p className={`text-center py-6 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+            No analysis results available
+          </p>
+        )}
       </div>
     );
   };
