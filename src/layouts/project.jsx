@@ -3,55 +3,76 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useContext, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
-import LayeredAnimations from "../components/Home/LayeredAnimations";
 import { createPortal } from "react-dom";
 import { smootherInstance } from "../layouts/GSAPSmoothScrollWrapper";
-
-import {
-  Github,
-  ExternalLink,
-  Globe,
-  Code,
-  Database,
-  Palette,
-  Search,
-  Filter,
-  X,
-  Calendar,
-  User,
-  ChevronDown,
-  Star,
-  Clock,
-  ArrowRight,
-  Layers,
-  Zap,
-} from "lucide-react";
+import { X, Calendar, Code, Clock, Globe, Github, Zap } from "lucide-react";
+import { Button } from "../components/ui/button"; // Sesuaikan path
 import "../index.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Projects = () => {
   const theme = useContext(ThemeContext);
   const isDarkMode = theme?.isDarkMode ?? true;
   const navigate = useNavigate();
-  const waveRef = useRef(null);
-  gsap.registerPlugin(ScrollTrigger);
-  const imageRefs = useRef([]);
-  const cardRefs = useRef([]);
-  const titleRef = useRef(null);
+
   const sectionRef = useRef(null);
-  
-  // State for filtering, sorting, and modal
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedTech, setSelectedTech] = useState("All");
-  const [sortBy, setSortBy] = useState("newest");
-  const [showFilters, setShowFilters] = useState(false);
+  const buttonRef = useRef(null);
+  const circleRef = useRef(null);
+  const floatingImgRef = useRef(null);
+  const floatingLabelRef = useRef(null);
+
+  const titleRefs = useRef([]);
+  const categoryRefs = useRef([]);
+
+  const [isHoveringList, setIsHoveringList] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  
-  // List of Projects with Preview Images
+
+  const handleEnter = (index) => {
+    const title = titleRefs.current[index];
+    const category = categoryRefs.current[index];
+
+    if (!title || !category) return;
+
+    gsap.to(title, {
+      x: 40,
+      duration: 0.6,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+
+    gsap.to(category, {
+      x: -40,
+      duration: 0.6,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+  };
+
+  const handleLeave = (index) => {
+    const title = titleRefs.current[index];
+    const category = categoryRefs.current[index];
+
+    if (!title || !category) return;
+
+    gsap.to(title, {
+      x: 0,
+      duration: 0.6,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+
+    gsap.to(category, {
+      x: 0,
+      duration: 0.6,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+  };
+
   const projects = [
     {
       id: 1,
@@ -62,7 +83,7 @@ const Projects = () => {
       repo: "https://github.com/Ananta-TI/my-first-web.git",
       tags: ["HTML", "CSS", "JavaScript"],
       category: "Web Development",
-      image: "/img/first-web.png",
+      image: "/img/first-web2.png",
       date: "2023-01-15",
       difficulty: "Beginner",
       featured: null,
@@ -77,7 +98,7 @@ const Projects = () => {
       repo: "https://github.com/Ananta-TI/React-Nta.git",
       tags: ["React", "Tailwind", "UI/UX"],
       category: "Web Development",
-      image: "/img/Sedap.png",
+      image: "/img/Sedap2.png",
       date: "2023-05-20",
       difficulty: "Intermediate",
       featured: true,
@@ -92,723 +113,297 @@ const Projects = () => {
       repo: "https://github.com/Ananta-TI/react-inventory.git",
       tags: ["React", "Inventory", "Management"],
       category: "Web Application",
-      image: "img/ReactInventory.png",
+      image: "img/react-inventory2.png",
       date: "2023-08-10",
       difficulty: "Intermediate",
       featured: true,
       status: "In Progress",
     },
   ];
-  
-  // Extract unique categories and technologies for filters
-  const categories = ["All", ...new Set(projects.map(p => p.category))];
-  const technologies = ["All", ...new Set(projects.flatMap(p => p.tags))];
-  
-  // Initialize filtered projects
-  useEffect(() => {
-    let result = [...projects];
-    
-    // Filter by search term
-    if (searchTerm) {
-      result = result.filter(
-        project =>
-          project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-    
-    // Filter by category
-    if (selectedCategory !== "All") {
-      result = result.filter(project => project.category === selectedCategory);
-    }
-    
-    // Filter by technology
-    if (selectedTech !== "All") {
-      result = result.filter(project => project.tags.includes(selectedTech));
-    }
-    
-    // Sort projects
-    switch (sortBy) {
-      case "newest":
-        result.sort((a, b) => new Date(b.date) - new Date(a.date));
-        break;
-      case "oldest":
-        result.sort((a, b) => new Date(a.date) - new Date(b.date));
-        break;
-      case "name":
-        result.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "difficulty":
-        const difficultyOrder = { "Beginner": 1, "Intermediate": 2, "Advanced": 3 };
-        result.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
-        break;
-      default:
-        break;
-    }
-    
-    setFilteredProjects(result);
-  }, [searchTerm, selectedCategory, selectedTech, sortBy]);
-  useEffect(() => {
-  if (!smootherInstance) return;
 
-  if (showModal) {
-    smootherInstance.paused(true);
-  } else {
-    smootherInstance.paused(false);
-  }
-}, [showModal]);
-
-  // Initialize filtered projects on mount
+  // =====================================================
+  // LOGIKA TOMBOL "VIEW ALL" YANG SUDAH DIPERBAIKI
+  // =====================================================
   useEffect(() => {
-    setFilteredProjects(projects);
+    if (!buttonRef.current || !circleRef.current) return;
+
+    const btn = buttonRef.current;
+    const circle = circleRef.current;
+
+    // Pastikan titik origin lingkaran ada di tengah
+    gsap.set(circle, { xPercent: -50, yPercent: -50 });
+
+    const xMove = gsap.quickTo(circle, "x", { duration: 0.4, ease: "power3" });
+    const yMove = gsap.quickTo(circle, "y", { duration: 0.4, ease: "power3" });
+
+    const moveCircle = (e) => {
+      const rect = btn.getBoundingClientRect();
+      xMove(e.clientX - rect.left);
+      yMove(e.clientY - rect.top);
+    };
+
+    const enter = (e) => {
+      const rect = btn.getBoundingClientRect();
+      // Snap lingkaran persis di titik kursor sebelum animasi scale dimulai
+      gsap.set(circle, { x: e.clientX - rect.left, y: e.clientY - rect.top });
+      gsap.to(circle, {
+        scale: 1,
+        opacity: 1,
+        duration: 0.4,
+        ease: "power3.out",
+      });
+    };
+
+    const leave = () => {
+      gsap.to(circle, {
+        scale: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power3.out",
+      });
+    };
+
+    btn.addEventListener("mousemove", moveCircle);
+    btn.addEventListener("mouseenter", enter);
+    btn.addEventListener("mouseleave", leave);
+
+    return () => {
+      btn.removeEventListener("mousemove", moveCircle);
+      btn.removeEventListener("mouseenter", enter);
+      btn.removeEventListener("mouseleave", leave);
+    };
   }, []);
 
-  
-// useEffect(() => {
-//   if (showModal) {
-//     document.documentElement.style.pointerEvents = "none";
-//     document.body.style.pointerEvents = "none";
-//   } else {
-//     document.documentElement.style.pointerEvents = "";
-//     document.body.style.pointerEvents = "";
-//   }
-// }, [showModal]);
+  useEffect(() => {
+    if (smootherInstance) smootherInstance.paused(showModal);
+  }, [showModal]);
 
-  // Enhanced parallax effects with GSAP
-useEffect(() => {
-  if (!sectionRef.current) return;
+  useEffect(() => {
+    if (!floatingImgRef.current || !floatingLabelRef.current) return;
 
-  const ctx = gsap.context(() => {
-    Object.values(imageRefs.current).forEach((wrapper) => {
-      const img = wrapper?.querySelector("img");
-      if (!img) return;
+    const xImg = gsap.quickTo(floatingImgRef.current, "left", { duration: 0.75, ease: "power3" });
+    const yImg = gsap.quickTo(floatingImgRef.current, "top", { duration: 0.75, ease: "power3" });
+    const xLabel = gsap.quickTo(floatingLabelRef.current, "left", { duration: 0.4, ease: "power3" });
+    const yLabel = gsap.quickTo(floatingLabelRef.current, "top", { duration: 0.4, ease: "power3" });
 
-      gsap.fromTo(
-        img,
-        { yPercent: -12 },
-        {
-          yPercent: 12,
-          ease: "none",
-          scrollTrigger: {
-            trigger: wrapper,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.8,
-          },
-        }
-      );
-    });
-  }, sectionRef);
+    const onMouseMove = (e) => {
+      xImg(e.clientX);
+      yImg(e.clientY);
+      xLabel(e.clientX);
+      yLabel(e.clientY);
+    };
 
-  return () => ctx.revert();
-}, [filteredProjects]);
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: {
-      opacity: 0,
-      // y: 50,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-  
-  const modalVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.9,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.9,
-      transition: {
-        duration: 0.2,
-        ease: "easeIn",
-      },
-    },
-  };
-  
-  const openProjectModal = (project) => {
+  const openProjectModal = (project, e) => {
+    e.preventDefault();
     setSelectedProject(project);
     setShowModal(true);
   };
-  
+
   const closeModal = () => {
     setShowModal(false);
     setTimeout(() => setSelectedProject(null), 300);
   };
-  
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
-      case "Beginner":
-        return "text-green-500";
-      case "Intermediate":
-        return "text-yellow-500";
-      case "Advanced":
-        return "text-red-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-  
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Completed":
-        return "text-green-500";
-      case "In Progress":
-        return "text-blue-500";
-      case "Planned":
-        return "text-gray-500";
-      default:
-        return "text-gray-500";
-    }
+
+  const scaleAnim = {
+    initial: { scale: 0, x: "-50%", y: "-50%" },
+    enter: { scale: 1, x: "-50%", y: "-50%", transition: { duration: 0.4, ease: [0.76, 0, 0.24, 1] } },
+    closed: { scale: 0, x: "-50%", y: "-50%", transition: { duration: 0.4, ease: [0.32, 0, 0.67, 0] } },
   };
 
   return (
     <section
       ref={sectionRef}
       id="projects"
-      className={`relative w-full min-h-screen py-20 overflow-hidden transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
+      className={`relative w-full min-h-screen py-32 transition-colors duration-500 ${
+        isDarkMode ? "bg-[#111111] text-white" : "bg-white text-black"
       }`}
     >
-      {/* Background Parallax Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-20 left-10 w-64 h-64 rounded-full opacity-20 blur-3xl ${
-          isDarkMode ? "bg-blue-500" : "bg-indigo-300"
-        }`} />
-        <div className={`absolute top-1/2 right-10 w-96 h-96 rounded-full opacity-20 blur-3xl ${
-          isDarkMode ? "bg-purple-500" : "bg-pink-300"
-        }`} />
-        <div className={`absolute bottom-20 left-1/3 w-80 h-80 rounded-full opacity-20 blur-3xl ${
-          isDarkMode ? "bg-teal-500" : "bg-teal-300"
-        }`} />
-      </div>
-
-      {/* Section Heading */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16 relative z-10">
-        <motion.div
-          ref={titleRef}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center"
-        >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-6">
-            <DecryptedText
-              text="My Projects"
-              speed={100}
-              maxIterations={105}
-              sequential
-              animateOn="view"
-            />
-          </h2>
-          <p
-            className={`relative text-base sm:text-lg md:text-xl leading-relaxed font-mono transition-colors duration-500 font px-2 sm:px-4 md:px-0 ${
-              isDarkMode ? "text-zinc-400" : "text-gray-600"
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="mb-10 pl-4">
+          <h5
+            className={`text-xs md:text-sm uppercase tracking-[0.2em] font-medium ${
+              isDarkMode ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            A collection of projects that I have developed using various modern
-            technologies.
-          </p>
-        </motion.div>
-      </div>
+            Recent work
+          </h5>
+        </div>
 
-      {/* Projects Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {filteredProjects.length > 0 ? (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
-          >
-            {filteredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                ref={(el) => (cardRefs.current[index] = el)}
-                variants={cardVariants}
-                whileHover={{
-                  // y: -8,
-                  transition: { duration: 0.3, ease: "easeOut" },
-                }}
-                className={`group relative overflow-hidden rounded-3xl ${
-                  isDarkMode
-                    ? "bg-zinc-800/50 border-none "
-                    : "bg-white/80 border-none "
-                } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
-              >
-                {/* Project Image/Preview */}
-                <div
-  ref={(el) => (imageRefs.current[project.id] = el)}
-  className="relative h-48 sm:h-52 md:h-64 lg:h-56 overflow-hidden rounded-t-3xl"
->
-                  <img
-    src={project.image}
-    alt={project.title}
-    className="absolute top-0 left-0 w-full h-[100%]"
-    loading="lazy"
-  />
-                  
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Featured Badge */}
-                  {project.featured && (
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
-                        <Star className="w-3 h-3" />
-                        Featured
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        isDarkMode
-                          ? "bg-zinc-900/80 text-zinc-200"
-                          : "bg-white/90 text-gray-700"
-                      } backdrop-blur-sm border border-white/20`}
-                    >
-                      {project.category}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Project Content */}
-                <div className="p-4 sm:p-6">
-                  {/* Title */}
-                  <h3
-                    className={`text-xl sm:text-2xl lg:text-3xl font-lyrae mb-3 ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {project.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p
-                    className={`text-sm sm:text-base font-mono leading-relaxed line-clamp-3 mb-4 ${
-                      isDarkMode ? "text-zinc-400" : "text-gray-600"
-                    }`}
-                  >
-                    {project.description}
-                  </p>
-                  
-                  {/* Project Meta */}
-                  <div className="flex flex-wrap items-center gap-3 mb-4 text-xs sm:text-sm font-mono">
-                    <span className={`flex items-center gap-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {new Date(project.date).toLocaleDateString()}
-                    </span>
-                    <span className={`flex items-center gap-1 ${getDifficultyColor(project.difficulty)}`}>
-                      <Code className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {project.difficulty}
-                    </span>
-                    <span className={`flex items-center gap-1 ${getStatusColor(project.status)}`}>
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {project.status}
-                    </span>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {project.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className={`px-2 py-1 text-xs rounded-md font-mono ${
-                          isDarkMode
-                            ? "bg-zinc-700 text-zinc-300"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <motion.button
-                      onClick={() => openProjectModal(project)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`
-        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2 
-        px-4 py-2 text-sm sm:text-base font-lyrae font-bold border-b-0
-        rounded-lg border 
-        bg-transparent transition-all duration-500
-
-        /* ::before - top line animation */
-        before:content-[''] before:absolute before:top-0 before:right-0
-        before:h-[2px] before:w-0
-        before:transition-all before:duration-500 before:z-[-1]
-
-        /* ::after - background fill animation */
-        after:content-[''] after:absolute after:left-0 after:bottom-0 
-        after:h-0 after:w-full
-        after:transition-all after:duration-400 after:z-[-2]
-
-        /* Hover effects */
-        hover:before:w-full
-        hover:after:h-full hover:after:delay-200
-cursor-target
-        ${
-          isDarkMode
-            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
-               hover:text-zinc-900 border-gray-100/20`
-            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
-               hover:text-white border-gray-800/20`
-        }
-      `}
-                    >
-                      <Layers className="w-4 h-4 cursor-target sm:w-5 sm:h-5" />
-                      <span>View Details</span>
-                    </motion.button>
-                    
-                    {project.demo && (
-                      <motion.a
-                        href={project.demo}
-                        target="_blank"
-                        rel="noreferrer"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={` cursor-target border-b-0
-        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
-        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
-        rounded-lg border 
-        bg-transparent transition-all duration-500
-
-        /* ::before - top line animation */
-        before:content-[''] before:absolute before:top-0 before:right-0
-        before:h-[2px] before:w-0
-        before:transition-all before:duration-500 before:z-[-1]
-
-        /* ::after - background fill animation */
-        after:content-[''] after:absolute after:left-0 after:bottom-0
-        after:h-0 after:w-full
-        after:transition-all after:duration-400 after:z-[-2]
-
-        /* Hover effects */
-        hover:before:w-full
-        hover:after:h-full hover:after:delay-200
-
-        ${
-          isDarkMode
-            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
-               hover:text-zinc-900 border-gray-100/20`
-            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
-               hover:text-white border-gray-800/20`
-        }
-      `}
-                      >
-                        <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span>Live Demo</span>
-                      </motion.a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <div className="text-center py-12">
-            <p className={`text-xl font-mono ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-              No projects found matching your criteria.
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedCategory("All");
-                setSelectedTech("All");
-              }}
-              className={`mt-4 px-6 py-2 rounded-lg font-mono text-sm ${
-                isDarkMode
-                  ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              } transition-colors duration-300`}
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Tombol ke All Projects */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center relative z-10"
-      >
-        <button
-          onClick={() => {navigate("/all-projects");
-          window.scrollTo(0, 0)}}
-          className={`cursor-target
-    relative px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base uppercase border-b-0 font-lyrae font-semibold rounded-lg
-     bg-transparent transition-all duration-500 overflow-hidden
-    z-10
-    before:content-[''] before:absolute before:right-0 before:top-0
-    before:h-[2px] before:w-0 before:transition-all before:duration-500 before:z-[-1]
-    after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0 after:w-full
-    after:transition-all after:duration-400 after:z-[-2]
-    hover:before:w-full
-    hover:after:h-full hover:after:delay-200
-    ${
-      isDarkMode
-        ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
-           hover:text-zinc-900 border border-gray-100/20`
-        : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
-           hover:text-white border border-gray-800/20`
-    }
-  `}
+        <ul
+          className="w-full m-0 p-0 list-none "
+          onMouseEnter={() => setIsHoveringList(true)}
+          onMouseLeave={() => setIsHoveringList(false)}
         >
-          <span className="relative z-20">
-            View All Projects
-          </span>
-        </button>
-      </motion.div>
+          {projects.map((project, index) => (
+            <li
+              key={project.id}
+              onMouseEnter={() => {
+                setHoveredIndex(index);
+                handleEnter(index);
+              }}
+              onMouseLeave={() => handleLeave(index)}
+              className="relative w-full"
+            >
+              <div className={`absolute top-0 left-0 w-full  h-[1px] ${isDarkMode ? "bg-white/10" : "bg-black/10"}`} />
 
-      {/* Bottom Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 text-center relative z-10"
-      >
+              <a
+                href={project.demo || "#"}
+                onClick={(e) => openProjectModal(project, e)}
+                className="flex flex-col md:flex-row md:items-center justify-between  py-12 md:py-16 px-4 md:px-8 group cursor-none"
+              >
+                <div ref={(el) => (titleRefs.current[index] = el)} className="pointer-events-none will-change-transform">
+                  <h4 className="text-4xl md:text-6xl font-lyrae lg:text-[80px] xl:text-[90px]  tracking-tight leading-none antialiased">
+                    {project.title}
+                  </h4>
+                </div>
+
+                <div ref={(el) => (categoryRefs.current[index] = el)} className="mt-4 md:mt-0 pointer-events-none will-change-transform">
+                  <p className={`text-sm md:text-base font-lyrae antialiased ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                    {project.category}
+                  </p>
+                </div>
+              </a>
+            </li>
+          ))}
+
+          <div className={`w-full h-[1px] ${isDarkMode ? "bg-white/10" : "bg-black/10"}`} />
+        </ul>
+      </div>
+
+     <div className="container mx-auto px-4 mt-24 text-center relative z-10 ">
+  <Button
+    ref={buttonRef}
+    variant="outline"
+    onClick={() => {
+      navigate("/all-projects");
+      window.scrollTo(0, 0);
+    }}
+    // Ganti rounded-full jadi rounded-none (petak tajam) atau rounded-md
+    className={`group relative overflow-hidden cursor-target rounded-md px-10 py-8 uppercase text-sm tracking-[0.15em] border transition-colors duration-300 ${
+      isDarkMode 
+        ? "border-white/20 hover:bg-transparent" 
+        : "border-black/20 hover:bg-transparent"
+    }`}
+  >
+    {/* Efek fill yang tadinya lingkaran, sekarang jadi kotak (rounded-full dihapus) */}
+    <span
+      ref={circleRef}
+      className={`absolute top-0 left-0 w-[250%] rounded-full aspect-square cursor-none ${
+        isDarkMode ? "bg-white" : "bg-black"
+      }`}
+      style={{
+        transform: "scale(0)",
+        opacity: 0,
+      }}
+    />
+
+    {/* Text Layer */}
+    <span
+      className={`relative z-10 transition-colors duration-300 cursor-none font-lyrae font-bold ${
+        isDarkMode
+          ? "text-white group-hover:text-black"
+          : "text-black group-hover:text-white"
+      }`}
+    >
+      View All Projects
+    </span>
+  </Button>
+</div>
+
+      <div className="container mx-auto px-4 mt-12 text-center relative z-10">
         <div
           className={`inline-flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full ${
-            isDarkMode
-              ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
-              : "bg-white text-gray-600 border border-gray-200"
+            isDarkMode ? "bg-zinc-800 text-zinc-300 border border-zinc-700" : "bg-white text-gray-600 border border-gray-200"
           } shadow-lg`}
         >
           <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="font-bold font-mono text-sm sm:text-base">
-            <span className="text-[#F55247]">{filteredProjects.length} Projects</span> •{" "}
-            <span className="text-[#FFA828]">
-              {filteredProjects.filter((p) => p.demo).length} Live Demos
-            </span>
+            <span className="text-[#F55247]">{projects.length} Projects</span> •{" "}
+            <span className="text-[#FFA828]">{projects.filter((p) => p.demo).length} Live Demos</span>
           </span>
         </div>
-        <div className="w-full flex justify-between items-start mt-8">
-          <div className="flex-shrink-0">
-            <LayeredAnimations />
-          </div>
-        </div>
-      </motion.div>
-      
-      {/* Project Details Modal */}
+      </div>
+
       {createPortal(
-      <AnimatePresence>
-        {showModal && selectedProject && (
+        <>
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeModal}
+            ref={floatingImgRef}
+            variants={scaleAnim}
+            initial="initial"
+            animate={isHoveringList ? "enter" : "closed"}
+            style={{ position: "fixed", top: 0, left: 0, width: "380px", height: "280px", pointerEvents: "none", overflow: "hidden", borderRadius: "8px", zIndex: 40 }}
           >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm " />
-            
-            <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className={`relative max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl ${
-                isDarkMode ? "bg-zinc-800 text-white" : "bg-white text-black"
-              } shadow-2xl`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden rounded-t-2xl">
-                <img
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                
-                <button
-                  onClick={closeModal}
-                  className={`absolute top-4 right-4 p-2 rounded-full cursor-target ${
-                    isDarkMode ? "bg-zinc-900/80 text-white" : "bg-white/80 text-black"
-                  } backdrop-blur-sm`}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-lyrae text-white mb-2">
-                    {selectedProject.title}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-white text-xs sm:text-sm">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {new Date(selectedProject.date).toLocaleDateString()}
-                    </span>
-                    <span className={`flex items-center gap-1 ${getDifficultyColor(selectedProject.difficulty)}`}>
-                      <Code className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {selectedProject.difficulty}
-                    </span>
-                    <span className={`flex items-center gap-1 ${getStatusColor(selectedProject.status)}`}>
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {selectedProject.status}
-                    </span>
-                  </div>
+            <div style={{ width: "100%", height: `${projects.length * 100}%`, transform: `translateY(-${(hoveredIndex / projects.length) * 100}%)`, transition: "transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)" }}>
+              {projects.map((project, i) => (
+                <div key={i} style={{ width: "100%", height: `${100 / projects.length}%` }}>
+                  <img src={project.image} alt={project.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 </div>
-              </div>
-              
-              {/* Modal Content */}
-              <div className="p-4 sm:p-6 md:p-8">
-                <div className="mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold mb-3">About this project</h4>
-                  <p className={`text-sm sm:text-base font-mono leading-relaxed ${isDarkMode ? "text-zinc-300" : "text-gray-700"}`}>
-                    {selectedProject.description}
-                  </p>
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold mb-3">Technologies Used</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProject.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className={`px-3 py-1 rounded-full text-xs sm:text-sm font-mono ${
-                          isDarkMode
-                            ? "bg-zinc-700 text-zinc-300"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {selectedProject.demo && (
-                    <a
-                      href={selectedProject.demo}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={` cursor-target border-b-0
-        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
-        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
-        rounded-lg border 
-        bg-transparent transition-all duration-500
-
-        /* ::before - top line animation */
-        before:content-[''] before:absolute before:top-0 before:right-0
-        before:h-[2px] before:w-0
-        before:transition-all before:duration-500 before:z-[-1]
-
-        /* ::after - background fill animation */
-        after:content-[''] after:absolute after:left-0 after:bottom-0
-        after:h-0 after:w-full
-        after:transition-all after:duration-400 after:z-[-2]
-
-        /* Hover effects */
-        hover:before:w-full
-        hover:after:h-full hover:after:delay-200
-
-        ${
-          isDarkMode
-            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
-               hover:text-zinc-900 border-gray-100/20`
-            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
-               hover:text-white border-gray-800/20`
-        }
-      `}
-                    >
-                      <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
-                      View Live Demo
-                    </a>
-                  )}
-                  
-                  {selectedProject.repo && (
-                    <a
-                      href={selectedProject.repo}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={` cursor-target border-b-0
-        relative z-10 overflow-hidden inline-flex items-center justify-center gap-2
-        px-4 py-2 text-sm sm:text-base font-lyrae font-bold
-        rounded-lg border 
-        bg-transparent transition-all duration-500
-
-        /* ::before - top line animation */
-        before:content-[''] before:absolute before:top-0 before:right-0
-        before:h-[2px] before:w-0
-        before:transition-all before:duration-500 before:z-[-1]
-
-        /* ::after - background fill animation */
-        after:content-[''] after:absolute after:left-0 after:bottom-0
-        after:h-0 after:w-full
-        after:transition-all after:duration-400 after:z-[-2]
-
-        /* Hover effects */
-        hover:before:w-full
-        hover:after:h-full hover:after:delay-200
-
-        ${
-          isDarkMode
-            ? `text-gray-100 before:bg-gray-100 after:bg-gray-100
-               hover:text-zinc-900 border-gray-100/20`
-            : `text-gray-800 before:bg-gray-800 after:bg-zinc-800
-               hover:text-white border-gray-800/20`
-        }
-      `}
-                    >
-                      <Github className="w-4 h-4 sm:w-5 sm:h-5" />
-                      View Repository
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+              ))}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>,
+
+          <motion.div
+            ref={floatingLabelRef}
+            variants={scaleAnim}
+            initial="initial"
+            animate={isHoveringList ? "enter" : "closed"}
+            style={{ position: "fixed", top: 0, left: 0, width: "72px", height: "72px", borderRadius: "50%", background: "#2563eb", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 400, pointerEvents: "none", zIndex: 50, letterSpacing: "0.03em" }}
+          >
+            View
+          </motion.div>
+        </>,
         document.body
       )}
 
-      <div
-      className={`absolute bottom-0 left-0 w-full h-40 z-30 pointer-events-none ${
-isDarkMode
- ? "bg-gradient-to-b from-transparent to-zinc-900"
- : "bg-gradient-to-b from-transparent to-[#faf9f9]"
- }`}
- />
+      {createPortal(
+        <AnimatePresence>
+          {showModal && selectedProject && (
+            <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeModal}>
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className={`relative max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${isDarkMode ? "bg-[#1a1a1a] text-white" : "bg-white text-black"}`} onClick={(e) => e.stopPropagation()}>
+                <div className="relative h-64 sm:h-80 overflow-hidden rounded-t-xl">
+                  <img src={selectedProject.image} alt={selectedProject.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <button onClick={closeModal} className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/80 transition-colors backdrop-blur-md">
+                    <X className="w-5 h-5" />
+                  </button>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <h3 className="text-3xl sm:text-5xl font-light text-white mb-2 tracking-tight">{selectedProject.title}</h3>
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  <div className="flex flex-wrap items-center gap-4 mb-6 text-xs sm:text-sm">
+                    <span className={`flex items-center gap-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}><Calendar className="w-4 h-4" />{new Date(selectedProject.date).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1 text-yellow-500"><Code className="w-4 h-4" />{selectedProject.difficulty}</span>
+                    <span className="flex items-center gap-1 text-green-500"><Clock className="w-4 h-4" />{selectedProject.status}</span>
+                  </div>
+
+                  <h4 className="text-xl font-medium mb-3">Overview</h4>
+                  <p className={`font-light leading-relaxed mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{selectedProject.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mb-10">
+                    {selectedProject.tags.map((tag, i) => (
+                      <span key={i} className={`px-4 py-1.5 text-sm rounded-full font-light border ${isDarkMode ? "border-white/10 text-gray-300 bg-white/5" : "border-black/10 text-gray-700 bg-black/5"}`}>{tag}</span>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {selectedProject.demo && <a href={selectedProject.demo} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300"><Globe className="w-4 h-4" /> Live Demo</a>}
+                    {selectedProject.repo && <a href={selectedProject.repo} target="_blank" rel="noreferrer" className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full border transition duration-300 ${isDarkMode ? "border-white/20 hover:bg-white/10" : "border-black/20 hover:bg-black/5"}`}><Github className="w-4 h-4" /> Repository</a>}
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </section>
-    
   );
 };
 
