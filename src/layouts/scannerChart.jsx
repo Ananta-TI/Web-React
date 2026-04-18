@@ -130,22 +130,22 @@ export default function ScanStatsDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={Shield} label="Harmless" value={data.stats.find(s => s.name === "Harmless")?.value} color={COLORS.Harmless} />
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={AlertTriangle} label="Suspicious" value={data.stats.find(s => s.name === "Suspicious")?.value} color={COLORS.Suspicious} />
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={Zap} label="Malicious" value={data.stats.find(s => s.name === "Malicious")?.value} color={COLORS.Malicious} />
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={EyeOff} label="Undetected" value={data.stats.find(s => s.name === "Undetected")?.value} color={COLORS.Undetected} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 cursor-none ">
           
           {/* Main Timeline Chart */}
-          <div className="lg:col-span-8 space-y-6 min-w-0">
-            <ChartWrapper isDarkMode={isDarkMode} title="Neural Threat Detection Timeline" subtitle="Detection density over temporal distribution">
-              <div className="h-[400px] w-full mt-4" style={{ minHeight: '400px' }}>
+          <div className="lg:col-span-8 space-y-6 min-w-0  cursor-none">
+            <ChartWrapper isDarkMode={isDarkMode} title="Neural Threat Detection Timeline" subtitle="Detection density over temporal distribution" className="cursor-target cursor-none">
+              <div className="h-[400px] w-full mt-4  cursor-none" style={{ minHeight: '400px' }}>
                 {data.trend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={data.trend}>
+                    <ComposedChart data={data.trend} classname=" cursor-none">
                       <defs>
                         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>

@@ -355,7 +355,7 @@ export default function SteamProfileCard({
       <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-6 pt-5 space-y-5 z-10">
 
         {/* ──── STAT CARDS ──── */}
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-4 gap-2.5 ">
           {[
             { icon: <Icons.Gamepad />, val: total.toLocaleString(), label: "Games", accent: "#66c0f4" },
             { icon: <Icons.Clock />, val: fmtPlaytime(playtimeTotal), label: "Hours", accent: "#a3cc47" },
@@ -364,7 +364,7 @@ export default function SteamProfileCard({
           ].map((stat, i) => (
             <div
               key={i}
-              className={`relative flex flex-col items-center justify-center p-3.5 rounded-xl border ${t.bgGlass} ${t.border} ${t.borderHover} ${t.cardShadow} transition-all duration-200 cursor-default group overflow-hidden`}
+              className={`relative flex flex-col items-center cursor-target cursor-none justify-center p-3.5 rounded-xl border ${t.bgGlass} ${t.border} ${t.borderHover} ${t.cardShadow} transition-all duration-200 cursor-default group overflow-hidden`}
             >
               {/* Subtle accent glow on hover */}
               <div

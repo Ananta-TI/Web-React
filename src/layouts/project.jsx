@@ -335,7 +335,7 @@ const Projects = () => {
             variants={scaleAnim}
             initial="initial"
             animate={isHoveringList ? "enter" : "closed"}
-            style={{ position: "fixed", top: 0, left: 0, width: "380px", height: "280px", pointerEvents: "none", overflow: "hidden", borderRadius: "8px", zIndex: 40 }}
+            style={{ position: "fixed", top: 0, left: 0, width: "400px", height: "400px", pointerEvents: "none", overflow: "hidden", borderRadius: "8px", zIndex: 40 }}
           >
             <div style={{ width: "100%", height: `${projects.length * 100}%`, transform: `translateY(-${(hoveredIndex / projects.length) * 100}%)`, transition: "transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)" }}>
               {projects.map((project, i) => (

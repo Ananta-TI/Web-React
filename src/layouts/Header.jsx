@@ -224,9 +224,9 @@ export default function Header() {
               </div>
 
               {/* 2. Navigation Area - Flex-1 makes it take available space */}
-              <nav className="flex-1 space-y-4 md:space-y-6">
+              <nav className="flex-1 space-y-4 md:space-y-6 ">
                 {["/all-projects", "/certificates", "/Scanner", "/art"].includes(location.pathname) ? (
-                  <div className="flex flex-col space-y-6">
+                  <div className="flex flex-col space-y-6 ">
                     {[
                       { name: "Certificates", link: "/certificates", icon: <Award size={32} /> },
                       { name: "All Projects", link: "/all-projects", icon: <Folder size={32} /> },
@@ -238,7 +238,7 @@ export default function Header() {
                         <motion.button
                           key={item.name}
                           onClick={() => handleNavigation(item.link)}
-                          className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl transition-transform flex items-center justify-between w-full"
+                          className="cursor-target cursor-none relative  text-2xl font-lyrae md:text-4xl transition-transform flex items-center justify-between w-full"
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
                         >
@@ -248,7 +248,7 @@ export default function Header() {
                       ))}
                     <motion.button
                       onClick={() => { handleNavigation("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                      className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl pt-4 border-t border-zinc-500/20 w-full text-left"
+                      className="cursor-target cursor-none relative text-2xl  font-lyrae md:text-4xl pt-4 border-t border-zinc-500/20 w-full text-left"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1, transition: { delay: 0.4 } }}
                     >
@@ -272,10 +272,10 @@ export default function Header() {
                     },
                     { name: "Contact", link: "#contact", style: <Mail size={32} /> },
                   ].map((item, index) => (
-                    <div key={item.name} className="flex flex-col w-full">
+                    <div key={item.name} className="flex flex-col w-full ">
                       <motion.button
                         onClick={() => item.isDropdown ? setIsShowcaseOpen(!isShowcaseOpen) : handleNavigation(item.link)}
-                        className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae w-full py-1"
+                        className="cursor-target cursor-none relative flex  items-center text-2xl md:text-4xl font-lyrae w-full py-1"
                         onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
                         onMouseLeave={() => !isMobile && setHoveredLink(null)}
                         initial={{ opacity: 0, y: 15 }}
@@ -290,10 +290,10 @@ export default function Header() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden flex flex-col pl-6 space-y-3 mt-2 border-l-2 border-zinc-500/30"
+                            className="overflow-hidden flex flex-col pl-6 space-y-3 mt-2 border-l-2  border-zinc-500/30"
                           >
                             {item.subItems.map((sub) => (
-                              <button key={sub.name} onClick={() => handleNavigation(sub.link)} className="flex items-center justify-between text-xl md:text-2xl font-lyrae text-zinc-400 hover:text-current transition-colors">
+                              <button key={sub.name} onClick={() => handleNavigation(sub.link)} className="flex cursor-target cursor-none items-center justify-between text-xl md:text-2xl font-lyrae text-zinc-400 hover:text-current transition-colors">
                                 <span>{sub.name}</span>
                                 {sub.icon}
                               </button>

@@ -151,10 +151,10 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
           </h3>
           
           {/* Grid 2x2 untuk 4 mode agar simetris dan rapi */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 ">
             
             {/* 1. 40 LINES (TEMA BIRU) */}
-            <div className={`p-3 rounded-xl border flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-blue-900/10 border-blue-500/20" : "bg-blue-50 border-blue-200"}`}>
+            <div className={`p-3 rounded-xl border cursor-target cursor-none flex flex-col  relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-blue-900/10 border-blue-500/20" : "bg-blue-50 border-blue-200"}`}>
               {/* Icon background transparan */}
               <div className="absolute -bottom-2 -right-2 text-5xl opacity-5 pointer-events-none">⏱️</div>
               
@@ -189,7 +189,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
             </div>
 
             {/* 2. BLITZ (TEMA UNGU) */}
-            <div className={`p-3 rounded-xl border flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-purple-900/10 border-purple-500/20" : "bg-purple-50 border-purple-200"}`}>
+            <div className={`p-3 rounded-xl border cursor-target cursor-none flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-purple-900/10 border-purple-500/20" : "bg-purple-50 border-purple-200"}`}>
               <div className="absolute -bottom-2 -right-2 text-5xl opacity-5 pointer-events-none">⚡</div>
               
               <div className="flex justify-between items-start mb-2 z-10">
@@ -223,7 +223,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
             </div>
             
             {/* 3. QUICK PLAY (TEMA HIJAU) */}
-            <div className={`p-3 rounded-xl border flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}>
+            <div className={`p-3 rounded-xl border cursor-target cursor-none flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}>
               <div className="absolute -bottom-2 -right-2 text-5xl opacity-5 pointer-events-none">🏔️</div>
               
               <div className="flex justify-between items-start mb-2 z-10">
@@ -250,7 +250,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
             </div>
 
             {/* 4. ZEN MODE (TEMA PINK) */}
-            <div className={`p-3 rounded-xl border flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-pink-900/10 border-pink-500/20" : "bg-pink-50 border-pink-200"}`}>
+            <div className={`p-3 rounded-xl border cursor-target cursor-none flex flex-col relative overflow-hidden transition-all hover:scale-[1.02] ${isDarkMode ? "bg-pink-900/10 border-pink-500/20" : "bg-pink-50 border-pink-200"}`}>
               <div className="absolute -bottom-2 -right-2 text-5xl opacity-5 pointer-events-none">🌸</div>
               
               <div className="flex justify-between items-start mb-2 z-10">
