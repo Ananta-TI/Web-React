@@ -495,3 +495,13 @@ body.is-transitioning canvas {
   opacity: 0 !important;
   transition: none !important; /* Hilang instan agar GPU lega */
 }
+
+/* Hilangin scrollbar tapi tetap bisa scroll */
+.custom-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge lama */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

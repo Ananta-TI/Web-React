@@ -108,6 +108,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
           <div className="flex flex-col gap-0.5 text-[10px] opacity-70 font-medium">
             <span>⏱️ {profile.play_time_readable || "0h"} playtime</span>
             <span>🎮 {profile.gamesplayed?.toLocaleString() || 0} games played</span>
+            <span>🚩 {profile.achievementCount?.toLocaleString() || 0} achievements</span>
           </div>
         </div>
 
@@ -173,16 +174,16 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
               {profile.lines40?.time && (
                 <div className="flex justify-between mt-auto pt-3 z-10 border-t border-blue-500/10">
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-bold">{profile.lines40.pps}</span>
-                    <span className="text-[8px] opacity-60 uppercase">PPS</span>
+                    <span className="text-[11px] font-bold">{profile.lines40.lines}</span>
+                    <span className="text-[8px] opacity-60 uppercase">Lines</span>
                   </div>
                   <div className="flex flex-col text-center">
                     <span className="text-[11px] font-bold text-yellow-500">{profile.lines40.finesse}</span>
                     <span className="text-[8px] opacity-60 uppercase">Faults</span>
                   </div>
                   <div className="flex flex-col text-right">
-                    <span className="text-[11px] font-bold">{profile.lines40.kpp?.toFixed(2)}</span>
-                    <span className="text-[8px] opacity-60 uppercase">KPP</span>
+                    <span className="text-[11px] font-bold">{profile.lines40.finesse?.toFixed(2)}</span>
+                    <span className="text-[8px] opacity-60 uppercase">finesse</span>
                   </div>
                 </div>
               )}
@@ -277,7 +278,7 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Recent Matches</h3>
           <div className={`rounded-lg border overflow-hidden ${bgAlt} border-gray-500/10`}>
             {flow && flow.points && flow.points.length > 0 ? (
-              <div className="max-h-[220px] overflow-y-auto custom-scrollbar">
+              <div className=" overflow-y-auto custom-scrollbar">
                 <table className="w-full text-xs text-left whitespace-nowrap">
                   <tbody className="divide-y divide-gray-500/5">
                     {[...flow.points].reverse().slice(0, 15).map((pt, idx) => {
