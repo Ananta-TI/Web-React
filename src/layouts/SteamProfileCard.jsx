@@ -767,13 +767,13 @@ export default function SteamProfileCardV2({
           ].map((stat, i) => (
             <Tooltip key={i} text={stat.label}>
               <div
-                className={`relative flex flex-col items-center justify-center p-3.5 rounded-xl border ${t.bgGlass} ${t.border} ${t.borderHover} ${t.cardShadow} transition-all duration-200 group overflow-hidden cursor-default hover:scale-105`}
+                className={`relative flex flex-col items-center justify-center p-3.5 rounded-xl border ${t.bgGlass} ${t.border} ${t.borderHover} ${t.cardShadow} transition-all duration-200 group overflow-hidden cursor-default hover:scale-105 z-100`}
               >
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 "
                   style={{ background: `radial-gradient(circle at 50% 0%, ${stat.color}12, transparent 70%)` }}
                 />
-                <div className="relative z-10 flex flex-col items-center">
+                <div className="relative z-100 flex flex-col items-center">
                   <div className="mb-2" style={{ color: stat.color }}>{stat.icon}</div>
                   <span className="text-[16px] sm:text-[18px] font-black tracking-tighter leading-none">{stat.val}</span>
                   <span className={`text-[7px] font-bold uppercase tracking-[0.2em] ${t.txt3} mt-1.5`}>{stat.label}</span>
@@ -787,10 +787,10 @@ export default function SteamProfileCardV2({
         <div className={`flex gap-1 overflow-x-auto border-b ${t.border} pb-0`}>
           {[
             { key: TAB_KEYS.OVERVIEW, label: "Overview", icon: <Icons.Sparkle /> },
-            { key: TAB_KEYS.GAMES, label: "Games", icon: <Icons.Gamepad /> },
+         //   { key: TAB_KEYS.GAMES, label: "Games", icon: <Icons.Gamepad /> },
             { key: TAB_KEYS.ANALYTICS, label: "Analytics", icon: <Icons.TrendingUp /> },
             { key: TAB_KEYS.ACHIEVEMENTS, label: "Achievements", icon: <Icons.Trophy /> },
-            { key: TAB_KEYS.COMPARISON, label: "Compare", icon: <Icons.Target /> },
+          //  { key: TAB_KEYS.COMPARISON, label: "Compare", icon: <Icons.Target /> },
           ].map(tab => (
             <button
               key={tab.key}
