@@ -107,64 +107,56 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
           {profile.public_repos} repos • {followers.length} followers
         </p>
 
-        {/* Followers */}
-        <div className="flex -space-x-3 mt-3 pl-2 justify-center lg:justify-start">
+
+       {/* Super-Tight Followers Stack */}
+        <div className="flex items-center -space-x-4 lg:-space-x-5 py-4 pl-2  justify-start">
           {followers.map((f, idx) => (
-            <a
+            <motion.a
               key={f.id}
               href={f.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative group hover:!z-50 focus:!z-50 outline-none"
+              // TAMBAHKAN 'group' DI SINI
+              className="relative group outline-none rounded-full cursor-none"
               style={{ zIndex: followers.length - idx }}
+              whileHover={{ 
+                scale: 1,           
+                y: -4,             
+                zIndex: 999,        
+                transition: { type: "spring", stiffness: 400, damping: 12 } 
+              }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0, transition: { delay: idx * 0.02 } }}
             >
+              {/* AVATAR */}
               <img
                 src={f.avatar_url}
                 alt={f.login || "Follower"}
                 className={`
-                  w-7 h-7
-                  lg:w-10 lg:h-6
-
-                  rounded-full
-                  border
-                  object-cover
-                  transform-gpu will-change-transform
-
-                  transition-all duration-700 ease-out delay-200
-                  group-hover:scale-[1.8]
-                  group-hover:-translate-y-2
-                  group-hover:z-50
-                  group-hover:duration-300
-                  group-hover:delay-0
-                  group-hover:ease-[cubic-bezier(0.34,1.56,0.64,1)]
-
-                  ${
-                    isDarkMode
-                      ? "border-stone-600 bg-stone-800"
-                      : "border-gray-700 bg-white"
-                  }
+                  w-8 h-8 lg:w-15 lg:h-8
+                  rounded-full border-2 object-cover
+                  ${isDarkMode ? "border-zinc-800 bg-zinc-800" : "border-white bg-white"}
                 `}
               />
 
+              {/* TOOLTIP */}
               <div
                 className="
-                  absolute bottom-8 left-1/2 -translate-x-1/2
-                  opacity-0 group-hover:opacity-100
-                  scale-90 group-hover:scale-100
-                  translate-y-2 group-hover:translate-y-0
-                  transition-all duration-200
-                  bg-stone-800 text-white text-[10px]
-                  px-2 py-1 rounded-md shadow-xl
+                  absolute bottom-full mb-2 left-1/2 -translate-x-1/2
+                  opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100
+                  transition-all duration-200 ease-out
+                  bg-zinc-800 text-white text-[10px] font-bold tracking-wide
+                  px-2.5 py-1 rounded-md shadow-xl
                   whitespace-nowrap pointer-events-none
-                  border border-stone-600 z-50
+                  border border-zinc-600
                 "
               >
-                <div className="w-2 h-2 bg-stone-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 border-l border-b border-stone-600" />
                 {f.login}
               </div>
-            </a>
+            </motion.a>
           ))}
         </div>
+
       </div>
     </div>
   );

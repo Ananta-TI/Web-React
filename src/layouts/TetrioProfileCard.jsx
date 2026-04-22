@@ -3,9 +3,13 @@ import { ThemeContext } from "../context/ThemeContext.jsx";
 import { fetchTetrioProfile, fetchHistoricalLeagueData, fetchLeagueFlow, formatTime } from "./tetrioApi";
 
 // Helper Component untuk Stat
-function StatBadge({ label, value, colorClass }) {
+function StatBadge({ label, value, colorClass, isDarkMode }) {
   return (
-    <div className={`flex flex-col items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 group`}>
+    <div className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-300 hover:scale-105 group ${
+      isDarkMode 
+        ? "bg-white/5 border-white/10 hover:bg-white/10" 
+        : "bg-black/5 border-black/10 hover:bg-black/10"
+    } backdrop-blur-sm`}>
       <span className="text-[9px] uppercase tracking-[0.2em] opacity-50 group-hover:opacity-100 transition-opacity mb-1">{label}</span>
       <span className={`text-lg font-black ${colorClass} drop-shadow-md`}>{value}</span>
     </div>
@@ -76,24 +80,22 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
   const qpRank = qpData?.rank ?? -1;
   
   const rankColor = getRankColor(profile.league?.rank);
-  const textColor = isDarkMode ? "text-gray-100" : "text-gray-800";
+  const textColor = isDarkMode ? "text-gray-100" : "text-gray-900";
+  const subTextColor = isDarkMode ? "text-gray-400" : "text-gray-500";
   const bgCard = isDarkMode 
-    ? " bg-zinc-800  border-gray-600" 
+    ? "bg-zinc-800 border-gray-600" 
     : "bg-gray-100 border-gray-800";
+  const bgBadge = isDarkMode ? "bg-white/10" : "bg-black/10";
 
   return (
     <div className={`w-full h-full flex flex-col rounded-2xl overflow-hidden border shadow-2xl backdrop-blur-xl ${bgCard} ${textColor} text-sm transition-all duration-500 relative group/card`}>
       
-      {/* GLOWING BACKGROUND EFFECT PADA CARD */}
-      <div className="absolute -inset-1 "></div>
-
-      {/* HEADER SECTION - Modern Layout */}
+      {/* HEADER SECTION */}
       <div className="relative p-6 border-b border-gray-500/10 overflow-hidden">
-        {/* Abstract pattern background */}
-        <div className="absolute top-0 right-0 w-64 h-64  bg-zinc-500/10 rounded-full blur-3xl -z-0"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-500/10 rounded-full blur-3xl -z-0"></div>
 
         <div className="flex justify-between items-center z-10 relative">
-            <h1 className={`text-2xl font-black font-lyrae tracking-[0.3em] uppercase bg-clip-text text-transparent bg-gradient-to-r ${isDarkMode ? 'from-white to-gray-500' : 'from-black to-gray-400'}`}>
+            <h1 className={`text-2xl font-black tracking-[0.3em] uppercase bg-clip-text text-transparent bg-gradient-to-r ${isDarkMode ? 'from-white to-gray-500' : 'from-black to-gray-400'}`}>
               Tetr.io
             </h1>
             <div className="flex gap-2">
@@ -104,145 +106,141 @@ export default function TetrioProfileCard({ userId = "684fa6fe12175609312650e8" 
         </div>
 
         <div className="flex items-center gap-5 mt-6 z-10 relative">
-          {/* Avatar Area with Glow & Spin */}
           <div className="relative w-20 h-20 flex-shrink-0 group/avatar cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-2xl blur-md opacity-40 group-hover/avatar:opacity-100 transition-all duration-500"></div>
             <img 
               src={profile.avatar || "https://tetr.io/res/avatar.png"} 
               alt="Avatar" 
-              className="relative w-full h-full object-cover rounded-2xl border-2 border-white/20 shadow-xl group-hover/avatar:scale-105 transition-transform duration-300"
+              className="relative w-full h-full cursor-target object-cover rounded-2xl border-2 border-white/20 shadow-xl group-hover/avatar:scale-105 transition-transform duration-300"
             />
             {profile.supporter && (
               <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-[10px] font-black px-2 py-1 rounded-md shadow-[0_0_10px_rgba(250,204,21,0.5)] animate-pulse">PRO</div>
             )}
           </div>
 
-          {/* User Info */}
           <div className="flex-1">
             <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
               {profile.username}
               {profile.country && <span className="text-xl drop-shadow-sm" title={profile.country}>{countryFlag(profile.country)}</span>}
             </h1>
-            <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-bold opacity-80 uppercase tracking-wider">
-              <span className="bg-white/10 px-2 py-1 rounded-md backdrop-blur-md">⏱️ {profile.play_time_readable || "0h"}</span>
-              <span className="bg-white/10 px-2 py-1 rounded-md backdrop-blur-md">🎮 {profile.gamesplayed?.toLocaleString() || 0} GMS</span>
-              <span className="bg-white/10 px-2 py-1 rounded-md backdrop-blur-md">🏆 {profile.winrate || 0}% WR</span>
+            <div className="flex flex-wrap cursor-target gap-2 mt-2 text-[10px] font-bold opacity-80 uppercase tracking-wider">
+              <span className={`${bgBadge} px-2 py-1 rounded-md backdrop-blur-md`}>⏱️ {profile.play_time_readable || "0h"}</span>
+              <span className={`${bgBadge} px-2 py-1 rounded-md backdrop-blur-md`}>🎮 {profile.gamesplayed?.toLocaleString() || 0} GMS</span>
+              <span className={`${bgBadge} px-2 py-1 rounded-md backdrop-blur-md`}>🏆 {profile.winrate || 0}% WR</span>
             </div>
           </div>
 
-          {/* Top Rank Badge - Huge & Impressive */}
           {profile.league && (
-            <div className={`flex flex-col items-center justify-center p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg transform transition-all hover:scale-110 hover:-rotate-2`}>
+            <div className={`flex flex-col cursor-target items-center justify-center p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg transform transition-all hover:scale-110 hover:-rotate-2`}>
               <span className={`text-4xl leading-none font-black drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${rankColor.replace('bg-', 'text-').replace('600', '400')}`}>
                 {profile.league.rank.toUpperCase()}
               </span>
-              <span className="text-[10px] font-bold opacity-80 mt-1 bg-black/20 px-2 py-0.5 rounded-full">{profile.league.tr} TR</span>
+              <span className="text-[10px] font-bold opacity-80 mt-1 bg-black/20 px-2 py-0.5 rounded-full text-white">{profile.league.tr} TR</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* QUICK STATS BOARD (4 Columns) */}
-      <div className="grid grid-cols-4 gap-2 p-4 border-b border-gray-500/10">
-          <StatBadge label="APM" value={profile.league?.apm?.toFixed(2) || "0.00"} colorClass="text-red-400" />
-          <StatBadge label="PPS" value={profile.league?.pps?.toFixed(2) || "0.00"} colorClass="text-blue-400" />
-          <StatBadge label="VS" value={profile.league?.vs?.toFixed(2) || "0.00"} colorClass="text-green-400" />
-          <StatBadge label="GLICKO" value={profile.league?.glicko ? Math.round(profile.league.glicko) : "—"} colorClass="text-purple-400" />
+      {/* QUICK STATS BOARD */}
+      <div className="grid grid-cols-4 gap-2 p-4 border-b border-gray-500/10 ">
+          <StatBadge label="APM" value={profile.league?.apm?.toFixed(2) || "0.00"} colorClass="text-red-400" isDarkMode={isDarkMode} />
+          <StatBadge label="PPS" value={profile.league?.pps?.toFixed(2) || "0.00"} colorClass="text-blue-400" isDarkMode={isDarkMode} />
+          <StatBadge label="VS" value={profile.league?.vs?.toFixed(2) || "0.00"} colorClass="text-green-400" isDarkMode={isDarkMode} />
+          <StatBadge label="GLICKO" value={profile.league?.glicko ? Math.round(profile.league.glicko) : "—"} colorClass="text-purple-400" isDarkMode={isDarkMode} />
       </div>
 
       {/* MAIN SCROLL AREA */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
         
-        {/* BEST RECORDS GRID */}
         <section>
           <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Mastery Records</h3>
+              <h3 className={`text-xs font-bold ${subTextColor} uppercase tracking-widest`}>Mastery Records</h3>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             {/* 40 LINES */}
-            <div className="group p-4 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/10 to-transparent hover:border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 relative overflow-hidden">
+            <div className={`group p-4 cursor-target rounded-2xl border ${isDarkMode ? 'border-blue-500/20 bg-blue-900/10' : 'border-blue-500/30 bg-blue-500/5'} hover:border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 relative overflow-hidden`}>
               <div className="absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">⏱️</div>
               <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">40 Lines Sprint</h4>
-              <div className="text-2xl font-black tracking-tight drop-shadow-md text-white">
+              <div className={`text-2xl font-black tracking-tight drop-shadow-md ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {profile.lines40?.time ? formatTime(profile.lines40.time) : "—"}
               </div>
               {profile.lines40?.time && (
                 <div className="flex gap-3 mt-3 text-[10px] font-mono opacity-80">
-                  <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">PPS: {profile.lines40.pps}</span>
-                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">F: {profile.lines40.finesse}</span>
+                  <span className="bg-blue-500/20 text-blue-500 px-2 py-0.5 rounded">PPS: {profile.lines40.pps}</span>
+                  <span className="bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded">F: {profile.lines40.finesse}</span>
                 </div>
               )}
             </div>
 
             {/* BLITZ */}
-            <div className="group p-4 rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-900/10 to-transparent hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300 relative overflow-hidden">
-              <div className="absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">⚡</div>
+            <div className={`group p-4 cursor-target rounded-2xl border ${isDarkMode ? 'border-purple-500/20 bg-purple-900/10' : 'border-purple-500/30 bg-purple-500/5'} hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300 relative overflow-hidden`}>
+              <div className="absolute  -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">⚡</div>
               <h4 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">Blitz 2 Min</h4>
-              <div className="text-2xl font-black tracking-tight drop-shadow-md text-white">
+              <div className={`text-2xl font-black tracking-tight drop-shadow-md ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {profile.blitz?.score?.toLocaleString() || "—"}
               </div>
               {profile.blitz?.score && (
                 <div className="flex gap-3 mt-3 text-[10px] font-mono opacity-80">
-                  <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">SPS: {profile.blitz.sps}</span>
+                  <span className="bg-purple-500/20 text-purple-500 px-2 py-0.5 rounded">SPS: {profile.blitz.sps}</span>
                 </div>
               )}
             </div>
             
             {/* QUICK PLAY */}
-            <div className="group p-4 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/10 to-transparent hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300 relative overflow-hidden">
+            <div className={`group p-4 cursor-target rounded-2xl  border ${isDarkMode ? 'border-emerald-500/20 bg-emerald-900/10' : 'border-emerald-500/30 bg-emerald-500/5'} hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300 relative overflow-hidden`}>
               <div className="absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500">🏔️</div>
               <div className="flex justify-between items-start">
                   <h4 className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Quick Play</h4>
-                  {qpRank !== -1 && <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full">#{Math.round(qpRank).toLocaleString()}</span>}
+                  {qpRank !== -1 && <span className="text-[8px] bg-emerald-500/20 text-emerald-600 px-1.5 py-0.5 rounded-full">#{Math.round(qpRank).toLocaleString()}</span>}
               </div>
-              <div className="text-2xl font-black tracking-tight drop-shadow-md text-white">
+              <div className={`text-2xl font-black tracking-tight drop-shadow-md ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {qpDisplay !== "—" ? `${qpDisplay}m` : "—"}
               </div>
             </div>
 
             {/* ZEN MODE */}
-            <div className="group p-4 rounded-2xl border border-pink-500/20 bg-gradient-to-br from-pink-900/10 to-transparent hover:border-pink-400/50 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] transition-all duration-300 relative overflow-hidden">
+            <div className={`group p-4 cursor-target rounded-2xl border ${isDarkMode ? 'border-pink-500/20 bg-pink-900/10' : 'border-pink-500/30 bg-pink-500/5'} hover:border-pink-400/50 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] transition-all duration-300 relative overflow-hidden`}>
               <div className="absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">🌸</div>
               <h4 className="text-[10px] font-bold text-pink-400 uppercase tracking-widest mb-1">Zen Mode</h4>
-              <div className="text-2xl font-black tracking-tight drop-shadow-md text-white">
+              <div className={`text-2xl font-black tracking-tight drop-shadow-md ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {profile.zen?.level ? `Lvl ${profile.zen.level}` : "—"}
               </div>
             </div>
           </div>
         </section>
 
-        {/* MATCH HISTORY SECTION - Sleek Table */}
+        {/* MATCH HISTORY SECTION */}
         <section>
           <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-4 bg-orange-500 rounded-full"></div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recent Engagements</h3>
+              <h3 className={`text-xs font-bold ${subTextColor} uppercase tracking-widest`}>Recent Engagements</h3>
           </div>
           
-          <div className="rounded-2xl border border-white/10 bg-black/20 overflow-hidden backdrop-blur-xl">
+          <div className={`rounded-2xl border overflow-hidden backdrop-blur-xl cursor-none ${isDarkMode ? 'border-white/10 bg-black/20' : 'border-black/10 bg-black/5'}`}>
             {flow && flow.points && flow.points.length > 0 ? (
-              <div className="max-h-[550px] overflow-y-auto custom-scrollbar">
-                <table className="w-full text-xs text-left whitespace-nowrap">
-                  <thead className="sticky top-0 bg-zinc-800/90 backdrop-blur-md z-20">
-                    <tr className="uppercase text-[9px] opacity-60 tracking-widest border-b border-white/10">
-                      <th className="px-4 py-3 font-bold">Result</th>
+              <div className="max-h-[550px] overflow-y-auto cursor-none custom-scrollbar">
+                <table className="w-full text-xs cursor-none text-left whitespace-nowrap">
+                  <thead className={`sticky top-0 backdrop-blur-md z-20 cursor-none ${isDarkMode ? 'bg-zinc-800/90' : 'bg-gray-200/90'}`}>
+                    <tr className={`uppercase text-[9px] opacity-60 cursor-none tracking-widest border-b ${isDarkMode ? 'border-white/10' : 'border-black/10'}`}>
+                      <th className="px-4 py-3 cursor-none font-bold">Result</th>
                       <th className="px-3 py-3 font-bold text-right">Rating</th>
                       <th className="px-3 py-3 font-bold text-right">Opponent</th>
                       <th className="px-4 py-3 font-bold text-right">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className={`divide-y cursor-none ${isDarkMode ? 'divide-white/5' : 'divide-black/5'}`}>
                     {[...flow.points].reverse().slice(0, 15).map((pt, idx) => {
                       const isWin = pt[1] === 1 || pt[1] === 3;
                       const isLoss = pt[1] === 2 || pt[1] === 4;
                       const date = new Date(flow.startTime + pt[0]);
-                      const trColor = pt[2] >= 1000 ? "text-red-400" : pt[2] >= 500 ? "text-yellow-400" : "text-gray-300";
+                      const trColor = pt[2] >= 1000 ? "text-red-500" : pt[2] >= 500 ? (isDarkMode ? "text-yellow-400" : "text-yellow-600") : subTextColor;
                       
                       return (
-                        <tr key={idx} className="group hover:bg-white/10 transition-colors duration-200 cursor-default">
+                        <tr key={idx} className={`group cursor-none transition-colors duration-200 cursor-target ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded-md text-[10px] font-black tracking-wider ${isWin ? 'bg-green-500/20 text-green-400' : isLoss ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                            <span className={`px-2 py-1 rounded-md text-[10px] font-black tracking-wider ${isWin ? 'bg-green-500/20 text-green-500' : isLoss ? 'bg-red-500/20 text-red-500' : 'bg-gray-500/20 text-gray-500'}`}>
                               {isWin ? "VICTORY" : isLoss ? "DEFEAT" : "DRAW"}
                             </span>
                           </td>
