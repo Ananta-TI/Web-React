@@ -144,23 +144,23 @@ export default function ScanStatsDashboard() {
             <ChartWrapper isDarkMode={isDarkMode} title="Neural Threat Detection Timeline" subtitle="Detection density over temporal distribution" className="cursor-target cursor-none">
               <div className="h-[400px] w-full mt-4  cursor-none" style={{ minHeight: '400px' }}>
                 {data.trend.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" classname=" cursor-none">
                     <ComposedChart data={data.trend} classname=" cursor-none">
                       <defs>
-                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1" classname=" cursor-none">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} classname=" cursor-none"/>
                           <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                      <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
-                      <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} />
-                      <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
-                      <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px', color: axisColor}} />
-                      <Area type="monotone" dataKey="total" fill="url(#areaGradient)" stroke="#10b981" strokeWidth={2} name="Global Volume" />
-                      <Bar dataKey="Malicious" fill={COLORS.Malicious} barSize={8} radius={[4, 4, 0, 0]} name="Malicious" />
-                      <Line type="stepAfter" dataKey="Suspicious" stroke={COLORS.Suspicious} strokeWidth={2} dot={false} name="Suspicious" />
-                      <Line type="stepAfter" dataKey="Undetected" stroke={COLORS.Undetected} strokeWidth={2} dot={false} name="Undetected" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} classname=" cursor-none" />
+                      <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} classname=" cursor-none"/>
+                      <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: axisColor}} classname=" cursor-none"/>
+                      <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} classname=" cursor-none"/>
+                      <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px', color: axisColor}} classname=" cursor-none"/>
+                      <Area type="monotone" dataKey="total" fill="url(#areaGradient)" stroke="#10b981" strokeWidth={2} name="Global Volume" classname=" cursor-none"/>
+                      <Bar dataKey="Malicious" fill={COLORS.Malicious} barSize={8} radius={[4, 4, 0, 0]} name="Malicious" classname=" cursor-none" />
+                      <Line type="stepAfter" dataKey="Suspicious" stroke={COLORS.Suspicious} strokeWidth={2} dot={false} name="Suspicious" classname=" cursor-none" />
+                      <Line type="stepAfter" dataKey="Undetected" stroke={COLORS.Undetected} strokeWidth={2} dot={false} name="Undetected" classname=" cursor-none" />
                     </ComposedChart>
                   </ResponsiveContainer>
                 ) : (

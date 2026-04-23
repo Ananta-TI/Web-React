@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Divide as Hamburger } from 'hamburger-react';
+import GooeyNav from "../components/GooeyNav"; // Sesuaikan dengan path file kamu
 
 export default function Header() {
   const navigate = useNavigate();
@@ -32,7 +33,20 @@ export default function Header() {
   const [currentTime, setCurrentTime] = useState("");
   const [isThemeChanging, setIsThemeChanging] = useState(false);
   const [isShowcaseOpen, setIsShowcaseOpen] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false); // State baru untuk scroll
+const [isDesktopShowcaseOpen, setIsDesktopShowcaseOpen] = useState(false); // State dropdown desktop
+  // Cek apakah ini halaman Home
+  // Tampilkan Full Navbar jika di halaman Home DAN belum di-scroll
+const showFullNavbar = !isScrolled;
+  // Scroll Listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50); // Akan true jika scroll lebih dari 50px
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   // Clock Logic
   useEffect(() => {
     const updateClock = () => {
@@ -164,20 +178,236 @@ export default function Header() {
 
   return (
     <div className="relative">
-      {/* Top Bar */}
-      <div className="fixed flex items-center justify-between right-4 left-4 z-[60] md:right-4 md:left-4">
-        <span className={`text-2xl font-bold p-0 ${isDarkMode ? "text-white" : "text-zinc-800"}`}>
-          {/* Logo Space */}
+{/* Top Bar / Navbar */}
+      <div 
+        className={`fixed z-[60] transition-all duration-500 ease-in-out flex items-center justify-between pointer-events-none ${
+          showFullNavbar 
+            ? `top-0 left-0 right-0 px-6 py-5 md:px-12 md:py-6 w-full ${isDarkMode ? "bg-transparent " : "bg-transparent"}` 
+            : "top-4 right-4 left-4 md:right-8 md:left-8"
+        }`}
+      >
+        {/* Logo */}
+        <span 
+          onClick={() => handleNavigation("/")}
+          className={`text-2xl font-bold p-0 pointer-events-auto cursor-none cursor-target transition-colors ${isDarkMode ? "text-white" : "text-zinc-800"}`}
+        >
         </span>
-        <div className={`p-2 mt-1 cursor-none pointer-none cursor-target rounded-full transition-colors ${isDarkMode ? 'bg-gray-100' : 'bg-zinc-800'}`}>
+
+{/* Full Desktop Navbar Links */}
+        <AnimatePresence>
+          {showFullNavbar && !isMobile && (
+            <motion.nav 
+              initial={{ opacity: 0, y: -15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="hidden md:flex gap-6 lg:gap-8 items-center top-8 pointer-events-auto absolute left-1/2 -translate-x-1/2"
+            >
+              {/* CEK KONDISI HALAMAN: Apakah ini halaman Showcase atau bukan? */}
+              {["/all-projects", "/certificates", "/Scanner", "/art"].includes(location.pathname) ? (
+                
+                /* =========================================
+                   TAMPILAN NAVBAR UNTUK HALAMAN SHOWCASE
+                   ========================================= */
+                <>
+                  <button
+                    onClick={() => { handleNavigation("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className={`relative group px-2 py-1 text-sm font-bold uppercase tracking-widest cursor-none cursor-target transition-colors duration-300 ${
+                      isDarkMode ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
+                    }`}
+                  >
+                    <span>Home</span>
+                    <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}></span>
+                  </button>
+                  
+                  <div className={`h-4 w-[1px] ${isDarkMode ? "bg-zinc-700" : "bg-gray-300"}`}></div>
+                  
+                  {[
+                    { name: "Certificates", link: "/certificates" },
+                    { name: "All Projects", link: "/all-projects" },
+                    { name: "Scanner", link: "/Scanner" },
+                    { name: "Art", link: "/art" },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.link;
+                    return (
+                      <button
+                        key={item.name}
+                        onClick={() => handleNavigation(item.link)}
+                        className={`relative group px-2 py-1 text-sm font-bold uppercase tracking-widest cursor-none cursor-target transition-colors duration-300 flex items-center gap-2 ${
+                          isActive 
+                            ? (isDarkMode ? "text-emerald-400" : "text-emerald-600") 
+                            : (isDarkMode ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-900")
+                        }`}
+                      >
+                        {item.name}
+                        {isActive && (
+                          <motion.span 
+                            layoutId="activeDot"
+                            className="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                          />
+                        )}
+                        {!isActive && (
+                          <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}></span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </>
+
+              ) : (
+
+                /* =========================================
+                   TAMPILAN NAVBAR UNTUK HALAMAN UTAMA (HOME)
+                   ========================================= */
+                <>
+                  {[
+                    { name: "Home", link: "/" },
+                    { name: "About", link: "#about" },
+                    { name: "Projects", link: "#projects" }
+                  ].map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => handleNavigation(item.link)}
+                      className={`relative group px-2 py-1 text-sm font-bold uppercase tracking-widest cursor-none cursor-target transition-colors duration-300 ${
+                        isDarkMode ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
+                      }`}
+                    >
+                      <span>{item.name}</span>
+                      <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}></span>
+                    </button>
+                  ))}
+
+                  <div className="relative py-2">
+                    <button
+                      onClick={() => setIsDesktopShowcaseOpen(!isDesktopShowcaseOpen)}
+                      className={`relative group px-2 py-1 flex items-center gap-1 text-sm font-bold uppercase tracking-widest cursor-none cursor-target transition-colors duration-300 ${
+                        isDarkMode 
+                          ? (isDesktopShowcaseOpen ? "text-white" : "text-zinc-400 hover:text-white") 
+                          : (isDesktopShowcaseOpen ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-900")
+                      }`}
+                    >
+                      <span>Showcase</span>
+                      <ChevronDown 
+                        size={16} 
+                        className={`transition-transform duration-300 ${isDesktopShowcaseOpen ? "rotate-180" : "rotate-0"}`} 
+                      />
+                      <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}></span>
+                    </button>
+
+                    <AnimatePresence>
+                      {isDesktopShowcaseOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(4px)" }}
+                          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(4px)" }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className={`absolute top-[120%] left-1/2 -translate-x-1/2 w-56 p-2 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border ${
+                            isDarkMode 
+                              ? "bg-zinc-900/80 border-zinc-700/50 shadow-black/50" 
+                              : "bg-white/90 border-gray-200/50 shadow-gray-200/50"
+                          }`}
+                        >
+                          <div className="flex flex-col gap-1">
+                            {[
+                              { name: "Certificates", link: "/certificates", icon: <Award size={16} /> },
+                              { name: "All Projects", link: "/all-projects", icon: <Folder size={16} /> },
+                              { name: "Scanner", link: "/Scanner", icon: <ScanText size={16} /> },
+                              { name: "Art", link: "/art", icon: <Palette size={16} /> },
+                            ].map((sub, index) => (
+                              <motion.button
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 + 0.1 }}
+                                key={sub.name}
+                                onClick={() => {
+                                  handleNavigation(sub.link);
+                                  setIsDesktopShowcaseOpen(false);
+                                }}
+                                className={`group flex items-center justify-between w-full text-left px-4 py-3 rounded-xl text-sm font-bold tracking-wider cursor-none cursor-target transition-all duration-200 ${
+                                  isDarkMode 
+                                    ? "text-zinc-300 hover:bg-zinc-800 hover:text-white" 
+                                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                                }`}
+                              >
+                                <span className="transform transition-transform duration-200 group-hover:translate-x-1">{sub.name}</span>
+                                <span className={`transform transition-transform duration-200 group-hover:scale-110 ${isDarkMode ? "text-zinc-500 group-hover:text-emerald-400" : "text-zinc-400 group-hover:text-emerald-600"}`}>
+                                  {sub.icon}
+                                </span>
+                              </motion.button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <button
+                    onClick={() => handleNavigation("#contact")}
+                    className={`relative group px-2 py-1 text-sm font-bold uppercase tracking-widest cursor-none cursor-target transition-colors duration-300 ${
+                      isDarkMode ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
+                    }`}
+                  >
+                    <span>Contact</span>
+                    <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}></span>
+                  </button>
+                </>
+              )}
+
+              {/* =========================================
+                  THEME TOGGLE (GLOBAL UNTUK SEMUA HALAMAN)
+                  ========================================= */}
+              <div className={`h-4 w-[1px] ml-2 ${isDarkMode ? "bg-zinc-700" : "bg-gray-300"}`}></div>
+              
+              <button
+                onClick={handleDarkModeToggle}
+                disabled={isThemeChanging}
+                className="relative group p-1.5 cursor-none cursor-target focus:outline-none"
+              >
+                <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" className={`w-[38px] h-[38px] transition-transform duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? "opacity-70 hover:opacity-100" : "opacity-60 hover:opacity-100"}`}>
+                  <motion.g animate={{ rotate: isDarkMode ? -180 : 0 }} transition={{ duration: 0.5 }}>
+                    <path d="M120 67.5C149.25 67.5 172.5 90.75 172.5 120C172.5 149.25 149.25 172.5 120 172.5" fill={isDarkMode ? "white" : "black"} />
+                    <path d="M120 67.5C90.75 67.5 67.5 90.75 67.5 120C67.5 149.25 90.75 172.5 120 172.5" fill={isDarkMode ? "white" : "black"} />
+                  </motion.g>
+                  <motion.path animate={{ rotate: isDarkMode ? 180 : 0 }} transition={{ duration: 0.5 }} d="M120 3.75C55.5 3.75 3.75 55.5 3.75 120C3.75 184.5 55.5 236.25 120 236.25C184.5 236.25 236.25 184.5 236.25 120ZM120 214.5V172.5C90.75 172.5 67.5 149.25 67.5 120C67.5 90.75 90.75 67.5 120 67.5V25.5C172.5 25.5 214.5 67.5 214.5 120C214.5 172.5 172.5 214.5 120 214.5Z" fill={isDarkMode ? "black" : "white"} />
+                </svg>
+              </button>
+
+            </motion.nav>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Hamburger Icon (Tetap ada untuk mobile atau saat di-scroll) */}
+        <motion.div 
+          initial={false}
+          animate={{
+            opacity: showFullNavbar && !isMobile ? 0 : 1,
+            scale: showFullNavbar && !isMobile ? 0.5 : 1,
+            x: showFullNavbar && !isMobile ? 40 : 0
+          }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 20 
+          }}
+          // Animasi saat di-hover (sedikit membesar)
+          whileHover={showFullNavbar && !isMobile ? {} : { scale: 1.08 }}
+          // Animasi saat ditekan/diklik (mengecil/mendem)
+          whileTap={showFullNavbar && !isMobile ? {} : { scale: 0.85 }}
+          className={`pointer-events-auto p-2 cursor-none cursor-target rounded-full shadow-xl ${
+            showFullNavbar && !isMobile 
+              ? "absolute right-12 pointer-events-none" 
+              : "relative"
+          } ${isDarkMode ? 'bg-zinc-100 hover:bg-white' : 'bg-zinc-900 hover:bg-zinc-800'}`}
+        >
           <Hamburger
             toggled={isOpen}
             toggle={setIsOpen}
             color={isDarkMode ? '#18181b' : 'white'}
+            size={20}
             duration={0.4}
-            easing="ease-in"
+            easing="ease-out"
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Overlay */}
