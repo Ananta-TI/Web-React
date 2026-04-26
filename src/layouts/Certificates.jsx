@@ -3,6 +3,7 @@ import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motio
 import { ThemeContext } from "../context/ThemeContext";
 import { FolderOpen, X } from "lucide-react";
 import { createPortal } from "react-dom";
+import DecryptedText from "../components/Shared/DecryptedText";
 
 const Certificates = () => {
   const theme = useContext(ThemeContext);
@@ -146,9 +147,15 @@ useEffect(() => {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
-              Certificates
-            </h1>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4 mt-20">
+                          <DecryptedText
+                            text="Certificates"
+                            speed={100}
+                            maxIterations={105}
+                            sequential
+                            animateOn="view"
+                          />
+                        </h1>
             <p
               className={`text-lg font-mono ${
                 isDarkMode ? "text-zinc-400" : "text-gray-600"

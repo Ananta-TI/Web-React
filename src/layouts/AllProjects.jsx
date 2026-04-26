@@ -295,7 +295,7 @@ useEffect(() => {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-lyrae mb-4 mt-20">
               <DecryptedText
                 text="All Projects"
                 speed={100}
