@@ -69,7 +69,8 @@ Fitur unggulan yang memberikan kesan pertama premium dengan animasi kelas Awwwar
 |:---|:---|:---|
 | **Framework** | ![React](https://img.shields.io/badge/-React%2018+-61DAFB?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat&logo=vite&logoColor=white) | Ekosistem komponen terbaik & HMR instan |
 | **Styling** | ![Tailwind CSS](https://img.shields.io/badge/-Tailwind%20CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white) | Rapid UI development & konsistensi desain |
-| **Animation** | ![Framer Motion](https://img.shields.io/badge/-Framer%20Motion-0055FF?style=flat&logo=framer&logoColor=white) ![GSAP](https://img.shields.io/badge/-GSAP-88CE02?style=flat&logo=greensock&logoColor=white) | Library animasi paling deklaratif untuk React |
+| **Animation** | ![Framer Motion](https://img.shields.io/badge/-Framer%20Motion-0055FF?style=flat&logo=framer&logoColor=white) ![GSAP](https://img.shields.io/badge/-GSAP-88CE02?style=flat&logo=greensock&logoColor=white) | Library animasi paling deklaratif untuk React | 
+| **3D & WebGL** | ![Three.js](https://img.shields.io/badge/-Three.js-000000?style=flat&logo=three.js&logoColor=white) | Rendering grafik 3D interaktif di browser |
 | **Scroll** | ![Lenis](https://img.shields.io/badge/-Lenis-000?style=flat) | Smooth scrolling berbasis inersia |
 | **Deployment** | ![Vercel](https://img.shields.io/badge/-Vercel-000000?style=flat&logo=vercel&logoColor=white) | CI/CD otomatis & Edge Network global |
 | **Version Control** | ![Git](https://img.shields.io/badge/-Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat&logo=github&logoColor=white) | Workflow kolaborasi modern |
@@ -136,17 +137,17 @@ Web-React/
 │   │   ├── index.css            # Global Tailwind & custom styles
 │   │   └── fonts/               # Custom fonts
 │   │
-│   ├── 📂 components/           # Komponen UI Reusable
-│   │   ├── 📂 Home/             # Komponen spesifik halaman Home
-│   │   │   ├── Hero.jsx         # Sektion hero dengan animasi
+│   ├── 📂 components/              # Komponen UI Reusable
+│   │   ├── 📂 Home/                # Komponen spesifik halaman Home
+│   │   │   ├── Hero.jsx            # Section hero dengan animasi
 │   │   │   ├── ScrollProgress.jsx
 │   │   │   └── ...
-│   │   ├── 📂 Shared/           # Komponen umum
-│   │   │   ├── TargetCursor.jsx # Custom cursor dengan efek
-│   │   │   ├── MorphTransition.jsx # SVG morphing preloader
-│   │   │   ├── TextPressure.jsx # Typography interaktif
+│   │   ├── 📂 Shared/                  # Komponen umum
+│   │   │   ├── TargetCursor.jsx        # Custom cursor dengan efek
+│   │   │   ├── MorphTransition.jsx     # SVG morphing preloader
+│   │   │   ├── TextPressure.jsx        # Typography interaktif
 │   │   │   └── ...
-│   │   └── 📂 UI/               # Komponen UI dasar
+│   │   └── 📂 UI/                     # Komponen UI dasar
 │   │       ├── Button.jsx
 │   │       ├── Card.jsx
 │   │       └── ...
@@ -249,6 +250,14 @@ Web-React/
 - Loading indicator rotasi
 - Smooth easing dengan GSAP
 ```
+### 8. 🧊 **3D GitHub Isometric Contributions**
+```jsx
+// Fitur:
+- Rendering aktivitas GitHub dalam bentuk balok neon 3D (Three.js)
+- Responsive layout dengan auto-camera positioning
+- Interaksi Gyroscope (Paralaks saat device dimiringkan)
+- Scroll momentum rotation (Otomatis berputar searah scroll)
+- Hover wobble animation & Dynamic Tooltip
 
 ---
 
@@ -343,13 +352,12 @@ git push origin feature/amazing-feature
 
 ## 🎯 Fitur yang Akan Datang
 
-- [ ] Dark mode refinement dengan lebih banyak color schemes
 - [ ] Blog section dengan MDX support
-- [ ] Interactive 3D elements dengan Three.js
+- [x] Interactive 3D elements dengan Three.js
 - [ ] Real-time collaboration features
 - [ ] CMS integration (Contentful/Sanity)
 - [ ] Advanced analytics dashboard
-- [ ] API backend integration
+- [x] API backend integration
 
 ---
 
@@ -499,7 +507,7 @@ Tertarik untuk berkolaborasi atau punya pertanyaan? Mari terhubung!
 
 <img src="https://img.shields.io/badge/Made%20with-💻%20and%20☕-000?style=for-the-badge" alt="Made with love and coffee">
 
-**© 2024 Ananta-TI. All rights reserved.**
+**© 2026 Ananta-TI. All rights reserved.**
 
 *Designed & Developed with by Ananta Firdaus*
 
