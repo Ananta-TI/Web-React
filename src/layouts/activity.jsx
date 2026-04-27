@@ -6,6 +6,7 @@ import Tetris from "./TetrioProfileCard.jsx";
 import SteamProfileCard from "./SteamProfileCard";
 import DiscordProfileCard from "./DiscordProfileCard.jsx";
 import WakatimeProfileCard from "../components/WakaTimeCard.jsx";
+import GithubIsometric from "../components/GithubIsometric";
 // import SpotifyProfileCard from "./SpotifyProfileCard.jsx";
 import { Gamepad2 } from "lucide-react";
 import "../index.css";
@@ -71,9 +72,11 @@ const Activity = () => {
           </motion.div>
         </div>
       </div>
-
       {/* ===== Content Section (Masonry Layout) ===== */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div className="break-inside-avoid inline-block w-full mb-4">
+  <GithubIsometric username="Ananta-TI" />
+</div>
         {/* Menggunakan columns-1 untuk mobile, dan columns-2 untuk desktop */}
         <div className="w-full max-w-7xl mx-auto mt-1 mb-auto columns-1 lg:columns-2 gap-4">
           
