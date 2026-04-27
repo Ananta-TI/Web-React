@@ -276,7 +276,7 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
 
     const gridPlaneGeo = new THREE.PlaneGeometry(numWeeks * STEP, 7 * STEP);
     const gridPlaneMat = new THREE.MeshStandardMaterial({ 
-      color: 0x0d1117, 
+      color: isDarkMode ? 0x0d1117 : 0xe1e4e8, // Grid base juga adaptif
       roughness: 0.8,
       metalness: 0.2
     });
@@ -286,7 +286,7 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
     gridPlane.receiveShadow = true;
     scene.add(gridPlane);
 
-    const gridLines = new THREE.GridHelper(numWeeks * STEP, numWeeks, 0x30363d, 0x30363d);
+    const gridLines = new THREE.GridHelper(numWeeks * STEP, numWeeks, isDarkMode ? 0x30363d : 0xd1d5da, isDarkMode ? 0x30363d : 0xd1d5da);
     gridLines.position.y = -0.09;
     gridLines.scale.set(1, 1, (7 * STEP) / (numWeeks * STEP)); 
     scene.add(gridLines);
@@ -455,6 +455,15 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
     };
   }, [contributions, isDarkMode]);
 
+  /* ── Classes Dinamis untuk Dark/Light Mode ── */
+  const textTitle = isDarkMode ? "text-zinc-200" : "text-gray-800";
+  const cardBg = isDarkMode ? "bg-[#161b22]/90 border-zinc-700/60" : "bg-white/90 border-gray-200";
+  const textNumber = isDarkMode ? "text-[#39d353]" : "text-[#26a641]";
+  const textLabel = isDarkMode ? "text-zinc-300" : "text-gray-600";
+  const textSub = isDarkMode ? "text-zinc-500" : "text-gray-400";
+  const tooltipStyle = isDarkMode ? "bg-zinc-800 text-zinc-100 border-zinc-600" : "bg-white text-gray-800 border-gray-200";
+  const hintStyle = isDarkMode ? "text-zinc-500" : "text-gray-400";
+
   return (
     <motion.div
       className="relative w-full rounded-2xl overflow-hidden bg-transparent"
@@ -468,11 +477,11 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
             <motion.div
-              className="w-8 h-8 border-[3px] rounded-full border-green-500 border-t-transparent"
+              className={`w-8 h-8 border-[3px] rounded-full ${isDarkMode ? "border-green-500" : "border-green-600"} border-t-transparent`}
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}
             />
-            <span className="text-xs text-zinc-400">Loading contributions…</span>
+            <span className={`text-xs ${hintStyle}`}>Loading contributions…</span>
           </div>
         )}
         
@@ -485,53 +494,53 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         {stats && !loading && (
           <>
             <motion.div 
-              style={{ y: yContribSmooth }} // Efek parallax turun
+              style={{ y: yContribSmooth }} 
               className="absolute top-2 right-2 md:top-6 md:right-6 z-10 flex flex-col pointer-events-none origin-top-right scale-[0.7] md:scale-100"
-              initial={{ opacity: 0, x: 100 }} // Masuk dari KANAN
+              initial={{ opacity: 0, x: 100 }} 
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.8, type: "spring", damping: 15 }}
             >
-              <h3 className="text-sm font-semibold text-zinc-200 mb-2 drop-shadow-md">Contributions</h3>
-              <div className="bg-[#161b22]/90 backdrop-blur-md border border-zinc-700/60 rounded-xl p-4 shadow-2xl flex gap-6">
+              <h3 className={`text-sm font-semibold mb-2 drop-shadow-md ${textTitle}`}>Contributions</h3>
+              <div className={`backdrop-blur-md border rounded-xl p-4 shadow-2xl flex gap-6 ${cardBg}`}>
                 <div>
-                  <div className="text-2xl font-bold text-[#39d353]">{stats.total}</div>
-                  <div className="text-[11px] text-zinc-300 font-semibold mt-1">Total</div>
-                  <div className="text-[10px] text-zinc-500">{stats.dateRange}</div>
+                  <div className={`text-2xl font-bold ${textNumber}`}>{stats.total}</div>
+                  <div className={`text-[11px] font-semibold mt-1 ${textLabel}`}>Total</div>
+                  <div className={`text-[10px] ${textSub}`}>{stats.dateRange}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-[#39d353]">{stats.thisWeek}</div>
-                  <div className="text-[11px] text-zinc-300 font-semibold mt-1">This week</div>
-                  <div className="text-[10px] text-zinc-500">{stats.weekRange}</div>
+                  <div className={`text-2xl font-bold ${textNumber}`}>{stats.thisWeek}</div>
+                  <div className={`text-[11px] font-semibold mt-1 ${textLabel}`}>This week</div>
+                  <div className={`text-[10px] ${textSub}`}>{stats.weekRange}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-[#39d353]">{stats.bestDay}</div>
-                  <div className="text-[11px] text-zinc-300 font-semibold mt-1">Best day</div>
-                  <div className="text-[10px] text-zinc-500">{new Date(stats.bestDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</div>
+                  <div className={`text-2xl font-bold ${textNumber}`}>{stats.bestDay}</div>
+                  <div className={`text-[11px] font-semibold mt-1 ${textLabel}`}>Best day</div>
+                  <div className={`text-[10px] ${textSub}`}>{new Date(stats.bestDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</div>
                 </div>
               </div>
-              <div className="text-right text-[10px] text-zinc-500 mt-2 font-medium">
-                Average: <span className="text-[#39d353] font-bold">{stats.avg}</span> / day
+              <div className={`text-right text-[10px] mt-2 font-medium ${textSub}`}>
+                Average: <span className={`font-bold ${textNumber}`}>{stats.avg}</span> / day
               </div>
             </motion.div>
 
             <motion.div 
-              style={{ y: yStreaksSmooth }} // Efek parallax naik
+              style={{ y: yStreaksSmooth }} 
               className="absolute bottom-8 left-2 md:bottom-10 md:left-6 z-10 flex flex-col pointer-events-none origin-bottom-left scale-[0.7] md:scale-100"
-              initial={{ opacity: 0, x: -100 }} // Masuk dari KIRI
+              initial={{ opacity: 0, x: -100 }} 
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.8, type: "spring", damping: 15 }}
             >
-              <h3 className="text-sm font-semibold text-zinc-200 mb-2 drop-shadow-md">Streaks</h3>
-              <div className="bg-[#161b22]/90 backdrop-blur-md border border-zinc-700/60 rounded-xl p-4 shadow-2xl flex gap-6">
+              <h3 className={`text-sm font-semibold mb-2 drop-shadow-md ${textTitle}`}>Streaks</h3>
+              <div className={`backdrop-blur-md border rounded-xl p-4 shadow-2xl flex gap-6 ${cardBg}`}>
                 <div>
-                  <div className="text-2xl font-bold text-[#39d353]">{stats.longestStreak} <span className="text-sm">days</span></div>
-                  <div className="text-[11px] text-zinc-300 font-semibold mt-1">Longest</div>
-                  <div className="text-[10px] text-zinc-500">{stats.longestRange}</div>
+                  <div className={`text-2xl font-bold ${textNumber}`}>{stats.longestStreak} <span className="text-sm">days</span></div>
+                  <div className={`text-[11px] font-semibold mt-1 ${textLabel}`}>Longest</div>
+                  <div className={`text-[10px] ${textSub}`}>{stats.longestRange}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-[#39d353]">{stats.currentStreak} <span className="text-sm">days</span></div>
-                  <div className="text-[11px] text-zinc-300 font-semibold mt-1">Current</div>
-                  <div className="text-[10px] text-zinc-500">{stats.currentRange}</div>
+                  <div className={`text-2xl font-bold ${textNumber}`}>{stats.currentStreak} <span className="text-sm">days</span></div>
+                  <div className={`text-[11px] font-semibold mt-1 ${textLabel}`}>Current</div>
+                  <div className={`text-[10px] ${textSub}`}>{stats.currentRange}</div>
                 </div>
               </div>
             </motion.div>
@@ -546,20 +555,20 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
 
         {tooltip && (
           <div
-            className="pointer-events-none absolute z-50 text-xs px-3 py-2 rounded-lg shadow-xl bg-zinc-800 text-zinc-100 border border-zinc-600 transition-opacity duration-75"
+            className={`pointer-events-none absolute z-50 text-xs px-3 py-2 rounded-lg shadow-xl border transition-opacity duration-75 ${tooltipStyle}`}
             style={{
               left: tooltip.x + 14,
               top: tooltip.y - 36,
               whiteSpace: "nowrap",
             }}
           >
-            <span className="text-[#39d353] font-bold">{tooltip.count} contribution{tooltip.count !== 1 ? "s" : ""}</span>
-            <span className="ml-1.5 text-zinc-400">on {tooltip.date}</span>
+            <span className={`font-bold ${textNumber}`}>{tooltip.count} contribution{tooltip.count !== 1 ? "s" : ""}</span>
+            <span className={`ml-1.5 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>on {tooltip.date}</span>
           </div>
         )}
 
         {!loading && !error && (
-          <div className="absolute bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 text-[9px] md:text-[11px] select-none text-zinc-500 opacity-80 pointer-events-none text-center">
+          <div className={`absolute bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 text-[9px] md:text-[11px] select-none opacity-80 pointer-events-none text-center ${hintStyle}`}>
             Tilt device · Scroll to spin · Hover to interact
           </div>
         )}
