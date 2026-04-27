@@ -13,7 +13,9 @@ import {
   Share2,
   Download,
   Eye,
-  EyeOff
+  EyeOff,
+  Disc,
+  MessageSquare // <--- Tambahan Icon untuk judul
 } from "lucide-react";
 
 // --------------------------------------------------
@@ -42,6 +44,24 @@ function formatElapsedString(start) {
   return hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins}m`;
 }
 
+// Decoder untuk public_flags Discord (Discord Badges Bawaan)
+function getDiscordBadges(flags) {
+  if (!flags) return [];
+  const badges = [];
+  if (flags & (1 << 0)) badges.push({ name: "Staff", color: "text-indigo-400" });
+  if (flags & (1 << 1)) badges.push({ name: "Partner", color: "text-blue-400" });
+  if (flags & (1 << 2)) badges.push({ name: "HypeSquad", color: "text-amber-400" });
+  if (flags & (1 << 3)) badges.push({ name: "Bug Hunter", color: "text-green-400" });
+  if (flags & (1 << 6)) badges.push({ name: "Bravery", color: "text-purple-400" });
+  if (flags & (1 << 7)) badges.push({ name: "Brilliance", color: "text-red-400" });
+  if (flags & (1 << 8)) badges.push({ name: "Balance", color: "text-emerald-400" });
+  if (flags & (1 << 9)) badges.push({ name: "Early Supporter", color: "text-pink-400" });
+  if (flags & (1 << 14)) badges.push({ name: "Bug Hunter Lvl 2", color: "text-green-400" });
+  if (flags & (1 << 17)) badges.push({ name: "Verified Bot Dev", color: "text-blue-400" });
+  if (flags & (1 << 22)) badges.push({ name: "Active Dev", color: "text-green-400" });
+  return badges;
+}
+
 function LiveTimer({ start }) {
   const [text, setText] = useState(formatElapsedString(start));
   
@@ -67,7 +87,7 @@ function LoadingCard({ dark }) {
 
 function UserNotFound({ dark }) {
   return (
-    <div className={`p-4 rounded-xl border  max-w-xl w-full text-center ${dark ? "bg-red-900/20 border-red-500/30 text-red-200" : "bg-red-50 border-red-200 text-red-800"}`}>
+    <div className={`p-4 rounded-xl border max-w-xl w-full text-center ${dark ? "bg-red-900/20 border-red-500/30 text-red-200" : "bg-red-50 border-red-200 text-red-800"}`}>
       <p className="font-bold">User not found on Lanyard</p>
       <p className="text-xs mt-1 opacity-80">Join <b>discord.gg/lanyard</b> first.</p>
     </div>
@@ -79,7 +99,6 @@ function AvatarSection({ user, status, dark, onAvatarClick, enableClickableAvata
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
     : `https://cdn.discordapp.com/embed/avatars/${user.discriminator % 5}.png`;
 
-  // Avatar decoration jika ada
   const hasDecoration = user.avatar_decoration_data;
   const decorationUrl = hasDecoration 
     ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png`
@@ -95,7 +114,6 @@ function AvatarSection({ user, status, dark, onAvatarClick, enableClickableAvata
           onClick={enableClickableAvatar ? onAvatarClick : undefined}
         />
         
-        {/* Avatar Decoration Overlay */}
         {decorationUrl && (
           <img 
             src={decorationUrl}
@@ -106,34 +124,37 @@ function AvatarSection({ user, status, dark, onAvatarClick, enableClickableAvata
         )}
       </div>
       
-      {/* Status Dot */}
       <div
         className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full border-[5px] ${dark ? "border-zinc-900" : "border-white"} ${getStatusColor(status)}`}
       />
-
-      {/* Clan Badge jika ada */}
-      {user.primary_guild && (
-        <div className="absolute -top-2 -left-2 w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-          <img 
-            src={`https://cdn.discordapp.com/clan-badges/${user.primary_guild.identity_guild_id}/${user.primary_guild.badge}.png`}
-            alt="Clan Badge"
-            className="w-6 h-6"
-          />
-        </div>
-      )}
     </div>
   );
 }
 
 function Header({ user, discord, dark, onCopyId, onStatusClick }) {
+  let badges = getDiscordBadges(user.public_flags);
+
+  // --------------------------------------------------------------------------
+  // MANUAL OVERRIDE: Memaksa badge gambar asli muncul khusus ID kamu
+  // --------------------------------------------------------------------------
+  if (user.id === "900690698133700638") {
+    badges = [
+      { name: "Originally known as ntakunti_14#4619", src: "https://cdn.discordapp.com/badge-icons/6de6d34650760ba5551a79732e98ed60.png" },
+      { name: "Completed a Quest", src: "https://cdn.discordapp.com/badge-icons/7d9ae358c8c5e118768335dbe68b4fb8.png" },
+      { name: "Last Meadow Online - Level 16 Reached", src: "https://cdn.discordapp.com/badge-icons/ca105ad9cfc8580c765101d17bbb2323.png" },
+      { name: "Collected the Orb Profile Badge", src: "https://cdn.discordapp.com/badge-icons/83d8a1eb09a8d64e59233eec5d4d5c2d.png" }
+    ];
+  }
+
   return (
     <div className="flex flex-col mb-1 ">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-2xl font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 font-mono tracking-tight">
-          {user.display_name || user.username}
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 font-mono tracking-tight">
+            {user.display_name || user.username}
+          </h2>
+        </div>
         
-        {/* Status Badge - Clickable */}
         <button 
           onClick={onStatusClick}
           className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm uppercase tracking-wide text-white ${getStatusColor(discord.discord_status)} hover:brightness-110 transition-all`}
@@ -151,7 +172,6 @@ function Header({ user, discord, dark, onCopyId, onStatusClick }) {
           <Copy size={12} className="opacity-0 group-hover:opacity-100" />
         </button>
         
-        {/* Device Indicators */}
         <div className="flex items-center gap-1.5 pl-2 border-l border-gray-500/30">
           {discord.active_on_discord_desktop && (
             <Monitor size={14} className="text-indigo-400" title="Online on Desktop" />
@@ -169,15 +189,43 @@ function Header({ user, discord, dark, onCopyId, onStatusClick }) {
         </div>
       </div>
 
-      {/* Clan Tag jika ada */}
-      {user.primary_guild && (
-        <div className="flex items-center gap-1 text-xs  mt-1">
-          <span className="font-bold text-yellow-400">[{user.primary_guild.tag}]</span>
-          <span className="opacity-50">Clan Member</span>
+      {/* RENDER BADGES (Menggunakan Gambar Asli) */}
+      {badges.length > 0 && (
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          {badges.map((badge) => (
+            badge.src ? (
+              <img 
+                key={badge.name}
+                src={badge.src}
+                alt={badge.name}
+                title={badge.name}
+                className="w-[22px] h-[22px] object-contain drop-shadow-md"
+              />
+            ) : (
+              <span key={badge.name} className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${dark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/10"} ${badge.color}`}>
+                {badge.name}
+              </span>
+            )
+          ))}
         </div>
       )}
 
-      {/* KV Location (Jika ada di JSON) */}
+      {/* CLAN BADGE (Diperbaiki rata tengah dan ukurannya pas) */}
+      {user.primary_guild && (
+        <div className="flex items-center gap-1.5 text-xs mt-2">
+          <div className="flex items-center gap-1 font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-1.5 py-0.5 rounded-md">
+            <span className="opacity-80">[</span>
+            <img 
+              src={`https://cdn.discordapp.com/clan-badges/${user.primary_guild.identity_guild_id}/${user.primary_guild.badge}.png`}
+              alt="Clan Badge"
+              className="w-4 h-4 object-contain" 
+            />
+            <span>{user.primary_guild.tag} <span className="opacity-80">]</span></span>
+          </div>
+          <span className="opacity-50 font-medium">Clan Member</span>
+        </div>
+      )}
+
       {discord.kv?.location && (
         <div className="flex items-center gap-1 text-xs opacity-50 mt-1">
           <MapPin size={12} />
@@ -222,12 +270,11 @@ function SpotifyCard({ spotify, dark, onSpotifyClick }) {
       onClick={onSpotifyClick}
       className={`mt-4 relative overflow-hidden p-3 rounded-xl border transition-all cursor-pointer ${dark ? "bg-green-900/10 border-green-500/20 hover:bg-green-900/20" : "bg-green-50 border-green-200 hover:bg-green-100"}`}
     >
-      {/* Header Spotify */}
       <div className="flex items-center gap-3 relative z-10">
         <a href={`https://open.spotify.com/track/${spotify.track_id}`} target="_blank" rel="noreferrer" className="shrink-0 group relative">
           <img 
             src={spotify.album_art_url} 
-            className="w-12 h-12 rounded-lg shadow-sm group-hover:opacity-80 transition-opacity"
+            className="w-14 h-14 rounded-lg shadow-sm group-hover:opacity-80 transition-opacity object-cover"
             alt="Album Art"
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
@@ -239,16 +286,19 @@ function SpotifyCard({ spotify, dark, onSpotifyClick }) {
           <div className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1 ${dark ? "text-green-400" : "text-green-600"}`}>
             <Music size={10} /> Listening to Spotify
           </div>
-          <a href={`https://open.spotify.com/track/${spotify.track_id}`} target="_blank" rel="noreferrer" className={`font-bold truncate hover:underline block ${dark ? "text-green-100" : "text-green-900"}`}>
+          <a href={`https://open.spotify.com/track/${spotify.track_id}`} target="_blank" rel="noreferrer" className={`font-bold text-sm truncate hover:underline block ${dark ? "text-green-100" : "text-green-900"}`}>
             {spotify.song}
           </a>
-          <div className={`text-xs truncate ${dark ? "text-green-400/70" : "text-green-700/70"}`}>
+          <div className={`text-[11px] truncate ${dark ? "text-green-400/80" : "text-green-700/80"}`}>
             by {spotify.artist}
+          </div>
+          
+          <div className={`text-[10px] truncate flex items-center gap-1 mt-0.5 ${dark ? "text-green-400/50" : "text-green-700/50"}`}>
+            <Disc size={8} /> {spotify.album}
           </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
       {spotify.timestamps && (
         <div className="mt-3 relative z-10">
           <div className={`h-1 w-full rounded-full overflow-hidden ${dark ? "bg-white/10" : "bg-black/10"}`}>
@@ -280,11 +330,15 @@ function ActivityItem({ act, dark, onActivityClick, enableClickableActivities })
           <img
             src={`https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.large_image}.png`}
             className="w-10 h-10 rounded-lg object-cover bg-black/20"
+            title={act.assets.large_text || act.name}
             onError={(e) => { e.target.style.display = "none"; }}
             alt={act.name}
           />
         ) : (
-          <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 font-bold text-xs uppercase">
+          <div 
+            className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 font-bold text-xs uppercase"
+            title={act.name} 
+          >
             {act.name.substring(0, 2)}
           </div>
         )}
@@ -293,6 +347,7 @@ function ActivityItem({ act, dark, onActivityClick, enableClickableActivities })
           <img 
             src={`https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.small_image}.png`}
             className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#18181b]"
+            title={act.assets.small_text} 
             alt="Small"
           />
         )}
@@ -300,8 +355,8 @@ function ActivityItem({ act, dark, onActivityClick, enableClickableActivities })
 
       <div className="min-w-0 flex-1">
         <div className={`text-xs font-bold ${dark ? "text-indigo-200" : "text-indigo-700"}`}>{act.name}</div>
-        {act.details && <div className="text-xs opacity-90 truncate">{act.details}</div>}
-        {act.state && <div className="text-xs opacity-60 truncate">{act.state}</div>}
+        {act.details && <div className="text-[11px] opacity-90 truncate mt-0.5">{act.details}</div>}
+        {act.state && <div className="text-[11px] opacity-60 truncate">{act.state}</div>}
 
         {hasTime && (
           <div className="mt-1.5 flex items-center gap-1 text-[10px] opacity-40 font-mono bg-black/20 w-fit px-1.5 py-0.5 rounded">
@@ -323,7 +378,7 @@ function ActivityList({ activities, expanded, setExpanded, dark, onActivityClick
   if (filtered.length === 0) return null;
 
   return (
-    <div className="mt-3">
+    <div className="mt-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">Activities</span>
         {filtered.length > 2 && (
@@ -351,7 +406,6 @@ function ActivityList({ activities, expanded, setExpanded, dark, onActivityClick
   );
 }
 
-// Toast Notification Component
 function Toast({ show, message, dark }) {
   if (!show) return null;
   
@@ -371,7 +425,6 @@ function Toast({ show, message, dark }) {
 export default function DiscordProfileCard({ 
   userId, 
   compact = false,
-  // Callback props
   onAvatarClick,
   onStatusClick,
   onActivityClick,
@@ -380,14 +433,12 @@ export default function DiscordProfileCard({
   onCopyId,
   onShare,
   onExport,
-  // Feature flags
   showRefreshButton = true,
   showShareButton = true,
   showExportButton = false,
   enableClickableAvatar = true,
   enableClickableActivities = true,
   showCompactToggle = false,
-  // Auto-refresh
   autoRefresh = false,
   refreshInterval = 30000
 }) {
@@ -400,7 +451,6 @@ export default function DiscordProfileCard({
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // Auto-refresh
   useEffect(() => {
     if (autoRefresh && refreshInterval > 0 && refetch) {
       const interval = setInterval(() => {
@@ -411,14 +461,12 @@ export default function DiscordProfileCard({
     }
   }, [autoRefresh, refreshInterval, refetch, onRefresh]);
 
-  // Toast helper
   const showNotification = useCallback((message) => {
     setToastMessage(message);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   }, []);
 
-  // Copy ID handler
   const handleCopyId = useCallback(() => {
     if (discord?.discord_user?.id) {
       navigator.clipboard.writeText(discord.discord_user.id).then(() => {
@@ -428,7 +476,6 @@ export default function DiscordProfileCard({
     }
   }, [discord, onCopyId, showNotification]);
 
-  // Avatar click handler
   const handleAvatarClick = useCallback(() => {
     if (onAvatarClick) {
       onAvatarClick(discord?.discord_user);
@@ -437,7 +484,6 @@ export default function DiscordProfileCard({
     }
   }, [discord, onAvatarClick, showNotification]);
 
-  // Status click handler
   const handleStatusClick = useCallback(() => {
     if (onStatusClick) {
       onStatusClick(discord?.discord_status);
@@ -446,7 +492,6 @@ export default function DiscordProfileCard({
     }
   }, [discord, onStatusClick, showNotification]);
 
-  // Spotify click handler
   const handleSpotifyClick = useCallback(() => {
     if (onSpotifyClick && discord?.spotify) {
       onSpotifyClick(discord.spotify);
@@ -455,7 +500,6 @@ export default function DiscordProfileCard({
     }
   }, [discord, onSpotifyClick, showNotification]);
 
-  // Activity click handler
   const handleActivityClick = useCallback((activity) => {
     if (onActivityClick) {
       onActivityClick(activity);
@@ -464,7 +508,6 @@ export default function DiscordProfileCard({
     }
   }, [onActivityClick, showNotification]);
 
-  // Refresh handler
   const handleRefresh = useCallback(() => {
     if (refetch) {
       refetch();
@@ -473,7 +516,6 @@ export default function DiscordProfileCard({
     }
   }, [refetch, onRefresh, showNotification]);
 
-  // Share handler
   const handleShare = useCallback(async () => {
     const shareData = {
       title: `${discord?.discord_user?.display_name}'s Discord Profile`,
@@ -493,7 +535,6 @@ export default function DiscordProfileCard({
     }
   }, [discord, onShare, showNotification]);
 
-  // Export handler
   const handleExport = useCallback(() => {
     if (discord) {
       const dataStr = JSON.stringify(discord, null, 2);
@@ -522,105 +563,85 @@ export default function DiscordProfileCard({
     <>
       <Toast show={showToast} message={toastMessage} dark={dark} />
       
-      <div className={`cursor-target relative flex flex-col sm:flex-row items-start gap-5 w-full max-w-xl rounded-2xl p-6 transition-all duration-300 shadow-2xl border 
-        ${dark 
-          ? "bg-zinc-800 bg-opacity-60 border border-gray-600 border-b-0 text-gray-100"
-          : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0"
-        } backdrop-blur-xl font-sans`}
-      >
-        {/* Avatar */}
-        <AvatarSection 
-          user={user} 
-          status={discord.discord_status} 
-          dark={dark} 
-          onAvatarClick={handleAvatarClick}
-          enableClickableAvatar={enableClickableAvatar}
-        />
-
-        {/* Content */}
-        <div className="flex-1 min-w-0 w-full">
-          <Header 
-            user={user} 
-            discord={discord} 
-            dark={dark} 
-            onCopyId={handleCopyId}
-            onStatusClick={handleStatusClick}
-          />
-
-          {customStatus && (
-            <div className={`mt-3 text-sm py-1.5 px-3 rounded-lg italic border inline-block max-w-full truncate ${dark ? "bg-zinc-800/50 border-white/5 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
-              "{customStatus.state}"
-            </div>
-          )}
-
-          {!isCompact && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <SpotifyCard 
-                spotify={spotify} 
-                dark={dark} 
-                onSpotifyClick={handleSpotifyClick}
-              />
-              <ActivityList 
-                activities={activities} 
-                expanded={expanded} 
-                setExpanded={setExpanded} 
-                dark={dark}
-                onActivityClick={handleActivityClick}
-                enableClickableActivities={enableClickableActivities}
-              />
-            </div>
-          )}
+      {/* KOTAK UTAMA */}
+      <div className={`cursor-target relative flex flex-col w-full rounded-2xl p-6 transition-all duration-300 shadow-2xl border ${dark ? "bg-zinc-800 bg-opacity-60 border border-gray-600 border-b-0 text-gray-100" : "bg-gray-100 bg-opacity-80 border border-gray-800 border-b-0"} backdrop-blur-xl font-sans`}>
+        
+        {/* JUDUL DISCORD DI ATAS */}
+        <div className="flex items-center gap-2 mb-5 opacity-60">
+          <MessageSquare size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest">
+            Discord Profile
+          </span>
         </div>
 
-        {/* Top Right Controls */}
-        <div className="absolute top-3 right-3 flex items-center gap-1">
+        {/* BUNGKUSAN KONTEN ROW (AVATAR KIRI, INFO KANAN) */}
+        <div className="flex flex-col sm:flex-row items-start gap-5 w-full">
+          <AvatarSection 
+            user={user} 
+            status={discord.discord_status} 
+            dark={dark} 
+            onAvatarClick={handleAvatarClick}
+            enableClickableAvatar={enableClickableAvatar}
+          />
+
+          <div className="flex-1 min-w-0 w-full">
+            <Header 
+              user={user} 
+              discord={discord} 
+              dark={dark} 
+              onCopyId={handleCopyId}
+              onStatusClick={handleStatusClick}
+            />
+
+            {customStatus && (
+              <div className={`mt-3 text-sm py-1.5 px-3 rounded-lg italic border inline-block max-w-full truncate ${dark ? "bg-zinc-800/50 border-white/5 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
+                "{customStatus.state}"
+              </div>
+            )}
+
+            {!isCompact && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <SpotifyCard 
+                  spotify={spotify} 
+                  dark={dark} 
+                  onSpotifyClick={handleSpotifyClick}
+                />
+                <ActivityList 
+                  activities={activities} 
+                  expanded={expanded} 
+                  setExpanded={setExpanded} 
+                  dark={dark}
+                  onActivityClick={handleActivityClick}
+                  enableClickableActivities={enableClickableActivities}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Top Right Controls (Digeser sedikit agar tidak nabrak judul) */}
+        <div className="absolute top-4 right-4 flex items-center gap-1">
           {showCompactToggle && (
-            <button
-              onClick={() => setIsCompact(!isCompact)}
-              className="opacity-30 hover:opacity-100 transition-opacity p-1"
-              title={isCompact ? "Show full" : "Compact view"}
-            >
+            <button onClick={() => setIsCompact(!isCompact)} className="opacity-30 hover:opacity-100 transition-opacity p-1" title={isCompact ? "Show full" : "Compact view"}>
               {isCompact ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           )}
-          
           {showExportButton && (
-            <button
-              onClick={handleExport}
-              className="opacity-30 hover:opacity-100 transition-opacity p-1"
-              title="Export data"
-            >
+            <button onClick={handleExport} className="opacity-30 hover:opacity-100 transition-opacity p-1" title="Export data">
               <Download size={14} />
             </button>
           )}
-          
           {showShareButton && (
-            <button
-              onClick={handleShare}
-              className="opacity-30 hover:opacity-100 transition-opacity p-1"
-              title="Share profile"
-            >
+            <button onClick={handleShare} className="opacity-30 hover:opacity-100 transition-opacity p-1" title="Share profile">
               <Share2 size={14} />
             </button>
           )}
-          
           {showRefreshButton && (
-            <button
-              onClick={handleRefresh}
-              className="opacity-30 hover:opacity-100  p-1 hover:rotate-180 transition-transform duration-500"
-              title="Refresh data"
-            >
+            <button onClick={handleRefresh} className="opacity-30 hover:opacity-100  p-1 hover:rotate-180 transition-transform duration-500" title="Refresh data">
               <RefreshCw size={14} />
             </button>
           )}
-          
-          <a 
-            href="https://github.com/Phineas/lanyard" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="opacity-30 hover:opacity-100 transition-opacity p-1" 
-            title="Powered by Lanyard"
-          >
+          <a href="https://github.com/Phineas/lanyard" target="_blank" rel="noreferrer" className="opacity-30 hover:opacity-100 transition-opacity p-1" title="Powered by Lanyard">
             <div className={`w-2 h-2 rounded-full ${discord.success === false ? "bg-red-500" : "bg-green-500"}`}></div>
           </a>
         </div>

@@ -23,6 +23,7 @@ const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
 const Timeline = lazy(() => import("./layouts/timeline"));
 const Chatbot = lazy(() => import("./components/Chatbot/Chatbot"));
 const Art = lazy(() => import("./layouts/Art"))
+const Activity = lazy(() => import("./layouts/activity"))
 
 
 // Analytics
@@ -95,6 +96,7 @@ function App() {
               <Route path="/all-projects" element={<AllProjects />} />
               <Route path="/certificates" element={<Certificates />} />
               <Route path="/art" element={<Art />} /> 
+              <Route path="/activity" element={<Activity />} />
             </Routes>
           </Suspense>
           <Footer />

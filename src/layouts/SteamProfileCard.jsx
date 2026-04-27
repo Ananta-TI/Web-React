@@ -4,7 +4,9 @@ import React, {
 import { ThemeContext } from "../context/ThemeContext.jsx";
 import { createPortal } from "react-dom";
 import { smootherInstance } from "../layouts/GSAPSmoothScrollWrapper";
-import { motion, AnimatePresence } from "framer-motion";// ─── CONSTANTS ────────────────────────────────────────────────────────────
+import { motion, AnimatePresence } from "framer-motion";
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────
 const API_KEY =  "F10E38DFF1FBB84407DF02D50B49A8CF";
 const PROXY = "https://api.codetabs.com/v1/proxy?quest=";
 const CACHE_TTL = 3600_000;
@@ -242,7 +244,7 @@ const Tooltip = ({ text, children }) => {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────
 export default function SteamProfileCardModern({
-  steamIds = ["76561199166544214", "76561199745356826", "76561198773672138"],
+  steamIds = ["76561199166544214", "76561199745356826", "76561198773672138", "76561198735338945"],
 }) {
   const { isDarkMode } = useContext(ThemeContext);
 
@@ -280,7 +282,7 @@ export default function SteamProfileCardModern({
     }
   };
 
- const theme = isDarkMode ? colors.dark : colors.light;
+  const theme = isDarkMode ? colors.dark : colors.light;
 
   const [data, setData] = useState({ 
     profile: null, 
@@ -299,13 +301,13 @@ export default function SteamProfileCardModern({
   const [activeTab, setActiveTab] = useState(TAB_KEYS.OVERVIEW);
   const [filterMode, setFilterMode] = useState(FILTER_MODES.ALL);
   const [achCache, setAchCache] = useState({});
-  const [imgErrors, setImgErrors] = useState({});
+  const [imgErrors, setImgErrors] = useState({}); 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("playtime");
   const [viewMode, setViewMode] = useState("grid");
   const [hoveredGame, setHoveredGame] = useState(null);
 
-  // ─── STATE & LOGIKA MODAL (PINDAHKAN KE SINI) ───
+  // ─── STATE & LOGIKA MODAL ───
   const [detailGameId, setDetailGameId] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -319,16 +321,19 @@ export default function SteamProfileCardModern({
     setTimeout(() => setDetailGameId(null), 300); 
   };
 
-  // Kunci scroll menggunakan smootherInstance ala project.jsx
   useEffect(() => {
     if (smootherInstance) {
       smootherInstance.paused(showModal);
     }
   }, [showModal]);
 
-
   const achTimeoutRef = useRef(null);
   const abortControllerRef = useRef(null);
+
+  // ─── FUNGSI HANDLE IMAGE ERROR ───
+  const handleImgError = useCallback((key) => {
+    setImgErrors(prev => ({ ...prev, [key]: true }));
+  }, []);
 
   // ─── DATA FETCHING ─
   useEffect(() => {
@@ -345,89 +350,78 @@ export default function SteamProfileCardModern({
       }
     } catch (_) {}
 
+    async function loadData() {
+      try {
+        const numIds = steamIds.length;
 
-async function loadData() {
-  try {
-    const numIds = steamIds.length;
+        const [profRes, badgesRes, ...rest] = await Promise.all([
+          pget(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${steamIds[0]}`),
+          pget(`https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${API_KEY}&steamid=${steamIds[0]}`),
+          ...steamIds.map(id => 
+            pget(`https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${API_KEY}&steamid=${id}&relationship=friend`)
+            .catch(() => ({ friendslist: { friends: [] } }))
+          ),
+          ...steamIds.map(id => pget(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${id}&include_appinfo=true&include_played_free_games=true`)),
+          ...steamIds.map(id => pget(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${API_KEY}&steamid=${id}`)),
+        ]);
 
-    const [profRes, badgesRes, ...rest] = await Promise.all([
-      // 1. Ambil Profile & Badge dari ID Utama saja
-      pget(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${steamIds[0]}`),
-      pget(`https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${API_KEY}&steamid=${steamIds[0]}`),
-      
-      // 2. Ambil Friends List dari SEMUA ID (Looping)
-      ...steamIds.map(id => 
-        pget(`https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${API_KEY}&steamid=${id}&relationship=friend`)
-        .catch(() => ({ friendslist: { friends: [] } })) // Antisipasi jika profil/friendlist private
-      ),
-      
-      // 3. Ambil Owned Games dari SEMUA ID
-      ...steamIds.map(id => pget(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${id}&include_appinfo=true&include_played_free_games=true`)),
-      
-      // 4. Ambil Recent Games dari SEMUA ID
-      ...steamIds.map(id => pget(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${API_KEY}&steamid=${id}`)),
-    ]);
+        if (!mounted) return;
 
-    if (!mounted) return;
+        const p = profRes.response?.players?.[0];
+        
+        const allFriendsData = rest.slice(0, numIds);
+        const uniqueFriendIds = new Set();
+        
+        allFriendsData.forEach(res => {
+          res.friendslist?.friends?.forEach(f => uniqueFriendIds.add(f.steamid));
+        });
 
-    const p = profRes.response?.players?.[0];
-    
-    // --- PROSES FRIENDS DARI SEMUA AKUN ---
-    const allFriendsData = rest.slice(0, numIds);
-    const uniqueFriendIds = new Set();
-    
-    allFriendsData.forEach(res => {
-      res.friendslist?.friends?.forEach(f => uniqueFriendIds.add(f.steamid));
-    });
+        const fCount = uniqueFriendIds.size;
+        let friendProfiles = [];
+        
+        if (fCount > 0) {
+          const topIds = Array.from(uniqueFriendIds).slice(0, 100).join(",");
+          const friendDetailsRes = await pget(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${topIds}`);
+          friendProfiles = friendDetailsRes.response?.players || [];
+        }
 
-    const fCount = uniqueFriendIds.size;
-    let friendProfiles = [];
-    
-    if (fCount > 0) {
-      // Ambil detail profil teman (maksimal 100 ID per request Steam API)
-      const topIds = Array.from(uniqueFriendIds).slice(0, 100).join(",");
-      const friendDetailsRes = await pget(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${topIds}`);
-      friendProfiles = friendDetailsRes.response?.players || [];
-    }
+        const ownedGamesRes = rest.slice(numIds, numIds * 2);
+        const recentGamesRes = rest.slice(numIds * 2, numIds * 3);
 
-    // --- PROSES GAMES (Index bergeser karena penambahan request friends) ---
-    const ownedGamesRes = rest.slice(numIds, numIds * 2);
-    const recentGamesRes = rest.slice(numIds * 2, numIds * 3);
+        const gMap = new Map(), rMap = new Map();
+        let ptTotal = 0;
 
-    const gMap = new Map(), rMap = new Map();
-    let ptTotal = 0;
+        ownedGamesRes.forEach(r => {
+          (r.response?.games || []).forEach(g => {
+            if (g.playtime_forever > 0) ptTotal += g.playtime_forever;
+            const ex = gMap.get(g.appid);
+            ex ? (ex.playtime_forever += g.playtime_forever) : gMap.set(g.appid, { ...g, accounts: 1 });
+          });
+        });
 
-    ownedGamesRes.forEach(r => {
-      (r.response?.games || []).forEach(g => {
-        if (g.playtime_forever > 0) ptTotal += g.playtime_forever;
-        const ex = gMap.get(g.appid);
-        ex ? (ex.playtime_forever += g.playtime_forever) : gMap.set(g.appid, { ...g, accounts: 1 });
-      });
-    });
+        recentGamesRes.forEach(r => {
+          (r.response?.games || []).forEach(g => {
+            const ex = rMap.get(g.appid);
+            ex ? (ex.playtime_2weeks += g.playtime_2weeks) : rMap.set(g.appid, { ...g });
+          });
+        });
 
-    recentGamesRes.forEach(r => {
-      (r.response?.games || []).forEach(g => {
-        const ex = rMap.get(g.appid);
-        ex ? (ex.playtime_2weeks += g.playtime_2weeks) : rMap.set(g.appid, { ...g });
-      });
-    });
+        const allGamesList = [...gMap.values()].sort((a, b) => b.playtime_forever - a.playtime_forever);
+        
+        const finalData = {
+          profile: p,
+          realName: p.realname || "",
+          friendsCount: fCount,
+          friendProfiles: friendProfiles,
+          level: badgesRes.response?.player_level || 0,
+          total: gMap.size,
+          playtimeTotal: ptTotal,
+          games: allGamesList.slice(0, 20),
+          allGames: allGamesList,
+          recent: [...rMap.values()].sort((a, b) => b.playtime_2weeks - a.playtime_2weeks).slice(0, 10),
+        };
 
-    const allGamesList = [...gMap.values()].sort((a, b) => b.playtime_forever - a.playtime_forever);
-    
-    const finalData = {
-      profile: p,
-      realName: p.realname || "",
-      friendsCount: fCount,
-      friendProfiles: friendProfiles,
-      level: badgesRes.response?.player_level || 0,
-      total: gMap.size,
-      playtimeTotal: ptTotal,
-      games: allGamesList.slice(0, 20),
-      allGames: allGamesList,
-      recent: [...rMap.values()].sort((a, b) => b.playtime_2weeks - a.playtime_2weeks).slice(0, 10),
-    };
-
-    setData(finalData);
+        setData(finalData);
         try { 
           localStorage.setItem(cacheKey, JSON.stringify({ data: finalData, ts: Date.now() })); 
         } catch (_) {}
@@ -493,47 +487,53 @@ async function loadData() {
     return result;
   }, [data.allGames, data.recent, filterMode, searchQuery, sortBy]);
 
-  // ─── ACHIEVEMENTS ─
+  // ─── ACHIEVEMENTS (SUDAH DIPERBAIKI UNTUK TOP 5 GAMES) ─
   useEffect(() => {
-    if (!data.allGames || data.allGames.length === 0) return;
-    const g = data.games[0];
-    if (!g || achCache[g.appid] !== undefined) return;
+    if (!data.games || data.games.length === 0) return;
+
+    const gamesToFetch = data.games.slice(0, 5);
+    const missingGames = gamesToFetch.filter(g => achCache[g.appid] === undefined);
+    
+    if (missingGames.length === 0) return;
 
     if (achTimeoutRef.current) clearTimeout(achTimeoutRef.current);
+    
     achTimeoutRef.current = setTimeout(async () => {
-      for (const sid of steamIds) {
-        try {
-          const res = await pget(
-            `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${g.appid}&key=${API_KEY}&steamid=${sid}`
-          );
-          const all = res.playerstats?.achievements;
-          if (all?.length > 0) {
-            const unlocked = all.filter(a => a.achieved === 1).length;
-            setAchCache(p => ({ 
-              ...p, 
-              [g.appid]: { 
-                found: true, 
-                cur: unlocked, 
-                tot: all.length, 
-                pct: Math.round((unlocked / all.length) * 100),
-                achievements: all
-              } 
-            }));
-            return;
-          }
-        } catch (_) {}
+      for (const g of missingGames) {
+        let found = false;
+        for (const sid of steamIds) {
+          try {
+            const res = await pget(
+              `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${g.appid}&key=${API_KEY}&steamid=${sid}`
+            );
+            const all = res.playerstats?.achievements;
+            if (all?.length > 0) {
+              const unlocked = all.filter(a => a.achieved === 1).length;
+              setAchCache(p => ({ 
+                ...p, 
+                [g.appid]: { 
+                  found: true, 
+                  cur: unlocked, 
+                  tot: all.length, 
+                  pct: Math.round((unlocked / all.length) * 100),
+                  achievements: all
+                } 
+              }));
+              found = true;
+              break; 
+            }
+          } catch (_) {}
+        }
+        if (!found) {
+          setAchCache(p => ({ ...p, [g.appid]: { found: false } }));
+        }
       }
-      setAchCache(p => ({ ...p, [g.appid]: { found: false } }));
-    }, 300);
+    }, 500);
 
     return () => achTimeoutRef.current && clearTimeout(achTimeoutRef.current);
-  }, [data.games, steamIds, achCache, data.allGames]);
+  }, [data.games, steamIds]); 
 
   // ─── HANDLERS ─
-  const handleImgError = useCallback((appid) => {
-    setImgErrors(prev => ({ ...prev, [appid]: true }));
-  }, []);
-
   const exportStats = useCallback(() => {
     const stats = {
       profile: data.profile?.personaname,
@@ -566,12 +566,6 @@ async function loadData() {
     analyzeComprehensive(data.allGames, data.recent, data.profile), 
     [data]
   );
-
-  // ─── ACTIVITY DATA ─
-  const getActivityData = (appid) => {
-    const seed = appid % 97;
-    return Array.from({ length: 12 }, (_, i) => 15 + ((seed * (i + 3) * 7) % 80));
-  };
 
   // ─── LOADING SKELETON ─
   if (loading) {
@@ -625,14 +619,22 @@ async function loadData() {
 
       {/* ═══════════════ CINEMATIC HEADER ═══════════════ */}
       <div className="relative w-full h-48 shrink-0 overflow-hidden group bg-gradient-to-b from-white/5 to-transparent">
-        {heroImg && (
+        {heroImg && !imgErrors['hero_banner'] ? (
           <div className="absolute inset-0 z-0">
             <img 
               src={heroImg} 
               className="w-full h-full object-cover opacity-20 group-hover:opacity-30 scale-110 transition-all duration-700" 
               alt="" 
+              onError={(e) => {
+                const imgs = getGameImages(data.games[0].appid);
+                if (e.target.src === imgs.banner) e.target.src = imgs.capsule;
+                else if (e.target.src === imgs.capsule) e.target.src = imgs.cover;
+                else handleImgError('hero_banner');
+              }}
             />
           </div>
+        ) : (
+          <div className="absolute inset-0 z-0 bg-zinc-800/40" />
         )}
         
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-[1]" />
@@ -686,106 +688,68 @@ async function loadData() {
           </Tooltip>
 
           <div className="flex-1 min-w-0 pb-1">
-  <div className="flex items-center gap-3">
-    <h1 className="text-3xl font-black tracking-tight leading-none truncate">
-      {profile.personaname}
-    </h1>
-    
-    {/* BADGE / LEVEL UI */}
-    <span className={`px-2 py-0.5 rounded-full border border-blue-500/50 bg-blue-500/20 text-blue-400 text-xs font-black`}>
-      LVL {data.level}
-    </span>
-  </div>
-  
-  {/* REAL NAME (Pengganti Bio) */}
-  {data.realName && (
-    <p className={`text-sm mt-1 font-medium italic ${theme.txt3}`}>
-      {data.realName}
-    </p>
-  )}
-
-  <div className="flex items-center gap-2 mt-3 flex-wrap">
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg border"
-      style={{
-        color: status.color,
-        backgroundColor: `${status.color}18`,
-        borderColor: `${status.color}50`,
-      }}
-    >
-      <span className="w-[5px] h-[5px] rounded-full animate-pulse" style={{ backgroundColor: status.color }} />
-      {status.label.split(':')[0]}
-    </span>
-    {profile.loccountrycode && (
-      <span className={`text-[9px] font-semibold opacity-70`}>
-        {profile.loccountrycode}
-      </span>
-    )}
-  </div>
-</div>
-
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-black tracking-tight leading-none truncate">
+                {profile.personaname}
+              </h1>
+              <span className={`px-2 py-0.5 rounded-full border border-blue-500/50 bg-blue-500/20 text-blue-400 text-xs font-black`}>
+                LVL {data.level}
+              </span>
+            </div>
+            {data.realName && (
+              <p className={`text-sm mt-1 font-medium italic ${theme.txt3}`}>
+                {data.realName}
+              </p>
+            )}
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <span
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] rounded-lg border"
+                style={{ color: status.color, backgroundColor: `${status.color}18`, borderColor: `${status.color}50` }}
+              >
+                <span className="w-[5px] h-[5px] rounded-full animate-pulse" style={{ backgroundColor: status.color }} />
+                {status.label.split(':')[0]}
+              </span>
+              {profile.loccountrycode && (
+                <span className={`text-[9px] font-semibold opacity-70`}>
+                  {profile.loccountrycode}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-{/* ──── FRIENDS STACK (Ala GitHub/Anime.js) ──── */}
-  {data.friendProfiles?.length > 0 && (
-    <div className="flex items-center gap-3 mt-3">
-      {/* flex-wrap agar rapi jika turun baris, -space-x-4 agar tumpukan rapat */}
-      <div className="flex flex-wrap -space-x-3 lg:-space-x-4 pl-2 justify-center lg:justify-start py-2">
-        {data.friendProfiles.map((friend, idx) => (
-          <motion.a
-            key={friend.steamid}
-            href={friend.profileurl}
-            target="_blank"
-            rel="noopener noreferrer"
-            // Tambahkan 'group' untuk tooltip, 'mb-2' untuk jarak antar baris
-            className="relative group outline-none rounded-full mb-2 cursor-none" 
-            style={{ zIndex: data.friendProfiles.length - idx }}
-            
-            // Animasi masuk (Muncul berurutan dari kiri)
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0, transition: { delay: idx * 0.02 } }}
-            
-            // Animasi Hover: Membesar dan meloncat ke paling depan
-            whileHover={{ 
-              scale: 1,         // Membesar
-              y: -6,              // Naik sedikit
-              zIndex: 999,        // KUNCI: Paksa avatar ini ke layer paling depan
-              transition: { type: "spring", stiffness: 400, damping: 12 } 
-            }}
-          >
-            {/* AVATAR (Ukurannya tetap w-8 h-8 lg:w-9 lg:h-9) */}
-            <img
-              src={friend.avatarmedium}
-              alt={friend.personaname}
-              className={`
-                w-8 h-8 lg:w-9 lg:h-9
-                rounded-full border-2 object-cover
-                ${friend.personastate > 0 ? 'border-blue-500' : theme.border}
-                ${isDarkMode ? 'bg-zinc-800' : 'bg-white'}
-              `}
-            />
 
-            {/* TOOLTIP KEREN */}
-            <div
-              className="
-                absolute bottom-full mb-2 left-1/2 -translate-x-1/2
-                opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100
-                transition-all duration-200 ease-out
-                bg-zinc-800 text-white text-[10px] font-bold tracking-wide
-                px-2.5 py-1 rounded-md shadow-xl
-                whitespace-nowrap pointer-events-none
-                border border-zinc-600 z-50
-              "
-            >
-              {/* Segitiga panah bawah tooltip */}
-              <div className="w-2 h-2 bg-zinc-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 border-r border-b border-zinc-600" />
-              {friend.personaname}
-            </div>
-          </motion.a>
-        ))}
-      </div>
-    </div>
-  )}
+      {/* ──── FRIENDS STACK ──── */}
+      {data.friendProfiles?.length > 0 && (
+        <div className="flex items-center gap-3 mt-3">
+          <div className="flex flex-wrap -space-x-3 lg:-space-x-4 pl-2 justify-center lg:justify-start py-2">
+            {data.friendProfiles.map((friend, idx) => (
+              <motion.a
+                key={friend.steamid}
+                href={friend.profileurl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative group outline-none rounded-full mb-2 cursor-none" 
+                style={{ zIndex: data.friendProfiles.length - idx }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0, transition: { delay: idx * 0.02 } }}
+                whileHover={{ scale: 1, y: -6, zIndex: 999, transition: { type: "spring", stiffness: 400, damping: 12 } }}
+              >
+                <img
+                  src={friend.avatarmedium}
+                  alt={friend.personaname}
+                  className={`w-8 h-8 lg:w-9 lg:h-9 rounded-full border-2 object-cover ${friend.personastate > 0 ? 'border-blue-500' : theme.border} ${isDarkMode ? 'bg-zinc-800' : 'bg-white'}`}
+                />
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out bg-zinc-800 text-white text-[10px] font-bold tracking-wide px-2.5 py-1 rounded-md shadow-xl whitespace-nowrap pointer-events-none border border-zinc-600 z-50">
+                  <div className="w-2 h-2 bg-zinc-800 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 border-r border-b border-zinc-600" />
+                  {friend.personaname}
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ═══════════════ SCROLLABLE BODY ═══════════════ */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-6 pt-5 space-y-5 z-10">
 
@@ -800,9 +764,7 @@ async function loadData() {
             <div
               key={i}
               className={`group relative flex flex-col items-center cursor-target cursor-none justify-center p-4 rounded-xl border ${theme.border} ${theme.bgGlass} transition-all duration-300 hover:scale-105 hover:border-opacity-70 cursor-default`}
-              style={{
-                borderColor: isDarkMode ? undefined : `rgb(217, 119, 6)`,
-              }}
+              style={{ borderColor: isDarkMode ? undefined : `rgb(217, 119, 6)` }}
             >
               <div
                 className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl inset-0"
@@ -818,7 +780,7 @@ async function loadData() {
         </div>
 
         {/* ──── TABS ──── */}
-        <div className={`flex gap-1 border-b ${theme.border} pb-0 overflow-x-auto`}>
+        <div className={`flex gap-1 border-b custom-scrollbar ${theme.border} pb-0 overflow-x-auto`}>
           {[
             { key: TAB_KEYS.OVERVIEW, label: "Overview", icon: <Icons.Gamepad /> },
             { key: TAB_KEYS.RECENTLY, label: "Recently Played", icon: <Icons.History /> },
@@ -858,7 +820,7 @@ async function loadData() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1  sm:grid-cols-2 cursor-none  lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 cursor-none lg:grid-cols-3 gap-3">
                   {data.games.slice(0, 6).map((game, idx) => (
                     <div
                       key={game.appid}
@@ -867,11 +829,23 @@ async function loadData() {
                       onMouseLeave={() => setHoveredGame(null)}
                       className={`group relative cursor-target cursor-none rounded-xl border ${theme.border} overflow-hidden transition-all duration-300 cursor-pointer ${theme.bgGlass} hover:scale-105 hover:border-blue-500/50`}
                     >
-                      <img
-                        src={getGameImages(game.appid).banner}
-                        className="absolute inset-0 w-full h-full cursor-none object-cover opacity-30 group-hover:opacity-50 transition-opacity"
-                        alt=""
-                      />
+                      {/* SMART IMAGE FALLBACK FOR OVERVIEW GRID */}
+                      {!imgErrors[`banner_${game.appid}`] ? (
+                        <img
+                          src={getGameImages(game.appid).banner}
+                          className="absolute inset-0 w-full h-full cursor-none object-cover opacity-30 group-hover:opacity-50 transition-opacity"
+                          alt=""
+                          onError={(e) => {
+                            const imgs = getGameImages(game.appid);
+                            if (e.target.src === imgs.banner) e.target.src = imgs.capsule;
+                            else if (e.target.src === imgs.capsule) e.target.src = imgs.cover;
+                            else handleImgError(`banner_${game.appid}`);
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 w-full h-full bg-zinc-800/40" />
+                      )}
+                      
                       <div className="absolute inset-0 cursor-none bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                       <div className="relative p-4 h-44 flex flex-col justify-between text-white">
@@ -921,17 +895,11 @@ async function loadData() {
                       </span>
                       <p className={`text-base font-black mt-2`} style={{ color: item.color }}>{item.val}</p>
                     </div>
-                    
                   ))}
-
                 </div>
-               
               </div>
-              
             )}
-            
           </div>
-          
         )}
 
         {/* ──── RECENTLY PLAYED TAB ──── */}
@@ -956,12 +924,26 @@ async function loadData() {
                         className={`group relative rounded-lg cursor-target border ${theme.border} ${theme.bgGlass} p-4 transition-all duration-300 cursor-pointer hover:border-blue-500/50 ${theme.bgHover}`}
                       >
                         <div className="flex gap-4 items-start">
-                          <img
-                            src={getGameImages(game.appid).cover}
-                            className="w-16 h-24 rounded-lg object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                            alt={game.name}
-                            onError={() => handleImgError(game.appid)}
-                          />
+                          
+                          {/* SMART IMAGE FALLBACK FOR RECENTLY PLAYED */}
+                          {!imgErrors[`cover_${game.appid}`] ? (
+                            <img
+                              src={getGameImages(game.appid).cover}
+                              className="w-16 h-24 rounded-lg object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                              alt={game.name}
+                              onError={(e) => {
+                                const imgs = getGameImages(game.appid);
+                                if (e.target.src === imgs.cover) e.target.src = imgs.capsule;
+                                else if (e.target.src === imgs.capsule) e.target.src = imgs.banner;
+                                else handleImgError(`cover_${game.appid}`);
+                              }}
+                            />
+                          ) : (
+                            <div className="w-16 h-24 rounded-lg bg-zinc-800/80 border border-white/5 flex flex-col items-center justify-center p-1 text-center opacity-80">
+                              <Icons.Gamepad />
+                            </div>
+                          )}
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-3">
                               <div>
@@ -1001,10 +983,9 @@ async function loadData() {
         {/* ──── ANALYTICS TAB ──── */}
         {activeTab === TAB_KEYS.ANALYTICS && insights && (
           <div className="space-y-5 animate-in fade-in duration-500">
-            {/* Engagement Metrics */}
+            {/* Analytics Content... */}
             <div className={`rounded-xl border ${theme.border} p-5 ${theme.bgGlass}`}>
               <h3 className="text-sm font-black uppercase tracking-widest mb-5">Metrics</h3>
-              
               <div className="space-y-4">
                 {[
                   { label: "Overall Engagement", val: insights.engagementScore, color: theme.accent },
@@ -1014,17 +995,13 @@ async function loadData() {
                   <div key={i}>
                     <div className="flex justify-between mb-2">
                       <span className={`text-sm font-bold uppercase ${theme.txt3}`}>{metric.label}</span>
-                      <span className="text-sm font-black" style={{ color: metric.color }}>
-                        {metric.val}%
-                      </span>
+                      <span className="text-sm font-black" style={{ color: metric.color }}>{metric.val}%</span>
                     </div>
                     <ProgressBar value={parseFloat(metric.val)} color={metric.color} />
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Time Analysis */}
             <div className={`grid grid-cols-2 gap-3 rounded-xl border ${theme.border} p-5 ${theme.bgGlass}`}>
               <div>
                 <p className={`text-xs font-bold uppercase tracking-wider ${theme.txt3} mb-2`}>Daily Avg</p>
@@ -1037,19 +1014,14 @@ async function loadData() {
                 <p className={`text-xs ${theme.txt3}`}>Per day</p>
               </div>
             </div>
-
-            {/* Top 5 Games */}
             <div className={`rounded-xl border ${theme.border} p-5 ${theme.bgGlass} space-y-3`}>
               <h3 className="text-sm font-black uppercase tracking-widest">Top 5 Games</h3>
-              
               {data.games.slice(0, 5).map((game, idx) => (
                 <div key={game.appid} className={`pb-3 ${idx < 4 ? 'border-b ' + theme.border : ''}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`text-sm font-black w-6 text-center`}>{idx + 1}.</span>
                     <span className="text-sm font-bold flex-1 truncate">{game.name}</span>
-                    <span className="text-sm font-black" style={{ color: theme.accent }}>
-                      {fmtPlaytime(game.playtime_forever)}h
-                    </span>
+                    <span className="text-sm font-black" style={{ color: theme.accent }}>{fmtPlaytime(game.playtime_forever)}h</span>
                   </div>
                   <ProgressBar value={((game.playtime_forever / data.playtimeTotal) * 100)} color={theme.accent} />
                 </div>
@@ -1088,7 +1060,7 @@ async function loadData() {
                         <p className={`text-xs ${theme.txt3} mt-1`}>{ach.cur}/{ach.tot} unlocked</p>
                       </>
                     ) : (
-                      <p className={`text-xs ${theme.txt3}`}>No data available</p>
+                      <p className={`text-xs ${theme.txt3}`}>No achievement data available for this title</p>
                     )}
                   </div>
                 );
@@ -1100,7 +1072,7 @@ async function loadData() {
         <div className="h-4" />
       </div>
 
-{/* ═══════════════ DETAIL MODAL (Enhanced Cinematic & Dynamic Theme) ═══════════════ */}
+{/* ═══════════════ DETAIL MODAL ═══════════════ */}
 {createPortal(
   <AnimatePresence>
     {showModal && detailGameId && (
@@ -1111,7 +1083,6 @@ async function loadData() {
         className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
         onClick={closeModal}
       >
-        {/* Backdrop dengan blur dinamis */}
         <div className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'bg-black/80' : 'bg-white/40'}`} />
         
         {data.allGames.find(g => g.appid === detailGameId) && (() => {
@@ -1128,16 +1099,24 @@ async function loadData() {
               className={`relative max-w-4xl w-full max-h-[90vh] overflow-hidden rounded-3xl border ${theme.border} ${isDarkMode ? theme.bgCard : 'bg-white'} shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col`}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* 1. Hero Header Section */}
+              {/* Header Modal */}
               <div className={`relative h-48 sm:h-64 w-full shrink-0 overflow-hidden ${isDarkMode ? 'bg-zinc-900' : 'bg-gray-200'}`}>
-                <img 
-                  src={images.banner} 
-                  className="w-full h-full object-cover scale-105 blur-[2px] opacity-40"
-                  alt=""
-                />
+                {!imgErrors[`modal_banner_${game.appid}`] ? (
+                  <img 
+                    src={images.banner} 
+                    className="w-full h-full object-cover scale-105 blur-[2px] opacity-40"
+                    alt=""
+                    onError={(e) => {
+                      if (e.target.src === images.banner) e.target.src = images.capsule;
+                      else if (e.target.src === images.capsule) e.target.src = images.cover;
+                      else handleImgError(`modal_banner_${game.appid}`);
+                    }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 w-full h-full bg-zinc-800/40" />
+                )}
                 <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-zinc-900' : 'from-white'} via-transparent to-transparent`} />
                 
-                {/* Close Button Floating */}
                 <button
                   onClick={closeModal}
                   className={`absolute top-5 right-5 z-50 p-2.5 rounded-full transition-all backdrop-blur-xl border ${
@@ -1152,20 +1131,32 @@ async function loadData() {
                 </button>
               </div>
 
-              {/* 2. Content Body (Scrollable) */}
+              {/* Body Modal */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8 -mt-20 relative z-10">
                 <div className="flex flex-col sm:flex-row gap-8">
                   
-                  {/* Left: Poster & Action */}
+                  {/* Kiri: Poster */}
                   <div className="w-full sm:w-48 shrink-0 space-y-4 ">
-                    <motion.img
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      src={images.cover}
-                      className={`w-full aspect-[2/3] cursor-none cursor-target rounded-2xl object-cover shadow-2xl border-2 ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}
-                      alt={game.name}
-                    />
+                    {!imgErrors[`modal_cover_${game.appid}`] ? (
+                      <motion.img
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        src={images.cover}
+                        className={`w-full aspect-[2/3] cursor-none cursor-target rounded-2xl object-cover shadow-2xl border-2 ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}
+                        alt={game.name}
+                        onError={(e) => {
+                          if (e.target.src === images.cover) e.target.src = images.capsule;
+                          else if (e.target.src === images.capsule) e.target.src = images.banner;
+                          else handleImgError(`modal_cover_${game.appid}`);
+                        }}
+                      />
+                    ) : (
+                      <div className={`w-full aspect-[2/3] rounded-2xl shadow-2xl border-2 flex items-center justify-center opacity-70 ${isDarkMode ? 'border-white/10 bg-zinc-800' : 'border-gray-200 bg-gray-100'}`}>
+                        <Icons.Gamepad />
+                      </div>
+                    )}
+
                     <button
                       onClick={() => window.open(`https://store.steampowered.com/app/${game.appid}`)}
                       className={`w-full py-3 px-4 cursor-none cursor-target rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg ${
@@ -1181,7 +1172,7 @@ async function loadData() {
                     </button>
                   </div>
 
-                  {/* Right: Info & Stats */}
+                  {/* Kanan: Stats & Info */}
                   <div className="flex-1 space-y-6">
                     <div>
                       <motion.h2 
@@ -1201,7 +1192,6 @@ async function loadData() {
                       </span>
                     </div>
 
-                    {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className={`p-4 rounded-2xl border cursor-none cursor-target ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'}`}>
                         <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${theme.txt3}`}>Playtime</p>
@@ -1213,7 +1203,7 @@ async function loadData() {
                       </div>
                     </div>
 
-                    {/* Achievements Section */}
+                    {/* Achievements di Modal */}
                     <div className={`space-y-4 pt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-100'}`}>
                       <div className="flex items-center justify-between text-sm">
                         <h3 className={`font-bold uppercase tracking-widest ${theme.txt2}`}>Achievements</h3>

@@ -13,7 +13,8 @@ import {
   Palette,
   ScanText,
   History,
-  ChevronDown
+  ChevronDown,
+  Gamepad2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
@@ -204,7 +205,7 @@ const showFullNavbar = !isScrolled;
               className="hidden md:flex gap-6 lg:gap-8 items-center top-8 pointer-events-auto absolute left-1/2 -translate-x-1/2"
             >
               {/* CEK KONDISI HALAMAN: Apakah ini halaman Showcase atau bukan? */}
-              {["/all-projects", "/certificates", "/Scanner", "/art"].includes(location.pathname) ? (
+              {["/all-projects", "/certificates", "/Scanner", "/art","/activity"].includes(location.pathname) ? (
                 
                 /* =========================================
                    TAMPILAN NAVBAR UNTUK HALAMAN SHOWCASE
@@ -227,6 +228,7 @@ const showFullNavbar = !isScrolled;
                     { name: "All Projects", link: "/all-projects" },
                     { name: "Scanner", link: "/Scanner" },
                     { name: "Art", link: "/art" },
+                    { name: "Activity", link: "/activity" },
                   ].map((item) => {
                     const isActive = location.pathname === item.link;
                     return (
@@ -313,6 +315,7 @@ const showFullNavbar = !isScrolled;
                               { name: "All Projects", link: "/all-projects", icon: <Folder size={16} /> },
                               { name: "Scanner", link: "/Scanner", icon: <ScanText size={16} /> },
                               { name: "Art", link: "/art", icon: <Palette size={16} /> },
+                              { name: "Activity", link: "/activity", icon: <Gamepad2 size={16} /> },
                             ].map((sub, index) => (
                               <motion.button
                                 initial={{ opacity: 0, x: -10 }}
@@ -462,6 +465,7 @@ const showFullNavbar = !isScrolled;
                       { name: "All Projects", link: "/all-projects", icon: <Folder size={32} /> },
                       { name: "Scanner", link: "/Scanner", icon: <ScanText size={32} /> },
                       { name: "Art", link: "/art", icon: <Palette size={32} /> },
+                      { name: "Activity", link: "/activity", icon: <Gamepad2 size={32} /> },
                     ]
                       .filter((item) => location.pathname !== item.link)
                       .map((item, index) => (
@@ -498,6 +502,7 @@ const showFullNavbar = !isScrolled;
                         { name: "Certificates", link: "/certificates", icon: <Award size={22} /> },
                         { name: "Scanner", link: "/Scanner", icon: <ScanText size={22} /> },
                         { name: "Art", link: "/art", icon: <Palette size={22} /> },
+                        { name: "Activity", link: "/activity", icon: <Gamepad2 size={22} /> },
                       ],
                     },
                     { name: "Contact", link: "#contact", style: <Mail size={32} /> },
