@@ -42,7 +42,7 @@ const showFullNavbar = !isScrolled;
   // Scroll Listener
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50); // Akan true jika scroll lebih dari 50px
+      setIsScrolled(window.scrollY > 100); // Akan true jika scroll lebih dari 50px
     };
     
     window.addEventListener("scroll", handleScroll);
@@ -205,7 +205,7 @@ const showFullNavbar = !isScrolled;
               className="hidden md:flex gap-6 lg:gap-8 items-center top-8 pointer-events-auto absolute left-1/2 -translate-x-1/2"
             >
               {/* CEK KONDISI HALAMAN: Apakah ini halaman Showcase atau bukan? */}
-              {["/all-projects", "/certificates", "/Scanner", "/art","/activity"].includes(location.pathname) ? (
+              {["/all-projects", "/certificates", "/Scanner", "/art", "/activity"].includes(location.pathname) ? (
                 
                 /* =========================================
                    TAMPILAN NAVBAR UNTUK HALAMAN SHOWCASE
@@ -458,7 +458,7 @@ const showFullNavbar = !isScrolled;
 
               {/* 2. Navigation Area - Flex-1 makes it take available space */}
               <nav className="flex-1 space-y-4 md:space-y-6 ">
-                {["/all-projects", "/certificates", "/Scanner", "/art"].includes(location.pathname) ? (
+                {["/all-projects", "/certificates", "/Scanner", "/art", "/activity"].includes(location.pathname) ? (
                   <div className="flex flex-col space-y-6 ">
                     {[
                       { name: "Certificates", link: "/certificates", icon: <Award size={32} /> },
