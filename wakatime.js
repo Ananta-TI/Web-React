@@ -13,7 +13,7 @@ const PORT = 5000;
 app.use(cors());
 
 app.get('/api/wakatime', async (req, res) => {
-  const WAKATIME_API_KEY = process.env.WAKATIME_API_KEY;
+  const WAKATIME_API_KEY = process.env.VITE_WAKATIME_API_KEY;
 
   if (!WAKATIME_API_KEY) {
     return res.status(500).json({ error: "API Key belum disetting di .env" });

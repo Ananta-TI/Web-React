@@ -1,193 +1,168 @@
-import React, { useState, useEffect, useContext } from "react";
-import { ThemeContext } from "../context/ThemeContext.jsx";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { ThemeContext } from "../context/ThemeContext";
+import { 
+  Code2, 
+  Clock, 
+  Terminal, 
+  ExternalLink, 
+  RefreshCw, 
+  ChevronRight,
+  Monitor,
+  AlertCircle,
+  Trophy
+} from "lucide-react";
 
-// --- MOCK DATA (Fallback jika API Error/Limit Habis) ---
-const MOCK_WAKA_DATA = {
-  data: {
-    human_readable_total: "0 hrs 0 mins",
-    human_readable_daily_average: "0 hrs 0 mins",
-    best_day: { date: "Today", text: "0 hrs 0 mins" },
-    languages: [],
-    editors: []
-  }
-};
+const WakatimeProfileCard = () => {
+  const theme = useContext(ThemeContext);
+  const isDarkMode = theme?.isDarkMode ?? true;
 
-export default function WakaTimeCard() {
-  const themeCtx = useContext(ThemeContext);
-  const isDarkMode = themeCtx?.isDarkMode ?? true;
-
-  const [stats, setStats] = useState(MOCK_WAKA_DATA.data);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [activeTab, setActiveTab] = useState("languages");
+  const [error, setError] = useState(null);
+
+  // Mengambil URL Backend dari .env
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+  const fetchWakaStats = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Sekarang kita menembak ke server kita sendiri, bukan langsung ke WakaTime
+      const response = await fetch(`${BACKEND_URL}/api/wakatime`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+      }
+
+      const json = await response.json();
+      
+      if (json && json.data) {
+        setStats(json.data);
+      } else {
+        throw new Error("Struktur data dari backend tidak sesuai");
+      }
+    } catch (err) {
+      console.error("WakaTime Fetch Error:", err);
+      setError(err.message || "Gagal mengambil data dari backend");
+    } finally {
+      setLoading(false);
+    }
+  }, [BACKEND_URL]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Try to call the API
-        const res = await fetch('http://localhost:5000/api/wakatime');
-        
-        if (!res.ok) throw new Error(`Gagal mengambil data: ${res.status}`);
-        
-        const json = await res.json();
-        if (json.data) {
-          setStats(json.data);
-          setError(false);
-        } else {
-          setStats(MOCK_WAKA_DATA.data);
-          setError(true);
-        }
-      } catch (err) {
-        console.error("WakaTime Fallback:", err);
-        setError(true);
-        setStats(MOCK_WAKA_DATA.data); // Fallback to mock data
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    fetchWakaStats();
+  }, [fetchWakaStats]);
 
   if (loading) {
     return (
-      <div className={`w-full max-w-md h-48 rounded-xl animate-pulse border ${isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-gray-100 border-gray-200"}`}>
-        <div className="h-full flex flex-col justify-center items-center space-y-3">
-          <div className={`w-10 h-10 rounded ${isDarkMode ? "bg-zinc-800" : "bg-gray-300"}`}></div>
-          <div className={`w-1/2 h-4 rounded ${isDarkMode ? "bg-zinc-800" : "bg-gray-300"}`}></div>
+      <div className={`w-full min-h-[300px] rounded-2xl border animate-pulse ${isDarkMode ? "bg-zinc-800/40 border-zinc-700" : "bg-gray-100 border-gray-200"}`}>
+        <div className="p-6 space-y-4">
+          <div className="h-4 w-32 bg-white/10 rounded" />
+          <div className="h-12 w-full bg-white/10 rounded-xl" />
+          <div className="grid grid-cols-2 gap-3">
+             <div className="h-20 bg-white/10 rounded-xl" />
+             <div className="h-20 bg-white/10 rounded-xl" />
+          </div>
         </div>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl p-6 border ${isDarkMode ? "bg-zinc-800/60 border-red-500/20 text-white" : "bg-white border-red-200 text-black"} backdrop-blur-xl`}>
+        <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+        <p className="text-sm font-medium opacity-70 mb-4">{error}</p>
+        <button 
+          onClick={fetchWakaStats}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all"
+        >
+          <RefreshCw size={14} /> Coba Lagi
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="font-sans antialiased w-full max-w-md mx-auto">
-      <div className={`relative overflow-hidden rounded-xl border shadow-xl transition-all duration-300 group
-        ${isDarkMode 
-          ? "bg-[#121212] border-[#333]" 
-          : "bg-white border-gray-200"
-        }`}>
-        
-        {/* Header Strip */}
-        <div className={`h-1 w-full bg-gradient-to-r ${error ? "from-red-500 to-orange-500" : "from-blue-500 via-purple-500 to-pink-500"}`}></div>
+    <div className={`relative flex flex-col w-full rounded-2xl p-6 transition-all duration-300 shadow-2xl border overflow-hidden ${isDarkMode ? "bg-zinc-800 bg-opacity-60 border-zinc-700 text-white" : "bg-white bg-opacity-80 border-gray-200 text-black"} backdrop-blur-xl font-sans`}>
+      <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
 
-        <div className="p-5">
-          {/* Header Info */}
-          <div className="flex justify-between items-start mb-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 flex items-center justify-center rounded-lg border ${isDarkMode ? "bg-[#202020] border-[#333]" : "bg-gray-100 border-gray-200"}`}>
-                <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-500" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.15 13.85L12 13V7h1.5v5.2l3.55 2.15-.9 1.5z" />
-                </svg>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <div className="flex items-center gap-2 opacity-60">
+          <Terminal size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest">Coding Activity</span>
+        </div>
+        <div className="flex items-center gap-2">
+           <button onClick={fetchWakaStats} className="opacity-40 hover:opacity-100 transition-opacity p-1"><RefreshCw size={14} /></button>
+           <a href="https://wakatime.com" target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity p-1"><ExternalLink size={14} /></a>
+        </div>
+      </div>
+
+      <div className="relative z-10 space-y-6">
+        {/* All-time Total Time */}
+        <div className="flex items-end gap-3">
+          <div className={`p-3 rounded-2xl ${isDarkMode ? "bg-indigo-500/20" : "bg-indigo-50"}`}>
+            <Clock className="w-8 h-8 text-indigo-400" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase opacity-50 mb-0.5">Total Coding Time</p>
+            <h2 className="text-3xl font-black tracking-tighter leading-none">
+              {stats?.human_readable_total || "0 hrs"}
+            </h2>
+          </div>
+        </div>
+
+        {/* Best Day Info (Data baru dari backend kamu) */}
+        {stats?.best_day && (
+          <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDarkMode ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-50 border-amber-200"}`}>
+            <Trophy className="w-5 h-5 text-amber-400" />
+            <div className="text-xs">
+              <span className="opacity-60">Best day: </span>
+              <span className="font-bold">{stats.best_day.date}</span>
+              <span className="mx-2 opacity-30">|</span>
+              <span className="font-bold text-amber-400">{stats.best_day.text}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Languages */}
+          <div className={`p-4 rounded-xl border ${isDarkMode ? "bg-black/20 border-white/5" : "bg-gray-50 border-black/5"}`}>
+            <div className="flex items-center gap-2 mb-3"><Code2 size={14} className="text-blue-400" /><span className="text-xs font-bold uppercase tracking-wider opacity-70">Last 7 Days</span></div>
+            <div className="space-y-3">
+              {stats?.languages?.slice(0, 3).map((lang) => (
+                <div key={lang.name} className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold"><span>{lang.name}</span><span className="opacity-60">{lang.percent}%</span></div>
+                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${lang.percent}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Editors & Average */}
+          <div className={`p-4 rounded-xl border ${isDarkMode ? "bg-black/20 border-white/5" : "bg-gray-50 border-black/5"}`}>
+            <div className="flex items-center gap-2 mb-3"><Monitor size={14} className="text-purple-400" /><span className="text-xs font-bold uppercase tracking-wider opacity-70">Environment</span></div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col"><span className="text-[9px] uppercase opacity-40 font-black">Top Editor</span><span className="text-xs font-bold">{stats?.editors?.[0]?.name || "VS Code"}</span></div>
+                <div className="flex flex-col text-right"><span className="text-[9px] uppercase opacity-40 font-black">Daily Avg</span><span className="text-xs font-bold text-green-400">{stats?.human_readable_daily_average || "0h"}</span></div>
               </div>
-              <div>
-                <h3 className={`text-sm font-bold uppercase tracking-wider ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                  WakaTime Stats
-                </h3>
-                <h2 className={`text-xl font-black ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                  Last 7 Days
-                </h2>
+              <div className="h-[1px] w-full bg-white/5" />
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col"><span className="text-[9px] uppercase opacity-40 font-black">Operating System</span><span className="text-xs font-bold">Windows</span></div>
+                <div className={`px-2 py-1 rounded text-[10px] font-black ${isDarkMode ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-100 text-indigo-600"}`}>VERIFIED</div>
               </div>
             </div>
-            
-            <div className="text-right">
-               <div className={`text-2xl font-bold font-mono ${isDarkMode ? "text-green-400" : "text-green-600"}`}>
-                 {stats.human_readable_total || "0 hrs"}
-               </div>
-               <div className="text-[10px] text-gray-500">Total Coding Time</div>
-            </div>
           </div>
-
-          {/* Main Stats Area */}
-          <div className={`mb-6 p-4 rounded-lg border ${isDarkMode ? "bg-[#1a1a1a] border-[#333]" : "bg-gray-50 border-gray-100"}`}>
-            <div className="flex justify-between items-center mb-2">
-               <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Daily Average</span>
-               <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>{stats.human_readable_daily_average || "-"}</span>
-            </div>
-            <div className="flex justify-between items-center">
-               <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Best Day</span>
-               <div className="text-right">
-                 <span className={`block font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>{stats.best_day?.text || "-"}</span>
-                 <span className="text-[10px] text-gray-500">{stats.best_day?.date || "-"}</span>
-               </div>
-            </div>
-          </div>
-
-          {/* Languages / Editors Tabs */}
-          <div className="mb-3 flex border-b border-gray-200 dark:border-[#333]">
-            <button 
-              onClick={() => setActiveTab('languages')}
-              className={`pb-2 pr-4 text-xs font-bold uppercase transition-colors ${activeTab === 'languages' ? (isDarkMode ? "text-blue-400 border-b-2 border-blue-400" : "text-blue-600 border-b-2 border-blue-600") : "text-gray-500"}`}
-            >
-              Languages
-            </button>
-            <button 
-              onClick={() => setActiveTab('editors')}
-              className={`pb-2 px-4 text-xs font-bold uppercase transition-colors ${activeTab === 'editors' ? (isDarkMode ? "text-blue-400 border-b-2 border-blue-400" : "text-blue-600 border-b-2 border-blue-600") : "text-gray-500"}`}
-            >
-              Editors
-            </button>
-          </div>
-
-          {/* List Content */}
-          <div className="space-y-3 min-h-[120px]">
-            {activeTab === 'languages' ? (
-              stats.languages && stats.languages.length > 0 ? (
-                stats.languages.slice(0, 5).map((lang, idx) => (
-                  <ProgressBar 
-                    key={idx} 
-                    label={lang.name} 
-                    percent={lang.percent} 
-                    color={lang.color || "#ccc"} 
-                    isDark={isDarkMode}
-                  />
-                ))
-              ) : (
-                <div className="text-center text-xs text-gray-500 pt-4">No language data available</div>
-              )
-            ) : (
-              stats.editors && stats.editors.length > 0 ? (
-                stats.editors.slice(0, 5).map((editor, idx) => (
-                  <ProgressBar 
-                    key={idx} 
-                    label={editor.name} 
-                    percent={editor.percent} 
-                    color={isDarkMode ? "#ffffff" : "#333333"} 
-                    isDark={isDarkMode}
-                  />
-                ))
-              ) : (
-                <div className="text-center text-xs text-gray-500 pt-4">No editor data available</div>
-              )
-            )}
-          </div>
-          
-          <div className="mt-4 pt-3 border-t border-gray-200 dark:border-[#333] text-center">
-             <span className="text-[10px] text-gray-500 flex justify-center items-center gap-1">
-               <span className={`w-2 h-2 rounded-full ${error ? "bg-red-500" : "bg-green-500 animate-pulse"}`}></span>
-               {error ? "Failed to load WakaTime" : "Live from WakaTime API"}
-             </span>
-          </div>
-
         </div>
       </div>
     </div>
   );
-}
+};
 
-// Helper Component: Custom Progress Bar
-const ProgressBar = ({ label, percent, color, isDark }) => (
-  <div className="group">
-    <div className="flex justify-between mb-1">
-      <span className={`text-xs font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>{label}</span>
-      <span className={`text-xs font-mono ${isDark ? "text-gray-500" : "text-gray-500"}`}>{percent}%</span>
-    </div>
-    <div className={`w-full h-1.5 rounded-full overflow-hidden ${isDark ? "bg-[#333]" : "bg-gray-200"}`}>
-      <div 
-        className="h-full rounded-full transition-all duration-1000 ease-out"
-        style={{ width: `${percent}%`, backgroundColor: color }}
-      ></div>
-    </div>
-  </div>
-);
+export default WakatimeProfileCard;

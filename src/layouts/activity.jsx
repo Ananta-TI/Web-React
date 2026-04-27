@@ -5,6 +5,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import Tetris from "./TetrioProfileCard.jsx";
 import SteamProfileCard from "./SteamProfileCard";
 import DiscordProfileCard from "./DiscordProfileCard.jsx";
+import WakatimeProfileCard from "../components/WakaTimeCard.jsx";
 // import SpotifyProfileCard from "./SpotifyProfileCard.jsx";
 import { Gamepad2 } from "lucide-react";
 import "../index.css";
@@ -81,10 +82,15 @@ const Activity = () => {
           <div className="break-inside-avoid inline-block w-full mb-4">
             <DiscordProfileCard userId="900690698133700638" />
           </div>
+          
           {/* Card 3: TETR.IO (Akan otomatis mengisi ruang kosong di bawah Discord) */}
           <div className="break-inside-avoid inline-block w-full mb-4">
             <Tetris />
           </div>
+          {/* Card WakaTime */}
+<div className="break-inside-avoid inline-block w-full mb-4">
+  <WakatimeProfileCard />
+</div>
           {/* Card 2: Steam (Ditaruh urutan kedua agar jatuh di kolom kanan) */}
           <div className="break-inside-avoid inline-block w-full mb-4">
             <SteamProfileCard
