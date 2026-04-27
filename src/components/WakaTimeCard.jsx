@@ -23,33 +23,40 @@ const WakatimeProfileCard = () => {
   // Mengambil URL Backend dari .env
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  const fetchWakaStats = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+const fetchWakaStats = useCallback(async () => {
+  setLoading(true);
+  setError(null);
+
+  try {
+    const response = await fetch("/api/wakatime");
+    const text = await response.text();
+
+    let json;
 
     try {
-      // Sekarang kita menembak ke server kita sendiri, bukan langsung ke WakaTime
-      const response = await fetch(`${BACKEND_URL}/api/wakatime`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP Error: ${response.status}`);
-      }
-
-      const json = await response.json();
-      
-      if (json && json.data) {
-        setStats(json.data);
-      } else {
-        throw new Error("Struktur data dari backend tidak sesuai");
-      }
-    } catch (err) {
-      console.error("WakaTime Fetch Error:", err);
-      setError(err.message || "Gagal mengambil data dari backend");
-    } finally {
-      setLoading(false);
+      json = JSON.parse(text);
+    } catch {
+      throw new Error("Response bukan JSON");
     }
-  }, [BACKEND_URL]);
+
+    if (!response.ok) {
+      throw new Error(json.error || "Gagal fetch");
+    }
+
+    if (!json.data) {
+      throw new Error("Data tidak valid");
+    }
+
+    setStats(json.data);
+
+  } catch (err) {
+    console.error(err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   useEffect(() => {
     fetchWakaStats();
