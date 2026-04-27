@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useContext, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext.jsx";
 import * as THREE from "three";
 
@@ -112,6 +112,25 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
   const [stats, setStats] = useState(null); 
   const [contributions, setContributions] = useState(null);
   const [tooltip, setTooltip] = useState(null); 
+
+  // --- LOGIKA PARALLAX YANG SUPER SMOOTH ---
+  const { scrollY } = useScroll();
+  
+  // Contributions: Turun ke bawah saat di-scroll
+  const yContribRaw = useTransform(scrollY, [0, 1000], [0, 450]);
+  const yContribSmooth = useSpring(yContribRaw, { 
+    stiffness: 100, 
+    damping: 30, 
+    restDelta: 0.001 
+  });
+
+  // Streaks: Naik ke atas saat di-scroll
+  const yStreaksRaw = useTransform(scrollY, [0, 1000], [0, -450]);
+  const yStreaksSmooth = useSpring(yStreaksRaw, { 
+    stiffness: 100, 
+    damping: 30, 
+    restDelta: 0.001 
+  });
 
   /* ── 1. Fetch data ── */
   useEffect(() => {
@@ -377,7 +396,7 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
     const ro = new ResizeObserver(() => {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      if (w === 0 || h === 0) return; // Mencegah glitch saat baru render
+      if (w === 0 || h === 0) return; 
       
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
@@ -388,9 +407,7 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         camera.position.set(-10, 20, 25); 
       }
       
-      // INI KUNCI FIX-NYA: Paksa kamera nengok ke tengah lagi setelah pindah posisi!
       camera.lookAt(0, 0, 0);
-      
       camera.updateProjectionMatrix();
     });
     ro.observe(canvas);
@@ -468,10 +485,11 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         {stats && !loading && (
           <>
             <motion.div 
+              style={{ y: yContribSmooth }} // Efek parallax turun
               className="absolute top-2 right-2 md:top-6 md:right-6 z-10 flex flex-col pointer-events-none origin-top-right scale-[0.7] md:scale-100"
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 100 }} // Masuk dari KANAN
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.2, duration: 0.8, type: "spring", damping: 15 }}
             >
               <h3 className="text-sm font-semibold text-zinc-200 mb-2 drop-shadow-md">Contributions</h3>
               <div className="bg-[#161b22]/90 backdrop-blur-md border border-zinc-700/60 rounded-xl p-4 shadow-2xl flex gap-6">
@@ -497,10 +515,11 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
             </motion.div>
 
             <motion.div 
+              style={{ y: yStreaksSmooth }} // Efek parallax naik
               className="absolute bottom-8 left-2 md:bottom-10 md:left-6 z-10 flex flex-col pointer-events-none origin-bottom-left scale-[0.7] md:scale-100"
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -100 }} // Masuk dari KIRI
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.3, duration: 0.8, type: "spring", damping: 15 }}
             >
               <h3 className="text-sm font-semibold text-zinc-200 mb-2 drop-shadow-md">Streaks</h3>
               <div className="bg-[#161b22]/90 backdrop-blur-md border border-zinc-700/60 rounded-xl p-4 shadow-2xl flex gap-6">
