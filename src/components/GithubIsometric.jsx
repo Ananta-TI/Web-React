@@ -164,7 +164,7 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
     const currentYear = new Date().getFullYear();
     const prevYear = currentYear - 1;
 
-    fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=${prevYear}&y=${currentYear}`)
+    fetch(`https://github-contributions-api.jogruber.de/v4/${username}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -186,7 +186,7 @@ days.sort((a, b) => a.date.localeCompare(b.date));
         const pastAndPresentDays = days.filter(d => d.date <= todayStr);
 
         // Gunakan data yang sudah difilter
-        const recent = pastAndPresentDays.slice(-730);
+        const recent = pastAndPresentDays.slice(-367);
 
         // Mulai kalkulasi (cukup tulis 1 kali saja)
         const total = recent.reduce((s, d) => s + d.count, 0);
