@@ -173,9 +173,22 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         const days = Array.isArray(data.contributions) ? data.contributions : [];
         if (days.length === 0) throw new Error("No contribution data");
 
-        days.sort((a, b) => a.date.localeCompare(b.date));
-        const recent = days.slice(-730);
+days.sort((a, b) => a.date.localeCompare(b.date));
+        
+        // Dapatkan tanggal hari ini
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
 
+        // Filter tanggal yang ada di masa depan
+        const pastAndPresentDays = days.filter(d => d.date <= todayStr);
+
+        // Gunakan data yang sudah difilter
+        const recent = pastAndPresentDays.slice(-730);
+
+        // Mulai kalkulasi (cukup tulis 1 kali saja)
         const total = recent.reduce((s, d) => s + d.count, 0);
         const best = recent.reduce((a, b) => (b.count > a.count ? b : a), recent[0]);
         const last7 = recent.slice(-7).reduce((s, d) => s + d.count, 0);
@@ -185,7 +198,6 @@ export default function GithubIsometric({ username = "Ananta-TI" }) {
         let longest = 0, current = 0, run = 0;
         let longestStart = "", longestEnd = "", currentStart = "";
         let tempStart = "";
-
         for (const d of recent) {
           if (d.count > 0) {
             if (run === 0) tempStart = d.date;
