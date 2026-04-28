@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from "react";
 
 export default function LocationBadge({ isDarkMode }) {
   const globeRef = useRef(null);
+  const containerRef = useRef(null); // Ref untuk mengecek visibilitas
 
-  // Palet warna premium
   const shapeFill = isDarkMode ? "#e4e4e7" : "#18181b";
   const textTitle = isDarkMode ? "rgba(0,0,0,0.42)" : "rgba(255,255,255,0.42)";
   const textCity = isDarkMode ? "#18181b" : "#ffffff";
@@ -11,21 +11,35 @@ export default function LocationBadge({ isDarkMode }) {
 
   useEffect(() => {
     const globe = globeRef.current;
-    if (!globe) return;
+    const container = containerRef.current;
+    if (!globe || !container) return;
 
     let angle = 0;
     let dir = 1;
     let raf;
     let tid;
+    let isVisible = true;
+
+    // OPTIMASI: Cek visibilitas dengan Intersection Observer
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+    });
+    observer.observe(container);
 
     function spin() {
+      raf = requestAnimationFrame(spin);
+      
+      // JIKA DI LUAR LAYAR, STOP BERPUTAR
+      if (!isVisible) return;
+
       angle += 0.42 * dir;
       globe.style.transform = `rotateZ(-15deg) rotateX(20deg) rotateY(${angle}deg)`;
-      raf = requestAnimationFrame(spin);
     }
     spin();
 
     function onScroll(delta) {
+      if (!isVisible) return; // Jangan jalankan interaksi kalau nggak kelihatan
+
       dir = delta > 0 ? 1 : -1;
       cancelAnimationFrame(raf);
       angle += dir * 5; 
@@ -47,6 +61,7 @@ export default function LocationBadge({ isDarkMode }) {
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     return () => {
+      observer.disconnect();
       cancelAnimationFrame(raf);
       clearTimeout(tid);
       window.removeEventListener("wheel", handleWheel);
@@ -55,94 +70,38 @@ export default function LocationBadge({ isDarkMode }) {
     };
   }, []);
 
-  // Cincin globe disesuaikan untuk globe yang lebih besar (66px)
   const rings = [
-    "rotateY(0deg)",
-    "rotateY(60deg)",
-    "rotateY(120deg)",
-    "rotateX(90deg)",
-    "rotateX(90deg) translateZ(15px) scale(0.85)", 
+    "rotateY(0deg)", "rotateY(60deg)", "rotateY(120deg)",
+    "rotateX(90deg)", "rotateX(90deg) translateZ(15px) scale(0.85)", 
     "rotateX(90deg) translateZ(-15px) scale(0.85)",
   ];
 
   return (
-    <div className="relative inline-flex items-center group cursor-none cursor-target drop-shadow-xl">
-      
-      {/* SVG Custom DIPERBESAR 1.5x
-        Width awal 220 -> 330
-        Height awal 64 -> 96
-        
-        Hitungan d path:
-        Lengkungan kanan (A48) -> Radius 48 (awalnya 32)
-        Titik potong x (188 -> 282)
-        Lubang (A33) -> Radius lubang 33 (awalnya 22) -> Diameter globe = 66
-        Posisi lubang: y=15 sampai y=81
-      */}
+    <div ref={containerRef} className="relative inline-flex items-center group cursor-none cursor-target drop-shadow-xl">
       <svg
-        width="330"
-        height="96"
-        viewBox="0 0 330 96"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+        width="330" height="96" viewBox="0 0 330 96" fill="none" xmlns="http://www.w3.org/2000/svg"
         className="transition-colors duration-500"
       >
         <path
-          fillRule="evenodd"
-          clipRule="evenodd"
+          fillRule="evenodd" clipRule="evenodd"
           d="M0 0 L282 0 A48 48 0 0 1 282 96 L0 96 Z M282 15 A33 33 0 0 0 282 81 A33 33 0 0 0 282 15 Z"
           fill={shapeFill}
         />
       </svg>
 
-      {/* Text Overlay - Ukuran Font Diperbesar */}
       <div className="absolute left-8 flex flex-col justify-center pointer-events-none mt-1">
-        <span
-          style={{ color: textTitle, transition: "color 0.5s ease" }}
-          className="text-xs font-bold tracking-[0.25em] uppercase mb-1"
-        >
+        <span style={{ color: textTitle, transition: "color 0.5s ease" }} className="text-xs font-bold tracking-[0.25em] uppercase mb-1">
           Located In
         </span>
-        <span
-          style={{ color: textCity, transition: "color 0.5s ease" }}
-          className="text-2xl font-black tracking-wider leading-none"
-        >
+        <span style={{ color: textCity, transition: "color 0.5s ease" }} className="text-2xl font-black tracking-wider leading-none">
           Indonesia
         </span>
       </div>
 
-      {/* Digital Ball / 3D Globe - Diperbesar menjadi 66px */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          right: 48, // Jarak disesuaikan dengan titik potong SVG yang baru (282px)
-          top: "50%",
-          transform: "translate(50%, -50%)",
-          width: 66,
-          height: 66,
-          perspective: 1200, // Perspektif dijauhkan agar proporsional
-        }}
-      >
-        <div
-          ref={globeRef}
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "relative",
-            transformStyle: "preserve-3d",
-          }}
-        >
+      <div className="absolute pointer-events-none" style={{ right: 48, top: "50%", transform: "translate(50%, -50%)", width: 66, height: 66, perspective: 1200 }}>
+        <div ref={globeRef} style={{ width: "100%", height: "100%", position: "relative", transformStyle: "preserve-3d" }}>
           {rings.map((transformRule, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                border: `3px solid ${ringColor}`,
-                transform: transformRule,
-                transition: "transform 0.5s ease",
-              }}
-            />
+            <div key={i} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `3px solid ${ringColor}`, transform: transformRule, transition: "transform 0.5s ease" }} />
           ))}
         </div>
       </div>

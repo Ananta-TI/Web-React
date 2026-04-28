@@ -1,93 +1,79 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useContext } from "react";
-import { ThemeContext } from "../../context/ThemeContext"; // Sesuaikan path context kamu
+import { useRef, useContext, useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ThemeContext } from "../../context/ThemeContext"; 
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const TextReveal = ({ text, className }) => {
-  const targetRef = useRef(null);
+  const containerRef = useRef(null);
   const { isDarkMode } = useContext(ThemeContext) || { isDarkMode: false };
-  
-  // Menggunakan offset standar agar efek scroll terasa natural
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start end", "end start"], 
-  });
 
   const words = text.split(" ");
   let isHighlighting = false;
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Ambil semua elemen kata yang *bukan* kata yang di-highlight
+      const revealWords = gsap.utils.toArray('.reveal-word');
+      
+      gsap.fromTo(revealWords, 
+        { opacity: 0.1 },
+        {
+          opacity: 1,
+          stagger: 0.05, // Efek gelombang berurutan
+          ease: "none",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 30%",
+            end: "bottom 70%",
+            scrub: 1, // Smooth scrub
+          }
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div
-      ref={targetRef}
-      // Menambahkan min-h agar ada ruang scroll yang cukup
-      className={`${className} relative w-full flex my-[70px] justify-center transition-colors duration-500  items-center`}
+      ref={containerRef}
+      className={`${className} relative w-full flex my-[70px] justify-center transition-colors duration-500 items-center`}
     >
       <div className="max-w-7xl py-10">
         <p className="flex flex-wrap font-bold transition-colors duration-500">
           {words.map((word, i) => {
-            // Logika deteksi **
             const startHighlight = word.startsWith("**");
             const endHighlight = word.endsWith("**") || word.includes("**");
             
             if (startHighlight) isHighlighting = true;
-
             const cleanWord = word.replace(/\*\*/g, "");
             const currentHighlightStatus = isHighlighting;
-
             if (endHighlight) isHighlighting = false;
 
-            // Menghitung range animasi per kata
-            const step = 1 / words.length;
-            const start = i * step;
-            const end = start + step;
-            
-         
-            const adjustedStart = 0.1 + (start * 0.5);
-            const adjustedEnd = 0.1 + (end * 0.5);
+            // Jika Highlight, warna merah/hijau menyala (opacity 1)
+            // Jika bukan, gunakan kelas 'reveal-word' untuk dikontrol GSAP
+            const colorClass = currentHighlightStatus
+              ? isDarkMode ? "dark:text-[#c1ff72]" : "text-[#f50a0a]"
+              : isDarkMode ? "text-white reveal-word" : "text-gray-900 reveal-word";
 
             return (
-              <Word 
-                key={i} 
-                progress={scrollYProgress} 
-                range={[adjustedStart, adjustedEnd]}
-                isHighlighted={currentHighlightStatus}
-                isDarkMode={isDarkMode}
-              >
-                {cleanWord}
-              </Word>
+              <span key={i} className="relative mx-[3px] lg:mx-[5px] inline-block my-1">
+                <span 
+                  className={`transition-colors duration-500 ${colorClass}`}
+                  // Set opacity bawaan: terang untuk highlight, redup untuk kata biasa
+                  style={{ opacity: currentHighlightStatus ? 1 : 0.1 }}
+                >
+                  {cleanWord}
+                </span>
+              </span>
             );
           })}
         </p>
       </div>
     </div>
-  );
-};
-
-const Word = ({ children, progress, range, isHighlighted, isDarkMode }) => {
-  // 1. Ini adalah animasi opacity untuk kata BIASA (dari redup ke terang)
-  const dynamicOpacity = useTransform(progress, range, [0.1, 1]);
-
-  const colorClass = isHighlighted
-    ? isDarkMode ? " dark:text-[#c1ff72]" : "text-[#f50a0a]"
-    : isDarkMode 
-      ? "text-white" 
-      : "text-gray-900";
-
-  // 3. LOGIKA KUNCI: Tentukan opacity final.
-  // Jika kata ini adalah highlight, PAKSA opacity menjadi 1 (selalu menyala).
-  // Jika bukan highlight, gunakan nilai dari animasi scroll (dynamicOpacity).
-  const finalOpacity = isHighlighted ? 1 : dynamicOpacity;
-
-  return (
-    // mx-1 untuk spasi antar kata
-    <span className="relative mx-[3px] lg:mx-[5px] inline-block my-1">
-      <motion.span
-        style={{ opacity: finalOpacity }} // Gunakan opacity yang sudah ditentukan di atas
-        className={`transition-colors duration-500 ${colorClass}`}
-      >
-        {children}
-      </motion.span>
-    </span>
   );
 };

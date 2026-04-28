@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, memo } from "react";
 import {
   Github,
   Linkedin,
@@ -22,33 +22,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Divide as Hamburger } from 'hamburger-react';
 import GooeyNav from "../components/GooeyNav"; // Sesuaikan dengan path file kamu
 
-export default function Header() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [hoveredLink, setHoveredLink] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
+// ==========================================
+// OPTIMASI 1: ISOLASI KOMPONEN JAM
+// ==========================================
+const DigitalClock = memo(({ isDarkMode }) => {
   const [currentTime, setCurrentTime] = useState("");
-  const [isThemeChanging, setIsThemeChanging] = useState(false);
-  const [isShowcaseOpen, setIsShowcaseOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false); // State baru untuk scroll
-const [isDesktopShowcaseOpen, setIsDesktopShowcaseOpen] = useState(false); // State dropdown desktop
-  // Cek apakah ini halaman Home
-  // Tampilkan Full Navbar jika di halaman Home DAN belum di-scroll
-const showFullNavbar = !isScrolled;
-  // Scroll Listener
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100); // Akan true jika scroll lebih dari 50px
-    };
-    
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-  // Clock Logic
+  
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -60,6 +39,42 @@ const showFullNavbar = !isScrolled;
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className={`text-2xl font-Calculator font-bold ${isDarkMode ? "text-black" : "text-gray-300"} mx-2`}>
+      {currentTime}
+    </span>
+  );
+});
+
+export default function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [hoveredLink, setHoveredLink] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const { isDarkMode, setIsDarkMode } = useContext(ThemeContext);
+  const [isThemeChanging, setIsThemeChanging] = useState(false);
+  const [isShowcaseOpen, setIsShowcaseOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false); 
+  const [isDesktopShowcaseOpen, setIsDesktopShowcaseOpen] = useState(false); 
+
+  const showFullNavbar = !isScrolled;
+
+  // ==========================================
+  // OPTIMASI 2: SCROLL LISTENER PINTAR
+  // ==========================================
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 100;
+      setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Theme Transition Logic
@@ -78,23 +93,29 @@ const showFullNavbar = !isScrolled;
     return () => document.body.classList.remove('theme-changing');
   }, [isThemeChanging, isDarkMode]);
 
-  // Mouse & Resize Logic
+  // ==========================================
+  // OPTIMASI 3: PELACAKAN MOUSE HANYA SAAT SIDEBAR TERBUKA
+  // ==========================================
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
     const handleMouseMove = (e) => {
-      if (!isMobile) setMousePosition({ x: e.clientX, y: e.clientY });
+      setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
-    if (!isMobile) window.addEventListener("mousemove", handleMouseMove);
+    // Hanya lacak mouse jika bukan mobile DAN sidebar sedang terbuka!
+    // Ini menghemat puluhan render per detik saat user melihat halaman normal.
+    if (!isMobile && isOpen) {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", checkMobile);
     };
-  }, [isMobile]);
+  }, [isMobile, isOpen]);
 
   // Body Scroll Lock
   useEffect(() => {
@@ -179,7 +200,7 @@ const showFullNavbar = !isScrolled;
 
   return (
     <div className="relative">
-{/* Top Bar / Navbar */}
+      {/* Top Bar / Navbar */}
       <div 
         className={`fixed z-[60] transition-all duration-500 ease-in-out flex items-center justify-between pointer-events-none ${
           showFullNavbar 
@@ -194,7 +215,7 @@ const showFullNavbar = !isScrolled;
         >
         </span>
 
-{/* Full Desktop Navbar Links */}
+        {/* Full Desktop Navbar Links */}
         <AnimatePresence>
           {showFullNavbar && !isMobile && (
             <motion.nav 
@@ -206,10 +227,6 @@ const showFullNavbar = !isScrolled;
             >
               {/* CEK KONDISI HALAMAN: Apakah ini halaman Showcase atau bukan? */}
               {["/all-projects", "/certificates", "/Scanner", "/art", "/activity"].includes(location.pathname) ? (
-                
-                /* =========================================
-                   TAMPILAN NAVBAR UNTUK HALAMAN SHOWCASE
-                   ========================================= */
                 <>
                   <button
                     onClick={() => { handleNavigation("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
@@ -257,10 +274,6 @@ const showFullNavbar = !isScrolled;
                 </>
 
               ) : (
-
-                /* =========================================
-                   TAMPILAN NAVBAR UNTUK HALAMAN UTAMA (HOME)
-                   ========================================= */
                 <>
                   {[
                     { name: "Home", link: "/" },
@@ -356,9 +369,6 @@ const showFullNavbar = !isScrolled;
                 </>
               )}
 
-              {/* =========================================
-                  THEME TOGGLE (GLOBAL UNTUK SEMUA HALAMAN)
-                  ========================================= */}
               <div className={`h-4 w-[1px] ml-2 ${isDarkMode ? "bg-zinc-700" : "bg-gray-300"}`}></div>
               
               <button
@@ -374,12 +384,11 @@ const showFullNavbar = !isScrolled;
                   <motion.path animate={{ rotate: isDarkMode ? 180 : 0 }} transition={{ duration: 0.5 }} d="M120 3.75C55.5 3.75 3.75 55.5 3.75 120C3.75 184.5 55.5 236.25 120 236.25C184.5 236.25 236.25 184.5 236.25 120ZM120 214.5V172.5C90.75 172.5 67.5 149.25 67.5 120C67.5 90.75 90.75 67.5 120 67.5V25.5C172.5 25.5 214.5 67.5 214.5 120C214.5 172.5 172.5 214.5 120 214.5Z" fill={isDarkMode ? "black" : "white"} />
                 </svg>
               </button>
-
             </motion.nav>
           )}
         </AnimatePresence>
 
-        {/* Floating Hamburger Icon (Tetap ada untuk mobile atau saat di-scroll) */}
+        {/* Floating Hamburger Icon */}
         <motion.div 
           initial={false}
           animate={{
@@ -392,9 +401,7 @@ const showFullNavbar = !isScrolled;
             stiffness: 300, 
             damping: 20 
           }}
-          // Animasi saat di-hover (sedikit membesar)
           whileHover={showFullNavbar && !isMobile ? {} : { scale: 1.08 }}
-          // Animasi saat ditekan/diklik (mengecil/mendem)
           whileTap={showFullNavbar && !isMobile ? {} : { scale: 0.85 }}
           className={`pointer-events-auto p-2 cursor-none cursor-target rounded-full shadow-xl ${
             showFullNavbar && !isMobile 
@@ -439,24 +446,21 @@ const showFullNavbar = !isScrolled;
               />
             </motion.svg>
 
-            {/* Menu Panel - NO SCROLL VERSION */}
+            {/* Menu Panel */}
             <div
               className={`h-full ${isMobile ? "w-screen" : "w-[480px]"} ${
                 isDarkMode ? "bg-gray-100 text-gray-900" : "bg-zinc-800 text-white"
               } p-6 md:p-8 flex flex-col overflow-hidden`}
             >
-              {/* 1. Header Area */}
               <div className="flex-none">
                 <div className="flex items-center justify-between mt-8 md:mt-10 mb-5">
                   <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">Navigation</span>
-                  <span className={`text-2xl font-Calculator font-bold ${isDarkMode ? "text-black" : "text-gray-300"} mx-2`}>
-                    {currentTime}
-                  </span>
+                  {/* PANGGIL KOMPONEN JAM OPTIMAL DI SINI */}
+                  <DigitalClock isDarkMode={isDarkMode} />
                 </div>
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800/20 dark:bg-zinc-400/20"></div>
               </div>
 
-              {/* 2. Navigation Area - Flex-1 makes it take available space */}
               <nav className="flex-1 space-y-4 md:space-y-6 ">
                 {["/all-projects", "/certificates", "/Scanner", "/art", "/activity"].includes(location.pathname) ? (
                   <div className="flex flex-col space-y-6 ">
@@ -472,7 +476,7 @@ const showFullNavbar = !isScrolled;
                         <motion.button
                           key={item.name}
                           onClick={() => handleNavigation(item.link)}
-                          className="cursor-target cursor-none relative  text-2xl font-lyrae md:text-4xl transition-transform flex items-center justify-between w-full"
+                          className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl transition-transform flex items-center justify-between w-full"
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
                         >
@@ -482,7 +486,7 @@ const showFullNavbar = !isScrolled;
                       ))}
                     <motion.button
                       onClick={() => { handleNavigation("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                      className="cursor-target cursor-none relative text-2xl  font-lyrae md:text-4xl pt-4 border-t border-zinc-500/20 w-full text-left"
+                      className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl pt-4 border-t border-zinc-500/20 w-full text-left"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1, transition: { delay: 0.4 } }}
                     >
@@ -510,7 +514,7 @@ const showFullNavbar = !isScrolled;
                     <div key={item.name} className="flex flex-col w-full ">
                       <motion.button
                         onClick={() => item.isDropdown ? setIsShowcaseOpen(!isShowcaseOpen) : handleNavigation(item.link)}
-                        className="cursor-target cursor-none relative flex  items-center text-2xl md:text-4xl font-lyrae w-full py-1"
+                        className="cursor-target cursor-none relative flex items-center text-2xl md:text-4xl font-lyrae w-full py-1"
                         onMouseEnter={() => !isMobile && setHoveredLink(item.name)}
                         onMouseLeave={() => !isMobile && setHoveredLink(null)}
                         initial={{ opacity: 0, y: 15 }}
@@ -525,7 +529,7 @@ const showFullNavbar = !isScrolled;
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden flex flex-col pl-6 space-y-3 mt-2 border-l-2  border-zinc-500/30"
+                            className="overflow-hidden flex flex-col pl-6 space-y-3 mt-2 border-l-2 border-zinc-500/30"
                           >
                             {item.subItems.map((sub) => (
                               <button key={sub.name} onClick={() => handleNavigation(sub.link)} className="flex cursor-target cursor-none items-center justify-between text-xl md:text-2xl font-lyrae text-zinc-400 hover:text-current transition-colors">
@@ -541,7 +545,6 @@ const showFullNavbar = !isScrolled;
                 )}
               </nav>
 
-              {/* 3. Footer Area (Links & Socials) - Locked at Bottom */}
               <div className="flex-none mt-auto">
                 <span className="block mb-2 text-sm font-bold tracking-wide uppercase">Links</span>
                 <div className="h-[1px] w-full bg-zinc-800/20 dark:bg-zinc-400/20 mb-6"></div>
@@ -567,7 +570,6 @@ const showFullNavbar = !isScrolled;
                   ))}
                 </div>
 
-                {/* Control Buttons */}
                 <div className="flex space-x-3 mb-2">
                   <button
                     onClick={handleDarkModeToggle}
