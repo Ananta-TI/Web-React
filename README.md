@@ -512,3 +512,5 @@ Tertarik untuk berkolaborasi atau punya pertanyaan? Mari terhubung!
 *Designed & Developed with by Ananta Firdaus*
 
 </div>
+
+y
