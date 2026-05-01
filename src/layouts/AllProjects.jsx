@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion"; // Tambahkan AnimatePresence
 import {
   Github,
   ExternalLink,
@@ -44,7 +44,7 @@ const allProjects = [
     category: "Portfolio",
     image: "img/first-web.png",
     color: "from-blue-500 to-cyan-500",
-    year: "2023",
+    year: "2022",
     status: "Completed",
     featured: false,
   },
@@ -58,7 +58,7 @@ const allProjects = [
     category: "Portfolio",
     image: "img/my-second-web.png",
     color: "from-purple-500 to-pink-500",
-    year: "2023",
+    year: "2022",
     status: "Completed",
     featured: false,
   },
@@ -72,7 +72,7 @@ const allProjects = [
     category: "Web Development",
     image: "img/Kabestu.png",
     color: "from-green-500 to-teal-500",
-    year: "2023",
+    year: "2024",
     status: "Completed",
     featured: false,
   },
@@ -86,7 +86,7 @@ const allProjects = [
     category: "Web Development",
     image: "img/Sedap.png",
     color: "from-orange-500 to-red-500",
-    year: "2024",
+    year: "2025",
     status: "Completed",
     featured: true,
   },
@@ -100,7 +100,7 @@ const allProjects = [
     category: "Web Development",
     image: "img/ReactInventory.png",
     color: "from-indigo-500 to-blue-500",
-    year: "2024",
+    year: "2025",
     status: "Completed",
     featured: true,
   },
@@ -358,213 +358,134 @@ A complete exploration of all the projects I have developed            </p>
           </motion.div>
         </div>
       </div>
-
-      {/* Projects Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
-        >
-          {filteredProjects.map((project, index) => (
-            <motion.div
-              key={index}
-              variants={cardVariants}
-              whileHover={{
-                y: -8,
-                transition: { duration: 0.3, ease: "easeOut" },
-              }}
-              className={`group relative overflow-hidden rounded-2xl ${
-                isDarkMode
-                  ? "bg-zinc-800/50 border border-zinc-700/50"
-                  : "bg-white border border-gray-200"
-              } backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500`}
-            >
-              {/* Featured Badge */}
-              {project.featured && (
-                <div className="absolute top-4 right-4 z-10">
-                  <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full">
-                    <Star className="w-3 h-3" />
-                    Featured
-                  </div>
-                </div>
-              )}
-
-              {/* Project Image/Preview */}
-             <div className="relative h-40 sm:h-52 md:h-64 lg:h-50 overflow-hidden rounded-xl">
-  <img
-    src={project.image}
-    alt={project.title}
-    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-    loading="lazy"
-  />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}>
-                    <div className="text-center text-white">
-                      <Github className="w-12 h-12 mx-auto mb-2 opacity-80" />
-                      <p className="text-lg font-mono">Repository</p>
-                    </div>
-                  </div>
-                )
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                {/* Category Badge */}
-                <div className="absolute top-4 left-4">
-                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    isDarkMode
-                      ? "bg-zinc-900/80 text-zinc-200"
-                      : "bg-white/90 text-gray-700"
-                  } backdrop-blur-sm border border-white/20`}>
-                    {getCategoryIcon(project.category)}
-                    {project.category}
-                  </div>
-                </div>
-
-                {/* Status Badge */}
-                <div className="absolute bottom-4 left-4">
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium border backdrop-blur-sm ${getStatusColor(project.status)}`}>
-                    {project.status}
-                  </div>
-                </div>
-              </div>
-
-              {/* Project Content */}
-              <div className="p-6">
-                {/* Title & Year */}
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className={`text-2xl font-lyrae font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                    {project.title}
-                  </h3>
-                  <div className={`flex items-center gap-1 text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
-                    <Calendar className="w-3 h-3" />
-                    {project.year}
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className={`text-lg font-mono leading-relaxed mb-4 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
-                  {project.description}
-                </p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tags.map((tag, tagIndex) => (
-                    <span
-                      key={tagIndex}
-                      className={`px-2 py-1 text-xs rounded-md font-medium ${
-                        isDarkMode
-                          ? "bg-zinc-700 text-zinc-300"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 cursor-target cursor-none">
-                  {project.demo && (
-                    <motion.a
-                      href={project.demo}
-                      target="_blank"
-                      rel="noreferrer"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex-1 flex items-center cursor-none justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Live Demo
-                    </motion.a>
-                  )}
-                  {project.repo && (
-                    <motion.a
-                      href={project.repo}
-                      target="_blank"
-                      rel="noreferrer"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`${
-                        project.demo ? "px-3" : "flex-1 justify-center cursor-none"
-                      } flex items-center gap-2 py-2.5 ${
-                        isDarkMode
-                          ? "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      } rounded-lg font-medium text-sm transition-all duration-300`}
-                    >
-                      <Github className="w-4 h-4 cursor-none" />
-                      {!project.demo && "View Code"}
-                    </motion.a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Empty State */}
-        {filteredProjects.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
-          >
-            <Search className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? "text-zinc-600" : "text-gray-400"}`} />
-            <h3 className={`text-xl font-semibold mb-2 ${isDarkMode ? "text-zinc-300" : "text-gray-600"}`}>
-              No projects found
-            </h3>
-            <p className={`text-sm ${isDarkMode ? "text-zinc-500" : "text-gray-500"}`}>
-              Try adjusting your search or filter criteria
-            </p>
-          </motion.div>
-        )}
-
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16"
-        >
-          {[
-  { label: "Total Projects", value: allProjects.length, icon: FolderOpen, color: "text-blue-500" },
-  { label: "Completed", value: allProjects.filter(p => p.status === "Completed").length, icon: Zap, color: "text-green-500" },
-  { label: "Live Demos", value: allProjects.filter(p => p.demo).length, icon: Globe, color: "text-purple-500" },
-  { label: "Featured", value: allProjects.filter(p => p.featured).length, icon: Star, color: "text-yellow-500" }
-].map((stat, index) => (
-  <div
-    key={index}
-    className={`p-6 rounded-xl text-center ${
-      isDarkMode
-        ? "bg-zinc-800/50 border border-zinc-700/50"
-        : "bg-white border border-gray-200"
-    } backdrop-blur-sm`}
+{/* Projects Grid */}
+<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <motion.div
+    layout
+    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
   >
-    <stat.icon
-      className={`w-8 h-8 mx-auto mb-2 ${stat.color}`}
-    />
-    <div
-      className={`text-2xl font-bold mb-1 ${
-        isDarkMode ? "text-white" : "text-gray-900"
-      }`}
-    >
-      {stat.value}
-    </div>
-    <div
-      className={`text-sm ${
-        isDarkMode ? "text-zinc-400" : "text-gray-600"
-      }`}
-    >
-      {stat.label}
-    </div>
-  </div>
-))}
+    <AnimatePresence mode="popLayout">
+      {filteredProjects.map((project) => (
+        <motion.div
+          key={project.title}
+          layout
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          // EFEK HOVER FRAMER MOTION
+          whileHover={{ 
+            y: -10,
+            transition: { type: "spring", stiffness: 400, damping: 25 }
+          }}
+          className={`group relative overflow-hidden rounded-2xl border ${
+            isDarkMode
+              ? "bg-zinc-800/40 border-zinc-700/50"
+              : "bg-white border-gray-200"
+          } backdrop-blur-md shadow-lg hover:shadow-2xl transition-shadow duration-500`}
+        >
+          {/* Featured Badge */}
+          {project.featured && (
+            <div className="absolute top-4 right-4 z-20">
+              <motion.div 
+                initial={{ rotate: -10 }}
+                whileHover={{ rotate: 0, scale: 1.1 }}
+                className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg"
+              >
+                <Star className="w-3 h-3 fill-current" />
+                Featured
+              </motion.div>
+            </div>
+          )}
 
+          {/* Project Image Container */}
+          <div className="relative h-48 sm:h-56 overflow-hidden">
+            <motion.img
+              src={project.image}
+              alt={project.title}
+              whileHover={{ scale: 1.15 }}
+              transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+            
+            {/* Badges on Image */}
+            <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+               <span className={`px-2 py-1 rounded-md text-[10px] font-bold border backdrop-blur-md ${getStatusColor(project.status)}`}>
+                {project.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          {/* Project Content */}
+          <div className="p-6">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className={`text-xl font-bold font-lyrae tracking-tight ${isDarkMode ? "text-white" : "text-zinc-900"}`}>
+                {project.title}
+              </h3>
+              <span className={`text-xs font-mono px-2 py-1 rounded ${isDarkMode ? "bg-zinc-700 text-zinc-400" : "bg-zinc-100 text-zinc-500"}`}>
+                {project.year}
+              </span>
+            </div>
+            
+            <p className={`text-sm font-mono line-clamp-2 mb-4 leading-relaxed ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}>
+              {project.description}
+            </p>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1.5 mb-6">
+              {project.tags.map((tag) => (
+                <span key={tag} className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                  isDarkMode ? "border-zinc-700 bg-zinc-800/50 text-zinc-400" : "border-zinc-200 bg-zinc-50 text-zinc-500"
+                }`}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* ACTION BUTTONS DENGAN LOGO */}
+            <div className="flex gap-3 cursor-none ">
+              {project.demo && (
+                <motion.a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex-1 flex items-center cursor-none cursor-target justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-600/20 transition-colors"
+                >
+                  <Globe className="w-4 h-4" />
+                  Live Demo
+                </motion.a>
+              )}
+              
+              {project.repo && (
+                <motion.a
+                  href={project.repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex items-center justify-center cursor-none cursor-target gap-2 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                    project.demo ? "px-4" : "flex-1"
+                  } ${
+                    isDarkMode 
+                    ? "border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700" 
+                    : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  <Github className="w-4 h-4" />
+                  {!project.demo && "View Source"}
+                </motion.a>
+              )}
+            </div>
+          </div>
         </motion.div>
-      </div>
+      ))}
+    </AnimatePresence>
+  </motion.div>
+</div>
     </div>
   );
 };

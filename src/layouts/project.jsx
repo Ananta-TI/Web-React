@@ -218,8 +218,8 @@ const Projects = () => {
     <section
       ref={sectionRef}
       id="projects"
-      className={`relative w-full min-h-screen py-32 transition-colors duration-500 ${
-        isDarkMode ? "bg-[#111111] text-white" : "bg-white text-black"
+      className={`relative w-full min-h-screen py-12 transition-colors duration-500 ${
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">

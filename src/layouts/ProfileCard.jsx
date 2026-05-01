@@ -45,6 +45,7 @@ const ProfileCardComponent = ({
 }) => {
   const wrapRef = useRef(null);
   const cardRef = useRef(null);
+const enterTimeoutRef = useRef(null); // Tambahkan baris ini
 
   const animationHandlers = useMemo(() => {
     if (!enableTilt) return null;
@@ -126,37 +127,48 @@ const ProfileCardComponent = ({
     [animationHandlers]
   );
 
-  const handlePointerEnter = useCallback(() => {
+
+// 2. Modifikasi fungsi handlePointerEnter
+const handlePointerEnter = useCallback(() => {
+  const card = cardRef.current;
+  const wrap = wrapRef.current;
+
+  if (!card || !wrap || !animationHandlers) return;
+
+  animationHandlers.cancelAnimation();
+  
+  // Tunda penambahan class 'active' agar CSS transisi bisa memuluskan lompatan
+  enterTimeoutRef.current = setTimeout(() => {
+    wrap.classList.add('active');
+    card.classList.add('active');
+  }, 150); // Delay 150ms biasanya sudah cukup mulus, bisa kamu sesuaikan
+}, [animationHandlers]);
+
+// 3. Modifikasi fungsi handlePointerLeave
+const handlePointerLeave = useCallback(
+  event => {
     const card = cardRef.current;
     const wrap = wrapRef.current;
 
     if (!card || !wrap || !animationHandlers) return;
 
-    animationHandlers.cancelAnimation();
-    wrap.classList.add('active');
-    card.classList.add('active');
-  }, [animationHandlers]);
+    // Bersihkan timeout jika user mengeluarkan kursor dengan sangat cepat
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current);
+    }
 
-  const handlePointerLeave = useCallback(
-    event => {
-      const card = cardRef.current;
-      const wrap = wrapRef.current;
-
-      if (!card || !wrap || !animationHandlers) return;
-
-      animationHandlers.createSmoothAnimation(
-        ANIMATION_CONFIG.SMOOTH_DURATION,
-        event.offsetX,
-        event.offsetY,
-        card,
-        wrap
-      );
-      wrap.classList.remove('active');
-      card.classList.remove('active');
-    },
-    [animationHandlers]
-  );
-
+    animationHandlers.createSmoothAnimation(
+      ANIMATION_CONFIG.SMOOTH_DURATION,
+      event.offsetX,
+      event.offsetY,
+      card,
+      wrap
+    );
+    wrap.classList.remove('active');
+    card.classList.remove('active');
+  },
+  [animationHandlers]
+);
   const handleDeviceOrientation = useCallback(
     event => {
       const card = cardRef.current;

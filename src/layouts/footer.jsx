@@ -206,7 +206,7 @@ export default function Footer() {
         />
 
         {/* Noise Component */}
-        <Noise patternAlpha={isDarkMode ? 35 : 70} />
+        {/* <Noise patternAlpha={isDarkMode ? 35 : 70} /> */}
 
         {/* --- FADE OUT TOP --- */}
         {/* Layer ini ditaruh paling bawah (di kode) agar menimpa Noise & Background */}
@@ -214,7 +214,7 @@ export default function Footer() {
           className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${
             isDarkMode
               ? "from-zinc-900 to-transparent" // Warna awal Dark Mode
-              : "from-[#f7f7f7] to-transparent" // Warna awal Light Mode
+              : "from-white to-transparent" // Warna awal Light Mode
           }`}
         />
       </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 export default function LocationBadge({ isDarkMode }) {
   const globeRef = useRef(null);
-  const containerRef = useRef(null); // Ref untuk mengecek visibilitas
+  const containerRef = useRef(null);
 
   const shapeFill = isDarkMode ? "#e4e4e7" : "#18181b";
   const textTitle = isDarkMode ? "rgba(0,0,0,0.42)" : "rgba(255,255,255,0.42)";
@@ -20,7 +20,6 @@ export default function LocationBadge({ isDarkMode }) {
     let tid;
     let isVisible = true;
 
-    // OPTIMASI: Cek visibilitas dengan Intersection Observer
     const observer = new IntersectionObserver(([entry]) => {
       isVisible = entry.isIntersecting;
     });
@@ -28,18 +27,14 @@ export default function LocationBadge({ isDarkMode }) {
 
     function spin() {
       raf = requestAnimationFrame(spin);
-      
-      // JIKA DI LUAR LAYAR, STOP BERPUTAR
       if (!isVisible) return;
-
       angle += 0.42 * dir;
       globe.style.transform = `rotateZ(-15deg) rotateX(20deg) rotateY(${angle}deg)`;
     }
     spin();
 
     function onScroll(delta) {
-      if (!isVisible) return; // Jangan jalankan interaksi kalau nggak kelihatan
-
+      if (!isVisible) return;
       dir = delta > 0 ? 1 : -1;
       cancelAnimationFrame(raf);
       angle += dir * 5; 
@@ -77,10 +72,18 @@ export default function LocationBadge({ isDarkMode }) {
   ];
 
   return (
-    <div ref={containerRef} className="relative inline-flex items-center group cursor-none cursor-target drop-shadow-xl">
+    /* Menggunakan lebar relatif (w-full/max-w) 
+       dan aspect-ratio agar proporsi SVG tetap terjaga 
+    */
+    <div 
+      ref={containerRef} 
+      className="relative inline-flex items-center group cursor-none cursor-target drop-shadow-xl w-full max-w-[240px] sm:max-w-[330px]"
+    >
       <svg
-        width="330" height="96" viewBox="0 0 330 96" fill="none" xmlns="http://www.w3.org/2000/svg"
-        className="transition-colors duration-500"
+        viewBox="0 0 330 96" 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+        className="transition-colors duration-500 w-full h-auto"
       >
         <path
           fillRule="evenodd" clipRule="evenodd"
@@ -89,19 +92,47 @@ export default function LocationBadge({ isDarkMode }) {
         />
       </svg>
 
-      <div className="absolute left-8 flex flex-col justify-center pointer-events-none mt-1">
-        <span style={{ color: textTitle, transition: "color 0.5s ease" }} className="text-xs font-bold tracking-[0.25em] uppercase mb-1">
+      {/* Teks menggunakan unit responsive (vw atau sm:text) */}
+      <div className="absolute left-[8%] flex flex-col justify-center pointer-events-none mt-0.5">
+        <span 
+          style={{ color: textTitle, transition: "color 0.5s ease" }} 
+          className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-0.5 sm:mb-1"
+        >
           Located In
         </span>
-        <span style={{ color: textCity, transition: "color 0.5s ease" }} className="text-2xl font-black tracking-wider leading-none">
+        <span 
+          style={{ color: textCity, transition: "color 0.5s ease" }} 
+          className="text-lg sm:text-2xl font-black tracking-wider leading-none"
+        >
           Indonesia
         </span>
       </div>
 
-      <div className="absolute pointer-events-none" style={{ right: 48, top: "50%", transform: "translate(50%, -50%)", width: 66, height: 66, perspective: 1200 }}>
+      {/* Globe Container dengan ukuran relatif terhadap badge */}
+      <div 
+        className="absolute pointer-events-none flex items-center justify-center" 
+        style={{ 
+          right: "14.5%", 
+          top: "50%", 
+          transform: "translate(50%, -50%)", 
+          width: "18%", // Ukuran relatif terhadap container
+          aspectRatio: "1/1",
+          perspective: 1200 
+        }}
+      >
         <div ref={globeRef} style={{ width: "100%", height: "100%", position: "relative", transformStyle: "preserve-3d" }}>
           {rings.map((transformRule, i) => (
-            <div key={i} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `3px solid ${ringColor}`, transform: transformRule, transition: "transform 0.5s ease" }} />
+            <div 
+              key={i} 
+              style={{ 
+                position: "absolute", 
+                inset: 0, 
+                borderRadius: "50%", 
+                border: `2px solid ${ringColor}`, // Border sedikit tipis agar rapi di layar kecil
+                transform: transformRule, 
+                transition: "transform 0.5s ease" 
+              }} 
+            />
           ))}
         </div>
       </div>
