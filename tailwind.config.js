@@ -1,4 +1,7 @@
+/** @type {import('tailwindcss').Config} */
 export default {
+  // KUNCI UTAMA: Beritahu Tailwind untuk membaca class "dark" di HTML
+  darkMode: 'class', 
   content: ['./src/**/*.{html,js,jsx,ts,tsx}'],
   theme: {
     extend: {

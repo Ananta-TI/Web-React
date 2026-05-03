@@ -45,7 +45,7 @@ export default function GithubProfileCard({ username = "Ananta-TI" }) {
       className={`
         cursor-target flex flex-col lg:flex-row items-center lg:items-start gap-4
         w-full lg:w-85 min-h-[180px] lg:h-50 p-4 lg:p-6 rounded-xl
-        transition-all duration-500 shadow-md hover:shadow-indigo-500/50 backdrop-blur-lg
+        transition-all duration-500 shadow-md 
         ${
           isDarkMode
             ? "bg-zinc-800 bg-opacity-60 border border-gray-600 border-b-0"

@@ -1,5 +1,4 @@
-import { useEffect, useState, useContext, useCallback } from "react";
-import { ThemeContext } from "../context/ThemeContext";
+import React, { useEffect, useState, useCallback } from "react";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { motion } from "framer-motion";
 import { 
@@ -22,62 +21,44 @@ const safePercentage = (value, total, decimals = 0) => {
   return isNaN(pct) ? 0 : (decimals === 0 ? Math.round(pct) : pct.toFixed(decimals));
 };
 
-export default function ScanStatsDashboard() {
-  const { isDarkMode } = useContext(ThemeContext);
+const ScanStatsDashboard = ({ isDarkMode = true }) => {
   const [activeTimeRange, setActiveTimeRange] = useState('all');
   const [data, setData] = useState({ stats: [], types: [], trend: [], total: 0 });
   const [isMounted, setIsMounted] = useState(false);
 
-  // --- DEFINISI WARNA (DIPINDAHKAN KE DALAM) ---
-  // Agar bisa mengakses 'isDarkMode' secara reaktif
   const COLORS = {
-    Harmless: "#10b981",
-    Suspicious: "#f59e0b",
-    Malicious: "#ef4444",
-    // Fix: Menggunakan warna solid berdasarkan tema
-    // Light Mode: Zinc-400 (biar kelihatan di background putih)
-    // Dark Mode: Zinc-600 (biar kelihatan di background gelap)
-    Undetected: isDarkMode ? '#ffffff' : '#52525b', 
-    URL: "#3b82f6",
-    FILE: "#8b5cf6"
+    Harmless: "#10b981", Suspicious: "#f59e0b", Malicious: "#ef4444",
+    Undetected: isDarkMode ? '#ffffff' : '#52525b', URL: "#3b82f6", FILE: "#8b5cf6"
   };
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
   const fetchStats = useCallback(async () => {
-    try {
+     try {
       let startDate = null;
       if (activeTimeRange !== 'all') {
         startDate = new Date();
         startDate.setDate(startDate.getDate() - (activeTimeRange === '7d' ? 7 : 30));
       }
-
       const url = `${SUPABASE_URL}/rest/v1/scan_history?select=type,stats,created_at`;
       const res = await fetch(startDate ? `${url}&created_at=gte.${startDate.toISOString()}` : url, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
       const rawData = await res.json();
-
       const counts = { Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0 };
       const typeMap = { url: 0, file: 0 };
       const trendMap = {};
 
       rawData.forEach(item => {
         const s = item.stats || {};
-        // Logika penentuan status
         const status = s.malicious > 0 ? "Malicious" : s.suspicious > 0 ? "Suspicious" : s.harmless > 0 ? "Harmless" : "Undetected";
-        
         counts[status]++;
         if (item.type) typeMap[item.type]++;
-
         const date = item.created_at?.split('T')[0];
         if (!trendMap[date]) trendMap[date] = { date, Harmless: 0, Suspicious: 0, Malicious: 0, Undetected: 0, total: 0 };
         trendMap[date][status]++;
         trendMap[date].total++;
       });
-
       setData({
         stats: Object.entries(counts).map(([name, value]) => ({ name, value })),
         types: Object.entries(typeMap).map(([name, value]) => ({ name: name.toUpperCase(), value })),
@@ -97,10 +78,9 @@ export default function ScanStatsDashboard() {
   if (!isMounted) return <div className="w-full min-h-screen" />;
 
   return (
-    <section className={`w-full min-h-screen py-16 transition-colors duration-500 ${isDarkMode ? "text-zinc-100" : "text-zinc-900"}`}>
+    <section className={`w-full min-h-screen py-16 ${isDarkMode ? "text-zinc-100" : "text-zinc-900"}`}>
       <div className="container mx-auto px-4 max-w-7xl">
         
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div className="text-left">
             <h2 className="text-6xl font-bold font-lyrae">
@@ -129,7 +109,6 @@ export default function ScanStatsDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={Shield} label="Harmless" value={data.stats.find(s => s.name === "Harmless")?.value} color={COLORS.Harmless} />
           <StatNode className="cursor-target" isDarkMode={isDarkMode} icon={AlertTriangle} label="Suspicious" value={data.stats.find(s => s.name === "Suspicious")?.value} color={COLORS.Suspicious} />
@@ -139,7 +118,6 @@ export default function ScanStatsDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 cursor-none ">
           
-          {/* Main Timeline Chart */}
           <div className="lg:col-span-8 space-y-6 min-w-0  cursor-none">
             <ChartWrapper isDarkMode={isDarkMode} title="Neural Threat Detection Timeline" subtitle="Detection density over temporal distribution" className="cursor-target cursor-none">
               <div className="h-[400px] w-full mt-4  cursor-none" style={{ minHeight: '400px' }}>
@@ -170,7 +148,6 @@ export default function ScanStatsDashboard() {
             </ChartWrapper>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-              {/* Origin Protocol */}
               <ChartWrapper className="cursor-target" isDarkMode={isDarkMode} title="Origin Protocol" subtitle="Vector analysis by source type">
                 <div className="flex items-center justify-around h-[250px] ">
                   {data.types.map((type) => (
@@ -207,7 +184,6 @@ export default function ScanStatsDashboard() {
                 </div>
               </ChartWrapper>
 
-              {/* Risk Distribution */}
               <ChartWrapper className="cursor-target" isDarkMode={isDarkMode} title="Risk Distribution" subtitle="Composition of scanned entities">
                 <div className="h-[250px] w-full relative">
                   <ResponsiveContainer width="100%" height="100%">
@@ -240,7 +216,6 @@ export default function ScanStatsDashboard() {
             </div>
           </div>
 
-          {/* Sidebar Feed */}
           <div className="lg:col-span-4 space-y-6 ">
             <div className={`p-6 rounded-3xl border cursor-target transition-colors duration-500 ${isDarkMode ? "bg-zinc-900/50 border-zinc-800" : "bg-white border-zinc-200 shadow-xl"}`}>
               <h3 className={`text-lg font-bold mb-6 flex items-center gap-2 ${isDarkMode ? "text-zinc-100" : "text-zinc-800"}`}>
@@ -285,6 +260,9 @@ export default function ScanStatsDashboard() {
     </section>
   );
 }
+
+// EKSPOR UTAMA: Wajib menggunakan React.memo
+export default React.memo(ScanStatsDashboard);
 
 function StatNode({ icon: Icon, label, value, color, isDarkMode, className = "" }) {
   return (
