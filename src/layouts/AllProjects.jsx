@@ -160,6 +160,20 @@ const allProjects = [
     status: "In Progress",
     featured: true,
   },
+  {
+    title: "NtaKit-Dev",
+    description:
+      "A comprehensive development toolkit that includes a collection of reusable React components, utilities, and hooks. It is designed to accelerate development and maintain consistency across projects.",
+    demo: "https://ntakit.vercel.app/",
+    repo: "https://github.com/Ananta-TI/NtaKit.git",
+    tags: ["React", "Vite", "Framer Motion", "Tailwind","Gsap"],
+    category: "Web Development",
+    image: "img/NtaKitt.png",
+    color: "from-blue-600 to-cyan-500",
+    year: "2025",
+    status: "In Progress",
+    featured: true,
+  },
   // {
   //   title: "NANTAGACOR88 - Online Gambling",
   //   description:
