@@ -170,7 +170,7 @@ const allProjects = [
     category: "Web Development",
     image: "img/NtaKitt.png",
     color: "from-blue-600 to-cyan-500",
-    year: "2025",
+    year: "2026",
     status: "In Progress",
     featured: true,
   },
