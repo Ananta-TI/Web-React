@@ -1,108 +1,134 @@
 @import "tailwindcss";
 
-/* @font-face {
-    font-family: 'Barlow';
-    src: url('/font/Barlow-Regular.ttf');
-} */
 @font-face {
-    font-family: 'Poppins';
-    src: url('/font/Poppins-Regular.ttf');
-    font-display: swap;
-}
-@font-face {
-    font-family: 'PoppinsBold';
-    src: url('/font/Poppins-ExtraBold.ttf');
-    font-display: swap;
-}
-@font-face {
-    font-family: 'lyrae';
-    src: url('/fonts/AlphaLyrae-Medium.ttf');
-    font-display: swap;
-}
-@font-face {
-    font-family: 'cocaine';
-    src: url('/fonts/Cocaine sans.ttf');
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Exorcista';
-    src: url('/fonts/Exorcista_-Jed_40.ttf');
-    font-display: swap;
-}
-@font-face {
-    font-family: 'termination';
-    src: url('/fonts/X Termination.otf');
-    font-display: swap;
-}
-@font-face {
-  font-family: 'MailBox';
-  src: url('/fonts/MailBox.ttf') format('truetype');
+  font-family: "Lyrae";
+  src: url("/fonts/AlphaLyrae-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
   font-display: swap;
 }
+
 @font-face {
-    font-family: 'Aira';
-    src: url('/fonts/Aira otf.otf');
-    font-display: swap;
+  font-family: "Cocaine";
+  src: url("/fonts/CocaineSans.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: "Ceraso";
-    src: url('/fonts/Ceraso otf.otf');
-    font-display: swap;
+  font-family: "Exorcista";
+  src: url("/fonts/Exorcista.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: "Darksame";
-    src: url('/fonts/DarksameRegular.ttf');
-    font-display: swap;
+  font-family: "Termination";
+  src: url("/fonts/XTermination.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: 'Skullines';
-    src: url('/fonts/SkullinesDemo-Regular.otf');
-    font-display: swap;
+  font-family: "MailBox";
+  src: url("/fonts/MailBox.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: 'Jena';
-    src: url('/fonts/JenaGotisch.ttf');
-    font-display: swap;
+  font-family: "Aira";
+  src: url("/fonts/Airaotf.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: Equiva;
-    src: url('/fonts/Equiva.ttf');
-    font-display: swap;
-    
+  font-family: "Ceraso";
+  src: url("/fonts/Ceraso.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: 'Calculator';
-    src: url('/fonts/Calculator.ttf');
-    font-display: swap;
-    
+  font-family: "Darksame";
+  src: url("/fonts/DarksameRegular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
+@font-face {
+  font-family: "Skullines";
+  src: url("/fonts/SkullinesDemo-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jena";
+  src: url("/fonts/JenaGotisch.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Equiva";
+  src: url("/fonts/Equiva.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Calculator";
+  src: url("/fonts/Calculator.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-    /* --font-barlow: "Barlow", sans-serif; */
-    --font-Poppins: "Poppins", sans-serif;
-    --font-PoppinsBold: "PoppinsBold", sans-serif;
-    --font-lyrae: "AlphaLyrae", sans-serif;
-    --font-cocaine: "cocaine", sans-serif; 
-    --font-Exorcista: "Exorcista", sans-serif;
-    --font-termination: "termination", sans-serif;
-    --font-MailBox: "MailBox", sans-serif;
-    --font-Aira:"Aira", sans-serif;
-    --font-Ceraso:"Ceraso", sans-serif;
-    --font-Darksame:"Darksame", sans-serif;
-    --font-Skullines:"Skullines", sans-serif;
-    --font-Jena:"Jena", sans-serif;
-    --font-Equiva:"Equiva", sans-serif;
-    --font-Calculator:"Calculator", sans-serif;
-    --color-latar: #f3f4f6;
-    --color-teks: #374151; 
-    --color-teks-samping: #6b7280;
-    --color-garis: #e5e7eb; 
-    --color-hijau: #00B074; 
-    --color-merah: #ef4444; 
-    --color-biru: #3b82f6;
-    --color-kuning: #f59e0b; 
+
+
+  --font-lyrae: "Lyrae", sans-serif;
+  --font-cocaine: "Cocaine", sans-serif;
+  --font-Exorcista: "Exorcista", sans-serif;
+  --font-termination: "Termination", sans-serif;
+  --font-MailBox: "MailBox", sans-serif;
+  --font-Aira: "Aira", sans-serif;
+  --font-Ceraso: "Ceraso", sans-serif;
+  --font-Darksame: "Darksame", sans-serif;
+  --font-Skullines: "Skullines", sans-serif;
+  --font-Jena: "Jena", sans-serif;
+  --font-Equiva: "Equiva", sans-serif;
+  --font-Calculator: "Calculator", sans-serif;
+
+  --color-latar: #f3f4f6;
+  --color-teks: #374151;
+  --color-teks-samping: #6b7280;
+  --color-garis: #e5e7eb;
+  --color-hijau: #00b074;
+  --color-merah: #ef4444;
+  --color-biru: #3b82f6;
+  --color-kuning: #f59e0b;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-    font-family: var(--font-barlow);
-
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
 }

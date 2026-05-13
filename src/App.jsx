@@ -3,115 +3,262 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
-// 1. Tetap gunakan Static Import untuk komponen yang muncul di atas (LCP)
 import Header from "./layouts/Header";
 import Footer from "./layouts/footer";
-import ScrollProgress from "./components/Home/ScrollProgress";
-import TargetCursor from "./components/Shared/TargetCursor";
-import Preloader from "./components/Preloader";
-import SmoothScrollWrapper from "./layouts/GSAPSmoothScrollWrapper";
-import Hero from "./components/Home/hero";
 import ScrollToTop from "./components/Shared/ScrollToTop";
-
-// 2. LAZY LOADING untuk komponen berat (Menghancurkan Chunk 8MB)
-const Hero2 = lazy(() => import("./components/Shared/TextPressure"));
-const About = lazy(() => import("./layouts/about"));
-const Project = lazy(() => import("./layouts/project"));
-const AllProjects = lazy(() => import("./layouts/AllProjects"));
-const Certificates = lazy(() => import("./layouts/Certificates"));
-const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
-const Timeline = lazy(() => import("./layouts/timeline"));
-const Chatbot = lazy(() => import("./components/Chatbot/Chatbot"));
-const Art = lazy(() => import("./layouts/Art"))
-const Activity = lazy(() => import("./layouts/activity"))
-
-
-// Analytics
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
+import HomePage from "./pages/HomePage";
 
 import "./index.css";
 import "./assets/tailwind.css";
 
-const SESSION_KEY = 'has_loaded_once';
+const Preloader = lazy(() => import("./components/Preloader"));
+const TargetCursor = lazy(() => import("./components/Shared/TargetCursor"));
+const ScrollProgress = lazy(() => import("./components/Home/ScrollProgress"));
 
-function App() {
-  const [isLoading, setIsLoading] = useState(() => {
-    return sessionStorage.getItem(SESSION_KEY) !== 'true';
-  });
+const AllProjects = lazy(() => import("./layouts/AllProjects"));
+const Certificates = lazy(() => import("./layouts/Certificates"));
+const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
+const Timeline = lazy(() => import("./layouts/timeline"));
+const Art = lazy(() => import("./layouts/Art"));
+const Activity = lazy(() => import("./layouts/activity"));
 
-  const location = useLocation();
+const Analytics = lazy(() =>
+  import("@vercel/analytics/react").then((mod) => ({
+    default: mod.Analytics,
+  }))
+);
+
+const SpeedInsights = lazy(() =>
+  import("@vercel/speed-insights/react").then((mod) => ({
+    default: mod.SpeedInsights,
+  }))
+);
+
+const SESSION_KEY = "has_loaded_once";
+const PRELOADER_DURATION = 900;
+
+function getInitialLoadingState() {
+  try {
+    return sessionStorage.getItem(SESSION_KEY) !== "true";
+  } catch {
+    return false;
+  }
+}
+
+function useFancyCursorEnabled(isLoading) {
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    if (isLoading) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
-      window.scrollTo(0, 0);
+    if (isLoading) return;
 
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-        sessionStorage.setItem(SESSION_KEY, 'true');
-      }, 3500);
+    const media = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
 
-      return () => clearTimeout(timer);
+    const activate = () => {
+      setEnabled(media.matches);
+    };
+
+    let timeoutId;
+    let idleId;
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(activate, { timeout: 2500 });
+    } else {
+      timeoutId = window.setTimeout(activate, 1200);
     }
+
+    return () => {
+      if (idleId && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [isLoading]);
+
+  return enabled;
+}
+
+function IdleOnly({ children, delay = 1200 }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let timeoutId;
+    let idleId;
+
+    const activate = () => setReady(true);
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(activate, {
+        timeout: delay + 1500,
+      });
+    } else {
+      timeoutId = window.setTimeout(activate, delay);
+    }
+
+    return () => {
+      if (idleId && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [delay]);
+
+  return ready ? children : null;
+}
+
+function PageFallback() {
+  return <div className="min-h-screen w-full bg-background" />;
+}
+
+function LazyPage({ children }) {
+  return <Suspense fallback={<PageFallback />}>{children}</Suspense>;
+}
+
+function App() {
+  const [isLoading, setIsLoading] = useState(getInitialLoadingState);
+  const location = useLocation();
+  const cursorEnabled = useFancyCursorEnabled(isLoading);
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    window.scrollTo(0, 0);
+
+    const timer = window.setTimeout(() => {
+      setIsLoading(false);
+
+      try {
+        sessionStorage.setItem(SESSION_KEY, "true");
+      } catch {
+        // Abaikan jika sessionStorage diblokir browser.
+      }
+    }, PRELOADER_DURATION);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      document.body.style.cursor = "";
+    };
   }, [isLoading]);
 
   const onPreloaderExitComplete = () => {
-    document.body.style.overflow = '';
-    document.body.style.height = ''; 
-    document.body.style.cursor = 'default';
+    document.body.style.overflow = "";
+    document.body.style.height = "";
+    document.body.style.cursor = "";
   };
 
   return (
     <ThemeProvider>
-      <TargetCursor spinDuration={1.1} hideDefaultCursor={true} parallaxOn={true} />
+      {cursorEnabled && (
+        <Suspense fallback={null}>
+          <TargetCursor
+            spinDuration={1.1}
+            hideDefaultCursor={true}
+            parallaxOn={true}
+          />
+        </Suspense>
+      )}
 
       <AnimatePresence mode="wait" onExitComplete={onPreloaderExitComplete}>
-        {isLoading && <Preloader key="preloader" />}
+        {isLoading && (
+          <Suspense fallback={null}>
+            <Preloader key="preloader" />
+          </Suspense>
+        )}
       </AnimatePresence>
 
       {!isLoading && <Header />}
 
-      <SmoothScrollWrapper>
-        <main className="relative z-0 min-h-screen w-full cursor-none bg-background text-foreground">
-          {/* 3. SUSPENSE: Menangani loading state saat komponen lazy diunduh */}
-          <Suspense fallback={<div className="h-screen w-full bg-background" />}>
-            <ScrollToTop />
-            <Routes location={location} key={location.pathname}>
-              <Route
-                path="/"
-                element={
-                  <>
-                    <Hero isAppLoading={isLoading} />
-                    <Hero2 />
-                    <About />
-                    <Project />
-                  </>
-                }
-              />
-              
-              <Route path="/Scanner" element={<Scanner />} />
-              <Route path="/timeline" element={<Timeline />} />
-              <Route path="/all-projects" element={<AllProjects />} />
-              <Route path="/certificates" element={<Certificates />} />
-              <Route path="/art" element={<Art />} /> 
-              <Route path="/activity" element={<Activity />} />
-            </Routes>
-          </Suspense>
-          <Footer />
-        </main>
-      </SmoothScrollWrapper>
+      <main
+        className={`relative z-0 min-h-screen w-full bg-background text-foreground ${
+          cursorEnabled ? "cursor-none" : "cursor-auto"
+        }`}
+      >
+        <ScrollToTop />
 
-      {!isLoading && <ScrollProgress />}
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<HomePage isAppLoading={isLoading} />} />
+
+          <Route
+            path="/scanner"
+            element={
+              <LazyPage>
+                <Scanner />
+              </LazyPage>
+            }
+          />
+
+          <Route
+            path="/timeline"
+            element={
+              <LazyPage>
+                <Timeline />
+              </LazyPage>
+            }
+          />
+
+          <Route
+            path="/all-projects"
+            element={
+              <LazyPage>
+                <AllProjects />
+              </LazyPage>
+            }
+          />
+
+          <Route
+            path="/certificates"
+            element={
+              <LazyPage>
+                <Certificates />
+              </LazyPage>
+            }
+          />
+
+          <Route
+            path="/art"
+            element={
+              <LazyPage>
+                <Art />
+              </LazyPage>
+            }
+          />
+
+          <Route
+            path="/activity"
+            element={
+              <LazyPage>
+                <Activity />
+              </LazyPage>
+            }
+          />
+        </Routes>
+
+        <Footer />
+      </main>
+
       {!isLoading && (
-        <Suspense fallback={null}>
-          {/* <Chatbot /> */}
-        </Suspense>
+        <IdleOnly delay={800}>
+          <Suspense fallback={null}>
+            <ScrollProgress />
+          </Suspense>
+        </IdleOnly>
       )}
 
-      <SpeedInsights />
-      <Analytics />
+      <IdleOnly delay={1600}>
+        <Suspense fallback={null}>
+          <SpeedInsights />
+          <Analytics />
+        </Suspense>
+      </IdleOnly>
     </ThemeProvider>
   );
 }
