@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import Hero from "../components/Home/hero";
-import DeferredSection from "../components/Shared/DeferredSection";
 
 const Hero2 = lazy(() => import("../components/Shared/TextPressure"));
 const About = lazy(() => import("../layouts/about"));
@@ -21,19 +20,15 @@ export default function HomePage({ isAppLoading }) {
     <>
       <Hero isAppLoading={isAppLoading} />
 
-      <DeferredSection id="intro-motion" rootMargin="800px" minHeight="45vh">
-        <Suspense >
-          <Hero2 />
-        </Suspense>
-      </DeferredSection>
+      <Suspense fallback={<SectionFallback height="45vh" />}>
+        <Hero2 />
+      </Suspense>
 
-      <DeferredSection id="about-wrapper" rootMargin="900px" minHeight="80vh">
-        <Suspense >
-          <About />
-        </Suspense>
-      </DeferredSection>
+      <Suspense fallback={<SectionFallback height="100vh" />}>
+        <About />
+      </Suspense>
 
-      <Suspense >
+      <Suspense fallback={<SectionFallback height="100vh" />}>
         <Project />
       </Suspense>
     </>

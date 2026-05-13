@@ -1,43 +1,94 @@
-// src/components/Shared/SmoothScrollWrapper.jsx
+import React, { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import Lenis from "lenis";
 
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother'; // Pastikan Anda memiliki file ini atau akses ke Club GreenSock
+function shouldDisableLenis() {
+  if (typeof window === "undefined") return true;
 
-// Daftar plugin GSAP yang perlu diimpor
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  return isTouchDevice || reduceMotion;
+}
 
 export default function SmoothScrollWrapper({ children }) {
-  const wrapperRef = useRef(null);
+  const location = useLocation();
+  const lenisRef = useRef(null);
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    // Pastikan ScrollSmoother didukung oleh browser
-    if (ScrollSmoother.isSupported()) {
-
-      // 1. Dapatkan referensi ke wrapper HTML
-      const smoother = ScrollSmoother.create({
-        wrapper: '#smooth-wrapper', // ID yang akan kita taruh di JSX
-        content: '#smooth-content', // ID konten utama
-        smooth: 1.5, // Tingkat kehalusan (semakin besar, semakin halus/lambat)
-        normalizeScroll: true, // Mengatasi masalah sentuhan/scroll di beberapa browser
-        ignoreMobileResize: true, // Opsional: Untuk stabilitas di perangkat mobile
-      });
-
-      // Cleanup function: Hapus instance ScrollSmoother saat komponen di-unmount
-      return () => {
-        smoother.kill();
-        ScrollTrigger.killAll();
-      };
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
     }
-  }, []); // Run sekali saat komponen dimuat
 
-  // Struktur wajib ScrollSmoother
-  return (
-    <div ref={wrapperRef} id="smooth-wrapper">
-      <div id="smooth-content">
-        {children}
-      </div>
-    </div>
-  );
+    window.scrollTo(0, 0);
+
+    return () => {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "auto";
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (shouldDisableLenis()) {
+      document.documentElement.style.scrollBehavior = "smooth";
+      return;
+    }
+
+    const lenis = new Lenis({
+      lerp: 0.09,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1,
+      smoothWheel: true,
+      syncTouch: false,
+    });
+
+    lenisRef.current = lenis;
+    window.lenis = lenis;
+
+    const raf = (time) => {
+      lenis.raf(time);
+      rafRef.current = requestAnimationFrame(raf);
+    };
+
+    rafRef.current = requestAnimationFrame(raf);
+
+    document.documentElement.classList.add("lenis");
+    document.documentElement.style.scrollBehavior = "auto";
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      lenis.destroy();
+      lenisRef.current = null;
+
+      if (window.lenis === lenis) {
+        delete window.lenis;
+      }
+
+      document.documentElement.classList.remove("lenis");
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    const lenis = lenisRef.current;
+
+    requestAnimationFrame(() => {
+      if (lenis) {
+        lenis.scrollTo(0, {
+          immediate: true,
+        });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    });
+  }, [location.pathname]);
+
+  return <>{children}</>;
 }

@@ -203,26 +203,35 @@ export default function Header() {
     }
   };
 
-  const scrollToSection = (selector) => {
-    const element = document.querySelector(selector);
+const scrollToSection = (selector) => {
+  const element = document.querySelector(selector);
 
-    if (!element) return;
+  if (!element) return;
 
-    const headerOffset = 10;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-    if (window.lenis) {
-      window.lenis.scrollTo(offsetPosition, {
-        duration: 1.1,
-      });
-    } else {
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
+  const offsetMap = {
+    "#home": 0,
+    "#about": 100,
+    "#projects": 95,
+    "#contact": -85,
   };
+
+  const offset = offsetMap[selector] ?? 0;
+
+  if (window.lenis) {
+    window.lenis.scrollTo(element, {
+      offset,
+      duration: 3,
+    });
+    return;
+  }
+
+  const y = element.getBoundingClientRect().top + window.pageYOffset + offset;
+
+  window.scrollTo({
+    top: y,
+    behavior: "smooth",
+  });
+};
 
   const handleNavigation = (link) => {
     setIsOpen(false);
