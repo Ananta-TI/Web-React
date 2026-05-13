@@ -21,23 +21,21 @@ export default function HomePage({ isAppLoading }) {
     <>
       <Hero isAppLoading={isAppLoading} />
 
-      <DeferredSection rootMargin="800px" minHeight="45vh">
-        <Suspense fallback={<SectionFallback height="45vh" />}>
+      <DeferredSection id="intro-motion" rootMargin="800px" minHeight="45vh">
+        <Suspense >
           <Hero2 />
         </Suspense>
       </DeferredSection>
 
-      <DeferredSection rootMargin="700px" minHeight="80vh">
-        <Suspense fallback={<SectionFallback height="80vh" />}>
+      <DeferredSection id="about-wrapper" rootMargin="900px" minHeight="80vh">
+        <Suspense >
           <About />
         </Suspense>
       </DeferredSection>
 
-      <DeferredSection rootMargin="700px" minHeight="90vh">
-        <Suspense fallback={<SectionFallback height="90vh" />}>
-          <Project />
-        </Suspense>
-      </DeferredSection>
+      <Suspense >
+        <Project />
+      </Suspense>
     </>
   );
 }

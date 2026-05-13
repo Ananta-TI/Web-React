@@ -328,20 +328,7 @@
 }
 
 /* Di index.css */
-#smooth-wrapper {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  inset: 0;
-}
 
-#smooth-content {
-  overflow: visible;
-  width: 100%;
-  min-height: 100vh;
-  will-change: transform;
-}
 /* src/index.css */
 
 /* Smooth scrolling untuk seluruh aplikasi */
@@ -392,7 +379,11 @@
 html {
   scroll-padding-top: 80px; 
 }
-
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}
 /* Smooth transitions untuk theme change */
 
 
@@ -484,4 +475,31 @@ body.is-transitioning canvas {
 
 .custom-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
+}
+
+html.lenis {
+  height: auto;
+}
+
+html.lenis,
+html.lenis body {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+[data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
 }

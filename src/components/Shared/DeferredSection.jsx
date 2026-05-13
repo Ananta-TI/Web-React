@@ -5,9 +5,26 @@ export default function DeferredSection({
   rootMargin = "600px",
   minHeight = "50vh",
   className = "",
+  id,
 }) {
   const ref = useRef(null);
   const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    const handleForceRender = (event) => {
+      const targetId = event.detail?.id;
+
+      if (id && targetId === id) {
+        setShouldRender(true);
+      }
+    };
+
+    window.addEventListener("force-render-section", handleForceRender);
+
+    return () => {
+      window.removeEventListener("force-render-section", handleForceRender);
+    };
+  }, [id]);
 
   useEffect(() => {
     if (shouldRender) return;
@@ -32,6 +49,7 @@ export default function DeferredSection({
 
   return (
     <section
+      id={id}
       ref={ref}
       className={className}
       style={{ minHeight: shouldRender ? undefined : minHeight }}

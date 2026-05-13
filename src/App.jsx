@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import SmoothScrollWrapper from "./layouts/SmoothScrollWrapper";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/footer";
@@ -14,7 +15,6 @@ import "./assets/tailwind.css";
 const Preloader = lazy(() => import("./components/Preloader"));
 const TargetCursor = lazy(() => import("./components/Shared/TargetCursor"));
 const ScrollProgress = lazy(() => import("./components/Home/ScrollProgress"));
-
 const AllProjects = lazy(() => import("./layouts/AllProjects"));
 const Certificates = lazy(() => import("./layouts/Certificates"));
 const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
@@ -177,73 +177,75 @@ function App() {
 
       {!isLoading && <Header />}
 
-      <main
-        className={`relative z-0 min-h-screen w-full bg-background text-foreground ${
-          cursorEnabled ? "cursor-none" : "cursor-auto"
-        }`}
-      >
-        <ScrollToTop />
+<SmoothScrollWrapper>
+  <main
+    className={`relative z-0 min-h-screen w-full bg-background text-foreground ${
+      cursorEnabled ? "cursor-none" : "cursor-auto"
+    }`}
+  >
+    <ScrollToTop />
 
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<HomePage isAppLoading={isLoading} />} />
+    <Routes location={location} key={location.pathname}>
+      <Route path="/" element={<HomePage isAppLoading={isLoading} />} />
 
-          <Route
-            path="/scanner"
-            element={
-              <LazyPage>
-                <Scanner />
-              </LazyPage>
-            }
-          />
+      <Route
+        path="/scanner"
+        element={
+          <LazyPage>
+            <Scanner />
+          </LazyPage>
+        }
+      />
 
-          <Route
-            path="/timeline"
-            element={
-              <LazyPage>
-                <Timeline />
-              </LazyPage>
-            }
-          />
+      <Route
+        path="/timeline"
+        element={
+          <LazyPage>
+            <Timeline />
+          </LazyPage>
+        }
+      />
 
-          <Route
-            path="/all-projects"
-            element={
-              <LazyPage>
-                <AllProjects />
-              </LazyPage>
-            }
-          />
+      <Route
+        path="/all-projects"
+        element={
+          <LazyPage>
+            <AllProjects />
+          </LazyPage>
+        }
+      />
 
-          <Route
-            path="/certificates"
-            element={
-              <LazyPage>
-                <Certificates />
-              </LazyPage>
-            }
-          />
+      <Route
+        path="/certificates"
+        element={
+          <LazyPage>
+            <Certificates />
+          </LazyPage>
+        }
+      />
 
-          <Route
-            path="/art"
-            element={
-              <LazyPage>
-                <Art />
-              </LazyPage>
-            }
-          />
+      <Route
+        path="/art"
+        element={
+          <LazyPage>
+            <Art />
+          </LazyPage>
+        }
+      />
 
-          <Route
-            path="/activity"
-            element={
-              <LazyPage>
-                <Activity />
-              </LazyPage>
-            }
-          />
-        </Routes>
+      <Route
+        path="/activity"
+        element={
+          <LazyPage>
+            <Activity />
+          </LazyPage>
+        }
+      />
+    </Routes>
 
-        <Footer />
-      </main>
+    <Footer />
+  </main>
+</SmoothScrollWrapper>
 
       {!isLoading && (
         <IdleOnly delay={800}>
