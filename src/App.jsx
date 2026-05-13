@@ -3,6 +3,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import SmoothScrollWrapper from "./layouts/SmoothScrollWrapper";
+import { PageTransitionProvider } from "./components/Shared/PageTransition";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/footer";
@@ -157,110 +158,112 @@ function App() {
 
   return (
     <ThemeProvider>
-      {cursorEnabled && (
-        <Suspense fallback={null}>
-          <TargetCursor
-            spinDuration={1.1}
-            hideDefaultCursor={true}
-            parallaxOn={true}
-          />
-        </Suspense>
-      )}
-
-      <AnimatePresence mode="wait" onExitComplete={onPreloaderExitComplete}>
-        {isLoading && (
+      <PageTransitionProvider>
+        {cursorEnabled && (
           <Suspense fallback={null}>
-            <Preloader key="preloader" />
+            <TargetCursor
+              spinDuration={1.1}
+              hideDefaultCursor={true}
+              parallaxOn={true}
+            />
           </Suspense>
         )}
-      </AnimatePresence>
 
-      {!isLoading && <Header />}
+        <AnimatePresence mode="wait" onExitComplete={onPreloaderExitComplete}>
+          {isLoading && (
+            <Suspense fallback={null}>
+              <Preloader key="preloader" />
+            </Suspense>
+          )}
+        </AnimatePresence>
 
-<SmoothScrollWrapper>
-  <main
-    className={`relative z-0 min-h-screen w-full bg-background text-foreground ${
-      cursorEnabled ? "cursor-none" : "cursor-auto"
-    }`}
-  >
-    <ScrollToTop />
+        {!isLoading && <Header />}
 
-    <Routes location={location} key={location.pathname}>
-      <Route path="/" element={<HomePage isAppLoading={isLoading} />} />
+        <SmoothScrollWrapper>
+          <main
+            className={`relative z-0 min-h-screen w-full bg-background text-foreground ${
+              cursorEnabled ? "cursor-none" : "cursor-auto"
+            }`}
+          >
+            <ScrollToTop />
 
-      <Route
-        path="/scanner"
-        element={
-          <LazyPage>
-            <Scanner />
-          </LazyPage>
-        }
-      />
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<HomePage isAppLoading={isLoading} />} />
 
-      <Route
-        path="/timeline"
-        element={
-          <LazyPage>
-            <Timeline />
-          </LazyPage>
-        }
-      />
+              <Route
+                path="/scanner"
+                element={
+                  <LazyPage>
+                    <Scanner />
+                  </LazyPage>
+                }
+              />
 
-      <Route
-        path="/all-projects"
-        element={
-          <LazyPage>
-            <AllProjects />
-          </LazyPage>
-        }
-      />
+              <Route
+                path="/timeline"
+                element={
+                  <LazyPage>
+                    <Timeline />
+                  </LazyPage>
+                }
+              />
 
-      <Route
-        path="/certificates"
-        element={
-          <LazyPage>
-            <Certificates />
-          </LazyPage>
-        }
-      />
+              <Route
+                path="/all-projects"
+                element={
+                  <LazyPage>
+                    <AllProjects />
+                  </LazyPage>
+                }
+              />
 
-      <Route
-        path="/art"
-        element={
-          <LazyPage>
-            <Art />
-          </LazyPage>
-        }
-      />
+              <Route
+                path="/certificates"
+                element={
+                  <LazyPage>
+                    <Certificates />
+                  </LazyPage>
+                }
+              />
 
-      <Route
-        path="/activity"
-        element={
-          <LazyPage>
-            <Activity />
-          </LazyPage>
-        }
-      />
-    </Routes>
+              <Route
+                path="/art"
+                element={
+                  <LazyPage>
+                    <Art />
+                  </LazyPage>
+                }
+              />
 
-    <Footer />
-  </main>
-</SmoothScrollWrapper>
+              <Route
+                path="/activity"
+                element={
+                  <LazyPage>
+                    <Activity />
+                  </LazyPage>
+                }
+              />
+            </Routes>
 
-      {!isLoading && (
-        <IdleOnly delay={800}>
+            <Footer />
+          </main>
+        </SmoothScrollWrapper>
+
+        {!isLoading && (
+          <IdleOnly delay={800}>
+            <Suspense fallback={null}>
+              <ScrollProgress />
+            </Suspense>
+          </IdleOnly>
+        )}
+
+        <IdleOnly delay={1600}>
           <Suspense fallback={null}>
-            <ScrollProgress />
+            <SpeedInsights />
+            <Analytics />
           </Suspense>
         </IdleOnly>
-      )}
-
-      <IdleOnly delay={1600}>
-        <Suspense fallback={null}>
-          <SpeedInsights />
-          <Analytics />
-        </Suspense>
-      </IdleOnly>
+      </PageTransitionProvider>
     </ThemeProvider>
   );
 }

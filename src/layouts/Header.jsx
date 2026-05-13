@@ -21,7 +21,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Divide as Hamburger } from "hamburger-react";
 import GooeyNav from "../components/GooeyNav"; // Sesuaikan dengan path file kamu
-
+import { usePageTransition } from "../components/Shared/PageTransition";
 // ==========================================
 // OPTIMASI 1: ISOLASI KOMPONEN JAM
 // ==========================================
@@ -65,7 +65,7 @@ export default function Header() {
   const [isDesktopShowcaseOpen, setIsDesktopShowcaseOpen] = useState(false);
 
   const showFullNavbar = !isScrolled;
-
+  const { transitionTo } = usePageTransition();
   // ==========================================
   // OPTIMASI 2: SCROLL LISTENER PINTAR
   // ==========================================
@@ -190,18 +190,18 @@ export default function Header() {
     document.body.classList.remove("is-transitioning");
   };
 
-  const scrollToTopSmooth = () => {
-    if (window.lenis) {
-      window.lenis.scrollTo(0, {
-        duration: 1,
-      });
-    } else {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
-  };
+const scrollToTopSmooth = () => {
+  if (window.lenis) {
+    window.lenis.scrollTo(0, {
+      duration: 1,
+    });
+  } else {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+};
 
 const scrollToSection = (selector) => {
   const element = document.querySelector(selector);
@@ -233,25 +233,52 @@ const scrollToSection = (selector) => {
   });
 };
 
-  const handleNavigation = (link) => {
-    setIsOpen(false);
-    setIsDesktopShowcaseOpen(false);
+const getTransitionLabel = (link) => {
+  if (link === "/") return "HOME";
+  if (link === "/all-projects") return "PROJECTS";
+  if (link === "/certificates") return "CERTIFICATES";
+  if (link === "/scanner") return "SCANNER";
+  if (link === "/timeline") return "TIMELINE";
+  if (link === "/art") return "ART";
+  if (link === "/activity") return "ACTIVITY";
 
-    setTimeout(() => {
-      if (link.startsWith("#")) {
-        scrollToSection(link);
+  return "ANANTA";
+};
+
+const handleNavigation = (link) => {
+  setIsOpen(false);
+  setIsDesktopShowcaseOpen(false);
+
+  setTimeout(() => {
+    if (link.startsWith("#")) {
+      if (location.pathname !== "/") {
+        transitionTo(() => {
+          navigate("/");
+
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              scrollToSection(link);
+            }, 150);
+          });
+        }, "HOME");
+
         return;
       }
 
-      navigate(link);
+      scrollToSection(link);
+      return;
+    }
 
-      if (link === "/") {
-        setTimeout(() => {
-          scrollToTopSmooth();
-        }, 50);
-      }
-    }, 100);
-  };
+    if (link === location.pathname) {
+      scrollToTopSmooth();
+      return;
+    }
+
+    transitionTo(() => {
+      navigate(link);
+    }, getTransitionLabel(link));
+  }, 80);
+};
 
   const getViewportHeight = () =>
     typeof window !== "undefined" ? window.innerHeight : 800;
