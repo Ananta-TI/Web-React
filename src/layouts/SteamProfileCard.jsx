@@ -3,7 +3,6 @@ import React, {
 } from "react";
 import { ThemeContext } from "../context/ThemeContext.jsx";
 import { createPortal } from "react-dom";
-import { smootherInstance } from "../layouts/GSAPSmoothScrollWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
@@ -321,11 +320,19 @@ export default function SteamProfileCardModern({
     setTimeout(() => setDetailGameId(null), 300); 
   };
 
-  useEffect(() => {
-    if (smootherInstance) {
-      smootherInstance.paused(showModal);
-    }
-  }, [showModal]);
+useEffect(() => {
+  const originalOverflow = document.body.style.overflow;
+
+  if (showModal) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = originalOverflow;
+  }
+
+  return () => {
+    document.body.style.overflow = originalOverflow;
+  };
+}, [showModal]);
 
   const achTimeoutRef = useRef(null);
   const abortControllerRef = useRef(null);

@@ -24,6 +24,7 @@ const ScrollIndicator = ({ tickDensity = 2 }) => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+    if (isMobile) return null;
   }, []);
 
   const updateScroll = useCallback(() => {

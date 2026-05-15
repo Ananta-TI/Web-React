@@ -12,10 +12,10 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import MergedShapes from "./MergedShape";
 import LocationBadge from "../LocationBadge";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+// import { gsap } from "gsap";
+// import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+// gsap.registerPlugin(ScrollTrigger);
 
 const Particles = lazy(() => import("./particles"));
 
@@ -92,7 +92,7 @@ export default function Hero({ isAppLoading }) {
 
   const shapeColor = isDarkMode ? "#ffffff" : "#1a1a1a";
 
-  const canLoadParticles = !isAppLoading && !shouldReduceMotion;
+const canLoadParticles = !isAppLoading && !shouldReduceMotion && isDesktop;
   const shouldRenderParticles = useIdleMount(canLoadParticles, 800);
 
   const particleThemeColors = useMemo(() => {
@@ -128,23 +128,50 @@ export default function Hero({ isAppLoading }) {
   }, [isDesktop]);
 
 useEffect(() => {
-  if (isAppLoading || !parallaxRef.current || shouldReduceMotion) return;
+  if (
+    isAppLoading ||
+    !isDesktop ||
+    !parallaxRef.current ||
+    shouldReduceMotion
+  ) {
+    return;
+  }
 
-  const ctx = gsap.context(() => {
-    gsap.to(parallaxRef.current, {
-      y: -180,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#home",
-        start: "top top",
-        end: "bottom top",
-        scrub: 0.8,
-      },
+  let ctx;
+  let cancelled = false;
+
+  async function runParallax() {
+    const gsapModule = await import("gsap");
+    const scrollTriggerModule = await import("gsap/ScrollTrigger");
+
+    if (cancelled || !parallaxRef.current) return;
+
+    const gsap = gsapModule.gsap;
+    const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    ctx = gsap.context(() => {
+      gsap.to(parallaxRef.current, {
+        y: -180,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#home",
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.8,
+        },
+      });
     });
-  });
+  }
 
-  return () => ctx.revert();
-}, [isAppLoading, shouldReduceMotion]);
+  runParallax();
+
+  return () => {
+    cancelled = true;
+    ctx?.revert();
+  };
+}, [isAppLoading, isDesktop, shouldReduceMotion]);
 
   return (
     <section

@@ -4,20 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
 
-    // Pakai ini saat mau analisis bundle.
-    // Kalau sudah mau deploy final, boleh comment visualizer ini.
-    visualizer({
-      filename: "dist/stats.html",
-      gzipSize: true,
-      brotliSize: true,
-      open: true,
-    }),
-  ],
+    mode === "analyze" &&
+      visualizer({
+        filename: "dist/stats.html",
+        gzipSize: true,
+        brotliSize: true,
+        open: true,
+      }),
+  ].filter(Boolean),
 
   resolve: {
     alias: {
@@ -26,11 +25,67 @@ export default defineConfig({
   },
 
   build: {
-    chunkSizeWarningLimit: 1200,
-
-    // Jangan aktifkan sourcemap untuk deploy final.
-    // Aktifkan true hanya saat debugging production error.
     sourcemap: false,
+    cssCodeSplit: true,
+    assetsInlineLimit: 2048,
+    chunkSizeWarningLimit: 700,
+
+//     rollupOptions: {
+//       output: {
+// //         manualChunks(id) {
+// //   const normalizedId = id.replaceAll("\\", "/");
+
+// //   if (!normalizedId.includes("/node_modules/")) return;
+
+// //   if (
+// //     normalizedId.includes("/node_modules/react/") ||
+// //     normalizedId.includes("/node_modules/react-dom/") ||
+// //     normalizedId.includes("/node_modules/scheduler/")
+// //   ) {
+// //     return "react-vendor";
+// //   }
+
+// //   if (
+// //     normalizedId.includes("/node_modules/react-router/") ||
+// //     normalizedId.includes("/node_modules/react-router-dom/")
+// //   ) {
+// //     return "router-vendor";
+// //   }
+
+// //   if (normalizedId.includes("/node_modules/lucide-react/")) {
+// //     return "icons-vendor";
+// //   }
+
+// //   if (normalizedId.includes("/node_modules/framer-motion/")) {
+// //     return "framer-vendor";
+// //   }
+
+// //   if (
+// //     normalizedId.includes("/node_modules/gsap/") ||
+// //     normalizedId.includes("/node_modules/lenis/")
+// //   ) {
+// //     return "motion-vendor";
+// //   }
+
+// //   if (normalizedId.includes("/node_modules/three/")) {
+// //     return "three-vendor";
+// //   }
+
+// //   if (normalizedId.includes("/node_modules/ogl/")) {
+// //     return "ogl-vendor";
+// //   }
+
+// //   if (
+// //     normalizedId.includes("/node_modules/@mui/") ||
+// //     normalizedId.includes("/node_modules/@emotion/")
+// //   ) {
+// //     return "mui-vendor";
+// //   }
+
+// //   return "vendor";
+// // }
+//       },
+//     },
   },
 
   server: {
@@ -42,4 +97,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

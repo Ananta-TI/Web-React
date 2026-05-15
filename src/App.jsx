@@ -28,7 +28,29 @@ const Analytics = lazy(() =>
     default: mod.Analytics,
   }))
 );
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(media.matches);
+
+    update();
+
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  return isMobile;
+}
 const SpeedInsights = lazy(() =>
   import("@vercel/speed-insights/react").then((mod) => ({
     default: mod.SpeedInsights,
@@ -40,12 +62,17 @@ const PRELOADER_DURATION = 900;
 
 function getInitialLoadingState() {
   try {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+    if (isMobile) {
+      return false;
+    }
+
     return sessionStorage.getItem(SESSION_KEY) !== "true";
   } catch {
     return false;
   }
 }
-
 function useFancyCursorEnabled(isLoading) {
   const [enabled, setEnabled] = useState(false);
 
@@ -121,9 +148,10 @@ function LazyPage({ children }) {
 }
 
 function App() {
-  const [isLoading, setIsLoading] = useState(getInitialLoadingState);
-  const location = useLocation();
-  const cursorEnabled = useFancyCursorEnabled(isLoading);
+const [isLoading, setIsLoading] = useState(getInitialLoadingState);
+const location = useLocation();
+const cursorEnabled = useFancyCursorEnabled(isLoading);
+const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isLoading) return;
@@ -249,13 +277,13 @@ function App() {
           </main>
         </SmoothScrollWrapper>
 
-        {!isLoading && (
-          <IdleOnly delay={800}>
-            <Suspense fallback={null}>
-              <ScrollProgress />
-            </Suspense>
-          </IdleOnly>
-        )}
+        {!isLoading && !isMobile && (
+  <IdleOnly delay={800}>
+    <Suspense fallback={null}>
+      <ScrollProgress />
+    </Suspense>
+  </IdleOnly>
+)}
 
         <IdleOnly delay={1600}>
           <Suspense fallback={null}>
