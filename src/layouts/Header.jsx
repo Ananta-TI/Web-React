@@ -25,30 +25,7 @@ import { usePageTransition } from "../components/Shared/PageTransition";
 // ==========================================
 // OPTIMASI 1: ISOLASI KOMPONEN JAM
 // ==========================================
-const DigitalClock = memo(({ isDarkMode }) => {
-  const [currentTime, setCurrentTime] = useState("");
 
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      setCurrentTime(`${hours}:${minutes}:${seconds}`);
-    };
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <span
-      className={`text-2xl font-Calculator font-bold ${isDarkMode ? "text-black" : "text-gray-300"} mx-2`}
-    >
-      {currentTime}
-    </span>
-  );
-});
 
 export default function Header() {
   const navigate = useNavigate();
@@ -120,25 +97,43 @@ export default function Header() {
   }, [isMobile, isOpen]);
 
   // Body Scroll Lock
-  useEffect(() => {
-    document.body.style.overflow = isMobile && isOpen ? "hidden" : "unset";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, isMobile]);
-  useEffect(() => {
-    if (!window.lenis) return;
+// Body scroll lock khusus mobile + cegah layout geser
+useEffect(() => {
+  if (!isMobile || !isOpen) {
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+    return;
+  }
 
-    if (isOpen) {
-      window.lenis.stop();
-    } else {
-      window.lenis.start();
-    }
+  const scrollbarWidth =
+    window.innerWidth - document.documentElement.clientWidth;
 
-    return () => {
-      window.lenis?.start();
-    };
-  }, [isOpen]);
+  document.body.style.overflow = "hidden";
+
+  if (scrollbarWidth > 0) {
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+  };
+}, [isOpen, isMobile]);
+
+// Lenis jangan dimatikan di desktop
+useEffect(() => {
+  if (!window.lenis) return;
+
+  if (isMobile && isOpen) {
+    window.lenis.stop();
+  } else {
+    window.lenis.start();
+  }
+
+  return () => {
+    window.lenis?.start();
+  };
+}, [isOpen, isMobile]);
   const handleToggleSidebar = () => setIsOpen((prev) => !prev);
 
   const handleDarkModeToggle = async (event) => {
@@ -660,7 +655,6 @@ const handleNavigation = (link) => {
                     Navigation
                   </span>
                   {/* PANGGIL KOMPONEN JAM OPTIMAL DI SINI */}
-                  <DigitalClock isDarkMode={isDarkMode} />
                 </div>
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800/20 dark:bg-zinc-400/20"></div>
               </div>

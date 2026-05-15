@@ -1,4 +1,11 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
@@ -285,7 +292,9 @@ export default function AllProjects() {
     let filtered = allProjects;
 
     if (selectedCategory !== "All") {
-      filtered = filtered.filter((project) => project.category === selectedCategory);
+      filtered = filtered.filter(
+        (project) => project.category === selectedCategory
+      );
     }
 
     if (searchTerm.trim()) {
@@ -332,6 +341,21 @@ export default function AllProjects() {
     });
   };
 
+  const hardResetListHover = () => {
+    setIsHoveringList(false);
+    setHoveredIndex(0);
+
+    const targets = [...titleRefs.current, ...metaRefs.current].filter(Boolean);
+
+    if (targets.length > 0) {
+      gsap.killTweensOf(targets);
+      gsap.set(targets, { x: 0 });
+    }
+
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+  };
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       window.scrollTo({
@@ -344,23 +368,19 @@ export default function AllProjects() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsHoveringList(false);
     setHoveredIndex(0);
 
-    requestAnimationFrame(() => {
-      titleRefs.current.forEach((element) => {
-        if (element) {
-          gsap.set(element, { x: 0 });
-        }
-      });
+    const targets = [...titleRefs.current, ...metaRefs.current].filter(Boolean);
 
-      metaRefs.current.forEach((element) => {
-        if (element) {
-          gsap.set(element, { x: 0 });
-        }
-      });
-    });
+    if (targets.length > 0) {
+      gsap.killTweensOf(targets);
+      gsap.set(targets, { x: 0 });
+    }
+
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
   }, [searchTerm, selectedCategory, effectiveViewMode]);
 
   useEffect(() => {
@@ -488,7 +508,7 @@ export default function AllProjects() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${
+      className={`min-h-screen overflow-x-clip transition-colors duration-500 ${
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
@@ -509,7 +529,9 @@ export default function AllProjects() {
               }`}
             >
               <FolderOpen className="h-5 w-5" />
-              <span className="font-medium">{filteredProjects.length} Projects</span>
+              <span className="font-medium">
+                {filteredProjects.length} Projects
+              </span>
             </div>
           </div>
 
@@ -555,7 +577,10 @@ export default function AllProjects() {
                 type="text"
                 placeholder="Search projects, tags, location, or technologies..."
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => {
+                  hardResetListHover();
+                  setSearchTerm(event.target.value);
+                }}
                 className={`w-full rounded-lg border py-3 pl-10 pr-4 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   isDarkMode
                     ? "bg-zinc-800 border-zinc-700 text-white placeholder-zinc-400"
@@ -570,7 +595,10 @@ export default function AllProjects() {
                   <motion.button
                     key={category}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => {
+                      hardResetListHover();
+                      setSelectedCategory(category);
+                    }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 font-medium transition-all duration-300 ${
@@ -607,7 +635,7 @@ export default function AllProjects() {
                         key={mode.id}
                         type="button"
                         onClick={() => {
-                          resetListHover();
+                          hardResetListHover();
                           setViewMode(mode.id);
                         }}
                         className={`flex items-center gap-2 rounded-full px-4 py-2 font-mono text-sm font-bold transition-all ${

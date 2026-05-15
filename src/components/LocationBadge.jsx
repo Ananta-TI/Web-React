@@ -1,139 +1,236 @@
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 
-export default function LocationBadge({ isDarkMode }) {
-  const globeRef = useRef(null);
-  const containerRef = useRef(null);
-
-  const shapeFill = isDarkMode ? "#e4e4e7" : "#18181b";
-  const textTitle = isDarkMode ? "rgba(0,0,0,0.42)" : "rgba(255,255,255,0.42)";
-  const textCity = isDarkMode ? "#18181b" : "#ffffff";
-  const ringColor = isDarkMode ? "rgba(255,255,255,0.42)" : "rgba(0,0,0,0.35)";
+const DigitalClock = memo(function DigitalClock({ isDarkMode }) {
+  const [time, setTime] = useState("");
 
   useEffect(() => {
+    const updateTime = () => {
+      const formatter = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+
+      setTime(formatter.format(new Date()).replace(/\./g, ":"));
+    };
+
+    updateTime();
+
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      className={[
+        "mt-1 block text-left text-[10px] font-semibold leading-none tracking-[0.08em]",
+        "sm:text-[11px]",
+        isDarkMode ? "text-zinc-700" : "text-zinc-300",
+      ].join(" ")}
+    >
+      {time} WIB
+    </span>
+  );
+});
+
+export default function LocationBadge({
+  isDarkMode = false,
+  className = "",
+}) {
+  const badgeRef = useRef(null);
+  const globeRef = useRef(null);
+  const rafRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const touchYRef = useRef(0);
+
+  const shapeColor = isDarkMode ? "#e4e4e7" : "#1C1D20";
+  const circleBg = isDarkMode
+    ? "rgba(24,24,27,0.16)"
+    : "rgba(255,255,255,0.18)";
+  const textColor = isDarkMode ? "#18181b" : "#ffffff";
+  const mutedText = isDarkMode
+    ? "rgba(24,24,27,0.68)"
+    : "rgba(255,255,255,0.78)";
+  const globeLine = isDarkMode
+    ? "rgba(255,255,255,0.88)"
+    : "rgba(24,24,27,0.62) ";
+
+  useEffect(() => {
+    const badge = badgeRef.current;
     const globe = globeRef.current;
-    const container = containerRef.current;
-    if (!globe || !container) return;
+
+    if (!badge || !globe) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (reduceMotion) {
+      globe.style.transform =
+        "translate(-50%, -50%) rotateZ(-14deg) rotateX(20deg) rotateY(0deg)";
+      return;
+    }
 
     let angle = 0;
-    let dir = 1;
-    let raf;
-    let tid;
+    let direction = 1;
     let isVisible = true;
+    let isTabVisible = !document.hidden;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      isVisible = entry.isIntersecting;
-    });
-    observer.observe(container);
-
-    function spin() {
-      raf = requestAnimationFrame(spin);
-      if (!isVisible) return;
-      angle += 0.42 * dir;
-      globe.style.transform = `rotateZ(-15deg) rotateX(20deg) rotateY(${angle}deg)`;
-    }
-    spin();
-
-    function onScroll(delta) {
-      if (!isVisible) return;
-      dir = delta > 0 ? 1 : -1;
-      cancelAnimationFrame(raf);
-      angle += dir * 5; 
-      globe.style.transform = `rotateZ(-15deg) rotateX(20deg) rotateY(${angle}deg)`;
-      clearTimeout(tid);
-      tid = setTimeout(spin, 350);
-    }
-
-    const handleWheel = (e) => onScroll(e.deltaY);
-    let ty = 0;
-    const handleTouchStart = (e) => { ty = e.touches[0].clientY; };
-    const handleTouchMove = (e) => {
-      onScroll(ty - e.touches[0].clientY);
-      ty = e.touches[0].clientY;
+    const setTransform = () => {
+      globe.style.transform = `translate(-50%, -50%) rotateZ(-14deg) rotateX(20deg) rotateY(${angle}deg)`;
     };
+
+    const animate = () => {
+      rafRef.current = requestAnimationFrame(animate);
+
+      if (!isVisible || !isTabVisible) return;
+
+      angle += 0.32 * direction;
+      setTransform();
+    };
+
+    const boostSpin = (delta) => {
+      if (!isVisible || !isTabVisible) return;
+
+      direction = delta > 0 ? 1 : -1;
+      angle += direction * 5.5;
+      setTransform();
+
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        cancelAnimationFrame(rafRef.current);
+        animate();
+      }, 260);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+
+    const handleWheel = (event) => {
+      boostSpin(event.deltaY);
+    };
+
+    const handleTouchStart = (event) => {
+      touchYRef.current = event.touches[0].clientY;
+    };
+
+    const handleTouchMove = (event) => {
+      const currentY = event.touches[0].clientY;
+      const delta = touchYRef.current - currentY;
+
+      if (Math.abs(delta) > 2) {
+        boostSpin(delta);
+      }
+
+      touchYRef.current = currentY;
+    };
+
+    const handleVisibilityChange = () => {
+      isTabVisible = !document.hidden;
+    };
+
+    observer.observe(badge);
 
     window.addEventListener("wheel", handleWheel, { passive: true });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    animate();
 
     return () => {
       observer.disconnect();
-      cancelAnimationFrame(raf);
-      clearTimeout(tid);
+
+      cancelAnimationFrame(rafRef.current);
+      clearTimeout(timeoutRef.current);
+
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
-  const rings = [
-    "rotateY(0deg)", "rotateY(60deg)", "rotateY(120deg)",
-    "rotateX(90deg)", "rotateX(90deg) translateZ(15px) scale(0.85)", 
-    "rotateX(90deg) translateZ(-15px) scale(0.85)",
+  const circles = [
+    "rotateY(0deg)",
+    "rotateY(60deg)",
+    "rotateY(120deg)",
+    "rotateX(90deg)",
+    "rotateX(90deg) translateZ(11px) scale(0.72)",
+    "rotateX(90deg) translateZ(-11px) scale(0.72)",
   ];
 
   return (
-    /* Menggunakan lebar relatif (w-full/max-w) 
-       dan aspect-ratio agar proporsi SVG tetap terjaga 
-    */
-    <div 
-      ref={containerRef} 
-      className="relative inline-flex items-center group cursor-none cursor-target drop-shadow-xl w-full max-w-[240px] sm:max-w-[330px]"
+    <div
+      ref={badgeRef}
+      aria-label="Located in Indonesia, current WIB time"
+      className={[
+        "pointer-events-none relative inline-flex select-none",
+        className,
+      ].join(" ")}
     >
-      <svg
-        viewBox="0 0 330 96" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-        className="transition-colors duration-500 w-full h-auto"
-      >
-        <path
-          fillRule="evenodd" clipRule="evenodd"
-          d="M0 0 L282 0 A48 48 0 0 1 282 96 L0 96 Z M282 15 A33 33 0 0 0 282 81 A33 33 0 0 0 282 15 Z"
-          fill={shapeFill}
-        />
-      </svg>
-
-      {/* Teks menggunakan unit responsive (vw atau sm:text) */}
-      <div className="absolute left-[8%] flex flex-col justify-center pointer-events-none mt-0.5">
-        <span 
-          style={{ color: textTitle, transition: "color 0.5s ease" }} 
-          className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-0.5 sm:mb-1"
+      <div className="relative h-[92px] w-[218px] sm:h-[104px] sm:w-[250px] lg:h-[114px] lg:w-[275px]">
+        <svg
+          viewBox="0 0 300 121"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(0,0,0,0.22)]"
+          preserveAspectRatio="none"
         >
-          Located In
-        </span>
-        <span 
-          style={{ color: textCity, transition: "color 0.5s ease" }} 
-          className="text-lg sm:text-2xl font-black tracking-wider leading-none"
-        >
-          Indonesia
-        </span>
-      </div>
+          <path
+            d="M239.633657,0 C272.770742,0 299.633657,26.862915 299.633657,60 C299.633657,93.137085 272.770742,120 239.633657,120 L0,120 L0,0 L239.633657,0 Z M239.633657,18.7755102 C216.866,18.7755102 198.409167,37.232343 198.409167,60 C198.409167,82.767657 216.866,101.22449 239.633657,101.22449 C262.401314,101.22449 280.858147,82.767657 280.858147,60 C280.858147,37.232343 262.401314,18.7755102 239.633657,18.7755102 Z"
+            fill={shapeColor}
+            className="transition-colors duration-500"
+          />
+        </svg>
 
-      {/* Globe Container dengan ukuran relatif terhadap badge */}
-      <div 
-        className="absolute pointer-events-none flex items-center justify-center" 
-        style={{ 
-          right: "14.5%", 
-          top: "50%", 
-          transform: "translate(50%, -50%)", 
-          width: "18%", // Ukuran relatif terhadap container
-          aspectRatio: "1/1",
-          perspective: 1200 
-        }}
-      >
-        <div ref={globeRef} style={{ width: "100%", height: "100%", position: "relative", transformStyle: "preserve-3d" }}>
-          {rings.map((transformRule, i) => (
-            <div 
-              key={i} 
-              style={{ 
-                position: "absolute", 
-                inset: 0, 
-                borderRadius: "50%", 
-                border: `2px solid ${ringColor}`, // Border sedikit tipis agar rapi di layar kecil
-                transform: transformRule, 
-                transition: "transform 0.5s ease" 
-              }} 
-            />
-          ))}
+        <div className="absolute left-[17%] top-1/2 flex -translate-y-1/2 flex-col items-start text-left">
+          <p
+            className="m-0 flex flex-col items-start gap-[1px] text-left text-[15px] font-bold leading-[1.05] tracking-[-0.035em] sm:text-[17px] lg:text-[18px]"
+            style={{ color: textColor }}
+          >
+            <span style={{ color: mutedText }}>Located</span>
+            <span>in the</span>
+            <span>Indonesia</span>
+          </p>
+
+          <DigitalClock isDarkMode={isDarkMode} />
+        </div>
+
+        <div className="absolute right-[6.4%] top-1/2 aspect-square w-[27.8%] -translate-y-1/2 rounded-full">
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{ background: circleBg }}
+          />
+
+          <div
+            ref={globeRef}
+            className="absolute left-1/2 top-1/2 aspect-square w-[54%]"
+            style={{
+              transform:
+                "translate(-50%, -50%) rotateZ(-14deg) rotateX(20deg) rotateY(0deg)",
+              transformStyle: "preserve-3d",
+              willChange: "transform",
+            }}
+          >
+            {circles.map((transform, index) => (
+              <div
+                key={index}
+                className="absolute inset-0 rounded-full"
+                style={{
+                  border: `2px solid ${globeLine}`,
+                  transform,
+                  transition: "border-color 0.5s ease",
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

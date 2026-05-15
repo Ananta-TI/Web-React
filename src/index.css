@@ -503,3 +503,32 @@ html.lenis body {
     scroll-behavior: auto !important;
   }
 }
+/* =========================
+   SCROLL GLITCH GUARD
+   Jangan pakai overflow-y: scroll di sini.
+   Itu bikin scrollbar kanan kelihatan maksa.
+========================= */
+
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+}

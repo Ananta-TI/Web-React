@@ -153,7 +153,7 @@ useEffect(() => {
 
     ctx = gsap.context(() => {
       gsap.to(parallaxRef.current, {
-        y: -180,
+        y: -380,
         ease: "none",
         scrollTrigger: {
           trigger: "#home",
