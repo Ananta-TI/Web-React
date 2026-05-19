@@ -17,6 +17,12 @@ const Projects = () => {
   const { transitionTo } = usePageTransition();
 
   const sectionRef = useRef(null);
+  const listRef = useRef(null);
+  const itemRefs = useRef([]);
+  const activeIndexRef = useRef(null);
+  const lastPointerRef = useRef({ x: 0, y: 0, ready: false });
+  const scrollFrameRef = useRef(null);
+
   const buttonRef = useRef(null);
   const circleRef = useRef(null);
   const floatingImgRef = useRef(null);
@@ -119,6 +125,145 @@ const Projects = () => {
       overwrite: "auto",
     });
   };
+
+  const activateProjectHover = (index) => {
+    if (index === null || index === undefined) return;
+
+    if (activeIndexRef.current === index) {
+      setIsHoveringList(true);
+      return;
+    }
+
+    if (activeIndexRef.current !== null) {
+      handleLeave(activeIndexRef.current);
+    }
+
+    activeIndexRef.current = index;
+    setHoveredIndex(index);
+    setIsHoveringList(true);
+    handleEnter(index);
+  };
+
+  const clearProjectHover = () => {
+    if (activeIndexRef.current !== null) {
+      handleLeave(activeIndexRef.current);
+    }
+
+    activeIndexRef.current = null;
+    setIsHoveringList(false);
+  };
+
+  const syncFloatingPreviewPosition = () => {
+    if (!lastPointerRef.current.ready) return;
+
+    const { x, y } = lastPointerRef.current;
+
+    if (floatingImgRef.current) {
+      gsap.set(floatingImgRef.current, {
+        left: x,
+        top: y,
+      });
+    }
+
+    if (floatingLabelRef.current) {
+      gsap.set(floatingLabelRef.current, {
+        left: x,
+        top: y,
+      });
+    }
+  };
+
+  const detectProjectUnderCursor = () => {
+    if (showModal || !lastPointerRef.current.ready) return;
+
+    const { x, y } = lastPointerRef.current;
+    const list = listRef.current;
+
+    if (!list) return;
+
+    const listRect = list.getBoundingClientRect();
+
+    const isInsideList =
+      x >= listRect.left &&
+      x <= listRect.right &&
+      y >= listRect.top &&
+      y <= listRect.bottom;
+
+    if (!isInsideList) {
+      clearProjectHover();
+      return;
+    }
+
+    let matchedIndex = null;
+
+    itemRefs.current.forEach((item, index) => {
+      if (!item) return;
+
+      const rect = item.getBoundingClientRect();
+
+      const isInsideItem =
+        x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom;
+
+      if (isInsideItem) {
+        matchedIndex = index;
+      }
+    });
+
+    if (matchedIndex === null) {
+      clearProjectHover();
+      return;
+    }
+
+    syncFloatingPreviewPosition();
+    activateProjectHover(matchedIndex);
+  };
+
+  const handlePointerMove = (event) => {
+    lastPointerRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      ready: true,
+    };
+
+    detectProjectUnderCursor();
+  };
+
+  const handleScrollHoverCheck = () => {
+    if (scrollFrameRef.current) {
+      cancelAnimationFrame(scrollFrameRef.current);
+    }
+
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      detectProjectUnderCursor();
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handlePointerMove, { passive: true });
+    window.addEventListener("scroll", handleScrollHoverCheck, { passive: true });
+
+    const lenis = window.lenis;
+
+    if (lenis?.on) {
+      lenis.on("scroll", handleScrollHoverCheck);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("scroll", handleScrollHoverCheck);
+
+      if (lenis?.off) {
+        lenis.off("scroll", handleScrollHoverCheck);
+      }
+
+      if (scrollFrameRef.current) {
+        cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, [showModal]);
 
   useEffect(() => {
     if (!buttonRef.current || !circleRef.current) return;
@@ -238,6 +383,7 @@ const Projects = () => {
   const openProjectModal = (project, event) => {
     event.preventDefault();
 
+    clearProjectHover();
     setSelectedProject(project);
     setShowModal(true);
   };
@@ -302,18 +448,17 @@ const Projects = () => {
         </div>
 
         <ul
+          ref={listRef}
           className="w-full m-0 p-0 list-none"
-          onMouseEnter={() => setIsHoveringList(true)}
-          onMouseLeave={() => setIsHoveringList(false)}
+          onMouseLeave={clearProjectHover}
         >
           {projects.map((project, index) => (
             <li
               key={project.id}
-              onMouseEnter={() => {
-                setHoveredIndex(index);
-                handleEnter(index);
+              ref={(element) => {
+                itemRefs.current[index] = element;
               }}
-              onMouseLeave={() => handleLeave(index)}
+              onMouseEnter={() => activateProjectHover(index)}
               className="relative w-full"
             >
               <div
