@@ -123,7 +123,7 @@ const allProjects = [
     featured: true,
   },
   {
-    title: "PCR Book-Request System",
+    title: "PCR Book-Request-System",
     description:
       "A request and management system for the PCR campus library. It features multi-role access (Student, Staff, Librarian) to streamline the document validation process.",
     demo: null,
@@ -182,6 +182,21 @@ const allProjects = [
     status: "In Progress",
     featured: true,
   },
+{
+  title: "PCR Book-Request-System_V2",
+  description:
+    "A responsive library request management system built with React, Vite, Tailwind CSS, and Supabase. This application allows students and academic staff to submit book and module requests, track request statuses, view reference books, and enables library staff to manage requests through an admin dashboard.",
+  demo: "https://book-request-v2.vercel.app/",
+  repo: "https://github.com/Ananta-TI/Book-Request_V2.git",
+  tags: ["React", "Vite", "Framer Motion", "Tailwind", "Gsap"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/image.png",
+  cover: "/img/cover/11.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
 ];
 
 function getCategoryIcon(category) {
