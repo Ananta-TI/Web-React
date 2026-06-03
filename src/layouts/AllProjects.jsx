@@ -197,6 +197,21 @@ const allProjects = [
   status: "Completed",
   featured: true,
 },
+{
+  title: "Fashion-Trend",
+  description:
+    "An AI-powered fashion trend prediction web application built with React, Vite, Tailwind CSS, TensorFlow.js, and Framer Motion. This application allows users to upload fashion product images, analyzes them using a CNN model running directly in the browser, and displays prediction results such as product category, confidence score, trend score, trend status, and top prediction insights.",
+  demo: "https://fash-trend.vercel.app/",
+  repo: "https://github.com/Ananta-TI/Fashion-Trend.git",
+  tags: ["React", "Vite", "TensorFlow.js", "Tailwind", "Framer Motion"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/FashTrend.png",
+  cover: "/img/cover/12.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
 ];
 
 function getCategoryIcon(category) {
