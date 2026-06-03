@@ -735,9 +735,9 @@ export default function AllProjects() {
                       }}
                       className="pointer-events-none min-w-0 will-change-transform"
                     >
-                      <h2 className="font-lyrae text-[clamp(2.15rem,5.8vw,4.9rem)] font-bold leading-[0.95] tracking-tight transition-opacity duration-300 group-hover:opacity-80">
-                        {project.title}
-                      </h2>
+                      <h2 className="font-lyrae text-[clamp(1.5rem,3.4vw,3rem)] font-bold leading-[1] tracking-tight transition-opacity duration-300 group-hover:opacity-80">
+  {project.title}
+</h2>
 
                       <p
                         className={`mt-4 max-w-xl font-mono text-sm leading-6 lg:hidden ${
@@ -761,7 +761,7 @@ export default function AllProjects() {
 
                       <div className={isDarkMode ? "text-zinc-400" : "text-zinc-600"}>
                         <span className="lg:hidden">Services: </span>
-                        {project.tags.slice(0, 3).join(" / ")}
+                        {project.tags.slice(0, 10).join(" / ")}
                       </div>
 
                       <div
@@ -836,8 +836,7 @@ export default function AllProjects() {
                       <h4
                         className={`font-lyrae text-[clamp(2rem,4vw,3.35rem)] font-bold leading-none tracking-tight ${
                           isDarkMode ? "text-white" : "text-zinc-900"
-                        }`}
-                      >
+                        }`}>
                         {project.title}
                       </h4>
 
@@ -854,7 +853,7 @@ export default function AllProjects() {
                           isDarkMode ? "text-zinc-400" : "text-zinc-600"
                         }`}
                       >
-                        {project.tags.slice(0, 3).join(" & ")}
+                        {project.tags.slice(0, 10).join(" & ")}
                       </p>
 
                       <p
