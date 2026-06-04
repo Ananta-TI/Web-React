@@ -39,6 +39,7 @@ const Certificates = () => {
     { image: "sertifikat/22.png", year: "2025" },
     { image: "sertifikat/23.png", year: "2025" },
     { image: "sertifikat/24.png", year: "2024" },
+    { image: "sertifikat/25.png", year: "2026" },
   ];
 // Di dalam AllProjects.jsx
 useEffect(() => {
