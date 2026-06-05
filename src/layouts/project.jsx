@@ -39,22 +39,23 @@ const Projects = () => {
   const projects = [
     {
       id: 1,
-      title: "My First Web",
-      description:
-        "My very first website built to learn the fundamentals of HTML, CSS, Tailwind, and JavaScript. Featuring a simple yet responsive design, this project marked the beginning of my journey into web development.",
-      demo: "https://ananta-ti.github.io/my-first-web/",
-      repo: "https://github.com/Ananta-TI/my-first-web.git",
-      tags: ["HTML", "CSS", "JavaScript"],
-      category: "Web Development",
-      image: "/img/first-web2.png",
-      date: "2023-01-15",
-      difficulty: "Beginner",
-      featured: null,
-      status: "Completed",
+      title: "Fashion-Trend",
+  description:
+    "An AI-powered fashion trend prediction web application built with React, Vite, Tailwind CSS, TensorFlow.js, and Framer Motion. This application allows users to upload fashion product images, analyzes them using a CNN model running directly in the browser, and displays prediction results such as product category, confidence score, trend score, trend status, and top prediction insights.",
+  demo: "https://fash-trend.vercel.app/",
+  repo: "https://github.com/Ananta-TI/Fashion-Trend.git",
+  tags: ["React", "Vite", "TensorFlow.js", "Tailwind", "Framer Motion"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/FashTrend.png",
+  cover: "/img/cover/12.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
     },
     {
       id: 2,
-      title: "Sedap",
+      title: "Indonesian Culinary ",
       description:
         "A React-based culinary platform showcasing local Indonesian food products with a modern and responsive UI. It allows users to explore traditional snacks, healthy meals, and contemporary cuisines while supporting local culinary SMEs.",
       demo: "https://react-nta.vercel.app/guest",
@@ -69,10 +70,10 @@ const Projects = () => {
     },
     {
       id: 3,
-      title: "React Inventory",
+      title: "Asetra Inventory",
       description:
         "An inventory management system built with React and a modern interface, designed to improve business efficiency and data organization.",
-      demo: "https://react-inventory-roan.vercel.app/",
+      demo: "https://asetra-inventory.vercel.app/",
       repo: "https://github.com/Ananta-TI/react-inventory.git",
       tags: ["React", "Inventory", "Management"],
       category: "Web Application",

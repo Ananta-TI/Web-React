@@ -93,10 +93,10 @@ const allProjects = [
     featured: true,
   },
   {
-    title: "Smart Inventory System",
+    title: "Asetra Inventory System",
     description:
       "An inventory management solution built to enhance operational efficiency. It features real-time stock tracking and a clean, data-driven analytical dashboard.",
-    demo: "https://react-inventory-roan.vercel.app/",
+    demo: "https://asetra-inventory.vercel.app/",
     repo: "https://github.com/Ananta-TI/react-inventory.git",
     tags: ["React", "Context API", "Dashboard", "Tailwind"],
     category: "Web Development",
