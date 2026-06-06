@@ -220,7 +220,7 @@ export default function About() {
       </div>
 
       {/* ================= SCANNER CHART ================= */}
-      {/* <div
+      <div
         ref={chartRef}
         className="w-full max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20"
       >
@@ -240,7 +240,7 @@ export default function About() {
             <SectionSkeleton height="h-screen" isDarkMode={delayedDarkMode} />
           )}
         </RevealWrapper>
-      </div> */}
+      </div>
     </section>
   );
 }
