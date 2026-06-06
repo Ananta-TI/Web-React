@@ -116,7 +116,7 @@ const allProjects = [
     tags: ["React", "Education", "Logic", "Algorithms"],
     category: "Education",
     location: "Indonesia",
-    image: "/img/MathDash.png",
+    image: "/img/MathDash2.png",
     cover: "/img/cover/6.png",
     year: "2024",
     status: "In Progress",
