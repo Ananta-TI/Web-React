@@ -212,6 +212,21 @@ const allProjects = [
   status: "Completed",
   featured: true,
 },
+{
+  title: "EduGuide",
+  description:
+    "A modern academic guide mobile application built with React Native, Expo, NativeWind, React Navigation, and Material Design style. This application helps students access academic information such as course lists, course details, student profiles, campus location, and academic actions using explicit and implicit intents including phone call, WhatsApp, Google Maps, email, and share features.",
+  demo: "",
+  repo: "https://github.com/Ananta-TI/EduGuide.git",
+  tags: ["React Native", "Expo", "NativeWind", "React Navigation", "Mobile App"],
+  category: "Mobile Development",
+  location: "Indonesia",
+  image: "/img/EduGuide.png",
+  cover: "/img/cover/13.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
 ];
 
 function getCategoryIcon(category) {
