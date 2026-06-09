@@ -12,20 +12,92 @@ import {
   Award,
   Palette,
   ScanText,
-  History,
   ChevronDown,
   Gamepad2,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Divide as Hamburger } from "hamburger-react";
-import GooeyNav from "../components/GooeyNav"; // Sesuaikan dengan path file kamu
+import GooeyNav from "../components/GooeyNav";
 import { usePageTransition } from "../components/Shared/PageTransition";
-// ==========================================
-// OPTIMASI 1: ISOLASI KOMPONEN JAM
-// ==========================================
 
+// ==========================================
+// TOMBOL THEME BARU
+// ==========================================
+const ThemeToggleButton = memo(function ThemeToggleButton({
+  isDarkMode,
+  onClick,
+  disabled,
+  className = "",
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      whileHover={disabled ? {} : { scale: 1.06 }}
+      whileTap={disabled ? {} : { scale: 0.94 }}
+      className={`cursor-none cursor-target relative h-9 w-[74px] overflow-hidden rounded-full border p-1 shadow-lg backdrop-blur-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 disabled:cursor-not-allowed disabled:opacity-60 ${
+        isDarkMode
+          ? "border-white/15 bg-zinc-950/70 shadow-black/30"
+          : "border-zinc-200/80 bg-white/70 shadow-zinc-300/40"
+      } ${className}`}
+    >
+      <span
+        className={`absolute inset-0 transition-opacity duration-300 ${
+          isDarkMode
+            ? "bg-[radial-gradient(circle_at_75%_50%,rgba(16,185,129,0.22),transparent_45%)]"
+            : "bg-[radial-gradient(circle_at_25%_50%,rgba(250,204,21,0.24),transparent_45%)]"
+        }`}
+      />
+
+      <span className="relative z-10 flex h-full items-center justify-between px-1.5">
+        <Sun
+          size={15}
+          className={`transition-all duration-300 ${
+            isDarkMode ? "text-zinc-500" : "text-amber-500"
+          }`}
+        />
+        <Moon
+          size={14}
+          className={`transition-all duration-300 ${
+            isDarkMode ? "text-emerald-300" : "text-zinc-400"
+          }`}
+        />
+      </span>
+
+      <motion.span
+        animate={{
+          x: isDarkMode ? 36 : 0,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 420,
+          damping: 30,
+        }}
+        className={`absolute left-1 top-1 z-20 flex h-7 w-7 items-center justify-center rounded-full shadow-md transition-colors duration-300 ${
+          isDarkMode
+            ? "bg-zinc-100 text-zinc-950 shadow-black/30"
+            : "bg-zinc-950 text-white shadow-zinc-400/40"
+        }`}
+      >
+        <motion.span
+          key={isDarkMode ? "moon" : "sun"}
+          initial={{ rotate: -60, opacity: 0, scale: 0.6 }}
+          animate={{ rotate: 0, opacity: 1, scale: 1 }}
+          exit={{ rotate: 60, opacity: 0, scale: 0.6 }}
+          transition={{ duration: 0.22 }}
+        >
+          {isDarkMode ? <Moon size={15} /> : <Sun size={15} />}
+        </motion.span>
+      </motion.span>
+    </motion.button>
+  );
+});
 
 export default function Header() {
   const navigate = useNavigate();
@@ -43,9 +115,7 @@ export default function Header() {
 
   const showFullNavbar = !isScrolled;
   const { transitionTo } = usePageTransition();
-  // ==========================================
-  // OPTIMASI 2: SCROLL LISTENER PINTAR
-  // ==========================================
+
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 100;
@@ -56,11 +126,11 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Theme Transition Logic
   useEffect(() => {
     if (isThemeChanging) {
       document.body.classList.add("theme-changing");
       const root = document.documentElement;
+
       if (isDarkMode) {
         root.style.setProperty("--circle-bg-color", "rgb(243,244,246)");
       } else {
@@ -69,23 +139,20 @@ export default function Header() {
     } else {
       document.body.classList.remove("theme-changing");
     }
+
     return () => document.body.classList.remove("theme-changing");
   }, [isThemeChanging, isDarkMode]);
 
-  // ==========================================
-  // OPTIMASI 3: PELACAKAN MOUSE HANYA SAAT SIDEBAR TERBUKA
-  // ==========================================
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
+
     window.addEventListener("resize", checkMobile);
 
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
-    // Hanya lacak mouse jika bukan mobile DAN sidebar sedang terbuka!
-    // Ini menghemat puluhan render per detik saat user melihat halaman normal.
     if (!isMobile && isOpen) {
       window.addEventListener("mousemove", handleMouseMove, { passive: true });
     }
@@ -96,55 +163,55 @@ export default function Header() {
     };
   }, [isMobile, isOpen]);
 
-  // Body Scroll Lock
-// Body scroll lock khusus mobile + cegah layout geser
-useEffect(() => {
-  if (!isMobile || !isOpen) {
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
-    return;
-  }
+  useEffect(() => {
+    if (!isMobile || !isOpen) {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      return;
+    }
 
-  const scrollbarWidth =
-    window.innerWidth - document.documentElement.clientWidth;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
 
-  document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
-  if (scrollbarWidth > 0) {
-    document.body.style.paddingRight = `${scrollbarWidth}px`;
-  }
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
 
-  return () => {
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
-  };
-}, [isOpen, isMobile]);
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [isOpen, isMobile]);
 
-// Lenis jangan dimatikan di desktop
-useEffect(() => {
-  if (!window.lenis) return;
+  useEffect(() => {
+    if (!window.lenis) return;
 
-  if (isMobile && isOpen) {
-    window.lenis.stop();
-  } else {
-    window.lenis.start();
-  }
+    if (isMobile && isOpen) {
+      window.lenis.stop();
+    } else {
+      window.lenis.start();
+    }
 
-  return () => {
-    window.lenis?.start();
-  };
-}, [isOpen, isMobile]);
+    return () => {
+      window.lenis?.start();
+    };
+  }, [isOpen, isMobile]);
+
   const handleToggleSidebar = () => setIsOpen((prev) => !prev);
 
   const handleDarkModeToggle = async (event) => {
-    document.body.classList.add("is-transitioning");
     if (isThemeChanging) return;
+
+    document.body.classList.add("is-transitioning");
     setIsThemeChanging(true);
 
     if (!document.startViewTransition) {
       setIsDarkMode((prev) => !prev);
       setIsOpen(false);
       setIsThemeChanging(false);
+      document.body.classList.remove("is-transitioning");
       return;
     }
 
@@ -152,6 +219,7 @@ useEffect(() => {
     const rect = button.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
+
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y),
@@ -164,6 +232,7 @@ useEffect(() => {
 
     try {
       await transition.ready;
+
       document.documentElement.animate(
         {
           clipPath: [
@@ -181,104 +250,110 @@ useEffect(() => {
       console.error("Animasi gagal:", error);
     } finally {
       setIsThemeChanging(false);
+      document.body.classList.remove("is-transitioning");
     }
-    document.body.classList.remove("is-transitioning");
   };
 
-const scrollToTopSmooth = () => {
-  if (window.lenis) {
-    window.lenis.scrollTo(0, {
-      duration: 1,
-    });
-  } else {
+  const scrollToTopSmooth = () => {
+    if (window.lenis) {
+      window.lenis.scrollTo(0, {
+        duration: 1,
+      });
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollToSection = (selector) => {
+    const element = document.querySelector(selector);
+
+    if (!element) return;
+
+    const offsetMap = {
+      "#home": 0,
+      "#about": 100,
+      "#projects": 95,
+      "#contact": -85,
+    };
+
+    const offset = offsetMap[selector] ?? 0;
+
+    if (window.lenis) {
+      window.lenis.scrollTo(element, {
+        offset,
+        duration: 3,
+      });
+      return;
+    }
+
+    const y = element.getBoundingClientRect().top + window.pageYOffset + offset;
+
     window.scrollTo({
-      top: 0,
+      top: y,
       behavior: "smooth",
     });
-  }
-};
-
-const scrollToSection = (selector) => {
-  const element = document.querySelector(selector);
-
-  if (!element) return;
-
-  const offsetMap = {
-    "#home": 0,
-    "#about": 100,
-    "#projects": 95,
-    "#contact": -85,
   };
 
-  const offset = offsetMap[selector] ?? 0;
+  const getTransitionLabel = (link) => {
+    if (link === "/") return "HOME";
+    if (link === "/all-projects") return "PROJECTS";
+    if (link === "/certificates") return "CERTIFICATES";
+    if (link === "/scanner") return "SCANNER";
+    if (link === "/timeline") return "TIMELINE";
+    if (link === "/art") return "ART";
+    if (link === "/activity") return "ACTIVITY";
 
-  if (window.lenis) {
-    window.lenis.scrollTo(element, {
-      offset,
-      duration: 3,
-    });
-    return;
-  }
+    return "ANANTA";
+  };
 
-  const y = element.getBoundingClientRect().top + window.pageYOffset + offset;
+  const handleNavigation = (link) => {
+    setIsOpen(false);
+    setIsDesktopShowcaseOpen(false);
 
-  window.scrollTo({
-    top: y,
-    behavior: "smooth",
-  });
-};
+    setTimeout(() => {
+      if (link.startsWith("#")) {
+        if (location.pathname !== "/") {
+          transitionTo(() => {
+            navigate("/");
 
-const getTransitionLabel = (link) => {
-  if (link === "/") return "HOME";
-  if (link === "/all-projects") return "PROJECTS";
-  if (link === "/certificates") return "CERTIFICATES";
-  if (link === "/scanner") return "SCANNER";
-  if (link === "/timeline") return "TIMELINE";
-  if (link === "/art") return "ART";
-  if (link === "/activity") return "ACTIVITY";
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                scrollToSection(link);
+              }, 150);
+            });
+          }, "HOME");
 
-  return "ANANTA";
-};
+          return;
+        }
 
-const handleNavigation = (link) => {
-  setIsOpen(false);
-  setIsDesktopShowcaseOpen(false);
-
-  setTimeout(() => {
-    if (link.startsWith("#")) {
-      if (location.pathname !== "/") {
-        transitionTo(() => {
-          navigate("/");
-
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              scrollToSection(link);
-            }, 150);
-          });
-        }, "HOME");
-
+        scrollToSection(link);
         return;
       }
 
-      scrollToSection(link);
-      return;
-    }
+      if (link === location.pathname) {
+        scrollToTopSmooth();
+        return;
+      }
 
-    if (link === location.pathname) {
-      scrollToTopSmooth();
-      return;
-    }
-
-    transitionTo(() => {
-      navigate(link);
-    }, getTransitionLabel(link));
-  }, 80);
-};
+      transitionTo(() => {
+        navigate(link);
+      }, getTransitionLabel(link));
+    }, 80);
+  };
 
   const getViewportHeight = () =>
     typeof window !== "undefined" ? window.innerHeight : 800;
-  const initialPath = `M100 0 L100 ${getViewportHeight()} Q-100 ${getViewportHeight() / 2} 100 0`;
-  const targetPath = `M100 0 L100 ${getViewportHeight()} Q100 ${getViewportHeight() / 2} 100 0`;
+
+  const initialPath = `M100 0 L100 ${getViewportHeight()} Q-100 ${
+    getViewportHeight() / 2
+  } 100 0`;
+
+  const targetPath = `M100 0 L100 ${getViewportHeight()} Q100 ${
+    getViewportHeight() / 2
+  } 100 0`;
 
   const curveVariants = {
     initial: { d: initialPath },
@@ -298,14 +373,18 @@ const handleNavigation = (link) => {
       <div
         className={`fixed z-[60] transition-all duration-500 ease-in-out flex items-center justify-between pointer-events-none ${
           showFullNavbar
-            ? `top-0 left-0 right-0 px-6 py-5 md:px-12 md:py-6 w-full ${isDarkMode ? "bg-transparent " : "bg-transparent"}`
+            ? `top-0 left-0 right-0 px-6 py-5 md:px-12 md:py-6 w-full ${
+                isDarkMode ? "bg-transparent " : "bg-transparent"
+              }`
             : "top-4 right-4 left-4 md:right-8 md:left-8"
         }`}
       >
         {/* Logo */}
         <span
           onClick={() => handleNavigation("/")}
-          className={`text-2xl font-bold p-0 pointer-events-auto cursor-none cursor-target transition-colors ${isDarkMode ? "text-white" : "text-zinc-800"}`}
+          className={`text-2xl font-bold p-0 pointer-events-auto cursor-none cursor-target transition-colors ${
+            isDarkMode ? "text-white" : "text-zinc-800"
+          }`}
         ></span>
 
         {/* Full Desktop Navbar Links */}
@@ -318,7 +397,6 @@ const handleNavigation = (link) => {
               transition={{ duration: 0.4, ease: "easeOut" }}
               className="hidden md:flex gap-6 lg:gap-8 items-center top-8 pointer-events-auto absolute left-1/2 -translate-x-1/2"
             >
-              {/* CEK KONDISI HALAMAN: Apakah ini halaman Showcase atau bukan? */}
               {[
                 "/all-projects",
                 "/certificates",
@@ -337,12 +415,16 @@ const handleNavigation = (link) => {
                   >
                     <span>Home</span>
                     <span
-                      className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}
+                      className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${
+                        isDarkMode ? "bg-white" : "bg-zinc-900"
+                      }`}
                     ></span>
                   </button>
 
                   <div
-                    className={`h-4 w-[1px] ${isDarkMode ? "bg-zinc-700" : "bg-gray-300"}`}
+                    className={`h-4 w-[1px] ${
+                      isDarkMode ? "bg-zinc-700" : "bg-gray-300"
+                    }`}
                   ></div>
 
                   {[
@@ -353,6 +435,7 @@ const handleNavigation = (link) => {
                     { name: "Activity", link: "/activity" },
                   ].map((item) => {
                     const isActive = location.pathname === item.link;
+
                     return (
                       <button
                         key={item.name}
@@ -368,15 +451,19 @@ const handleNavigation = (link) => {
                         }`}
                       >
                         {item.name}
+
                         {isActive && (
                           <motion.span
                             layoutId="activeDot"
                             className="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
                           />
                         )}
+
                         {!isActive && (
                           <span
-                            className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}
+                            className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${
+                              isDarkMode ? "bg-white" : "bg-zinc-900"
+                            }`}
                           ></span>
                         )}
                       </button>
@@ -401,7 +488,9 @@ const handleNavigation = (link) => {
                     >
                       <span>{item.name}</span>
                       <span
-                        className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}
+                        className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${
+                          isDarkMode ? "bg-white" : "bg-zinc-900"
+                        }`}
                       ></span>
                     </button>
                   ))}
@@ -424,10 +513,14 @@ const handleNavigation = (link) => {
                       <span>Showcase</span>
                       <ChevronDown
                         size={16}
-                        className={`transition-transform duration-300 ${isDesktopShowcaseOpen ? "rotate-180" : "rotate-0"}`}
+                        className={`transition-transform duration-300 ${
+                          isDesktopShowcaseOpen ? "rotate-180" : "rotate-0"
+                        }`}
                       />
                       <span
-                        className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}
+                        className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${
+                          isDarkMode ? "bg-white" : "bg-zinc-900"
+                        }`}
                       ></span>
                     </button>
 
@@ -506,7 +599,11 @@ const handleNavigation = (link) => {
                                   {sub.name}
                                 </span>
                                 <span
-                                  className={`transform transition-transform duration-200 group-hover:scale-110 ${isDarkMode ? "text-zinc-500 group-hover:text-emerald-400" : "text-zinc-400 group-hover:text-emerald-600"}`}
+                                  className={`transform transition-transform duration-200 group-hover:scale-110 ${
+                                    isDarkMode
+                                      ? "text-zinc-500 group-hover:text-emerald-400"
+                                      : "text-zinc-400 group-hover:text-emerald-600"
+                                  }`}
                                 >
                                   {sub.icon}
                                 </span>
@@ -528,48 +625,25 @@ const handleNavigation = (link) => {
                   >
                     <span>Contact</span>
                     <span
-                      className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${isDarkMode ? "bg-white" : "bg-zinc-900"}`}
+                      className={`absolute bottom-0 left-1/2 w-0 h-[2px] -translate-x-1/2 transition-all duration-300 group-hover:w-full ${
+                        isDarkMode ? "bg-white" : "bg-zinc-900"
+                      }`}
                     ></span>
                   </button>
                 </>
               )}
 
               <div
-                className={`h-4 w-[1px] ml-2 ${isDarkMode ? "bg-zinc-700" : "bg-gray-300"}`}
+                className={`h-4 w-[1px] ml-2 ${
+                  isDarkMode ? "bg-zinc-700" : "bg-gray-300"
+                }`}
               ></div>
 
-              <button
+              <ThemeToggleButton
+                isDarkMode={isDarkMode}
                 onClick={handleDarkModeToggle}
                 disabled={isThemeChanging}
-                className="relative group p-1.5 cursor-none cursor-target focus:outline-none"
-              >
-                <svg
-                  viewBox="0 0 240 240"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-[38px] h-[38px] transition-transform duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? "opacity-70 hover:opacity-100" : "opacity-60 hover:opacity-100"}`}
-                >
-                  <motion.g
-                    animate={{ rotate: isDarkMode ? -180 : 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <path
-                      d="M120 67.5C149.25 67.5 172.5 90.75 172.5 120C172.5 149.25 149.25 172.5 120 172.5"
-                      fill={isDarkMode ? "white" : "black"}
-                    />
-                    <path
-                      d="M120 67.5C90.75 67.5 67.5 90.75 67.5 120C67.5 149.25 90.75 172.5 120 172.5"
-                      fill={isDarkMode ? "white" : "black"}
-                    />
-                  </motion.g>
-                  <motion.path
-                    animate={{ rotate: isDarkMode ? 180 : 0 }}
-                    transition={{ duration: 0.5 }}
-                    d="M120 3.75C55.5 3.75 3.75 55.5 3.75 120C3.75 184.5 55.5 236.25 120 236.25C184.5 236.25 236.25 184.5 236.25 120ZM120 214.5V172.5C90.75 172.5 67.5 149.25 67.5 120C67.5 90.75 90.75 67.5 120 67.5V25.5C172.5 25.5 214.5 67.5 214.5 120C214.5 172.5 172.5 214.5 120 214.5Z"
-                    fill={isDarkMode ? "black" : "white"}
-                  />
-                </svg>
-              </button>
+              />
             </motion.nav>
           )}
         </AnimatePresence>
@@ -593,7 +667,11 @@ const handleNavigation = (link) => {
             showFullNavbar && !isMobile
               ? "absolute right-12 pointer-events-none"
               : "relative"
-          } ${isDarkMode ? "bg-zinc-100 hover:bg-white" : "bg-zinc-900 hover:bg-zinc-800"}`}
+          } ${
+            isDarkMode
+              ? "bg-zinc-100 hover:bg-white"
+              : "bg-zinc-900 hover:bg-zinc-800"
+          }`}
         >
           <Hamburger
             toggled={isOpen}
@@ -654,12 +732,11 @@ const handleNavigation = (link) => {
                   <span className="text-lg md:text-xl font-semibold tracking-wide uppercase">
                     Navigation
                   </span>
-                  {/* PANGGIL KOMPONEN JAM OPTIMAL DI SINI */}
                 </div>
                 <div className="h-[1px] w-full mt-2 mb-6 bg-zinc-800/20 dark:bg-zinc-400/20"></div>
               </div>
 
-              <nav className="flex-1 space-y-4 md:space-y-6 ">
+              <nav className="flex-1 space-y-4 md:space-y-6">
                 {[
                   "/all-projects",
                   "/certificates",
@@ -667,7 +744,7 @@ const handleNavigation = (link) => {
                   "/art",
                   "/activity",
                 ].includes(location.pathname) ? (
-                  <div className="flex flex-col space-y-6 ">
+                  <div className="flex flex-col space-y-6">
                     {[
                       {
                         name: "Certificates",
@@ -712,6 +789,7 @@ const handleNavigation = (link) => {
                           {item.icon}
                         </motion.button>
                       ))}
+
                     <motion.button
                       onClick={() => handleNavigation("/")}
                       className="cursor-target cursor-none relative text-2xl font-lyrae md:text-4xl pt-4 border-t border-zinc-500/20 w-full text-left"
@@ -773,7 +851,7 @@ const handleNavigation = (link) => {
                       style: <Mail size={32} />,
                     },
                   ].map((item, index) => (
-                    <div key={item.name} className="flex flex-col w-full ">
+                    <div key={item.name} className="flex flex-col w-full">
                       <motion.button
                         onClick={() =>
                           item.isDropdown
@@ -795,6 +873,7 @@ const handleNavigation = (link) => {
                         <span>{item.name}</span>
                         <div className="ml-auto">{item.style}</div>
                       </motion.button>
+
                       <AnimatePresence>
                         {item.isDropdown && isShowcaseOpen && (
                           <motion.div
@@ -825,7 +904,9 @@ const handleNavigation = (link) => {
                 <span className="block mb-2 text-sm font-bold tracking-wide uppercase">
                   Links
                 </span>
+
                 <div className="h-[1px] w-full bg-zinc-800/20 dark:bg-zinc-400/20 mb-6"></div>
+
                 <div className="flex flex-wrap gap-4 font-mono font-bold mb-8">
                   {[
                     {
@@ -858,7 +939,12 @@ const handleNavigation = (link) => {
                       key={link.name}
                       href={link.url}
                       target="_blank"
-                      className={`relative flex items-center gap-2 cursor-target cursor-none hover:underline transition-colors ${isDarkMode ? "text-gray-900 hover:text-gray-600" : "text-white hover:text-gray-300"}`}
+                      rel="noreferrer"
+                      className={`relative flex items-center gap-2 cursor-target cursor-none hover:underline transition-colors ${
+                        isDarkMode
+                          ? "text-gray-900 hover:text-gray-600"
+                          : "text-white hover:text-gray-300"
+                      }`}
                       onMouseEnter={() => setHoveredLink(link.name)}
                       onMouseLeave={() => setHoveredLink(null)}
                       animate={
@@ -878,44 +964,22 @@ const handleNavigation = (link) => {
                   ))}
                 </div>
 
-                <div className="flex space-x-3 mb-2">
-                  <button
+                <div className="flex items-center gap-3 mb-2">
+                  <ThemeToggleButton
+                    isDarkMode={isDarkMode}
                     onClick={handleDarkModeToggle}
                     disabled={isThemeChanging}
-                    className={`p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95 ${isDarkMode ? "border-gray-300" : "border-zinc-600"}`}
-                  >
-                    <svg
-                      viewBox="0 0 240 240"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                    >
-                      <motion.g
-                        animate={{ rotate: isDarkMode ? -180 : 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <path
-                          d="M120 67.5C149.25 67.5 172.5 90.75 172.5 120C172.5 149.25 149.25 172.5 120 172.5"
-                          fill={isDarkMode ? "white" : "black"}
-                        />
-                        <path
-                          d="M120 67.5C90.75 67.5 67.5 90.75 67.5 120C67.5 149.25 90.75 172.5 120 172.5"
-                          fill={isDarkMode ? "white" : "black"}
-                        />
-                      </motion.g>
-                      <motion.path
-                        animate={{ rotate: isDarkMode ? 180 : 0 }}
-                        transition={{ duration: 0.5 }}
-                        d="M120 3.75C55.5 3.75 3.75 55.5 3.75 120C3.75 184.5 55.5 236.25 120 236.25C184.5 236.25 236.25 184.5 236.25 120ZM120 214.5V172.5C90.75 172.5 67.5 149.25 67.5 120C67.5 90.75 90.75 67.5 120 67.5V25.5C172.5 25.5 214.5 67.5 214.5 120C214.5 172.5 172.5 214.5 120 214.5Z"
-                        fill={isDarkMode ? "black" : "white"}
-                      />
-                    </svg>
-                  </button>
+                  />
+
                   <button
-                    className={`p-2 border rounded hover:bg-gray-200 ${isDarkMode ? "border-gray-300" : "border-zinc-600"}`}
+                    className={`p-2 border rounded cursor-target cursor-none transition-all hover:scale-105 active:scale-95 ${
+                      isDarkMode ? "border-gray-300" : "border-zinc-600"
+                    }`}
                   >
                     <Globe
-                      className={`w-5 h-5 ${isDarkMode ? "text-gray-900" : "text-white"}`}
+                      className={`w-5 h-5 ${
+                        isDarkMode ? "text-gray-900" : "text-white"
+                      }`}
                     />
                   </button>
                 </div>
