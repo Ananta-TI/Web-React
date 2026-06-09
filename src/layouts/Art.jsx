@@ -1,10 +1,10 @@
 import { useContext, useEffect, useMemo, useRef, useState, memo } from "react";
 import {
-  motion,
-  useMotionValue,
-  useSpring,
-  AnimatePresence,
-  useReducedMotion,
+motion,
+useMotionValue,
+useSpring,
+AnimatePresence,
+useReducedMotion,
 } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { FolderOpen, X } from "lucide-react";
@@ -68,6 +68,7 @@ const ART_ITEMS = [
   { image: "art/54.jpg", year: "2025" },
   { image: "art/55.jpg", year: "2025" },
   { image: "art/56.jpg", year: "2026" },
+  { image: "art/57.png", year: "2026" },
 ];
 
 function shuffleArt(items) {
