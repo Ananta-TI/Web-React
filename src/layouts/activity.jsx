@@ -4,6 +4,7 @@ import React, {
   lazy,
   Suspense,
   useState,
+  useRef,
 } from "react";
 import { motion } from "framer-motion";
 import { Gamepad2 } from "lucide-react";
@@ -19,6 +20,7 @@ import WakatimeProfileCard from "../components/WakaTimeCard.jsx";
 import "../index.css";
 
 const GithubIsometric = lazy(() => import("../components/GithubIsometric"));
+const ScannerChart = lazy(() => import("../layouts/scannerChart.jsx"));
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => {
@@ -44,10 +46,55 @@ function useIsMobile() {
   return isMobile;
 }
 
+function useLazyMount(rootMargin = "700px") {
+  const ref = useRef(null);
+  const [shouldMount, setShouldMount] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+
+    if (!element || shouldMount) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldMount(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [shouldMount, rootMargin]);
+
+  return [ref, shouldMount];
+}
+
+function SectionSkeleton({ height = "h-64", isDarkMode }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`w-full ${height} rounded-3xl border animate-pulse ${
+        isDarkMode
+          ? "border-zinc-800 bg-zinc-800/40"
+          : "border-gray-200 bg-gray-100"
+      }`}
+    />
+  );
+}
+
 const Activity = () => {
   const theme = useContext(ThemeContext);
   const isDarkMode = theme?.isDarkMode ?? true;
   const isMobile = useIsMobile();
+
+  const [chartRef, mountChart] = useLazyMount("900px");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -114,13 +161,7 @@ const Activity = () => {
           <div className="break-inside-avoid inline-block w-full mb-4">
             <Suspense
               fallback={
-                <div
-                  className={`min-h-[260px] rounded-3xl border animate-pulse ${
-                    isDarkMode
-                      ? "border-zinc-800 bg-zinc-800/40"
-                      : "border-gray-200 bg-gray-100"
-                  }`}
-                />
+                <SectionSkeleton height="min-h-[260px]" isDarkMode={isDarkMode} />
               }
             >
               <GithubIsometric username="Ananta-TI" />
@@ -144,6 +185,29 @@ const Activity = () => {
             </p>
           </div>
         )}
+
+        <div
+          ref={chartRef}
+          className="w-full max-w-7xl mx-auto mb-4"
+        >
+          {mountChart ? (
+            <Suspense
+              fallback={
+                <SectionSkeleton
+                  height="min-h-[520px]"
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
+              <ScannerChart isDarkMode={isDarkMode} />
+            </Suspense>
+          ) : (
+            <SectionSkeleton
+              height="min-h-[520px]"
+              isDarkMode={isDarkMode}
+            />
+          )}
+        </div>
 
         <div className="w-full max-w-7xl mx-auto columns-1 lg:columns-2 gap-4">
           <div className="break-inside-avoid inline-block w-full mb-4">
