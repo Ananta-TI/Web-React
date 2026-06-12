@@ -11,8 +11,8 @@ import { Gamepad2 } from "lucide-react";
 import DecryptedText from "../components/Shared/DecryptedText";
 import { ThemeContext } from "../context/ThemeContext";
 
-import Tetris from "./TetrioProfileCard.jsx";
-import SteamProfileCard from "./SteamProfileCard";
+import Tetris from "../pages/TetrioProfileCard.jsx";
+import SteamProfileCard from "../pages/SteamProfileCard.jsx";
 import DiscordProfileCard from "./DiscordProfileCard.jsx";
 import WakatimeProfileCard from "../components/WakaTimeCard.jsx";
 

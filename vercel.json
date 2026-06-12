@@ -1,11 +1,10 @@
 {
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/((?!api/|robots\\.txt|sitemap\\.xml|favicon\\.ico|.*\\..*).*)",
+      "source": "/((?!api(?:/|$)|@vite/|@react-refresh|src/|node_modules/|robots\\.txt$|sitemap\\.xml$|favicon\\.ico$|.*\\..*$).*)",
       "destination": "/index.html"
     }
   ],
