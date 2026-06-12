@@ -735,11 +735,11 @@ export default function SteamProfileCard({
           ))}
         </div>
 
-        {data.failed && Object.values(data.failed).some(Boolean) && (
+        {/* {data.failed && Object.values(data.failed).some(Boolean) && (
           <div className="rounded-2xl border border-yellow-500/25 bg-yellow-500/10 p-4 text-xs text-yellow-500">
             Sebagian data Steam gagal dimuat. Biasanya karena profile private, endpoint Steam nolak, atau rate limit. Card tetap jalan karena sekarang tidak manja seperti kode lama.
           </div>
-        )}
+        )} */}
 
         <div className={`grid grid-cols-4 gap-1 border-b pb-0 ${theme.border}`}>
   {[
