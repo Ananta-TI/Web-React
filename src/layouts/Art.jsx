@@ -257,7 +257,7 @@ const Art = () => {
           variants={containerVariants}
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
-          className="columns-1 gap-1 space-y-3 sm:columns-2 lg:columns-3 xl:columns-4"
+          className="columns-3 gap-1 space-y-3 sm:columns-3 lg:columns-3 xl:columns-4"
         >
           {filteredArt.map((art, index) => (
             <ArtCard
