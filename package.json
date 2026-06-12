@@ -22,7 +22,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "animejs": "^4.2.2",
+    "animejs": "^4.4.1",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

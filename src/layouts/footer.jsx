@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import gsap from "gsap";
+import { animate, svg, stagger } from "animejs";
 import {
   Loader,
   Mail,
@@ -44,6 +45,94 @@ function ContactFormLine({ inputId, hasError, isDarkMode }) {
   );
 }
 
+function AnimatedSignature({ isDarkMode }) {
+  const signatureRef = useRef(null);
+
+  useEffect(() => {
+    if (!signatureRef.current) return;
+
+    const lines = signatureRef.current.querySelectorAll(".nta-signature-line");
+    if (!lines.length) return;
+
+    const animation = animate(svg.createDrawable(lines), {
+      draw: ["0 0", "0 1", "1 1"],
+      ease: "inOutQuad",
+      duration: 2200,
+      delay: stagger(350),
+      loop: true,
+    });
+
+    return () => {
+      animation?.pause?.();
+      animation?.cancel?.();
+      animation?.revert?.();
+    };
+  }, []);
+
+  return (
+    <svg
+      ref={signatureRef}
+      viewBox="0 0 1149 575"
+      preserveAspectRatio="xMidYMid meet"
+      aria-label="NTA Signature"
+      className={cn(
+        "relative z-10 h-[150px] w-full select-none px-6 py-5 transition-colors duration-500 sm:h-[180px] lg:h-[210px]",
+        isDarkMode ? "text-white" : "text-zinc-950"
+      )}
+    >
+      <g
+        stroke="currentColor"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="8"
+      >
+        {/* N */}
+        <path
+          className="nta-signature-line"
+          d="M 397 565
+             C 435 485 480 383 526 281
+             C 552 224 579 162 604 116
+             C 608 109 615 113 612 122
+             C 598 223 586 345 585 430
+             C 585 455 603 459 620 437
+             C 662 381 691 297 714 210
+             C 735 130 754 54 704 20
+             C 660 -10 568 16 458 65
+             C 334 121 194 213 56 299
+             C 18 323 -4 342 18 353
+             C 60 372 182 344 292 344
+             C 416 344 533 345 642 345
+             C 688 345 717 345 731 345"
+        />
+
+        {/* T, satu garis utuh */}
+        <path
+          className="nta-signature-line"
+          d="M 768 171
+             C 750 220 724 283 695 354
+             C 681 389 669 418 662 444
+             C 675 392 690 330 621 288
+             C 590 288 550 288 515 288
+             C 650 288 850 288 1138 288"
+        />
+
+        {/* A */}
+        <path
+          className="nta-signature-line"
+          d="M 726 357
+             C 738 336 755 328 766 336
+             C 778 345 770 368 747 389
+             C 731 402 718 394 721 374
+             C 724 357 744 340 764 338
+             C 770 354 772 371 785 375
+             C 798 379 811 360 820 343"
+        />
+      </g>
+    </svg>
+  );
+}
+
 export default function Footer() {
   const { isDarkMode } = useContext(ThemeContext);
   const formEl = useRef(null);
@@ -61,8 +150,6 @@ export default function Footer() {
   const [errors, setErrors] = useState({});
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
-
-  const signatureImage = isDarkMode ? "/img/sign1.png" : "/img/sign2.png";
 
   const handleFocus = (inputId) => {
     gsap.fromTo(
@@ -395,50 +482,10 @@ export default function Footer() {
                   "min-h-[150px] sm:min-h-[180px] lg:min-h-[210px]"
                 )}
               >
-                <div
-                  className={cn(
-                    "relative w-full max-w-[360px] overflow-hidden ",
-                    isDarkMode
-                      ? ""
-                      : ""
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "absolute inset-0",
-                      isDarkMode
-                        ? ""
-                        : ""
-                    )}
-                  />
+                <div className="relative w-full max-w-[360px] overflow-visible">
+                  <AnimatedSignature isDarkMode={isDarkMode} />
 
-                  <div
-                    className={cn(
-                      "absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl",
-                      isDarkMode ? "" : ""
-                    )}
-                  />
-
-                  <img
-                    src={signatureImage}
-                    alt="Signature"
-                    draggable="false"
-                    className={cn(
-                      "relative z-10 h-[150px] w-full select-none object-contain px-6 py-5 transition-all duration-500 sm:h-[180px] lg:h-[210px]",
-                      isDarkMode
-                        ? ""
-                        : ""
-                    )}
-                  />
-
-                  <div
-                    className={cn(
-                      "absolute bottom-0 left-0 right-0 h-20",
-                      isDarkMode
-                        ? "bg-transparent"
-                        : "bg-transparent"
-                    )}
-                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-transparent" />
                 </div>
               </motion.div>
             </div>
