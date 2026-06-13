@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AnimatePresence } from "framer-motion";
+import { upload } from "@vercel/blob/client";
 import { ThemeContext } from "../context/ThemeContext";
-import supabase from '../supabaseClient';
+import supabase from "../supabaseClient";
 
 // Import components
 import Toast from "./Shared/Toast";
@@ -22,26 +23,81 @@ const BACKEND_CONFIG = {
   // Try to use VITE_BACKEND_URL first, then fallback
   getBackendUrl: () => {
     // Check if we're on localhost
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000';
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
+      return "http://localhost:5000";
     }
 
     // For deployed version, use Vercel API
-    if (window.location.hostname.includes('vercel.app') || 
-        window.location.hostname.includes('netlify.app')) {
+    if (
+      window.location.hostname.includes("vercel.app") ||
+      window.location.hostname.includes("netlify.app")
+    ) {
       return window.location.origin; // Same origin for Vercel
     }
 
     // Fallback
     return import.meta.env.VITE_BACKEND_URL || window.location.origin;
-  }
+  },
 };
 
 const POLLING_CONFIG = {
-  maxAttempts: 60,           // 5 minutes with 5s interval
-  intervalMs: 5000,          // 5 seconds
-  timeoutMs: 300000          // 5 minutes total
+  maxAttempts: 60, // 5 minutes with 5s interval
+  intervalMs: 5000, // 5 seconds
+  timeoutMs: 300000, // 5 minutes total
 };
+
+const LOCAL_BACKEND_PATTERN =
+  /^https?:\/\/(?:localhost|127(?:\.\d{1,3}){3})(?::\d+)?(?:\/|$)/i;
+
+const getApiErrorMessage = (payload, fallback) => {
+  if (typeof payload?.error === "string") return payload.error;
+  if (typeof payload?.error?.message === "string") {
+    return payload.error.message;
+  }
+  if (typeof payload?.message === "string") return payload.message;
+  return fallback;
+};
+
+const readApiResponse = async (
+  response,
+  fallbackMessage = `Request failed (HTTP ${response.status})`,
+  { allowNotFound = false } = {},
+) => {
+  const rawText = await response.text();
+  let payload = {};
+
+  if (rawText) {
+    try {
+      payload = JSON.parse(rawText);
+    } catch {
+      const compactText = rawText.replace(/\s+/g, " ").trim().slice(0, 180);
+      throw new Error(
+        `Server returned a non-JSON response (HTTP ${response.status})${
+          compactText ? `: ${compactText}` : ""
+        }`,
+      );
+    }
+  }
+
+  if (allowNotFound && response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(getApiErrorMessage(payload, fallbackMessage));
+  }
+
+  return payload;
+};
+
+const sanitizeUploadName = (fileName) =>
+  String(fileName || "uploaded-file")
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 140) || "uploaded-file";
 
 // ============= MAIN COMPONENT =============
 export default function WebsiteSecurityScanner() {
@@ -77,7 +133,6 @@ export default function WebsiteSecurityScanner() {
 
   // Refs for cleanup
   const pollRef = React.useRef(null);
-  const abortRef = React.useRef(null);
   const pollTimeoutRef = React.useRef(null);
 
   // Get backend URL
@@ -85,27 +140,27 @@ export default function WebsiteSecurityScanner() {
 
   // ============= LOGGING =============
   useEffect(() => {
-    console.log('🚀 Scanner initialized');
-    console.log('Backend URL:', BACKEND_URL);
-    console.log('Dark Mode:', isDarkMode);
-    console.log('Hostname:', window.location.hostname);
+    console.log("🚀 Scanner initialized");
+    console.log("Backend URL:", BACKEND_URL);
+    console.log("Dark Mode:", isDarkMode);
+    console.log("Hostname:", window.location.hostname);
   }, [BACKEND_URL, isDarkMode]);
 
   // ============= CLEANUP =============
   useEffect(() => {
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current) clearTimeout(pollRef.current);
       if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
-      if (abortRef.current) abortRef.current.abort();
     };
   }, []);
 
   // ============= HISTORY MANAGEMENT =============
   useEffect(() => {
     const loadHistory = async () => {
-      const isHistoryCleared = sessionStorage.getItem('historyCleared') === 'true';
+      const isHistoryCleared =
+        sessionStorage.getItem("historyCleared") === "true";
       if (isHistoryCleared) {
-        console.log('🚫 History cleared in this session');
+        console.log("🚫 History cleared in this session");
         return;
       }
 
@@ -115,9 +170,9 @@ export default function WebsiteSecurityScanner() {
         try {
           const parsed = JSON.parse(localHistory);
           setHistory(Array.isArray(parsed) ? parsed : []);
-          console.log('✅ Loaded history from localStorage');
+          console.log("✅ Loaded history from localStorage");
         } catch (err) {
-          console.error('Error parsing localStorage:', err);
+          console.error("Error parsing localStorage:", err);
           localStorage.removeItem("scanHistory");
         }
       }
@@ -131,7 +186,7 @@ export default function WebsiteSecurityScanner() {
           .limit(20);
 
         if (supabaseErr) {
-          console.warn('Supabase history load error:', supabaseErr);
+          console.warn("Supabase history load error:", supabaseErr);
           return;
         }
 
@@ -139,21 +194,23 @@ export default function WebsiteSecurityScanner() {
           const formatted = data.map((d) => ({
             ...d,
             timestamp: new Date(d.created_at).getTime(),
-            id: d.vt_id || d.id
+            id: d.vt_id || d.id,
           }));
 
-          setHistory(prevHistory => {
+          setHistory((prevHistory) => {
             const combined = [...formatted, ...prevHistory];
             const unique = Array.from(
-              new Map(combined.map(item => [item.vt_id || item.id, item])).values()
+              new Map(
+                combined.map((item) => [item.vt_id || item.id, item]),
+              ).values(),
             );
             const sorted = unique.sort((a, b) => b.timestamp - a.timestamp);
             return sorted.slice(0, 20);
           });
-          console.log('✅ Loaded history from Supabase');
+          console.log("✅ Loaded history from Supabase");
         }
       } catch (err) {
-        console.warn('Supabase load error:', err);
+        console.warn("Supabase load error:", err);
       }
     };
 
@@ -162,7 +219,7 @@ export default function WebsiteSecurityScanner() {
 
   // ============= UTILITY FUNCTIONS =============
   const saveToHistory = async (resData, metaData, name, scanType) => {
-    sessionStorage.removeItem('historyCleared');
+    sessionStorage.removeItem("historyCleared");
 
     const supabaseItem = {
       vt_id: resData.data.id,
@@ -171,45 +228,72 @@ export default function WebsiteSecurityScanner() {
       stats: resData.data.attributes?.stats || {},
       result: resData,
       metadata: metaData,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     const localItem = {
       ...supabaseItem,
       id: resData.data.id,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Save to Supabase (non-blocking)
     try {
       await supabase.from("scan_history").insert([supabaseItem]);
-      console.log('✅ Saved to Supabase');
+      console.log("✅ Saved to Supabase");
     } catch (err) {
-      console.warn('⚠️ Supabase save error:', err);
+      console.warn("⚠️ Supabase save error:", err);
     }
 
-    // Save to localStorage
-    const newList = [localItem, ...history].slice(0, 20);
-    setHistory(newList);
-    localStorage.setItem("scanHistory", JSON.stringify(newList));
+    // Save to localStorage without relying on a stale history closure.
+    setHistory((previousHistory) => {
+      const combined = [localItem, ...previousHistory];
+      const unique = Array.from(
+        new Map(
+          combined.map((item) => [
+            item.vt_id || item.id || item.timestamp,
+            item,
+          ]),
+        ).values(),
+      );
+      const newList = unique
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, 20);
+
+      localStorage.setItem("scanHistory", JSON.stringify(newList));
+      return newList;
+    });
   };
 
-  const showToast = (message, type = 'info') => {
+  const showToast = (message, type = "info") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
   const clearHistory = () => {
-    console.log('🗑️ Clearing history');
+    console.log("🗑️ Clearing history");
     setHistory([]);
     localStorage.removeItem("scanHistory");
-    sessionStorage.setItem('historyCleared', 'true');
-    showToast('History cleared', 'success');
+    sessionStorage.setItem("historyCleared", "true");
+    showToast("History cleared", "success");
   };
 
   const restoreHistory = (item) => {
+    const restoredType = item?.metadata?.type || item?.type;
+
     setResult(item.result);
     setMetadata(item.metadata);
+    setInput(item?.name || "");
+    setSelectedFile(null);
+    setMode(
+      restoredType === "file"
+        ? "file"
+        : restoredType === "url"
+          ? "scan"
+          : "search",
+    );
+    setActiveTab("detection");
+    setError("");
     setShowHistoryTab(false);
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
@@ -221,52 +305,50 @@ export default function WebsiteSecurityScanner() {
    */
   const fetchMetadata = async (type, id) => {
     if (!type || !id) {
-      console.warn('fetchMetadata: Missing type or id', { type, id });
+      console.warn("fetchMetadata: Missing type or id", { type, id });
       return null;
     }
 
     try {
-      setStatus('Fetching detailed metadata...');
+      setStatus("Fetching detailed metadata...");
 
-      // Map type
       const typeMap = {
-        'file': 'file',
-        'url': 'url',
-        'domain': 'domain',
-        'ip': 'ip'
+        file: "file",
+        url: "url",
+        domain: "domain",
+        ip: "ip",
+        ip_address: "ip",
       };
 
       const mappedType = typeMap[type] || type;
-      const params = new URLSearchParams({ id });
-      
+      const params = new URLSearchParams({ id: String(id) });
       const url = `${BACKEND_URL}/api/vt/metadata/${mappedType}?${params}`;
-      console.log('📥 Fetching metadata:', url);
 
-      const res = await fetch(url, {
-        method: 'GET',
+      console.log("📥 Fetching metadata:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Accept: "application/json",
+        },
       });
 
-      if (res.status === 404) {
-        console.warn('Metadata not found for:', id);
+      const payload = await readApiResponse(
+        response,
+        `Metadata request failed (HTTP ${response.status})`,
+        { allowNotFound: true },
+      );
+
+      if (!payload) {
+        console.warn("Metadata not found for:", id);
         return null;
       }
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Metadata fetch error:', res.status, errorData);
-        return null;
-      }
-
-      const data = await res.json();
-      console.log('✅ Metadata fetched:', data);
-      return data.data || data;
-
-    } catch (err) {
-      console.error('❌ fetchMetadata error:', err.message);
+      const metadataResult = payload.data || payload;
+      console.log("✅ Metadata fetched:", metadataResult);
+      return metadataResult;
+    } catch (metadataError) {
+      console.error("❌ fetchMetadata error:", metadataError);
       return null;
     }
   };
@@ -274,152 +356,151 @@ export default function WebsiteSecurityScanner() {
   /**
    * Start polling for analysis results
    */
-  const startPolling = useCallback((id, scanType, inputName) => {
-    console.log('🔄 Starting polling for:', id, 'Type:', scanType);
+  const startPolling = (id, scanType, inputName) => {
+    console.log("🔄 Starting polling for:", id, "Type:", scanType);
 
     let attempt = 0;
-    let isCompleted = false;
+    let stopped = false;
 
-    // Cleanup previous polling
-    if (pollRef.current) clearInterval(pollRef.current);
+    const clearPolling = () => {
+      stopped = true;
+
+      if (pollRef.current) {
+        clearTimeout(pollRef.current);
+        pollRef.current = null;
+      }
+
+      if (pollTimeoutRef.current) {
+        clearTimeout(pollTimeoutRef.current);
+        pollTimeoutRef.current = null;
+      }
+    };
+
+    if (pollRef.current) clearTimeout(pollRef.current);
     if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
 
-    // Set timeout for max polling duration
     pollTimeoutRef.current = setTimeout(() => {
-      console.error('⏱️ Polling timeout exceeded');
-      if (pollRef.current) clearInterval(pollRef.current);
-      
+      if (stopped) return;
+
+      clearPolling();
       setLoading(false);
-      setError('Analysis took too long. Please try again.');
+      setError("Analysis took too long. Please try again.");
       setProgress(0);
-      setStatus('');
+      setStatus("");
     }, POLLING_CONFIG.timeoutMs);
 
-    // Start polling
-    pollRef.current = setInterval(async () => {
-      if (isCompleted) return;
+    const poll = async () => {
+      if (stopped) return;
 
-      attempt++;
-      const progressPercent = Math.min((attempt / POLLING_CONFIG.maxAttempts) * 100, 90);
-      setProgress(progressPercent);
+      attempt += 1;
+      setProgress(
+        Math.min(20 + (attempt / POLLING_CONFIG.maxAttempts) * 70, 90),
+      );
 
       try {
-        const url = `${BACKEND_URL}/api/vt/result/${id}`;
+        const url = `${BACKEND_URL}/api/vt/result/${encodeURIComponent(id)}`;
         console.log(`[${attempt}/${POLLING_CONFIG.maxAttempts}] Polling:`, url);
 
-        const res = await fetch(url, {
-          method: 'GET',
+        const response = await fetch(url, {
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
+            Accept: "application/json",
+          },
         });
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.warn(`Poll failed (${res.status}):`, errorData);
-          return; // Continue polling
+        let payload;
+
+        try {
+          payload = await readApiResponse(
+            response,
+            `Result polling failed (HTTP ${response.status})`,
+          );
+        } catch (pollError) {
+          if (response.status === 404 || response.status === 429) {
+            console.warn(
+              `Polling temporarily unavailable (${response.status}):`,
+              pollError.message,
+            );
+          } else {
+            throw pollError;
+          }
         }
 
-        const data = await res.json();
-        const vtStatus = data.data?.attributes?.status;
+        if (payload) {
+          const vtStatus = payload.data?.attributes?.status;
 
-        if (!vtStatus) {
-          console.warn('No status in response:', data);
-          return; // Continue polling
+          if (vtStatus === "queued") {
+            setStatus(`Queued (${attempt}/${POLLING_CONFIG.maxAttempts})...`);
+          } else if (vtStatus === "running") {
+            setStatus(
+              `Analyzing (${attempt}/${POLLING_CONFIG.maxAttempts})...`,
+            );
+          } else if (vtStatus === "completed") {
+            clearPolling();
+
+            setProgress(90);
+            setStatus("Fetching metadata...");
+            setResult(payload);
+
+            let targetId = id;
+
+            if (scanType === "file") {
+              targetId =
+                payload.meta?.file_info?.sha256 ||
+                payload.data?.attributes?.sha256 ||
+                id;
+            } else if (scanType === "url") {
+              targetId =
+                payload.meta?.url_info?.id ||
+                payload.data?.attributes?.url_info?.id ||
+                id;
+            }
+
+            const metadataResult = await fetchMetadata(scanType, targetId);
+
+            setMetadata(metadataResult);
+            await saveToHistory(payload, metadataResult, inputName, scanType);
+
+            setProgress(100);
+            setStatus("✅ Scan completed!");
+            setLoading(false);
+            setTimeout(() => setStatus(""), 2000);
+            return;
+          } else if (vtStatus) {
+            console.warn("Unknown VirusTotal status:", vtStatus);
+          } else {
+            console.warn("No status in polling response:", payload);
+          }
         }
-
-        console.log('Status:', vtStatus, 'Attempt:', attempt);
-
-        // Handle different statuses
-        if (vtStatus === 'queued') {
-          setStatus(`Queued (${attempt}/${POLLING_CONFIG.maxAttempts})...`);
-          return;
-        }
-
-        if (vtStatus === 'running') {
-          setStatus(`Analyzing (${attempt}/${POLLING_CONFIG.maxAttempts})...`);
-          return;
-        }
-
-        if (vtStatus === 'completed') {
-          console.log('✅ Analysis completed!');
-          isCompleted = true;
-          
-          // Stop polling
-          if (pollRef.current) {
-            clearInterval(pollRef.current);
-            pollRef.current = null;
-          }
-          if (pollTimeoutRef.current) {
-            clearTimeout(pollTimeoutRef.current);
-            pollTimeoutRef.current = null;
-          }
-
-          // Update UI
-          setProgress(90);
-          setStatus('Fetching metadata...');
-          setResult(data);
-
-          // Fetch metadata
-          // For URL scans: VT analysis response contains meta.url_info.id which is
-          // the SHA-256 hash of the URL — this is the correct ID for /api/vt/metadata/url
-          // For file scans: use sha256 from attributes
-          // Fallback: use the analysis id itself
-          let targetId = id;
-
-          if (scanType === 'file') {
-            targetId = data.data?.attributes?.sha256 || id;
-          }
-
-          if (scanType === 'url') {
-            // meta.url_info.id is the URL identifier (sha256 of the url)
-            targetId = data.meta?.url_info?.id || id;
-          }
-
-          console.log('Fetching metadata for:', targetId, 'Type:', scanType);
-
-          const meta = await fetchMetadata(scanType, targetId);
-          if (meta) {
-            setMetadata(meta);
-          }
-
-          // Save to history
-          await saveToHistory(data, meta, inputName, scanType);
-
-          setProgress(100);
-          setStatus('✅ Scan completed!');
-          setLoading(false);
-
-          // Clear status after delay
-          setTimeout(() => setStatus(''), 2000);
-          return;
-        }
-
-      } catch (err) {
-        console.error(`Poll attempt ${attempt} error:`, err.message);
+      } catch (pollError) {
+        console.error(`Poll attempt ${attempt} error:`, pollError);
       }
 
-      // Check max attempts
       if (attempt >= POLLING_CONFIG.maxAttempts) {
-        console.error('❌ Max polling attempts reached');
-        if (pollRef.current) clearInterval(pollRef.current);
-        
+        clearPolling();
         setLoading(false);
-        setError('Analysis timeout. VirusTotal server may be slow.');
+        setError(
+          "Analysis timeout. VirusTotal server may be slow or rate-limited.",
+        );
         setProgress(0);
-        setStatus('');
+        setStatus("");
+        return;
       }
-    }, POLLING_CONFIG.intervalMs);
 
-  }, [BACKEND_URL]);
+      pollRef.current = setTimeout(poll, POLLING_CONFIG.intervalMs);
+    };
+
+    pollRef.current = setTimeout(poll, 1200);
+  };
 
   /**
    * Handle URL scan
    */
   const handleScanUrl = async () => {
-    if (!input.trim()) {
-      setError('Please enter a URL');
+    const targetUrl = input.trim();
+
+    if (!targetUrl) {
+      setError("Please enter a URL");
       return;
     }
 
@@ -431,49 +512,38 @@ export default function WebsiteSecurityScanner() {
     setProgress(0);
 
     try {
-      console.log('🔍 Scanning URL:', input);
-      setStatus('Submitting URL...');
+      setStatus("Submitting URL...");
 
-      const url = `${BACKEND_URL}/api/vt/scan`;
-      console.log('📤 POST to:', url);
-
-      const res = await fetch(url, {
-        method: 'POST',
+      const response = await fetch(`${BACKEND_URL}/api/vt/scan`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify({ url: input.trim() })
+        body: JSON.stringify({ url: targetUrl }),
       });
 
-      console.log('Response status:', res.status);
+      const payload = await readApiResponse(
+        response,
+        `URL scan failed (HTTP ${response.status})`,
+      );
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Scan error:', errorData);
-        throw new Error(errorData.error || `HTTP ${res.status}`);
+      if (!payload.data?.id) {
+        throw new Error("No analysis ID received");
       }
 
-      const data = await res.json();
-      console.log('Scan response:', data);
-
-      if (!data.data?.id) {
-        throw new Error('No analysis ID received');
-      }
-
-      setAnalysisId(data.data.id);
+      setAnalysisId(payload.data.id);
       setProgress(10);
-      setStatus('Analysis queued, waiting for results...');
-
-      // Start polling
-      startPolling(data.data.id, 'url', input.trim());
-
-    } catch (err) {
-      console.error('❌ Scan error:', err.message);
-      setError(err.message);
+      setStatus("Analysis queued, waiting for results...");
+      startPolling(payload.data.id, "url", targetUrl);
+    } catch (scanError) {
+      console.error("❌ URL scan error:", scanError);
+      setError(
+        scanError instanceof Error ? scanError.message : "URL scan failed",
+      );
       setLoading(false);
       setProgress(0);
-      setStatus('');
+      setStatus("");
     }
   };
 
@@ -482,14 +552,29 @@ export default function WebsiteSecurityScanner() {
    */
   const handleScanFile = async () => {
     if (!selectedFile) {
-      setError('Please select a file');
+      setError("Please select a file");
       return;
     }
 
-    // Validate file size (650MB max)
-    const maxSize = 650 * 1024 * 1024;
+    const usesLegacyLocalBackend = LOCAL_BACKEND_PATTERN.test(BACKEND_URL);
+    const maxSize = usesLegacyLocalBackend
+      ? 650 * 1024 * 1024
+      : 32 * 1024 * 1024;
+    const maxSizeLabel = usesLegacyLocalBackend ? "650MB" : "32MB";
+
+    if (selectedFile.size <= 0) {
+      setError("The selected file is empty");
+      return;
+    }
+
     if (selectedFile.size > maxSize) {
-      setError(`File too large. Maximum size: 650MB. Your file: ${(selectedFile.size / 1024 / 1024).toFixed(2)}MB`);
+      setError(
+        `File too large. Maximum size: ${maxSizeLabel}. Your file: ${(
+          selectedFile.size /
+          1024 /
+          1024
+        ).toFixed(2)}MB`,
+      );
       return;
     }
 
@@ -501,48 +586,77 @@ export default function WebsiteSecurityScanner() {
     setProgress(0);
 
     try {
-      console.log('📁 Scanning file:', selectedFile.name, `(${(selectedFile.size / 1024 / 1024).toFixed(2)}MB)`);
-      setStatus('Uploading file...');
+      let response;
 
-      const formData = new FormData();
-      formData.append('file', selectedFile);
+      if (usesLegacyLocalBackend) {
+        setStatus("Uploading file to local scanner...");
 
-      const url = `${BACKEND_URL}/api/vt/scan-file`;
-      console.log('📤 POST to:', url);
+        const formData = new FormData();
+        formData.append("file", selectedFile);
 
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData
-      });
+        response = await fetch(`${BACKEND_URL}/api/vt/scan-file`, {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        setStatus("Preparing secure upload...");
+        setProgress(5);
 
-      console.log('Response status:', res.status);
+        const blobResult = await upload(
+          `scanner/${Date.now()}-${sanitizeUploadName(selectedFile.name)}`,
+          selectedFile,
+          {
+            access: "private",
+            handleUploadUrl: `${BACKEND_URL}/api/blob/upload`,
+            clientPayload: JSON.stringify({
+              purpose: "virus-total-scan",
+              size: selectedFile.size,
+            }),
+            multipart: selectedFile.size >= 5 * 1024 * 1024,
+          },
+        );
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('File scan error:', errorData);
-        throw new Error(errorData.error || `HTTP ${res.status}`);
+        if (!blobResult?.url) {
+          throw new Error("Temporary upload did not return a Blob URL");
+        }
+
+        setProgress(15);
+        setStatus("Sending file to VirusTotal...");
+
+        response = await fetch(`${BACKEND_URL}/api/vt/scan-file`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            blobUrl: blobResult.url,
+            fileName: selectedFile.name,
+          }),
+        });
       }
 
-      const data = await res.json();
-      console.log('File scan response:', data);
+      const payload = await readApiResponse(
+        response,
+        `File scan failed (HTTP ${response.status})`,
+      );
 
-      if (!data.data?.id) {
-        throw new Error('No analysis ID received');
+      if (!payload.data?.id) {
+        throw new Error("No analysis ID received");
       }
 
-      setAnalysisId(data.data.id);
+      setAnalysisId(payload.data.id);
       setProgress(20);
-      setStatus('File uploaded, waiting for analysis...');
-
-      // Start polling
-      startPolling(data.data.id, 'file', selectedFile.name);
-
-    } catch (err) {
-      console.error('❌ File scan error:', err.message);
-      setError(err.message);
+      setStatus("File uploaded, waiting for analysis...");
+      startPolling(payload.data.id, "file", selectedFile.name);
+    } catch (scanError) {
+      console.error("❌ File scan error:", scanError);
+      setError(
+        scanError instanceof Error ? scanError.message : "File scan failed",
+      );
       setLoading(false);
       setProgress(0);
-      setStatus('');
+      setStatus("");
     }
   };
 
@@ -550,8 +664,10 @@ export default function WebsiteSecurityScanner() {
    * Handle search
    */
   const handleSearch = async () => {
-    if (!input.trim()) {
-      setError('Please enter a search query');
+    const query = input.trim();
+
+    if (!query) {
+      setError("Please enter a search query");
       return;
     }
 
@@ -563,26 +679,28 @@ export default function WebsiteSecurityScanner() {
     setProgress(0);
 
     try {
-      console.log('🔎 Searching for:', input);
-      setStatus('Searching database...');
+      setStatus("Searching database...");
 
-      const url = `${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(input.trim())}`;
-      console.log('📥 GET from:', url);
+      const response = await fetch(
+        `${BACKEND_URL}/api/vt/search?query=${encodeURIComponent(query)}`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        },
+      );
 
-      const res = await fetch(url);
+      const payload = await readApiResponse(
+        response,
+        `Search failed (HTTP ${response.status})`,
+      );
 
-      if (!res.ok) {
-        throw new Error(`Search failed: ${res.status}`);
+      if (!Array.isArray(payload.data) || payload.data.length === 0) {
+        throw new Error("No results found in VirusTotal database");
       }
 
-      const data = await res.json();
-      console.log('Search results:', data);
-
-      if (!data.data || data.data.length === 0) {
-        throw new Error('No results found in VirusTotal database');
-      }
-
-      const item = data.data[0];
+      const item = payload.data[0];
+      const itemType = item.type === "ip_address" ? "ip" : item.type;
       const simulatedResult = {
         success: true,
         data: {
@@ -593,31 +711,31 @@ export default function WebsiteSecurityScanner() {
               malicious: 0,
               suspicious: 0,
               undetected: 0,
-              harmless: 0
+              harmless: 0,
             },
             results: item.attributes?.last_analysis_results || {},
-            status: 'completed'
-          }
-        }
+            status: "completed",
+          },
+        },
       };
 
       setResult(simulatedResult);
       setMetadata(item);
       setProgress(100);
-      setStatus('Search complete!');
+      setStatus("Search complete!");
 
-      // Save to history
-      await saveToHistory(simulatedResult, item, input.trim(), 'search');
+      await saveToHistory(simulatedResult, item, query, itemType || "search");
 
       setLoading(false);
-      setTimeout(() => setStatus(''), 2000);
-
-    } catch (err) {
-      console.error('❌ Search error:', err.message);
-      setError(err.message);
+      setTimeout(() => setStatus(""), 2000);
+    } catch (searchError) {
+      console.error("❌ Search error:", searchError);
+      setError(
+        searchError instanceof Error ? searchError.message : "Search failed",
+      );
       setLoading(false);
       setProgress(0);
-      setStatus('');
+      setStatus("");
     }
   };
 
@@ -626,7 +744,7 @@ export default function WebsiteSecurityScanner() {
    */
   const handleSubmit = () => {
     setActiveTab("detection");
-    
+
     if (mode === "scan") {
       handleScanUrl();
     } else if (mode === "file") {
@@ -668,7 +786,7 @@ export default function WebsiteSecurityScanner() {
     malicious: 0,
     suspicious: 0,
     undetected: 0,
-    harmless: 0
+    harmless: 0,
   };
 
   const vendorObj = result?.data?.attributes?.results || {};
@@ -677,12 +795,14 @@ export default function WebsiteSecurityScanner() {
     .map(([vendor, info]) => ({
       vendor,
       category: info?.category || "undetected",
-      result: info?.result || info?.category || "clean"
+      result: info?.result || info?.category || "clean",
     }));
 
   // ============= RENDER =============
   return (
-    <div className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}>
+    <div
+      className={`${isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-zinc-900"} min-h-screen font-sans transition-colors duration-500`}
+    >
       <Header isDarkMode={isDarkMode} />
 
       <div className="container mx-auto px-4 py-10 max-w-5xl">
@@ -712,8 +832,16 @@ export default function WebsiteSecurityScanner() {
 
         <AnimatePresence>
           {loading && <SkeletonLoader isDarkMode={isDarkMode} />}
-          {error && <ErrorDisplay error={error} onRetry={handleSubmit} isDarkMode={isDarkMode} />}
-          {!loading && !error && !result && !showHistoryTab && <EmptyState isDarkMode={isDarkMode} />}
+          {error && (
+            <ErrorDisplay
+              error={error}
+              onRetry={handleSubmit}
+              isDarkMode={isDarkMode}
+            />
+          )}
+          {!loading && !error && !result && !showHistoryTab && (
+            <EmptyState isDarkMode={isDarkMode} />
+          )}
 
           {result && !showHistoryTab && (
             <div className="space-y-6">
@@ -734,23 +862,23 @@ export default function WebsiteSecurityScanner() {
               />
 
               <div className="min-h-[500px]">
-                {activeTab === 'detection' && (
-                  <DetectionTab 
-                    stats={stats} 
-                    vendorList={vendorList} 
-                    showAllVendors={showAllVendors} 
-                    setShowAllVendors={setShowAllVendors} 
-                    isDarkMode={isDarkMode} 
+                {activeTab === "detection" && (
+                  <DetectionTab
+                    stats={stats}
+                    vendorList={vendorList}
+                    showAllVendors={showAllVendors}
+                    setShowAllVendors={setShowAllVendors}
+                    isDarkMode={isDarkMode}
                   />
                 )}
-                {activeTab === 'details' && (
+                {activeTab === "details" && (
                   <DetailsTab metadata={metadata} isDarkMode={isDarkMode} />
                 )}
-                {activeTab === 'intelligence' && (
-                  <IntelligenceTab 
-                    id={metadata?.id} 
-                    type={metadata?.type} 
-                    isDarkMode={isDarkMode} 
+                {activeTab === "intelligence" && (
+                  <IntelligenceTab
+                    id={metadata?.id || result?.data?.id}
+                    type={metadata?.type || result?.data?.type || mode}
+                    isDarkMode={isDarkMode}
                     backendUrl={BACKEND_URL}
                   />
                 )}

@@ -51,34 +51,81 @@ export default function EnhancedIntelligenceTab({
 
   // Fetch Intelligence Data dengan endpoint yang berbeda
   const fetchIntelData = async (key, endpoint) => {
-    if (!id) return;
+    if (!id || !endpoint) return;
 
-    setLoading((prev) => ({ ...prev, [key]: true }));
+    setLoading((previous) => ({
+      ...previous,
+      [key]: true,
+    }));
     setError("");
 
     try {
-      const res = await fetch(`${backendUrl}/api/vt/${endpoint}`);
-      const data = await res.json();
+      const baseUrl = String(backendUrl || "").replace(/\/+$/, "");
+      const requestUrl = `${baseUrl}/api/vt/advanced/${endpoint}`;
 
-      if (res.status === 404) {
-        setIntelData((prev) => ({ ...prev, [key]: [] }));
-        setLoading((prev) => ({ ...prev, [key]: false }));
+      const response = await fetch(requestUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      const rawText = await response.text();
+      let payload = {};
+
+      if (rawText) {
+        try {
+          payload = JSON.parse(rawText);
+        } catch {
+          const compactText = rawText.replace(/\s+/g, " ").trim().slice(0, 180);
+
+          throw new Error(
+            `Intelligence API returned a non-JSON response (HTTP ${response.status})${
+              compactText ? `: ${compactText}` : ""
+            }`,
+          );
+        }
+      }
+
+      if (response.status === 404) {
+        setIntelData((previous) => ({
+          ...previous,
+          [key]: [],
+        }));
         return;
       }
 
-      if (!res.ok) {
-        throw new Error(data.error?.message || `Gagal fetch ${key}`);
+      if (!response.ok) {
+        const message =
+          typeof payload?.error === "string"
+            ? payload.error
+            : payload?.error?.message ||
+              payload?.message ||
+              `Failed to fetch ${key} (HTTP ${response.status})`;
+
+        throw new Error(message);
       }
 
-      setIntelData((prev) => ({ ...prev, [key]: data.data || data }));
-    } catch (err) {
-      setError(err.message);
+      setIntelData((previous) => ({
+        ...previous,
+        [key]: payload.data ?? payload,
+      }));
+    } catch (fetchError) {
+      console.error(`Intelligence request failed for ${key}:`, fetchError);
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : `Failed to fetch ${key}`,
+      );
     } finally {
-      setLoading((prev) => ({ ...prev, [key]: false }));
+      setLoading((previous) => ({
+        ...previous,
+        [key]: false,
+      }));
     }
   };
 
-  // Load semua data yang dibutuhkan saat tab berubah atau ID berubah
+  // Load semua data yang dibutuhkan saat tab berubah atau ID berubah  // Load semua data yang dibutuhkan saat tab berubah atau ID berubah
   useEffect(() => {
     if (!id) return;
 
@@ -167,15 +214,18 @@ export default function EnhancedIntelligenceTab({
           ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
           : "bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-lg shadow-blue-400/30"
         : isDarkMode
-        ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700"
-        : "bg-gray-200 text-gray-600 hover:bg-gray-300 hover:text-black border border-gray-300"
+          ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700"
+          : "bg-gray-200 text-gray-600 hover:bg-gray-300 hover:text-black border border-gray-300"
     }`;
 
   // Render Detection Stats
   const renderDetectionStats = () => {
     if (!intelData.detections) return null;
 
-    const stats = intelData.detections?.last_analysis_stats || {
+    const detectionAttributes =
+      intelData.detections?.attributes || intelData.detections || {};
+
+    const stats = detectionAttributes.last_analysis_stats || {
       malicious: 0,
       suspicious: 0,
       undetected: 0,
@@ -184,8 +234,12 @@ export default function EnhancedIntelligenceTab({
 
     const total =
       stats.malicious + stats.suspicious + stats.undetected + stats.harmless;
-    const maliciousPercent = total ? ((stats.malicious / total) * 100).toFixed(1) : 0;
-    const harmlessPercent = total ? ((stats.harmless / total) * 100).toFixed(1) : 0;
+    const maliciousPercent = total
+      ? ((stats.malicious / total) * 100).toFixed(1)
+      : 0;
+    const harmlessPercent = total
+      ? ((stats.harmless / total) * 100).toFixed(1)
+      : 0;
 
     return (
       <div className="space-y-6">
@@ -202,64 +256,92 @@ export default function EnhancedIntelligenceTab({
               <FiBarChart2 className="text-blue-500" />
               Detection Summary
             </h3>
-            <span className={`text-xs px-3 py-1 rounded-full font-mono ${
-              stats.malicious > 0
-                ? "bg-red-500/20 text-red-500"
-                : "bg-green-500/20 text-green-500"
-            }`}>
+            <span
+              className={`text-xs px-3 py-1 rounded-full font-mono ${
+                stats.malicious > 0
+                  ? "bg-red-500/20 text-red-500"
+                  : "bg-green-500/20 text-green-500"
+              }`}
+            >
               {stats.malicious} Malicious
             </span>
           </div>
 
           {/* Detection Ratio Bars */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}>
+            <div
+              className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <FiXCircle className="text-red-500" />
                 <span className="text-sm font-medium">Malicious</span>
               </div>
-              <p className="text-2xl font-bold text-red-500">{stats.malicious}</p>
-              <p className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+              <p className="text-2xl font-bold text-red-500">
+                {stats.malicious}
+              </p>
+              <p
+                className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+              >
                 {maliciousPercent}% of {total}
               </p>
             </div>
 
-            <div className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}>
+            <div
+              className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <FiAlertTriangle className="text-yellow-500" />
                 <span className="text-sm font-medium">Suspicious</span>
               </div>
-              <p className="text-2xl font-bold text-yellow-500">{stats.suspicious}</p>
-              <p className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+              <p className="text-2xl font-bold text-yellow-500">
+                {stats.suspicious}
+              </p>
+              <p
+                className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+              >
                 Detection Results
               </p>
             </div>
 
-            <div className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}>
+            <div
+              className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <FiEye className="text-blue-500" />
                 <span className="text-sm font-medium">Undetected</span>
               </div>
-              <p className="text-2xl font-bold text-blue-500">{stats.undetected}</p>
-              <p className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+              <p className="text-2xl font-bold text-blue-500">
+                {stats.undetected}
+              </p>
+              <p
+                className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+              >
                 Not Flagged
               </p>
             </div>
 
-            <div className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}>
+            <div
+              className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <FiCheckCircle className="text-green-500" />
                 <span className="text-sm font-medium">Harmless</span>
               </div>
-              <p className="text-2xl font-bold text-green-500">{stats.harmless}</p>
-              <p className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+              <p className="text-2xl font-bold text-green-500">
+                {stats.harmless}
+              </p>
+              <p
+                className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+              >
                 {harmlessPercent}% Safe
               </p>
             </div>
           </div>
 
           {/* Detection Bar */}
-          <div className={`w-full h-3 rounded-full overflow-hidden ${isDarkMode ? "bg-zinc-700" : "bg-gray-200"}`}>
+          <div
+            className={`w-full h-3 rounded-full overflow-hidden ${isDarkMode ? "bg-zinc-700" : "bg-gray-200"}`}
+          >
             <div className="flex h-full">
               <div
                 className="bg-red-500 transition-all"
@@ -267,11 +349,15 @@ export default function EnhancedIntelligenceTab({
               />
               <div
                 className="bg-yellow-500 transition-all"
-                style={{ width: `${(stats.suspicious / total) * 100}%` }}
+                style={{
+                  width: `${total ? (stats.suspicious / total) * 100 : 0}%`,
+                }}
               />
               <div
                 className="bg-blue-500 transition-all"
-                style={{ width: `${(stats.undetected / total) * 100}%` }}
+                style={{
+                  width: `${total ? (stats.undetected / total) * 100 : 0}%`,
+                }}
               />
               <div
                 className="bg-green-500 transition-all"
@@ -282,13 +368,15 @@ export default function EnhancedIntelligenceTab({
         </div>
 
         {/* Vendor Detections */}
-        {intelData.detections?.last_analysis_results && (
-          <div className={`p-6 rounded-2xl border ${isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"}`}>
+        {detectionAttributes.last_analysis_results && (
+          <div
+            className={`p-6 rounded-2xl border ${isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"}`}
+          >
             <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
               <FiShield /> Vendor Detections
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-              {Object.entries(intelData.detections.last_analysis_results).map(
+              {Object.entries(detectionAttributes.last_analysis_results).map(
                 ([vendor, result]) => (
                   <div
                     key={vendor}
@@ -296,14 +384,16 @@ export default function EnhancedIntelligenceTab({
                       result.category === "malicious"
                         ? `border-l-red-500 ${isDarkMode ? "bg-red-500/10" : "bg-red-50"}`
                         : result.category === "suspicious"
-                        ? `border-l-yellow-500 ${isDarkMode ? "bg-yellow-500/10" : "bg-yellow-50"}`
-                        : `border-l-green-500 ${isDarkMode ? "bg-green-500/10" : "bg-green-50"}`
+                          ? `border-l-yellow-500 ${isDarkMode ? "bg-yellow-500/10" : "bg-yellow-50"}`
+                          : `border-l-green-500 ${isDarkMode ? "bg-green-500/10" : "bg-green-50"}`
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-semibold text-sm">{vendor}</p>
-                        <p className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+                        <p
+                          className={`text-xs mt-1 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}
+                        >
                           {result.result || "Clean"}
                         </p>
                       </div>
@@ -312,15 +402,15 @@ export default function EnhancedIntelligenceTab({
                           result.category === "malicious"
                             ? "bg-red-500/30 text-red-500"
                             : result.category === "suspicious"
-                            ? "bg-yellow-500/30 text-yellow-600"
-                            : "bg-green-500/30 text-green-500"
+                              ? "bg-yellow-500/30 text-yellow-600"
+                              : "bg-green-500/30 text-green-500"
                         }`}
                       >
                         {result.category}
                       </span>
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -339,7 +429,9 @@ export default function EnhancedIntelligenceTab({
 
     if (dataList.length === 0 || !dataList[0]?.id) {
       return (
-        <p className={`text-center py-8 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+        <p
+          className={`text-center py-8 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+        >
           Tidak ada relationship data yang ditemukan
         </p>
       );
@@ -364,7 +456,9 @@ export default function EnhancedIntelligenceTab({
                   <p className="font-mono text-sm truncate font-semibold">
                     {item.id}
                   </p>
-                  <p className={`text-xs mt-1 uppercase font-bold ${isMalicious ? "text-red-500" : "text-blue-500"}`}>
+                  <p
+                    className={`text-xs mt-1 uppercase font-bold ${isMalicious ? "text-red-500" : "text-blue-500"}`}
+                  >
                     {item.type}
                   </p>
                 </div>
@@ -380,7 +474,9 @@ export default function EnhancedIntelligenceTab({
               </div>
               {item.attributes?.last_analysis_stats && (
                 <div className="text-xs mt-2 space-y-1">
-                  <p>{item.attributes.last_analysis_stats.malicious} detections</p>
+                  <p>
+                    {item.attributes.last_analysis_stats.malicious} detections
+                  </p>
                 </div>
               )}
             </div>
@@ -394,8 +490,7 @@ export default function EnhancedIntelligenceTab({
   const renderThreatDetails = () => {
     if (!intelData.threatDetails) return null;
 
-    const data = intelData.threatDetails;
-    const categories = data.last_dns_records || data.threat_severity;
+    const data = intelData.threatDetails?.attributes || intelData.threatDetails;
 
     return (
       <div className="space-y-6">
@@ -422,7 +517,9 @@ export default function EnhancedIntelligenceTab({
         {data.categories && (
           <div
             className={`p-6 rounded-2xl border ${
-              isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"
+              isDarkMode
+                ? "bg-zinc-800/50 border-zinc-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h4 className="font-bold text-lg mb-4">Threat Categories</h4>
@@ -447,7 +544,9 @@ export default function EnhancedIntelligenceTab({
         {data.last_dns_records && (
           <div
             className={`p-6 rounded-2xl border ${
-              isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"
+              isDarkMode
+                ? "bg-zinc-800/50 border-zinc-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
@@ -459,14 +558,18 @@ export default function EnhancedIntelligenceTab({
                   <div
                     key={idx}
                     className={`p-3 rounded-lg font-mono text-xs ${
-                      isDarkMode ? "bg-zinc-900 border border-zinc-700" : "bg-gray-50 border border-gray-200"
+                      isDarkMode
+                        ? "bg-zinc-900 border border-zinc-700"
+                        : "bg-gray-50 border border-gray-200"
                     }`}
                   >
                     {record.type}: {record.value}
                   </div>
                 ))
               ) : (
-                <pre className={`p-3 rounded-lg text-xs overflow-x-auto ${isDarkMode ? "bg-zinc-900" : "bg-gray-50"}`}>
+                <pre
+                  className={`p-3 rounded-lg text-xs overflow-x-auto ${isDarkMode ? "bg-zinc-900" : "bg-gray-50"}`}
+                >
                   {JSON.stringify(data.last_dns_records, null, 2)}
                 </pre>
               )}
@@ -523,7 +626,9 @@ export default function EnhancedIntelligenceTab({
               <h5 className="font-bold text-blue-600 mb-2">
                 {tactic.name} ({tactic.id})
               </h5>
-              <p className={`text-sm mb-3 ${isDarkMode ? "text-zinc-300" : "text-gray-700"}`}>
+              <p
+                className={`text-sm mb-3 ${isDarkMode ? "text-zinc-300" : "text-gray-700"}`}
+              >
                 {tactic.description}
               </p>
               {tactic.techniques && (
@@ -548,7 +653,9 @@ export default function EnhancedIntelligenceTab({
             </div>
           ))
         ) : (
-          <p className={`text-center py-6 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+          <p
+            className={`text-center py-6 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+          >
             Tidak ada MITRE tactics yang terdeteksi
           </p>
         )}
@@ -566,10 +673,14 @@ export default function EnhancedIntelligenceTab({
     const date = attrs.last_analysis_date || attrs.date;
 
     const resultEntries = Object.entries(results);
-    const malicious = resultEntries.filter(([, v]) => v.category === "malicious");
-    const suspicious = resultEntries.filter(([, v]) => v.category === "suspicious");
-    const clean = resultEntries.filter(([, v]) =>
-      v.category === "harmless" || v.category === "undetected"
+    const malicious = resultEntries.filter(
+      ([, v]) => v.category === "malicious",
+    );
+    const suspicious = resultEntries.filter(
+      ([, v]) => v.category === "suspicious",
+    );
+    const clean = resultEntries.filter(
+      ([, v]) => v.category === "harmless" || v.category === "undetected",
     );
 
     return (
@@ -586,34 +697,59 @@ export default function EnhancedIntelligenceTab({
                 key={key}
                 className={`p-3 rounded-xl text-center ${isDarkMode ? "bg-zinc-700/50" : "bg-gray-100"}`}
               >
-                <p className={`text-2xl font-bold ${
-                  key === "malicious" ? "text-red-500" :
-                  key === "suspicious" ? "text-yellow-500" :
-                  key === "harmless" ? "text-green-500" : "text-blue-500"
-                }`}>{val}</p>
-                <p className="text-xs uppercase font-bold mt-1 opacity-60">{key}</p>
+                <p
+                  className={`text-2xl font-bold ${
+                    key === "malicious"
+                      ? "text-red-500"
+                      : key === "suspicious"
+                        ? "text-yellow-500"
+                        : key === "harmless"
+                          ? "text-green-500"
+                          : "text-blue-500"
+                  }`}
+                >
+                  {val}
+                </p>
+                <p className="text-xs uppercase font-bold mt-1 opacity-60">
+                  {key}
+                </p>
               </div>
             ))}
           </div>
         )}
 
         {date && (
-          <p className={`text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+          <p
+            className={`text-xs ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+          >
             Last analysis: {new Date(date * 1000).toLocaleString()}
           </p>
         )}
 
         {/* Malicious & suspicious results */}
         {(malicious.length > 0 || suspicious.length > 0) && (
-          <div className={`p-4 rounded-xl border ${isDarkMode ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200"}`}>
-            <h5 className="font-bold text-red-500 mb-3">⚠️ Flagged by {malicious.length + suspicious.length} engines</h5>
+          <div
+            className={`p-4 rounded-xl border ${isDarkMode ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200"}`}
+          >
+            <h5 className="font-bold text-red-500 mb-3">
+              ⚠️ Flagged by {malicious.length + suspicious.length} engines
+            </h5>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
               {[...malicious, ...suspicious].map(([vendor, res]) => (
-                <div key={vendor} className={`p-2 rounded text-xs ${isDarkMode ? "bg-zinc-800" : "bg-white"}`}>
+                <div
+                  key={vendor}
+                  className={`p-2 rounded text-xs ${isDarkMode ? "bg-zinc-800" : "bg-white"}`}
+                >
                   <span className="font-bold">{vendor}</span>
-                  <span className={`ml-2 px-1 rounded text-[10px] ${
-                    res.category === "malicious" ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-600"
-                  }`}>{res.result || res.category}</span>
+                  <span
+                    className={`ml-2 px-1 rounded text-[10px] ${
+                      res.category === "malicious"
+                        ? "bg-red-500/20 text-red-500"
+                        : "bg-yellow-500/20 text-yellow-600"
+                    }`}
+                  >
+                    {res.result || res.category}
+                  </span>
                 </div>
               ))}
             </div>
@@ -621,7 +757,9 @@ export default function EnhancedIntelligenceTab({
         )}
 
         {resultEntries.length === 0 && (
-          <p className={`text-center py-6 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+          <p
+            className={`text-center py-6 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+          >
             No analysis results available
           </p>
         )}
@@ -648,13 +786,17 @@ export default function EnhancedIntelligenceTab({
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className={`text-xs uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+              <p
+                className={`text-xs uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}
+              >
                 {type} ID
               </p>
               <p className="font-mono text-sm break-all">{data.id}</p>
             </div>
             <div>
-              <p className={`text-xs uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+              <p
+                className={`text-xs uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}
+              >
                 Type
               </p>
               <p className="text-sm font-semibold capitalize">{data.type}</p>
@@ -666,10 +808,14 @@ export default function EnhancedIntelligenceTab({
         {normalizedType === "urls" && attrs.title && (
           <div
             className={`p-6 rounded-2xl border ${
-              isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"
+              isDarkMode
+                ? "bg-zinc-800/50 border-zinc-700"
+                : "bg-white border-gray-200"
             }`}
           >
-            <p className={`text-sm uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}>
+            <p
+              className={`text-sm uppercase font-bold mb-2 ${isDarkMode ? "text-zinc-400" : "text-gray-600"}`}
+            >
               Page Title
             </p>
             <p className="text-lg font-semibold">{attrs.title}</p>
@@ -682,7 +828,9 @@ export default function EnhancedIntelligenceTab({
               className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white border border-gray-200"}`}
             >
               <p className="text-xs uppercase font-bold mb-1">HTTP Code</p>
-              <p className="text-2xl font-bold">{attrs.last_http_response_code}</p>
+              <p className="text-2xl font-bold">
+                {attrs.last_http_response_code}
+              </p>
             </div>
             {attrs.categories && (
               <div
@@ -749,7 +897,9 @@ export default function EnhancedIntelligenceTab({
                 className={`p-4 rounded-xl ${isDarkMode ? "bg-zinc-800/50 border border-zinc-700" : "bg-white border border-gray-200"}`}
               >
                 <p className="text-xs uppercase font-bold mb-1">SHA256</p>
-                <p className="font-mono text-xs truncate">{attrs.sha256.slice(0, 16)}...</p>
+                <p className="font-mono text-xs truncate">
+                  {attrs.sha256.slice(0, 16)}...
+                </p>
               </div>
             )}
           </div>
@@ -771,60 +921,89 @@ export default function EnhancedIntelligenceTab({
   };
 
   return (
-    <div className={`p-6 space-y-6 ${isDarkMode ? "bg-gradient-to-br from-zinc-900 to-zinc-950" : "bg-gray-50"}`}>
+    <div
+      className={`p-6 space-y-6 ${isDarkMode ? "bg-gradient-to-br from-zinc-900 to-zinc-950" : "bg-gray-50"}`}
+    >
       {/* Tab Navigation */}
       <div className="flex flex-wrap gap-2 pb-4 border-b border-zinc-700 overflow-x-auto">
-        <button onClick={() => setActiveTab("overview")} className={tabButtonClass("overview")}>
+        <button
+          onClick={() => setActiveTab("overview")}
+          className={tabButtonClass("overview")}
+        >
           <FiEye size={16} />
           Overview
         </button>
         {(normalizedType === "urls" || normalizedType === "files") && (
-          <button onClick={() => setActiveTab("detections")} className={tabButtonClass("detections")}>
+          <button
+            onClick={() => setActiveTab("detections")}
+            className={tabButtonClass("detections")}
+          >
             <FiBarChart2 size={16} />
             Detections
           </button>
         )}
-        <button onClick={() => setActiveTab("relationships")} className={tabButtonClass("relationships")}>
+        <button
+          onClick={() => setActiveTab("relationships")}
+          className={tabButtonClass("relationships")}
+        >
           <FiShare2 size={16} />
           Relationships
         </button>
-        <button onClick={() => setActiveTab("threat-details")} className={tabButtonClass("threat-details")}>
+        <button
+          onClick={() => setActiveTab("threat-details")}
+          className={tabButtonClass("threat-details")}
+        >
           <FiAlertTriangle size={16} />
           Threats
         </button>
         {normalizedType === "files" && (
           <>
-            <button onClick={() => setActiveTab("behavior")} className={tabButtonClass("behavior")}>
+            <button
+              onClick={() => setActiveTab("behavior")}
+              className={tabButtonClass("behavior")}
+            >
               <FiActivity size={16} />
               Behavior
             </button>
-            <button onClick={() => setActiveTab("mitre")} className={tabButtonClass("mitre")}>
+            <button
+              onClick={() => setActiveTab("mitre")}
+              className={tabButtonClass("mitre")}
+            >
               <FiShield size={16} />
               MITRE
             </button>
           </>
         )}
-        <button onClick={() => setActiveTab("analysis")} className={tabButtonClass("analysis")}>
+        <button
+          onClick={() => setActiveTab("analysis")}
+          className={tabButtonClass("analysis")}
+        >
           <FiZap size={16} />
           Analysis
         </button>
       </div>
 
       {/* Content Area */}
-      <div className={`rounded-2xl border ${isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"} p-6`}>
+      <div
+        className={`rounded-2xl border ${isDarkMode ? "bg-zinc-800/50 border-zinc-700" : "bg-white border-gray-200"} p-6`}
+      >
         {loading[activeTab] && (
           <div className="flex justify-center py-12">
             <div className="animate-spin">
               <FiRefreshCw className="text-blue-500" size={24} />
             </div>
-            <span className={`ml-3 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}>
+            <span
+              className={`ml-3 ${isDarkMode ? "text-zinc-400" : "text-gray-500"}`}
+            >
               Mengambil data...
             </span>
           </div>
         )}
 
         {error && !loading[activeTab] && (
-          <div className={`p-4 rounded-xl border-l-4 border-l-red-500 ${isDarkMode ? "bg-red-500/10 border border-red-500/20" : "bg-red-50 border border-red-200"}`}>
+          <div
+            className={`p-4 rounded-xl border-l-4 border-l-red-500 ${isDarkMode ? "bg-red-500/10 border border-red-500/20" : "bg-red-50 border border-red-200"}`}
+          >
             <div className="flex items-start gap-3">
               <FiAlertTriangle className="text-red-500 mt-1" />
               <div>
