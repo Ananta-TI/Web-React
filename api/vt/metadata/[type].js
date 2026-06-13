@@ -1,5 +1,5 @@
-import { allowMethods, rateLimit, setCommonHeaders } from "../../_lib/http.js";
-import { sendVtError, vtRequest } from "../../_lib/virustotal.js";
+import { allowMethods, rateLimit, setCommonHeaders } from "../../../server/scanner/http.js";
+import { sendVtError, vtRequest } from "../../../server/scanner/virustotal.js";
 
 const TYPE_MAP = {
   file: "files",

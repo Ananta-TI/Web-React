@@ -1,5 +1,5 @@
-import { allowMethods, rateLimit, setCommonHeaders } from "../_lib/http.js";
-import { sendVtError, vtRequest } from "../_lib/virustotal.js";
+import { allowMethods, rateLimit, setCommonHeaders } from "../../server/scanner/http.js";
+import { sendVtError, vtRequest } from "../../server/scanner/virustotal.js";
 
 export default async function handler(req, res) {
   setCommonHeaders(res);

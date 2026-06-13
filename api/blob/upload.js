@@ -5,7 +5,7 @@ import {
   rateLimit,
   requireSameOrigin,
   setCommonHeaders,
-} from "../_lib/http.js";
+} from "../../server/scanner/http.js";
 
 const MAX_FILE_SIZE = 32 * 1024 * 1024;
 

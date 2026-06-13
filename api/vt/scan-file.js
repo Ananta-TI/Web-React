@@ -4,8 +4,8 @@ import {
   rateLimit,
   requireSameOrigin,
   setCommonHeaders,
-} from "../_lib/http.js";
-import { sendVtError, vtRequest } from "../_lib/virustotal.js";
+} from "../../server/scanner/http.js";
+import { sendVtError, vtRequest } from "../../server/scanner/virustotal.js";
 
 const MAX_FILE_SIZE = 32 * 1024 * 1024;
 
