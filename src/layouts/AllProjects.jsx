@@ -227,6 +227,36 @@ const allProjects = [
   status: "Completed",
   featured: true,
 },
+{
+  title: "Sewa Barang",
+  description:
+    "A web application for renting various items, built with React, Vite, Tailwind CSS, and Framer Motion. This application allows users to browse available items, view details, and manage their rental requests.",
+  demo: "https://sewa-barang-tau.vercel.app",
+  repo: "https://github.com/Ananta-TI/Sewa-Barang.git",
+  tags: ["React", "Vite", "Tailwind", "Framer Motion"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/sewabarang.png",
+  cover: "/img/cover/16.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
+{
+  title: "Question Legal",
+  description:
+    "An AI-powered legal assistant chatbot specializing in Indonesian child protection laws. Built using a fine-tuned SBERT semantic search architecture, it delivers accurate, real-time constitutional insights and legal guidance through an elegant, responsive editorial-style interface.",
+  demo: "https://question-legal.vercel.app/",
+  repo: "https://github.com/Ananta-TI/chatbot-legal.git",
+  tags: ["React", "Vite", "Tailwind", "Framer Motion","Gsap"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/Chatbot.png",
+  cover: "/img/cover/15.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
 ];
 
 function getCategoryIcon(category) {
