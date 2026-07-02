@@ -391,7 +391,7 @@ export default function AllProjects() {
 
   const resetListHover = () => {
     setIsHoveringList(false);
-    setHoveredIndex(0);
+    // setHoveredIndex(0);
 
     titleRefs.current.forEach((element) => {
       if (element) {
@@ -418,7 +418,7 @@ export default function AllProjects() {
 
   const hardResetListHover = () => {
     setIsHoveringList(false);
-    setHoveredIndex(0);
+    // setHoveredIndex(0);
 
     const targets = [...titleRefs.current, ...metaRefs.current].filter(Boolean);
 
@@ -928,70 +928,66 @@ export default function AllProjects() {
       )}
 
       {isDesktop &&
-        effectiveViewMode === "list" &&
-        createPortal(
-          <>
-            <motion.div
-              ref={floatingImgRef}
-              variants={previewVariants}
-              initial="initial"
-              animate={
-                effectiveViewMode === "list" &&
-                isHoveringList &&
-                filteredProjects.length > 0
-                  ? "enter"
-                  : "closed"
-              }
-              className="pointer-events-none fixed left-0 top-0 z-[60] h-[320px] w-[420px] overflow-hidden rounded-lg shadow-2xl"
+  effectiveViewMode === "list" &&
+  createPortal(
+    <>
+      <motion.div
+        ref={floatingImgRef}
+        variants={previewVariants}
+        initial="initial"
+        animate={
+          effectiveViewMode === "list" &&
+          isHoveringList &&
+          filteredProjects.length > 0
+            ? "enter"
+            : "closed"
+        }
+        className="pointer-events-none fixed left-0 top-0 z-[60] h-[420px] w-[520px] overflow-hidden rounded-lg shadow-2xl"
+      >
+        <div
+          className="relative h-full w-full"
+          style={{
+            top: `${hoveredIndex * -100}%`,
+            // LOGIKA BARU: Transisi dimatikan ("none") jika kursor sedang tidak di dalam list
+            transition: isHoveringList 
+              ? "top 0.5s cubic-bezier(0.76, 0, 0.24, 1)" 
+              : "none",
+          }}
+        >
+          {filteredProjects.map((project, index) => (
+            <div
+              key={`modal-img-${index}`}
+              className="h-full w-full bg-zinc-800"
             >
-              <div
-                style={{
-                  width: "100%",
-                  height: `${Math.max(filteredProjects.length, 1) * 100}%`,
-                  transform: `translateY(-${
-                    (hoveredIndex / Math.max(filteredProjects.length, 1)) * 100
-                  }%)`,
-                  transition:
-                    "transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)",
-                }}
-              >
-                {filteredProjects.map((project) => (
-                  <div
-                    key={project.title}
-                    style={{
-                      width: "100%",
-                      height: `${100 / Math.max(filteredProjects.length, 1)}%`,
-                    }}
-                  >
-                    <img
-                      src={project.cover || project.image}
-                      alt={project.title}
-                      className="block h-full w-full object-cover"
-                      loading="eager"
-                    />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              <img
+                src={project.cover || project.image}
+                alt={project.title}
+                className="block h-full w-full object-cover"
+                loading="eager"
+              />
+            </div>
+          ))}
+        </div>
+      </motion.div>
 
-            <motion.div
-              ref={floatingLabelRef}
-              variants={previewVariants}
-              initial="initial"
-              animate={
-                effectiveViewMode === "list" &&
-                isHoveringList &&
-                filteredProjects.length > 0
-                  ? "enter"
-                  : "closed"
-              }
-              className="pointer-events-none fixed left-0 top-0 z-[70] flex h-[68px] w-[68px] items-center justify-center rounded-full bg-blue-600 text-sm font-bold tracking-wide text-white"
-            >
-              View
-            </motion.div>
-          </>,
-          document.body
-        )}
+      <motion.div
+        ref={floatingLabelRef}
+        variants={previewVariants}
+        initial="initial"
+        animate={
+          effectiveViewMode === "list" &&
+          isHoveringList &&
+          filteredProjects.length > 0
+            ? "enter"
+            : "closed"
+        }
+        className="pointer-events-none fixed left-0 top-0 z-[70] flex h-[68px] w-[68px] items-center justify-center rounded-full bg-blue-600 text-sm font-bold tracking-wide text-white"
+      >
+        View
+      </motion.div>
+    </>,
+    document.body
+  )}
 
       {createPortal(
         <AnimatePresence>
