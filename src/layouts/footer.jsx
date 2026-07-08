@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
+import RevealButton from "../components/Shared/Button"; 
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
 import ProfileCard from "./ProfileCard";
@@ -273,14 +274,14 @@ export default function Footer() {
             "absolute inset-0 bg-gradient-to-b",
             isDarkMode
               ? "from-zinc-900 via-zinc-950 to-black"
-              : "from-white via-[#c9c9c9] to-[#797979]"
+              : "from-[#FAF9F9] via-[#c9c9c9] to-[#c4c4c4]"
           )}
         />
 
         <div
           className={cn(
             "absolute left-0 top-0 h-32 w-full bg-gradient-to-b",
-            isDarkMode ? "from-zinc-900 to-transparent" : "from-white to-transparent"
+            isDarkMode ? "from-zinc-900 to-transparent" : "from-[#FAF9F9] to-transparent"
           )}
         />
 
@@ -440,30 +441,27 @@ export default function Footer() {
                   </div>
                 ))}
 
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className={cn(
-                    "group mt-4 inline-flex cursor-none cursor-target items-center justify-center gap-x-2 rounded-md border px-6 py-3 font-bold",
-                    "transition-all duration-500 ease-out hover:shadow-lg",
-                    isDarkMode
-                      ? "border-zinc-600 hover:bg-[#faf9f9] hover:text-zinc-900 hover:shadow-white/10"
-                      : "border-zinc-900 hover:bg-zinc-900 hover:text-zinc-50 hover:shadow-zinc-900/20",
-                    "disabled:cursor-not-allowed disabled:opacity-50"
-                  )}
-                >
-                  {pending ? (
-                    <>
-                      <Loader className="h-5 w-5 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-12" />
-                      Send Message
-                    </>
-                  )}
-                </button>
+                <RevealButton
+  type="submit"
+  variant="secondary"
+  size="md"
+  className={cn(
+    "mt-4 w-full sm:w-auto", // Biar responsif
+    pending ? "opacity-50 cursor-not-allowed" : ""
+  )}
+>
+  {pending ? (
+    <>
+      <Loader className="h-5 w-5 animate-spin pointer-events-none" />
+      <span className="pointer-events-none">Sending...</span>
+    </>
+  ) : (
+    <>
+      <Mail className="h-5 w-5 pointer-events-none transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-12" />
+      <span className="pointer-events-none">Send Message</span>
+    </>
+  )}
+</RevealButton>
 
                 {sent && (
                   <span className="mt-3 font-mono text-sm font-bold text-green-400">

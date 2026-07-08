@@ -517,7 +517,7 @@ const Projects = () => {
       ref={sectionRef}
       id="projects"
       className={`relative w-full min-h-[100svh] py-14 sm:py-20 md:py-12 transition-colors duration-500 ${
-        isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#FAF9F9] text-black"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">

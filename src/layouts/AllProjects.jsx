@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 
 import DecryptedText from "../components/Shared/DecryptedText";
+import RevealButton from "../components/Shared/Button"; // Sesuaikan path-nya ya
 import { ThemeContext } from "../context/ThemeContext";
 
 const allProjects = [
@@ -1087,35 +1088,31 @@ export default function AllProjects() {
                     ))}
                   </div>
 
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    {selectedProject.demo && (
-                      <a
-                        href={selectedProject.demo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-8 py-3 font-bold text-white transition hover:bg-blue-700"
-                      >
-                        <Globe className="h-4 w-4" />
-                        Live Demo
-                      </a>
-                    )}
+<div className="flex flex-col gap-4 sm:flex-row">
+  {selectedProject.demo && (
+    <RevealButton
+      href={selectedProject.demo}
+      variant="primary"
+      size="md"
+      className="w-full sm:w-auto" // Agar di HP full width, di PC menyesuaikan isi
+    >
+      <Globe className="h-4 w-4 shrink-0" />
+      <span>Live Demo</span>
+    </RevealButton>
+  )}
 
-                    {selectedProject.repo && (
-                      <a
-                        href={selectedProject.repo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center justify-center gap-2 rounded-full border px-8 py-3 font-bold transition ${
-                          isDarkMode
-                            ? "border-white/20 hover:bg-white/10"
-                            : "border-black/20 hover:bg-black/5"
-                        }`}
-                      >
-                        <Github className="h-4 w-4" />
-                        Repository
-                      </a>
-                    )}
-                  </div>
+  {selectedProject.repo && (
+    <RevealButton
+      href={selectedProject.repo}
+      variant="secondary"
+      size="md"
+      className="w-full sm:w-auto"
+    >
+      <Github className="h-4 w-4 shrink-0" />
+      <span>Repository</span>
+    </RevealButton>
+  )}
+</div>
                 </div>
               </motion.div>
             </motion.div>
