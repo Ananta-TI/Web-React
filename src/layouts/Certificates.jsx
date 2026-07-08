@@ -41,6 +41,7 @@ const CERTIFICATES = [
   { image: "sertifikat/27.png", year: "2026" },
   { image: "sertifikat/28.png", year: "2026" },
   { image: "sertifikat/29.png", year: "2026" },
+  { image: "sertifikat/30.png", year: "2026" },
 ];
 
 function shuffleCertificates(items) {
