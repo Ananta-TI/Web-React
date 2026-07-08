@@ -349,7 +349,7 @@ const Activity = () => {
           )}
         </div>
 
-        <div ref={chartRef} className="w-full max-w-7xl mx-auto mb-4">
+        {/* <div ref={chartRef} className="w-full max-w-7xl mx-auto mb-4">
           {mountChart ? (
             <CardErrorBoundary isDarkMode={isDarkMode}>
               <Suspense
@@ -369,7 +369,7 @@ const Activity = () => {
               isDarkMode={isDarkMode}
             />
           )}
-        </div>
+        </div> */}
 
         <div className="w-full max-w-7xl mx-auto columns-1 lg:columns-2 gap-4">
           <LazyCard
