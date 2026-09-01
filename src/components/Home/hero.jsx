@@ -4,7 +4,6 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import MergedShapes from "./MergedShape";
 import LocationBadge from "../LocationBadge";
-import DotField from "./DotField";
 
 export default function Hero({ isAppLoading }) {
   const theme = useContext(ThemeContext);
@@ -64,23 +63,7 @@ export default function Hero({ isAppLoading }) {
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
-      {/* DotField sebagai background dengan efek paralaks */}
-      <div ref={dotFieldRef} className="absolute inset-0 z-0">
-        <DotField
-          dotRadius={2.5}
-          dotSpacing={30}
-          bulgeStrength={67}
-          glowRadius={0}
-          sparkle={false}
-          waveAmplitude={0}
-          cursorRadius={200}
-          cursorForce={0.1}
-          bulgeOnly
-          gradientFrom={isDarkMode ? "#ffffff" : "#000000"}
-          gradientTo={isDarkMode ? "#ffffff" : "#000000"}
-          glowColor={isDarkMode ? "#ffffff" : "#000000"}
-        />
-      </div>
+      
 
       {/* Konten Utama */}
       <motion.div

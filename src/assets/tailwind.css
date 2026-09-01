@@ -7,6 +7,13 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: "spirit";
+  src: url("/fonts/Fighting Spirit 2 bold.otf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: "Cocaine";
@@ -100,6 +107,7 @@
 
 
   --font-lyrae: "Lyrae", sans-serif;
+  --font-spirit: "spirit", sans-serif;
   --font-cocaine: "Cocaine", sans-serif;
   --font-Exorcista: "Exorcista", sans-serif;
   --font-termination: "Termination", sans-serif;
