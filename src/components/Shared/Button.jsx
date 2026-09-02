@@ -70,9 +70,14 @@ export default function RevealButton({
     gsap.to(textRef.current, { color: currentStyle.initialColor, duration: 0.45, ease: "power3.inOut" });
   };
 
-  const Element = to ? Link : "a";
-  const elementProps = to ? { to } : { href, target: "_blank", rel: "noreferrer" };
+  const Element = to ? Link : href ? "a" : "button";
 
+const elementProps = to
+  ? { to }
+  : href
+    ? { href, target: "_blank", rel: "noreferrer" }
+    : { type };
+    
   return (
     <Element
       {...elementProps}
