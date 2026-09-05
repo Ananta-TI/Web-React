@@ -298,17 +298,19 @@ export default function Footer() {
           <div className="z-10 space-y-10 lg:col-span-5">
             <div className="flex justify-center lg:justify-start">
               <ProfileCard
-                name="Ananta Firdaus"
-                title="Web Developer"
-                handle="Ananta-TI"
-                status="Online"
-                contactText="Contact Me"
-                avatarUrl="/img/m3.png"
-                showUserInfo={false}
-                enableTilt={true}
-                enableMobileTilt={true}
-                onContactClick={() => console.log("Contact clicked")}
-              />
+  name="Ananta Firdaus"
+  title="Web Developer"
+  handle="Ananta-TI"
+  status="Online"
+  contactText="Contact Me"
+  avatarUrl="/img/m3.png"
+  showUserInfo={false}
+  enableTilt={true}
+  enableMobileTilt={false}
+  onContactClick={() =>
+    console.log("Contact clicked")
+  }
+/>
             </div>
 
             <div className="grid grid-cols-2 gap-8 lg:grid-cols-2 lg:gap-10">

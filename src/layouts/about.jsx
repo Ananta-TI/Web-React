@@ -134,70 +134,198 @@ export default function About() {
         isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
-      {/* ================= HERO / INTRO ================= */}
-      <RevealWrapper className="mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
-        <h2 className="text-3xl sm:text-4xl mt-6 sm:mt-10 px-4 sm:px-8 md:px-20 lg:px-60 md:text-7xl font-lyrae font-bold">
-          <DecryptedText
-            text="About Me"
-            speed={35}
-            maxIterations={28}
-            sequential
-            animateOn="view"
-          />
-        </h2>
+{/* ================= HERO / INTRO ================= */}
 
-        <div className="relative z-10">
-          <TextReveal
-            isDarkMode={delayedDarkMode}
-            className="relative lg:-mb-25 -mt-7 sm:-mb-10 sm:text-lg md:text-2xl leading-relaxed font-mono px-2 sm:px-4 md:px-0"
-            text="Hi there! 👋 I'm **Ananta** **Firdaus**, a **frontend** **developer** with a unique combination of traits: I'm both a **perfectionist** and **lazy**. I always strive for the most **efficient way** to achieve high-quality results. Currently studying **Informatics** **Engineering** at **Politeknik** **Caltex** **Riau**, I have a strong foundation in logical thinking and structured problem-solving. However, my passion lies in crafting elegant and interactive user interfaces, ensuring that every design is not only visually appealing but also intuitive and seamless. Lately, I've been diving deeper into **React.js**, exploring **dynamic** **UI** **development** and **smooth** **animations** to create engaging digital experiences. My goal is to bridge **aesthetics** and **functionality**, making technology feel effortless for users."
-          />
-        </div>
-      </RevealWrapper>
+<RevealWrapper>
+  <div className="container mx-auto px-4 sm:px-6 lg:px-35">
+    {/* TITLE */}
+    <h2
+      className="
+        font-lyrae
+        font-bold
+        leading-none
+      "
+      style={{
+        marginTop:
+          "clamp(24px, 4vw, 40px)",
+
+        fontSize:
+          "clamp(2rem, 5vw, 4.5rem)",
+      }}
+    >
+      <DecryptedText
+        text="About Me"
+        speed={35}
+        maxIterations={28}
+        sequential
+        animateOn="view"
+      />
+    </h2>
+
+    {/* TEXT */}
+    <div
+      className="
+        relative
+        z-10
+
+        w-full
+        min-w-0
+      "
+      style={{
+        /*
+         * Mobile jangan terlalu naik.
+         * Desktop tetap bisa dekat dengan title.
+         */
+        marginTop:
+          "clamp(-38px, -3vw, -16px)",
+      }}
+    >
+      <TextReveal
+        isDarkMode={
+          delayedDarkMode
+        }
+        className="
+          relative
+
+          w-full
+          min-w-0
+
+          font-mono
+
+          text-[14px]
+          leading-relaxed
+
+          sm:text-lg
+
+          md:text-xl
+
+          lg:text-2xl
+
+          sm:-mb-10
+          lg:-mb-20
+        "
+        text="Hi there! 👋 I'm **Ananta** **Firdaus**, a **frontend** **developer** with a unique combination of traits: I'm both a **perfectionist** and **lazy**. I always strive for the most **efficient way** to achieve high-quality results. Currently studying **Informatics** **Engineering** at **Politeknik** **Caltex** **Riau**, I have a strong foundation in logical thinking and structured problem-solving. However, my passion lies in crafting elegant and interactive user interfaces, ensuring that every design is not only visually appealing but also intuitive and seamless. Lately, I've been diving deeper into **React.js**, exploring **dynamic** **UI** **development** and **smooth** **animations** to create engaging digital experiences. My goal is to bridge **aesthetics** and **functionality**, making technology feel effortless for users."
+      />
+    </div>
+  </div>
+</RevealWrapper>
 
       {/* ================= EXPERIENCE ================= */}
       <RevealWrapper>
-        <h2 className="text-3xl -mb-10 sm:mt-20 px-4 sm:px-8 md:px-20 lg:px-80 md:text-5xl font-lyrae font-bold">
-          <DecryptedText
-            text="Experience"
-            speed={35}
-            maxIterations={28}
-            sequential
-            animateOn="view"
-          />
-        </h2>
+  <div className="container mx-auto px-4 sm:px-6 lg:px-35">
+    <h2 className="text-3xl -mb-10 sm:mt-20 md:text-5xl font-lyrae font-bold">
+      <DecryptedText
+        text="Experience"
+        speed={35}
+        maxIterations={28}
+        sequential
+        animateOn="view"
+      />
+    </h2>
 
-        <div className="mt-15 sm:mt-10 px-4 sm:px-6 md:px-12 lg:px-80">
-          <ExperienceList isDarkMode={delayedDarkMode} />
-        </div>
-      </RevealWrapper>
+    <div className="mt-15 sm:mt-10">
+      <ExperienceList isDarkMode={delayedDarkMode} />
+    </div>
+  </div>
+</RevealWrapper>
 
-      {/* ================= GITHUB GRAPH ================= */}
-      <div
-        ref={githubRef}
-        className="w-full max-w-7xl mx-auto px-4 mt-1 grid gap-6 grid-cols-1 lg:grid-cols-4 auto-rows-[minmax(120px,auto)]"
-      >
-        <RevealWrapper className="lg:col-span-1">
-          <GithubCard username="Ananta-TI" isDarkMode={delayedDarkMode} />
-        </RevealWrapper>
+{/* ================= GITHUB GRAPH ================= */}
+<div
+  ref={githubRef}
+  className="
+    w-full
+    min-w-0
+    max-w-7xl
+    mx-auto
 
-        <RevealWrapper className="lg:col-span-3">
-          {mountGithub ? (
-            <Suspense
-              fallback={
-                <SectionSkeleton
-                  height="h-48"
-                  isDarkMode={delayedDarkMode}
-                />
-              }
-            >
-              <GithubGraph isDarkMode={delayedDarkMode} />
-            </Suspense>
-          ) : (
-            <SectionSkeleton height="h-48" isDarkMode={delayedDarkMode} />
-          )}
-        </RevealWrapper>
-      </div>
+    px-4
+    mt-1
+
+    grid
+    grid-cols-1
+    lg:grid-cols-4
+
+    gap-6
+
+    auto-rows-[minmax(120px,auto)]
+
+    overflow-hidden
+  "
+>
+  {/* ================= GITHUB CARD ================= */}
+  <RevealWrapper
+    className="
+      w-full
+      min-w-0
+      max-w-full
+
+      lg:col-span-1
+    "
+  >
+    <div
+      className="
+        w-full
+        min-w-0
+        max-w-full
+      "
+    >
+      <GithubCard
+        username="Ananta-TI"
+        isDarkMode={delayedDarkMode}
+      />
+    </div>
+  </RevealWrapper>
+
+  {/* ================= GITHUB GRAPH ================= */}
+  <RevealWrapper
+    className="
+      w-full
+      min-w-0
+      max-w-full
+
+      lg:col-span-3
+    "
+  >
+    <div
+      className="
+        w-full
+        min-w-0
+        max-w-full
+
+        overflow-hidden
+      "
+    >
+      {mountGithub ? (
+        <Suspense
+          fallback={
+            <SectionSkeleton
+              height="h-48"
+              isDarkMode={delayedDarkMode}
+            />
+          }
+        >
+          <div
+            className="
+              w-full
+              min-w-0
+              max-w-full
+              overflow-hidden
+            "
+          >
+            <GithubGraph
+              isDarkMode={delayedDarkMode}
+            />
+          </div>
+        </Suspense>
+      ) : (
+        <SectionSkeleton
+          height="h-48"
+          isDarkMode={delayedDarkMode}
+        />
+      )}
+    </div>
+  </RevealWrapper>
+</div>
 
       {/* ================= ANIMATED BEAM ================= */}
       <div ref={beamRef} className="dark px-4 sm:px-0 mt-8">

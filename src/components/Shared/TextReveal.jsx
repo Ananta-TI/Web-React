@@ -1,77 +1,380 @@
 "use client";
 
-import { useRef, useContext, useEffect } from "react";
+import {
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
+
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ThemeContext } from "../../context/ThemeContext"; 
+import { ThemeContext } from "../../context/ThemeContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const TextReveal = ({ text, className }) => {
-  const containerRef = useRef(null);
-  const { isDarkMode } = useContext(ThemeContext) || { isDarkMode: false };
+export const TextReveal = ({
+  text,
+  className = "",
+  isDarkMode: isDarkModeProp,
+}) => {
+  const containerRef =
+    useRef(null);
 
-  const words = text.split(" ");
-  let isHighlighting = false;
+  const theme =
+    useContext(ThemeContext);
+
+  const isDarkMode =
+    isDarkModeProp ??
+    theme?.isDarkMode ??
+    false;
+
+  const words =
+    text.split(" ");
+
+  // ============================================================
+  // TEXT REVEAL ANIMATION
+  // ============================================================
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Ambil semua elemen kata yang *bukan* kata yang di-highlight
-      const revealWords = gsap.utils.toArray('.reveal-word');
-      
-      gsap.fromTo(revealWords, 
-        { opacity: 0.1 },
-        {
-          opacity: 1,
-          stagger: 0.05, // Efek gelombang berurutan
-          ease: "none",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top 30%",
-            end: "bottom 70%",
-            scrub: 1, // Smooth scrub
-          }
-        }
-      );
-    }, containerRef);
+    if (
+      !containerRef.current
+    ) {
+      return;
+    }
 
-    return () => ctx.revert();
-  }, []);
+    const ctx =
+      gsap.context(() => {
+        const revealWords =
+          gsap.utils.toArray(
+            ".reveal-word",
+            containerRef.current
+          );
+
+        if (
+          !revealWords.length
+        ) {
+          return;
+        }
+
+        const mm =
+          gsap.matchMedia();
+
+        // ======================================================
+        // MOBILE
+        // ======================================================
+
+        mm.add(
+          "(max-width: 639px)",
+          () => {
+            gsap.fromTo(
+              revealWords,
+              {
+                opacity:
+                  0.12,
+              },
+              {
+                opacity:
+                  1,
+
+                stagger:
+                  0.025,
+
+                ease:
+                  "none",
+
+                scrollTrigger: {
+                  trigger:
+                    containerRef.current,
+
+                  /*
+                   * Mulai lebih cepat saat text
+                   * masuk dari bawah viewport.
+                   */
+                  start:
+                    "top 42%",
+
+                  /*
+                   * Selesai saat mayoritas paragraph
+                   * sudah naik ke tengah layar.
+                   */
+                  end:
+                    "bottom 85%",
+
+                  scrub:
+                    0.65,
+
+                  invalidateOnRefresh:
+                    true,
+                },
+              }
+            );
+          }
+        );
+
+        // ======================================================
+        // TABLET
+        // ======================================================
+
+        mm.add(
+          "(min-width: 640px) and (max-width: 1023px)",
+          () => {
+            gsap.fromTo(
+              revealWords,
+              {
+                opacity:
+                  0.1,
+              },
+              {
+                opacity:
+                  1,
+
+                stagger:
+                  0.035,
+
+                ease:
+                  "none",
+
+                scrollTrigger: {
+                  trigger:
+                    containerRef.current,
+
+                  start:
+                    "top 42%",
+
+                  end:
+                    "bottom 82%",
+
+                  scrub:
+                    0.8,
+
+                  invalidateOnRefresh:
+                    true,
+                },
+              }
+            );
+          }
+        );
+
+        // ======================================================
+        // DESKTOP
+        // ======================================================
+
+        mm.add(
+          "(min-width: 1024px)",
+          () => {
+            gsap.fromTo(
+              revealWords,
+              {
+                opacity:
+                  0.1,
+              },
+              {
+                opacity:
+                  1,
+
+                stagger:
+                  0.05,
+
+                ease:
+                  "none",
+
+                scrollTrigger: {
+                  trigger:
+                    containerRef.current,
+
+                  start:
+                    "top 35%",
+
+                  end:
+                    "bottom 75%",
+
+                  scrub:
+                    1,
+
+                  invalidateOnRefresh:
+                    true,
+                },
+              }
+            );
+          }
+        );
+
+        return () =>
+          mm.revert();
+      }, containerRef);
+
+    // refresh sesudah layout selesai
+    const refreshTimer =
+      window.setTimeout(
+        () => {
+          ScrollTrigger.refresh();
+        },
+        100
+      );
+
+    return () => {
+      window.clearTimeout(
+        refreshTimer
+      );
+
+      ctx.revert();
+    };
+  }, [text]);
+
+  // ============================================================
+  // PARSE HIGHLIGHT
+  // ============================================================
+
+  let isHighlighting =
+    false;
 
   return (
     <div
-      ref={containerRef}
-      className={`${className} relative w-full flex my-[70px] justify-center transition-colors duration-500 items-center`}
+      ref={
+        containerRef
+      }
+      className={`
+        relative
+
+        flex
+        w-full
+        min-w-0
+
+        items-start
+        justify-start
+
+        transition-colors
+        duration-500
+
+        ${className}
+      `}
     >
-      <div className="max-w-7xl py-10">
-        <p className="flex flex-wrap font-bold transition-colors duration-500">
-          {words.map((word, i) => {
-            const startHighlight = word.startsWith("**");
-            const endHighlight = word.endsWith("**") || word.includes("**");
-            
-            if (startHighlight) isHighlighting = true;
-            const cleanWord = word.replace(/\*\*/g, "");
-            const currentHighlightStatus = isHighlighting;
-            if (endHighlight) isHighlighting = false;
+      <div
+        className="
+          w-full
+          min-w-0
 
-            // Jika Highlight, warna merah/hijau menyala (opacity 1)
-            // Jika bukan, gunakan kelas 'reveal-word' untuk dikontrol GSAP
-            const colorClass = currentHighlightStatus
-              ? isDarkMode ? "dark:text-[#c1ff72]" : "text-[#f50a0a]"
-              : isDarkMode ? "text-white reveal-word" : "text-gray-900 reveal-word";
+          py-3
 
-            return (
-              <span key={i} className="relative mx-[3px] lg:mx-[5px] inline-block my-1">
-                <span 
-                  className={`transition-colors duration-500 ${colorClass}`}
-                  // Set opacity bawaan: terang untuk highlight, redup untuk kata biasa
-                  style={{ opacity: currentHighlightStatus ? 1 : 0.1 }}
+          sm:py-5
+
+          md:py-7
+
+          lg:py-10
+        "
+      >
+        <p
+          className="
+            flex
+            w-full
+            min-w-0
+            flex-wrap
+
+            items-baseline
+
+            font-bold
+            leading-[1.55]
+
+            transition-colors
+            duration-500
+
+            sm:leading-[1.6]
+
+            md:leading-[1.65]
+          "
+        >
+          {words.map(
+            (
+              word,
+              index
+            ) => {
+              const startHighlight =
+                word.startsWith(
+                  "**"
+                );
+
+              const endHighlight =
+                word.endsWith(
+                  "**"
+                ) ||
+                word.includes(
+                  "**"
+                );
+
+              if (
+                startHighlight
+              ) {
+                isHighlighting =
+                  true;
+              }
+
+              const cleanWord =
+                word.replace(
+                  /\*\*/g,
+                  ""
+                );
+
+              const currentHighlightStatus =
+                isHighlighting;
+
+              if (
+                endHighlight
+              ) {
+                isHighlighting =
+                  false;
+              }
+
+              const colorClass =
+                currentHighlightStatus
+                  ? isDarkMode
+                    ? "text-[#c1ff72]"
+                    : "text-[#f50a0a]"
+                  : isDarkMode
+                    ? "text-white reveal-word"
+                    : "text-gray-900 reveal-word";
+
+              return (
+                <span
+                  key={
+                    `${cleanWord}-${index}`
+                  }
+                  className="
+                    relative
+                    inline-block
+
+                    mx-[2px]
+                    my-[2px]
+
+                    sm:mx-[3px]
+                    sm:my-[3px]
+
+                    md:mx-[4px]
+
+                    lg:mx-[5px]
+                  "
                 >
-                  {cleanWord}
+                  <span
+                    className={`
+                      transition-colors
+                      duration-500
+
+                      ${colorClass}
+                    `}
+                    style={{
+                      opacity:
+                        currentHighlightStatus
+                          ? 1
+                          : 0.1,
+                    }}
+                  >
+                    {
+                      cleanWord
+                    }
+                  </span>
                 </span>
-              </span>
-            );
-          })}
+              );
+            }
+          )}
         </p>
       </div>
     </div>
