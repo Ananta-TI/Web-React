@@ -1,516 +1,910 @@
 <div align="center">
 
-# 🌊 Ananta-TI Portfolio v2.0
-### Interactive • Immersive • Awwwards-Inspired
+# ⚡ ANANTA — WEB EXPERIENCE
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-ananta--ti.vercel.app-success?style=for-the-badge&logoColor=white)](https://ananta-ti.vercel.app/)
-[![GitHub](https://img.shields.io/badge/GitHub-Ananta--TI%2FWeb--React-black?style=for-the-badge&logo=github)](https://github.com/Ananta-TI/Web-React)
-[![Last Commit](https://img.shields.io/github/last-commit/Ananta-TI/Web-React?style=for-the-badge&color=blue&logo=git)](https://github.com/Ananta-TI/Web-React)
-[![Performance](https://img.shields.io/badge/Performance-⚡_100%25-brightgreen?style=for-the-badge)](https://vercel.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+### `Interactive Portfolio · Creative Frontend · Motion · Security · Experiments`
 
-<br/>
+<a href="https://ananta-ti.vercel.app">
+  <img src="https://img.shields.io/badge/LIVE_PORTFOLIO-Visit_Website-7C3AED?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Portfolio" />
+</a>
+<a href="https://github.com/Ananta-TI/Web-React">
+  <img src="https://img.shields.io/badge/SOURCE_CODE-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="Source Code" />
+</a>
 
-> **Website portofolio eksperimental yang mendorong batas kemampuan React & Framer Motion**  
-> Menampilkan liquid transitions, micro-interactions, dan typography-driven design dengan performa maksimal.
+![React](https://img.shields.io/badge/React_19-20232A?style=flat-square\&logo=react\&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite_6-646CFF?style=flat-square\&logo=vite\&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square\&logo=tailwindcss\&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-FF0055?style=flat-square\&logo=framer\&logoColor=white)
+![GSAP](https://img.shields.io/badge/GSAP-0AE448?style=flat-square\&logo=greensock\&logoColor=000000)
+![Three.js](https://img.shields.io/badge/Three.js-000000?style=flat-square\&logo=threedotjs\&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square\&logo=supabase\&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square\&logo=vercel\&logoColor=white)
 
-[**🌐 Kunjungi Website**](https://ananta-ti.vercel.app/) • [**📚 Lihat Kode**](https://github.com/Ananta-TI/Web-React) • [**📧 Hubungi Saya**](mailto:ananta23ti@mahasiswa.pcr.ac.id)
+![GitHub last commit](https://img.shields.io/github/last-commit/Ananta-TI/Web-React?style=flat-square\&color=22c55e)
+![GitHub repo size](https://img.shields.io/github/repo-size/Ananta-TI/Web-React?style=flat-square\&color=3b82f6)
+![GitHub stars](https://img.shields.io/github/stars/Ananta-TI/Web-React?style=flat-square\&color=f59e0b)
+![GitHub forks](https://img.shields.io/github/forks/Ananta-TI/Web-React?style=flat-square\&color=ec4899)
+![License](https://img.shields.io/badge/License-MIT-a855f7?style=flat-square)
+
+
+> **A personal portfolio engineered as an interactive digital experience — combining modern frontend development, cinematic motion, experimental UI, creative coding, and cybersecurity-inspired features.**
 
 </div>
 
 ---
 
-## 📋 Daftar Isi
-- [✨ Fitur Utama](#-fitur-utama)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [📁 Struktur Folder](#-struktur-folder)
-- [🎨 Komponen & Fitur Khusus](#-komponen--fitur-khusus)
-- [⚡ Optimasi Performa](#-optimasi-performa)
-- [🔧 Development](#-development)
-- [📬 Kontak](#-kontak)
+## 🌌 About The Project
+
+**Web-React** is my personal portfolio and experimental frontend playground.
+
+Instead of building a conventional portfolio made only of static sections and cards, this project explores how **motion, typography, interaction, WebGL, responsive layouts, data visualization, and frontend engineering** can work together to create a memorable digital experience.
+
+The project serves as both:
+
+* 💼 a professional developer portfolio
+* 🎨 a creative frontend showcase
+* 🧪 an experimental UI laboratory
+* 🛡️ a cybersecurity interface playground
+* 📊 a developer activity visualization platform
+* ⚡ a place to explore animation and interaction techniques
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Experience Highlights
 
-### 🎬 **Cinematic Preloader** (Signature Feature)
-Fitur unggulan yang memberikan kesan pertama premium dengan animasi kelas Awwwards:
+<table>
+<tr>
+<td width="50%" valign="top">
 
-- **✨ Curtain Reveal Effect**: SVG Path Morphing menciptakan efek tirai "cair" yang ditarik ke atas, memberikan transisi liquid yang sangat halus saat website dimuat
-- **🌍 Multi-language Greeting**: Menyapa pengguna dengan animasi teks dalam **16 bahasa berbeda** sebelum konten utama muncul
-- **🧠 Smart Loading Logic**: Menggunakan `SessionStorage` agar preloader hanya muncul pada kunjungan pertama, tidak mengganggu navigasi berulang
-- **🔒 Anti-Scroll Locking**: Mencegah scroll saat loading berlangsung untuk menjaga integritas visual
+### 🎬 Cinematic Experience
 
-### 🖱️ **Interaksi & Navigasi** (UX First)
+Custom preloader, animated typography, page transitions, visual reveals, smooth scrolling, and motion-driven storytelling.
 
-- **🎯 Custom Target Cursor**: Kursor kustom dengan efek magnetik dan indikator visual yang berputar
-- **📜 GSAP Smooth Scroll (Lenis)**: Scroll berbasis inersia (momentum) yang lembut menggantikan scroll browser default
-- **📊 Scroll Progress Bar**: Indikator visual real-time yang menunjukkan posisi baca pengguna
+</td>
+<td width="50%" valign="top">
 
-### 🌓 **Dynamic Theming** (Dark/Light Mode)
+### 🖱️ Interactive UI
 
-- Global state management menggunakan `ThemeContext`
-- Transisi warna halus (`duration-500`) pada semua elemen
-- SVG dan komponen secara otomatis menyesuaikan palet warna
+Custom cursor interactions, hover previews, draggable interfaces, micro-interactions, magnetic elements, and animated cards.
 
-### 📱 **Fully Responsive Design**
+</td>
+</tr>
 
-- Mobile-first approach
-- Breakpoint Tailwind yang optimal
-- Testing di berbagai device ukuran
-- Touch-friendly interaction
+<tr>
+<td width="50%" valign="top">
 
----
+### 🌗 Adaptive Theme
 
-## 🛠️ Tech Stack & Tools
+Global dark/light mode powered by React Context with coordinated visual transitions throughout the application.
 
-| Kategori | Teknologi | Alasan Dipilih |
-|:---|:---|:---|
-| **Framework** | ![React](https://img.shields.io/badge/-React%2018+-61DAFB?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat&logo=vite&logoColor=white) | Ekosistem komponen terbaik & HMR instan |
-| **Styling** | ![Tailwind CSS](https://img.shields.io/badge/-Tailwind%20CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white) | Rapid UI development & konsistensi desain |
-| **Animation** | ![Framer Motion](https://img.shields.io/badge/-Framer%20Motion-0055FF?style=flat&logo=framer&logoColor=white) ![GSAP](https://img.shields.io/badge/-GSAP-88CE02?style=flat&logo=greensock&logoColor=white) | Library animasi paling deklaratif untuk React | 
-| **3D & WebGL** | ![Three.js](https://img.shields.io/badge/-Three.js-000000?style=flat&logo=three.js&logoColor=white) | Rendering grafik 3D interaktif di browser |
-| **Scroll** | ![Lenis](https://img.shields.io/badge/-Lenis-000?style=flat) | Smooth scrolling berbasis inersia |
-| **Deployment** | ![Vercel](https://img.shields.io/badge/-Vercel-000000?style=flat&logo=vercel&logoColor=white) | CI/CD otomatis & Edge Network global |
-| **Version Control** | ![Git](https://img.shields.io/badge/-Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat&logo=github&logoColor=white) | Workflow kolaborasi modern |
+</td>
+<td width="50%" valign="top">
 
-**Node Version**: v16+ | **Package Manager**: npm atau yarn
+### 📱 Responsive System
 
----
+Designed for phones, tablets, laptops, desktops, browser resizing, and changing viewport conditions.
 
-## 🚀 Quick Start
+</td>
+</tr>
 
-### 📋 Prerequisites
-```
-✅ Node.js v16 atau lebih tinggi
-✅ npm atau yarn (package manager)
-✅ Git untuk version control
-```
+<tr>
+<td width="50%" valign="top">
 
-### 1️⃣ Clone Repository
-```bash
-git clone https://github.com/Ananta-TI/Web-React.git
-cd Web-React
-```
+### 🛡️ Security Experiments
 
-### 2️⃣ Install Dependencies
-```bash
-npm install
-# atau jika menggunakan yarn
-yarn install
-```
+Experimental website scanning interface with server-side VirusTotal integrations and security-oriented UI.
 
-### 3️⃣ Jalankan Development Server
-```bash
-npm run dev
-# atau
-yarn dev
-```
-Buka `http://localhost:5173` di browser Anda untuk melihat hasilnya.
+</td>
+<td width="50%" valign="top">
 
-### 4️⃣ Build untuk Production
-```bash
-npm run build
-# atau
-yarn build
-```
+### 📊 Developer Activity
 
-### 5️⃣ Preview Production Build
-```bash
-npm run preview
-# atau
-yarn preview
-```
+GitHub profile, follower visualization, contribution data, coding activity, charts, and developer statistics.
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 📁 Struktur Folder
+# 🚀 Core Features
 
-```
-Web-React/
-├── 📂 public/                    # Aset statis & favicon
-│   ├── img/                      # Gambar-gambar proyek
-│   └── ...
-├── 📂 src/
-│   ├── 📂 assets/               # Global assets (CSS, Fonts, Images)
-│   │   ├── index.css            # Global Tailwind & custom styles
-│   │   └── fonts/               # Custom fonts
-│   │
-│   ├── 📂 components/              # Komponen UI Reusable
-│   │   ├── 📂 Home/                # Komponen spesifik halaman Home
-│   │   │   ├── Hero.jsx            # Section hero dengan animasi
-│   │   │   ├── ScrollProgress.jsx
-│   │   │   └── ...
-│   │   ├── 📂 Shared/                  # Komponen umum
-│   │   │   ├── TargetCursor.jsx        # Custom cursor dengan efek
-│   │   │   ├── MorphTransition.jsx     # SVG morphing preloader
-│   │   │   ├── TextPressure.jsx        # Typography interaktif
-│   │   │   └── ...
-│   │   └── 📂 UI/                     # Komponen UI dasar
-│   │       ├── Button.jsx
-│   │       ├── Card.jsx
-│   │       └── ...
-│   │
-│   ├── 📂 context/              # State Management Global
-│   │   ├── ThemeContext.jsx     # Dark/Light mode context
-│   │   └── ...
-│   │
-│   ├── 📂 layouts/              # Page Layouts & Sections
-│   │   ├── Home.jsx             # Halaman utama
-│   │   ├── Projects.jsx         # Halaman projects
-│   │   ├── About.jsx            # Halaman tentang
-│   │   └── ...
-│   │
-│   ├── 📂 hooks/                # Custom React Hooks
-│   │   ├── useScrollProgress.js
-│   │   ├── useTheme.js
-│   │   └── ...
-│   │
-│   ├── 📂 utils/                # Utility functions
-│   │   ├── animations.js        # Helper animasi
-│   │   ├── constants.js         # Konstanta global
-│   │   └── ...
-│   │
-│   ├── App.jsx                  # Main routing & preloader logic
-│   ├── main.jsx                 # React entry point
-│   └── index.css                # Global styles
-│
-├── 📄 package.json              # Dependencies & scripts
-├── 📄 vite.config.js            # Konfigurasi Vite
-├── 📄 tailwind.config.js        # Konfigurasi Tailwind CSS
-├── 📄 postcss.config.js         # PostCSS configuration
-└── 📄 README.md                 # Dokumentasi ini
-```
+## 🎞️ Cinematic Preloader
+
+A custom opening sequence creates a stronger first impression before the main interface is displayed.
+
+Features include:
+
+* 🌊 liquid-style transitions
+* 🔤 animated multilingual greetings
+* 🧠 session-aware loading behavior
+* 🔒 temporary scroll locking
+* ⚡ optimized lifecycle handling
+* 🎬 smooth transition into the main application
+
+The preloader uses browser session state so it does not unnecessarily replay during every navigation.
 
 ---
 
-## 🎨 Komponen & Fitur Khusus
+## 🖱️ Motion & Micro-Interactions
 
-### 1. 🦸 **Hero Section**
-```jsx
-// Fitur:
-- Tipografi besar, bold, dan kontras
-- Identitas personal yang kuat
-- Entry animation berbasis opacity + transform
-- Responsive pada semua ukuran layar
+The portfolio makes extensive use of motion without treating animation purely as decoration.
+
+### Motion stack
+
+```text
+Framer Motion
+      ↓
+Component transitions
+Page transitions
+Hover interactions
+Layout animation
+
+GSAP + ScrollTrigger
+      ↓
+Scroll animation
+Text reveals
+Pointer interactions
+Advanced timelines
+
+Lenis
+      ↓
+Smooth inertial scrolling
 ```
 
-### 2. 🔤 **Text Pressure Effect**
-```jsx
-// Fitur:
-- Typography responsif terhadap posisi mouse
-- Distorsi berbasis CSS transform matrix
-- Menjadikan teks sebagai elemen interaktif
-- Smooth follow animation dengan useMousePosition hook
-```
+Interactive elements include:
 
-### 3. 👤 **About Section**
-```jsx
-// Fitur:
-- Layout minimalis dan fokus pada konten
-- Background yang adaptive sesuai theme
-- Typography hierarchy yang jelas
-- Scroll-triggered animations
-```
-
-### 4. 💼 **Projects & Portfolio Grid**
-```jsx
-// Fitur:
-- Grid system fleksibel (responsive cols)
-- Hover reveal untuk metadata proyek
-- Modal detail dengan scroll-locking
-- Background freeze saat modal aktif
-- Lazy loading untuk optimasi performa
-```
-
-### 5. 📊 **Scanner & Experimental Visuals**
-```jsx
-// Fitur:
-- Elemen visual sci-fi inspired
-- CSS animation intensive
-- Demonstrasi eksplorasi kreatif frontend
-- Performance-optimized SVG animations
-```
-
-### 6. 🕒 **Timeline & Certificates**
-```jsx
-// Fitur:
-- Visualisasi kronologis yang elegan
-- Scroll-triggered animations
-- Modal certificate dengan UX overlay proper
-- Responsive design untuk mobile
-```
-
-### 7. 🎯 **Custom Target Cursor**
-```jsx
-// Fitur:
-- Kursor custom yang mengikuti mouse
-- Efek magnetik pada hover elements
-- Loading indicator rotasi
-- Smooth easing dengan GSAP
-```
-### 8. 🧊 **3D GitHub Isometric Contributions**
-```jsx
-// Fitur:
-- Rendering aktivitas GitHub dalam bentuk balok neon 3D (Three.js)
-- Responsive layout dengan auto-camera positioning
-- Interaksi Gyroscope (Paralaks saat device dimiringkan)
-- Scroll momentum rotation (Otomatis berputar searah scroll)
-- Hover wobble animation & Dynamic Tooltip
+* custom pointer behavior
+* project hover previews
+* text reveal animation
+* animated project lists
+* infinite experience carousel
+* magnetic button interactions
+* dynamic hover states
+* animated follower stacks
+* scroll-linked visual effects
+* theme transitions
 
 ---
 
-## ⚡ Optimasi Performa
+## 🎨 Visual & Creative Development
 
-Website ini bukan hanya soal visual, tapi juga dioptimalkan untuk performa maksimal:
+The project experiments with multiple rendering and animation approaches.
 
-### 📦 **Code Splitting**
-```bash
-✓ Vite memecah bundle JavaScript otomatis
-✓ Dynamic import untuk route-based splitting
-✓ Tree-shaking untuk menghilangkan dead code
-```
+<div align="center">
 
-### 🖼️ **Asset Optimization**
-```bash
-✓ Format gambar modern (AVIF/WebP)
-✓ Image compression & responsive images
-✓ Lazy loading untuk images & components
-✓ SVG optimization dengan SVGO
-```
+### Creative Stack
 
-### 📊 **Monitoring & Analytics**
-```bash
-✓ Vercel Speed Insights untuk Core Web Vitals
-✓ Real-time performance monitoring
-✓ Lighthouse scoring tinggi (90+)
-```
+<img src="https://skillicons.dev/icons?i=react,vite,tailwind,threejs,js,html,css&theme=dark" alt="Creative Development Stack" />
 
-### 🧹 **Memory Management**
-```jsx
-✓ useEffect cleanup functions
-✓ Event listener removal pada unmount
-✓ Timeout/interval clearing
-✓ No memory leaks
-```
+</div>
 
-### 🔄 **Browser Caching**
-```bash
-✓ Service Worker untuk offline support
-✓ HTTP caching headers optimal
-✓ LocalStorage untuk preferences
-✓ SessionStorage untuk transient data
-```
+<br />
+
+Technologies such as **Three.js** and **OGL** are used for graphics-oriented and WebGL experiments alongside traditional DOM-based interfaces.
+
+
+# 🧭 Application
+
+## 🏠 Home
+
+The primary portfolio experience.
+
+Includes:
+
+* hero experience
+* animated typography
+* responsive navigation
+* custom cursor
+* featured content
+* project previews
+* theme system
+* cinematic interactions
 
 ---
+
+## 👨‍💻 About
+
+The About experience contains:
+
+* personal introduction
+* animated text reveal
+* technology-focused content
+* experience carousel
+* GitHub profile card
+* contribution visualization
+* development activity components
+* lazily loaded interactive sections
+
+Heavy components are loaded only when necessary to reduce initial rendering cost.
+
+---
+
+## 💼 Projects
+
+Projects are displayed through an interaction-focused showcase instead of a conventional static grid.
+
+### Project interaction includes
+
+* floating preview images
+* GSAP hover movement
+* detailed project modals
+* technology tags
+* repository links
+* live demo links
+* responsive project cards
+* dedicated project archive
+
+---
+
+## 🛡️ Website Scanner
+
+The repository also contains an experimental **website security scanner**.
+
+The frontend provides dedicated scanner interfaces while server-side endpoints communicate with external security services.
+
+### Scanner views
+
+```text
+┌───────────────────────────────┐
+│       Website Scanner         │
+├───────────────────────────────┤
+│  🔍 Detection                │
+│  📋 Details                  │
+│  ⚙️ Behavior                 │
+│  🧠 Intelligence             │
+│  🕒 History                  │
+└───────────────────────────────┘
+```
+
+Available API functionality includes URL scanning, file scanning, metadata retrieval, search operations, and result processing.
+
+> [!IMPORTANT]
+> The scanner is an experimental and educational portfolio feature.
+> It should not be considered a replacement for professional penetration testing or security assessment.
+
+---
+
+## 🗓️ Timeline
+
+A dedicated chronological experience for displaying personal, educational, and development milestones.
+
+
+## 🏆 Certificates
+
+Dedicated certificate showcase with responsive presentation and interactive navigation.
+
+
+## 🎨 Art
+
+A creative section for visual experiments and work outside conventional software projects.
+
+
+## 📈 Activity
+
+Developer-related activity and statistics presented through a dedicated route.
+
+
+# 🗺️ Routes
+
+| Route           | Experience            |
+| --------------- | --------------------- |
+| `/`             | 🏠 Main portfolio     |
+| `/Scanner`      | 🛡️ Security scanner  |
+| `/timeline`     | 🗓️ Timeline          |
+| `/all-projects` | 💼 Project archive    |
+| `/certificates` | 🏆 Certificates       |
+| `/art`          | 🎨 Creative work      |
+| `/activity`     | 📊 Developer activity |
+
+---
+
+# 🧰 Technology Stack
+
+<div align="center">
+
+## ⚛️ Frontend
+
+<img src="https://skillicons.dev/icons?i=react,vite,tailwind,javascript,html,css&theme=dark" alt="Frontend Stack" />
+
+<br /><br />
+
+## ⚡ Backend & Services
+
+<img src="https://skillicons.dev/icons?i=nodejs,express,supabase,vercel&theme=dark" alt="Backend Stack" />
+
+<br /><br />
 
 ## 🔧 Development
 
-### Available Scripts
+<img src="https://skillicons.dev/icons?i=git,github,vscode,npm&theme=dark" alt="Development Tools" />
 
-```bash
-# Development server dengan hot reload
-npm run dev              # Jalankan di http://localhost:5173
+</div>
 
-# Build untuk production
-npm run build            # Optimized build untuk deployment
 
-# Preview production build
-npm run preview          # Test production build locally
+## ⚛️ Frontend Core
 
-# Lint code (jika eslint dikonfigurasi)
-npm run lint             # Check code quality
+| Technology            | Usage                  |
+| --------------------- | ---------------------- |
+| ⚛️ **React 19**       | Component architecture |
+| ⚡ **Vite 6**          | Development & bundling |
+| 🎨 **Tailwind CSS 4** | Responsive UI styling  |
+| 🧭 **React Router**   | Client-side navigation |
+| 🧩 **Lucide React**   | Interface iconography  |
 
-# Format code (jika prettier dikonfigurasi)
-npm run format           # Auto format code
-```
 
-### Environment Variables (jika diperlukan)
-```bash
-# Buat file .env.local di root folder
-VITE_API_URL=your_api_url
-VITE_PUBLIC_KEY=your_public_key
-```
+## 🎬 Animation & Graphics
 
-### Git Workflow (Best Practices)
-```bash
-# Buat feature branch
-git checkout -b feature/amazing-feature
+| Technology           | Usage                          |
+| -------------------- | ------------------------------ |
+| 💫 **Framer Motion** | Component animation            |
+| 🟢 **GSAP**          | Advanced animation             |
+| 📜 **ScrollTrigger** | Scroll-driven sequences        |
+| 🌊 **Lenis**         | Smooth scrolling               |
+| 🧊 **Three.js**      | WebGL / 3D                     |
+| 🔮 **OGL**           | Lightweight WebGL              |
+| ⚡ **Anime.js**       | Additional animation utilities |
 
-# Commit dengan pesan deskriptif
-git commit -m "feat: add amazing feature"
 
-# Push ke remote
-git push origin feature/amazing-feature
+## 🎛️ UI Ecosystem
 
-# Buat Pull Request di GitHub
-# (Vercel akan auto-deploy preview)
+The repository also makes use of:
+
+![MUI](https://img.shields.io/badge/Material_UI-007FFF?style=for-the-badge\&logo=mui\&logoColor=white)
+![Radix](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge\&logo=radixui\&logoColor=white)
+![Lucide](https://img.shields.io/badge/Lucide-FF6B6B?style=for-the-badge\&logo=lucide\&logoColor=white)
+
+Additional utilities include:
+
+* `clsx`
+* `tailwind-merge`
+* `class-variance-authority`
+* `react-icons`
+* `hamburger-react`
+
+---
+
+## ☁️ Services & Integrations
+
+![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge\&logo=supabase\&logoColor=3FCF8E)
+![Vercel](https://img.shields.io/badge/Vercel-181818?style=for-the-badge\&logo=vercel\&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub_API-181717?style=for-the-badge\&logo=github)
+![Analytics](https://img.shields.io/badge/Vercel_Analytics-000000?style=for-the-badge\&logo=vercel)
+![VirusTotal](https://img.shields.io/badge/VirusTotal-394EFF?style=for-the-badge\&logo=virustotal\&logoColor=white)
+
+Integrations include:
+
+* Supabase
+* GitHub API
+* VirusTotal
+* WakaTime
+* Vercel Analytics
+* Vercel Speed Insights
+* Vercel Blob
+
+---
+
+# 🏗️ Architecture
+
+```text
+Web-React/
+│
+├── 🛡️ api/
+│   ├── vt/
+│   │   ├── advanced/
+│   │   ├── metadata/
+│   │   ├── result/
+│   │   ├── scan.js
+│   │   ├── scan-file.js
+│   │   └── search.js
+│   │
+│   ├── index.js
+│   ├── test.js
+│   └── wakatime.js
+│
+├── 🌐 public/
+│
+├── 🛣️ routes/
+│
+├── 🖥️ server/
+│   └── scanner/
+│
+├── ⚛️ src/
+│   │
+│   ├── 📦 Data/
+│   ├── 🎨 assets/
+│   │
+│   ├── 🧩 components/
+│   │   ├── Chatbot/
+│   │   ├── Home/
+│   │   ├── Shared/
+│   │   ├── WebsiteScanner/
+│   │   ├── ui/
+│   │   └── ...
+│   │
+│   ├── 🌗 context/
+│   ├── 🪝 hooks/
+│   │
+│   ├── 🖼️ layouts/
+│   │   ├── AllProjects.jsx
+│   │   ├── Art.jsx
+│   │   ├── Certificates.jsx
+│   │   ├── Header.jsx
+│   │   ├── about.jsx
+│   │   ├── activity.jsx
+│   │   ├── footer.jsx
+│   │   ├── project.jsx
+│   │   └── timeline.jsx
+│   │
+│   ├── 📚 lib/
+│   ├── 📄 pages/
+│   ├── 🔌 services/
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
+│   └── supabaseClient.js
+│
+├── 🧰 utils/
+│
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+├── vercel.json
+└── README.md
 ```
 
 ---
 
-## 🎯 Fitur yang Akan Datang
+# ⚡ Performance Strategy
 
-- [ ] Blog section dengan MDX support
-- [x] Interactive 3D elements dengan Three.js
-- [ ] Real-time collaboration features
-- [ ] CMS integration (Contentful/Sanity)
-- [ ] Advanced analytics dashboard
-- [x] API backend integration
+Performance is treated as part of the design rather than an afterthought.
+
+## 💤 Lazy Loading
+
+Large pages and visual components use:
+
+```jsx
+lazy(() => import("./SomeComponent"));
+```
+
+combined with:
+
+```jsx
+<Suspense fallback={...}>
+```
+
+This prevents all major sections from being included in the first rendering path.
 
 ---
 
-## 🐛 Troubleshooting
+## 👁️ Viewport-Based Mounting
 
-### Port 5173 sudah terpakai?
-```bash
-npm run dev -- --port 3000  # Ganti ke port 3000
+Some heavy components are mounted only when approaching the viewport using:
+
+```text
+IntersectionObserver
 ```
 
-### Permasalahan dengan dependencies?
-```bash
-# Clear cache
-npm cache clean --force
+Flow:
 
-# Delete node_modules dan reinstall
-rm -rf node_modules package-lock.json
+```text
+User scrolls
+     ↓
+Component approaches viewport
+     ↓
+IntersectionObserver activates
+     ↓
+Dynamic component mounts
+     ↓
+Animation / visualization begins
+```
+
+---
+
+## 📦 Build Optimization
+
+Vite handles production bundling and optimization.
+
+The project also contains support for:
+
+* CSS code splitting
+* dependency optimization
+* bundle visualization
+* production asset optimization
+* route lazy loading
+* production analytics
+
+Run bundle analysis using:
+
+```bash
+npm run analyze
+```
+
+---
+
+# 🌗 Theme System
+
+The application uses a global React context for theme management.
+
+```text
+ThemeContext
+     │
+     ├── Header
+     ├── About
+     ├── Projects
+     ├── Github components
+     ├── Scanner
+     ├── Footer
+     └── Interactive UI
+```
+
+The system coordinates:
+
+* backgrounds
+* text
+* borders
+* cards
+* SVG elements
+* charts
+* hover states
+* transitions
+
+---
+
+# 📱 Responsive Design
+
+The interface is designed around adaptive layouts rather than a single target resolution.
+
+Test targets include:
+
+<p align="center">
+
+![Mobile](https://img.shields.io/badge/📱_Mobile-Responsive-22C55E?style=for-the-badge)
+![Tablet](https://img.shields.io/badge/📟_Tablet-Adaptive-3B82F6?style=for-the-badge)
+![Laptop](https://img.shields.io/badge/💻_Laptop-Optimized-F59E0B?style=for-the-badge)
+![Desktop](https://img.shields.io/badge/🖥️_Desktop-Immersive-A855F7?style=for-the-badge)
+
+</p>
+
+Responsive considerations include:
+
+* fluid containers
+* flexible CSS Grid layouts
+* responsive typography
+* mobile-first spacing
+* `min-w-0` overflow protection
+* adaptive cards
+* touch interactions
+* responsive modals
+* breakpoint-aware animation
+* browser resize handling
+* browser zoom stability
+
+---
+
+# 🔐 Environment Variables
+
+Create a `.env.local` file in the project root.
+
+```env
+# =========================
+# SUPABASE
+# =========================
+
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+
+# =========================
+# VIRUSTOTAL
+# SERVER SIDE ONLY
+# =========================
+
+VT_API_KEY=your_virustotal_api_key
+
+
+# =========================
+# WAKATIME
+# SERVER SIDE ONLY
+# =========================
+
+WAKATIME_API_KEY=your_wakatime_api_key
+```
+
+> [!CAUTION]
+> Never expose private server credentials using the `VITE_` prefix.
+>
+> Variables prefixed with `VITE_` can become available inside client-side bundles.
+
+---
+
+# 🛠️ Getting Started
+
+## 1️⃣ Clone
+
+```bash
+git clone https://github.com/Ananta-TI/Web-React.git
+```
+
+```bash
+cd Web-React
+```
+
+---
+
+## 2️⃣ Install
+
+```bash
 npm install
 ```
 
-### Build gagal?
-```bash
-# Clear Vite cache
-rm -rf dist/ .vite/
+---
 
-# Rebuild
+## 3️⃣ Configure Environment
+
+Create:
+
+```text
+.env.local
+```
+
+Then add the environment variables required by the integrations you want to use.
+
+---
+
+## 4️⃣ Start Frontend Development
+
+```bash
+npm run dev
+```
+
+Default Vite development URL:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 5️⃣ Run With Vercel Functions
+
+For features that depend on `/api` serverless routes:
+
+```bash
+npm run dev:full
+```
+
+---
+
+## 6️⃣ Production Build
+
+```bash
 npm run build
 ```
 
-### Permasalahan dengan styling?
+---
+
+## 7️⃣ Preview Build
+
 ```bash
-# Rebuild Tailwind cache
-npx tailwindcss -i ./src/assets/index.css -o ./dist/output.css
+npm run preview
 ```
 
 ---
 
-## 📚 Resources & Documentation
+# 📜 Scripts
 
-### Official Docs
-- [🔗 React Documentation](https://react.dev)
-- [🔗 Vite Guide](https://vitejs.dev)
-- [🔗 Tailwind CSS](https://tailwindcss.com/docs)
-- [🔗 Framer Motion](https://www.framer.com/motion)
-- [🔗 GSAP Docs](https://greensock.com/gsap/)
-- [🔗 Lenis Scroll](https://lenis.darkroom.engineering/)
-
-### Learning Resources
-- [📺 React Hooks Tutorial](https://react.dev/reference/react)
-- [📺 Animation Basics](https://www.framer.com/motion/introduction/)
-- [📖 Performance Optimization](https://web.dev/performance/)
+| Command            | Purpose                          |
+| ------------------ | -------------------------------- |
+| `npm run dev`      | ⚡ Start Vite development         |
+| `npm run dev:full` | ▲ Start Vercel local environment |
+| `npm run build`    | 📦 Production build              |
+| `npm run preview`  | 👀 Preview production build      |
+| `npm run lint`     | 🧹 Run ESLint                    |
+| `npm run analyze`  | 📊 Analyze bundle                |
 
 ---
 
-## 🤝 Contributing
+# ▲ Deployment
 
-Kami menerima kontribusi dari komunitas! Berikut cara berkontribusi:
+<div align="center">
 
-### Langkah-langkah:
-1. **Fork** repository ini
-2. **Clone** fork Anda ke lokal
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/Web-React.git
-   ```
-3. **Buat feature branch**
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-4. **Commit changes**
-   ```bash
-   git commit -m 'feat: Add some AmazingFeature'
-   ```
-5. **Push ke branch**
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-6. **Buka Pull Request**
+<img src="https://skillicons.dev/icons?i=vercel&theme=dark" width="70" alt="Vercel" />
 
-### Contribution Guidelines
-- ✅ Ikuti kode style yang sudah ada
-- ✅ Tulis commit message yang deskriptif
-- ✅ Update dokumentasi jika diperlukan
-- ✅ Test fitur sebelum push
-- ✅ Jangan push ke `main` secara langsung
+### Deployed with Vercel
 
-### Kode Style
-```javascript
-// ✓ Baik
-const fetchUserData = async (userId) => {
-  const response = await fetch(`/api/users/${userId}`);
-  return response.json();
-};
+</div>
 
-// ✗ Hindari
-const FetchUserData=async(u)=>{return fetch(`/api/users/${u}`).then(r=>r.json())}
+The repository contains dedicated Vercel configuration for:
+
+* frontend builds
+* SPA routing
+* serverless API functions
+* API configuration
+* response headers
+* static asset handling
+
+### Production
+
+```text
+https://ananta-ti.vercel.app
 ```
 
+
+# 🛡️ Security Principles
+
+Because this project contains security-related integrations, API design follows several basic principles:
+
+* 🔐 private API keys remain server-side
+* 🚫 secrets should never be committed
+* ✅ incoming requests should be validated
+* 🔗 external URLs should be treated as untrusted input
+* 📁 uploaded files should be validated
+* ⏱️ API usage should respect rate limits
+* 🧱 method restrictions should remain enforced
+* 🌐 security-related response headers should be preserved
+
+
+# 🧠 Development Philosophy
+
+<table>
+<tr>
+<td align="center" width="25%">
+
+### 🎨
+
+**Design**
+
+Interfaces should feel intentional.
+
+</td>
+
+<td align="center" width="25%">
+
+### ⚡
+
+**Performance**
+
+Motion should not destroy responsiveness.
+
+</td>
+
+<td align="center" width="25%">
+
+### 🧠
+
+**Engineering**
+
+Components should remain maintainable.
+
+</td>
+
+<td align="center" width="25%">
+
+### 🧪
+
+**Experiment**
+
+The web should be fun to explore.
+
+</td>
+</tr>
+</table>
+
 ---
 
-## 📄 License
+# 📊 GitHub
 
-Project ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
+<div align="center">
 
+<a href="https://github.com/Ananta-TI">
+  <img height="165" src="https://github-readme-stats.vercel.app/api?username=Ananta-TI&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=A855F7&icon_color=22D3EE&text_color=FFFFFF" alt="GitHub Stats" />
+</a>
+
+<a href="https://github.com/Ananta-TI">
+  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Ananta-TI&layout=compact&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=EC4899&text_color=FFFFFF" alt="Top Languages" />
+</a>
+
+</div>
+
+<br />
+
+<div align="center">
+
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=Ananta-TI&bg_color=0D1117&color=A855F7&line=22D3EE&point=F472B6&area=true&hide_border=true" alt="GitHub Activity Graph" />
+
+</div>
+
+---
+
+# 🌟 Repository
+
+<div align="center">
+
+If you find this project interesting, consider giving it a ⭐.
+
+<br />
+<br />
+
+<a href="https://github.com/Ananta-TI/Web-React">
+<img src="https://img.shields.io/github/stars/Ananta-TI/Web-React?style=for-the-badge&logo=github&color=F59E0B&labelColor=18181B" />
+</a>
+
+<a href="https://github.com/Ananta-TI/Web-React/fork">
+<img src="https://img.shields.io/github/forks/Ananta-TI/Web-React?style=for-the-badge&logo=github&color=3B82F6&labelColor=18181B" />
+</a>
+
+<a href="https://github.com/Ananta-TI/Web-React/issues">
+<img src="https://img.shields.io/github/issues/Ananta-TI/Web-React?style=for-the-badge&logo=github&color=EC4899&labelColor=18181B" />
+</a>
+
+</div>
+
+
+# 🤝 Contributing
+
+Although this repository primarily serves as a personal portfolio, suggestions and improvements are welcome.
+
+```bash
+# Create a feature branch
+git checkout -b feature/awesome-feature
+
+# Stage changes
+git add .
+
+# Commit
+git commit -m "feat: add awesome feature"
+
+# Push
+git push origin feature/awesome-feature
 ```
-MIT License
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-...
-```
+Then open a Pull Request.
+
+
+# 👨‍💻 Author
+
+<div align="center">
+
+## Ananta Firdaus
+
+**Frontend Developer · Creative Developer · Technology Enthusiast**
+
+<br />
+
+<a href="https://github.com/Ananta-TI">
+<img src="https://img.shields.io/badge/GitHub-Ananta--TI-181717?style=for-the-badge&logo=github&logoColor=white" />
+</a>
+
+<a href="https://ananta-ti.vercel.app">
+<img src="https://img.shields.io/badge/Portfolio-ananta--ti.vercel.app-7C3AED?style=for-the-badge&logo=vercel&logoColor=white" />
+</a>
+
+</div>
 
 ---
 
-## 📬 Kontak & Social Media
+# 📄 License
 
-Tertarik untuk berkolaborasi atau punya pertanyaan? Mari terhubung!
+This repository is distributed under the **MIT License**.
 
-| Platform | Link |
-|:---|:---|
-| **🌐 Website** | [ananta-ti.vercel.app](https://ananta-ti.vercel.app/) |
-| **📧 Email** | [ananta23ti@mahasiswa.pcr.ac.id](mailto:ananta23ti@mahasiswa.pcr.ac.id) |
-| **🐙 GitHub** | [@Ananta-TI](https://github.com/Ananta-TI) |
-
----
-
-## 🙏 Acknowledgments & Credits
-
-- Terinspirasi oleh desain **Awwwards** award-winning websites
-- Terima kasih kepada komunitas React yang luar biasa
-- GSAP & Framer Motion untuk library animasi terbaik
-- Vercel untuk deployment platform yang sempurna
-- Semua kontributor dan supporter! ❤️
+See [`LICENSE`](./LICENSE) for more information.
 
 ---
 
 <div align="center">
 
-##  Jika project ini membantu, jangan lupa beri ⭐ di GitHub!
+<br />
 
-**[⬆ Kembali ke Atas](#-ananta-ti-portfolio-v20)**
+### ⚡ Building interfaces that feel alive.
 
----
+### `Code × Design × Motion × Experimentation`
 
-<img src="https://img.shields.io/badge/Made%20with-💻%20and%20☕-000?style=for-the-badge" alt="Made with love and coffee">
+<br />
 
-**© 2026 Ananta-TI. All rights reserved.**
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:7C3AED,35:EC4899,70:3B82F6,100:22D3EE&height=120&section=footer" width="100%" />
 
-*Designed & Developed with by Ananta Firdaus*
+**© 2026 Ananta Firdaus**
 
 </div>
-
-y
