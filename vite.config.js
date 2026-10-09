@@ -88,13 +88,10 @@ export default defineConfig(({ mode }) => ({
 //     },
   },
 
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://ch.tetr.io",
-        changeOrigin: true,
-        rewrite: (urlPath) => urlPath.replace(/^\/api/, ""),
-      },
-    },
-  },
+  // NOTE: tidak ada dev-proxy untuk /api di sini.
+  // Semua panggilan /api/* (vt, steam, tetrio, wakatime, blob) dilayani oleh
+  // Vercel Functions di ./api. Untuk pengembangan dengan API, jalankan:
+  //   npm run dev:full   (vercel dev)
+  // Proxy blanket ke host eksternal (mis. ch.tetr.io) hanya akan membajak
+  // request API lokal dan merusak scanner + kartu aktivitas di `npm run dev`.
 }));

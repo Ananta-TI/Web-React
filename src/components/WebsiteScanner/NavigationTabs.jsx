@@ -1,9 +1,11 @@
 // NavigationTabs.jsx
 import React from "react";
 
-const NavigationTabs = ({ activeTab, setActiveTab, isDarkMode, type }) => {
-  // Tambahkan 'intelligence' ke dalam array tab
-  const tabs = ['detection', 'details', 'intelligence'];
+const NavigationTabs = ({ activeTab, setActiveTab, isDarkMode, type, showBehavior = false }) => {
+  // Behavior hanya tersedia untuk file (butuh sandbox analysis).
+  const tabs = showBehavior
+    ? ['detection', 'details', 'intelligence', 'behavior']
+    : ['detection', 'details', 'intelligence'];
   
   return (
     <div className="flex justify-center">

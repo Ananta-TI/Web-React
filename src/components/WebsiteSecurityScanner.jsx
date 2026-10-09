@@ -17,29 +17,26 @@ import NavigationTabs from "./WebsiteScanner/NavigationTabs";
 import DetectionTab from "./WebsiteScanner/DetectionTab";
 import DetailsTab from "./WebsiteScanner/DetailsTab";
 import IntelligenceTab from "./WebsiteScanner/IntelligenceTab";
+import BehaviorTab from "./WebsiteScanner/BehaviorTab";
 
 // ============= CONFIGURATION =============
 const BACKEND_CONFIG = {
-  // Try to use VITE_BACKEND_URL first, then fallback
+  // Prioritas: override eksplisit (non-localhost) -> same-origin.
+  // Override localhost (Express :5000) hanya dipakai saat halamannya sendiri
+  // dibuka dari localhost, supaya bundle production (custom domain / vercel.app)
+  // tidak pernah menembak http://localhost:5000 milik laptop developer.
   getBackendUrl: () => {
-    // Check if we're on localhost
-    if (
+    const override = import.meta.env.VITE_BACKEND_URL;
+    const isLocalPage =
       window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
-      return "http://localhost:5000";
+      window.location.hostname === "127.0.0.1";
+
+    if (override) {
+      const overrideIsLocal = LOCAL_BACKEND_PATTERN.test(override);
+      if (!overrideIsLocal || isLocalPage) return override;
     }
 
-    // For deployed version, use Vercel API
-    if (
-      window.location.hostname.includes("vercel.app") ||
-      window.location.hostname.includes("netlify.app")
-    ) {
-      return window.location.origin; // Same origin for Vercel
-    }
-
-    // Fallback
-    return import.meta.env.VITE_BACKEND_URL || window.location.origin;
+    return window.location.origin;
   },
 };
 
@@ -116,9 +113,9 @@ export default function WebsiteSecurityScanner() {
   const [progress, setProgress] = useState(0);
 
   // Result State
-  const [analysisId, setAnalysisId] = useState(null);
   const [result, setResult] = useState(null);
   const [metadata, setMetadata] = useState(null);
+  const [metaLoading, setMetaLoading] = useState(false);
 
   // UI Tabs
   const [activeTab, setActiveTab] = useState("detection");
@@ -134,6 +131,8 @@ export default function WebsiteSecurityScanner() {
   // Refs for cleanup
   const pollRef = React.useRef(null);
   const pollTimeoutRef = React.useRef(null);
+  const toastTimeoutRef = React.useRef(null);
+  const lastMetaTargetRef = React.useRef(null);
 
   // Get backend URL
   const BACKEND_URL = BACKEND_CONFIG.getBackendUrl();
@@ -151,6 +150,7 @@ export default function WebsiteSecurityScanner() {
     return () => {
       if (pollRef.current) clearTimeout(pollRef.current);
       if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
   }, []);
 
@@ -266,8 +266,12 @@ export default function WebsiteSecurityScanner() {
   };
 
   const showToast = (message, type = "info") => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+      toastTimeoutRef.current = null;
+    }, 3000);
   };
 
   const clearHistory = () => {
@@ -309,7 +313,10 @@ export default function WebsiteSecurityScanner() {
       return null;
     }
 
+    lastMetaTargetRef.current = { type, id };
+
     try {
+      setMetaLoading(true);
       setStatus("Fetching detailed metadata...");
 
       const typeMap = {
@@ -350,6 +357,22 @@ export default function WebsiteSecurityScanner() {
     } catch (metadataError) {
       console.error("❌ fetchMetadata error:", metadataError);
       return null;
+    } finally {
+      setMetaLoading(false);
+    }
+  };
+
+  /**
+   * Retry the last metadata fetch (used by Details tab empty state).
+   */
+  const retryMetadata = async () => {
+    const target = lastMetaTargetRef.current;
+    if (!target || loading) return;
+    setError("");
+    const metadataResult = await fetchMetadata(target.type, target.id);
+    setMetadata(metadataResult);
+    if (!metadataResult) {
+      showToast("Metadata belum tersedia di VirusTotal", "info");
     }
   };
 
@@ -389,6 +412,8 @@ export default function WebsiteSecurityScanner() {
       setStatus("");
     }, POLLING_CONFIG.timeoutMs);
 
+    let rateLimitedStreak = 0;
+
     const poll = async () => {
       if (stopped) return;
 
@@ -416,17 +441,34 @@ export default function WebsiteSecurityScanner() {
             `Result polling failed (HTTP ${response.status})`,
           );
         } catch (pollError) {
-          if (response.status === 404 || response.status === 429) {
+          if (response.status === 404) {
             console.warn(
               `Polling temporarily unavailable (${response.status}):`,
               pollError.message,
             );
+          } else if (response.status === 429) {
+            rateLimitedStreak += 1;
+            console.warn(
+              `Polling rate-limited (${rateLimitedStreak}x):`,
+              pollError.message,
+            );
+            if (rateLimitedStreak >= 5) {
+              clearPolling();
+              setLoading(false);
+              setError(
+                "VirusTotal rate limit tercapai. Tunggu ~1 menit lalu coba lagi.",
+              );
+              setProgress(0);
+              setStatus("");
+              return;
+            }
           } else {
             throw pollError;
           }
         }
 
         if (payload) {
+          rateLimitedStreak = 0;
           const vtStatus = payload.data?.attributes?.status;
 
           if (vtStatus === "queued") {
@@ -442,21 +484,27 @@ export default function WebsiteSecurityScanner() {
             setStatus("Fetching metadata...");
             setResult(payload);
 
-            let targetId = id;
+            // Backend result/[id].js sudah menghitung resource asli
+            // (sha256 file / id url). Pakai itu dulu, fallback ke cara lama.
+            const resource = payload.resource || {};
+            let targetId = resource.id || id;
+            let targetKind = resource.kind || scanType;
 
-            if (scanType === "file") {
-              targetId =
-                payload.meta?.file_info?.sha256 ||
-                payload.data?.attributes?.sha256 ||
-                id;
-            } else if (scanType === "url") {
-              targetId =
-                payload.meta?.url_info?.id ||
-                payload.data?.attributes?.url_info?.id ||
-                id;
+            if (!resource.id) {
+              if (scanType === "file") {
+                targetId =
+                  payload.meta?.file_info?.sha256 ||
+                  payload.data?.attributes?.sha256 ||
+                  id;
+              } else if (scanType === "url") {
+                targetId =
+                  payload.meta?.url_info?.id ||
+                  payload.data?.attributes?.url_info?.id ||
+                  id;
+              }
             }
 
-            const metadataResult = await fetchMetadata(scanType, targetId);
+            const metadataResult = await fetchMetadata(targetKind, targetId);
 
             setMetadata(metadataResult);
             await saveToHistory(payload, metadataResult, inputName, scanType);
@@ -532,10 +580,13 @@ export default function WebsiteSecurityScanner() {
         throw new Error("No analysis ID received");
       }
 
-      setAnalysisId(payload.data.id);
+      // Backend menormalisasi URL (mis. tambah https://). Tampilkan
+      // versi finalnya supaya user tahu persis apa yang di-scan.
+      const finalUrl = payload.normalizedUrl || targetUrl;
+      setInput(finalUrl);
       setProgress(10);
       setStatus("Analysis queued, waiting for results...");
-      startPolling(payload.data.id, "url", targetUrl);
+      startPolling(payload.data.id, "url", finalUrl);
     } catch (scanError) {
       console.error("❌ URL scan error:", scanError);
       setError(
@@ -556,7 +607,10 @@ export default function WebsiteSecurityScanner() {
       return;
     }
 
-    const usesLegacyLocalBackend = LOCAL_BACKEND_PATTERN.test(BACKEND_URL);
+    // Hanya Express lokal (:5000) yang menerima multipart langsung.
+    // vercel dev (localhost:3000) dan production memakai jalur Blob +
+    // serverless, meskipun hostname-nya juga localhost.
+    const usesLegacyLocalBackend = /:5000(?:\/|$)/.test(BACKEND_URL);
     const maxSize = usesLegacyLocalBackend
       ? 650 * 1024 * 1024
       : 32 * 1024 * 1024;
@@ -645,7 +699,6 @@ export default function WebsiteSecurityScanner() {
         throw new Error("No analysis ID received");
       }
 
-      setAnalysisId(payload.data.id);
       setProgress(20);
       setStatus("File uploaded, waiting for analysis...");
       startPolling(payload.data.id, "file", selectedFile.name);
@@ -762,6 +815,8 @@ export default function WebsiteSecurityScanner() {
     setSelectedFile(null);
     setResult(null);
     setMetadata(null);
+    setMetaLoading(false);
+    lastMetaTargetRef.current = null;
     setStatus("");
     setError("");
     setProgress(0);
@@ -797,6 +852,28 @@ export default function WebsiteSecurityScanner() {
       category: info?.category || "undetected",
       result: info?.result || info?.category || "clean",
     }));
+
+  // ============= EFFECTIVE RESOURCE (untuk Intelligence & Behavior tabs) =============
+  // result.data.type === "analysis" untuk scan URL/file baru, jadi tipe asli
+  // diturunkan dari resource backend -> metadata -> mode. Tanpa ini Intelligence
+  // dipanggil dengan type="analysis" dan selalu 404.
+  const effectiveType =
+    metadata?.type ||
+    result?.resource?.kind ||
+    (result?.data?.type && result.data.type !== "analysis"
+      ? result.data.type
+      : mode === "scan"
+        ? "url"
+        : mode === "file"
+          ? "file"
+          : mode) ||
+    mode;
+
+  const effectiveId =
+    metadata?.id || result?.resource?.id || result?.data?.id || null;
+
+  const showBehaviorTab =
+    effectiveType === "file" || effectiveType === "files";
 
   // ============= RENDER =============
   return (
@@ -851,6 +928,7 @@ export default function WebsiteSecurityScanner() {
                 stats={stats}
                 input={input}
                 mode={mode}
+                displayType={effectiveType}
                 selectedFile={selectedFile}
                 isDarkMode={isDarkMode}
               />
@@ -859,6 +937,7 @@ export default function WebsiteSecurityScanner() {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 isDarkMode={isDarkMode}
+                showBehavior={showBehaviorTab}
               />
 
               <div className="min-h-[500px]">
@@ -872,12 +951,27 @@ export default function WebsiteSecurityScanner() {
                   />
                 )}
                 {activeTab === "details" && (
-                  <DetailsTab metadata={metadata} isDarkMode={isDarkMode} />
+                  <DetailsTab
+                    metadata={metadata}
+                    isDarkMode={isDarkMode}
+                    loading={metaLoading}
+                    onRetry={retryMetadata}
+                  />
                 )}
                 {activeTab === "intelligence" && (
                   <IntelligenceTab
-                    id={metadata?.id || result?.data?.id}
-                    type={metadata?.type || result?.data?.type || mode}
+                    id={effectiveId}
+                    type={effectiveType}
+                    isDarkMode={isDarkMode}
+                    backendUrl={BACKEND_URL}
+                  />
+                )}
+                {activeTab === "behavior" && (
+                  <BehaviorTab
+                    id={effectiveId}
+                    type={
+                      effectiveType === "files" ? "file" : effectiveType
+                    }
                     isDarkMode={isDarkMode}
                     backendUrl={BACKEND_URL}
                   />

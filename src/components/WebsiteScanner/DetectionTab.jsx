@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { BarChart2, ListFilter, Skull } from "lucide-react";
 import { PieChart } from '@mui/x-charts/PieChart';
@@ -11,11 +11,13 @@ const DetectionTab = ({ stats, vendorList, showAllVendors, setShowAllVendors, is
     { name: "Undetected", value: stats.undetected || 0, color: "#6b7280" },
   ].filter(d => d.value > 0);
 
-  const sortedVendors = vendorList.sort((a, b) => {
+  // Salin dulu sebelum sort: Array.sort mutasi in-place dan tidak boleh
+  // dilakukan saat render. Key pakai nama vendor (stabil), bukan index.
+  const sortedVendors = useMemo(() => [...vendorList].sort((a, b) => {
     if (a.category === 'malicious' && b.category !== 'malicious') return -1;
     if (b.category === 'malicious' && a.category !== 'malicious') return 1;
     return a.vendor.localeCompare(b.vendor);
-  });
+  }), [vendorList]);
 
   return (
     <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -53,8 +55,8 @@ const DetectionTab = ({ stats, vendorList, showAllVendors, setShowAllVendors, is
         </div>
         <div className="flex-1 overflow-y-auto max-h-[500px] p-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {(showAllVendors ? sortedVendors : sortedVendors.slice(0, 16)).map((v,i)=>(
-              <div key={i} className={`p-3 rounded-lg border flex items-center justify-between group hover:shadow-md transition-all ${isDarkMode?"bg-zinc-900/50 border-zinc-700/50":"bg-gray-50 border-gray-100"}`}>
+            {(showAllVendors ? sortedVendors : sortedVendors.slice(0, 16)).map((v)=>(
+              <div key={v.vendor} className={`p-3 rounded-lg border flex items-center justify-between group hover:shadow-md transition-all ${isDarkMode?"bg-zinc-900/50 border-zinc-700/50":"bg-gray-50 border-gray-100"}`}>
                 <span className="text-sm font-medium">{v.vendor}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase flex items-center gap-1 ${
                   v.category==='malicious'?"bg-red-500/10 text-red-500":

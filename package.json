@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "node server.js",
     "build": "vite build",
     "lint": "eslint .",
     "dev:full": "vercel dev",

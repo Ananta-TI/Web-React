@@ -231,6 +231,62 @@ app.get("/api/vt/search", async (req, res) => {
 });
 
 // ==========================================
+// ROUTE: GET /api/vt/advanced/*  (generic intelligence proxy)
+// Mirrors api/vt/advanced/[...path].js (Vercel) for local dev.
+// Strips the "/advanced" prefix before forwarding to VirusTotal.
+// MUST be registered BEFORE the universal proxy below.
+// ==========================================
+const VT_ADVANCED_ROOTS = new Set([
+  "urls",
+  "files",
+  "domains",
+  "ip_addresses",
+  "analyses",
+  "graphs",
+]);
+
+const VT_SAFE_SEGMENT = /^[A-Za-z0-9._~%-]+$/;
+
+app.get(/^\/api\/vt\/advanced\/(.*)/, async (req, res) => {
+  try {
+    const rawPath = req.params[0] || "";
+    const segments = rawPath.split("/").filter(Boolean);
+
+    if (segments.length === 0) {
+      return res.status(400).json({ error: "Path VirusTotal wajib diisi." });
+    }
+
+    if (
+      segments.some(
+        (seg) => seg === ".." || seg === "." || !VT_SAFE_SEGMENT.test(seg)
+      )
+    ) {
+      return res.status(400).json({ error: "Path VirusTotal tidak valid." });
+    }
+
+    if (!VT_ADVANCED_ROOTS.has(String(segments[0]).toLowerCase())) {
+      return res
+        .status(400)
+        .json({ error: "Jenis resource VirusTotal tidak didukung." });
+    }
+
+    const vtPath = "/" + segments.map(encodeURIComponent).join("/");
+
+    const response = await vtClient.get(vtPath, {
+      params: Object.keys(req.query).length ? req.query : undefined,
+    });
+
+    return res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error(`[Advanced Error] ${req.method} ${req.path}`, err.message);
+
+    res
+      .status(err.response?.status || 500)
+      .json(err.response?.data || { error: err.message });
+  }
+});
+
+// ==========================================
 // UNIVERSAL VT PROXY
 // Handles: /api/vt/files/:hash/behaviour_summary
 //          /api/vt/urls/:id

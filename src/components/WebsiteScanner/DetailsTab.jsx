@@ -8,13 +8,37 @@ import {
 import SectionCard from "../Shared/SectionCard";
 import CopyableText from "../Shared/CopyableText";
 
-const DetailsTab = ({ metadata, isDarkMode }) => {
-  // 1. Loading State
-  if (!metadata) {
+const DetailsTab = ({ metadata, isDarkMode, loading = false, onRetry }) => {
+  // 1. Loading State (metadata masih diambil dari VirusTotal)
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 opacity-50">
         <Loader2 className="w-10 h-10 animate-spin mb-4 text-blue-500"/>
         <p>Fetching deep intelligence...</p>
+      </div>
+    );
+  }
+
+  // 2. Empty State (objek belum ada di database VirusTotal — wajar untuk
+  // scan pertama kali; bukan spinner selamanya)
+  if (!metadata) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Globe className="w-10 h-10 mb-4 opacity-30" />
+        <p className="font-semibold mb-1">No detailed metadata yet</p>
+        <p className="text-sm opacity-60 max-w-md mb-6">
+          VirusTotal belum menyimpan objek ini di databasenya (umum untuk scan
+          pertama kali). Hasil Detection di atas tetap valid.
+        </p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg transition-all active:scale-95"
+          >
+            Retry Metadata
+          </button>
+        )}
       </div>
     );
   }
@@ -144,7 +168,7 @@ const DetailsTab = ({ metadata, isDarkMode }) => {
           <div className="lg:col-span-2">
             <SectionCard title="WHOIS Intelligence" icon={BookOpen} isDarkMode={isDarkMode}>
               {attributes.whois ? (
-                <div className={`p-3 rounded-lg text-xs font-mono max-h-600 overflow-y-auto whitespace-pre-wrap border ${isDarkMode ? "bg-zinc-900/50 border-zinc-700 text-zinc-400" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
+                <div className={`p-3 rounded-lg text-xs font-mono max-h-[600px] overflow-y-auto whitespace-pre-wrap border ${isDarkMode ? "bg-zinc-900/50 border-zinc-700 text-zinc-400" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
                   {attributes.whois}
                 </div>
               ) : (
@@ -341,7 +365,7 @@ const DetailsTab = ({ metadata, isDarkMode }) => {
                       {attributes.last_http_response_headers && (
                         <div>
                            <h4 className="text-xs font-bold uppercase opacity-50 mb-3 flex items-center gap-1"><Server className="w-3 h-3"/> Response Headers</h4>
-                           <div className={`p-3 rounded-lg text-xs font-mono max-h-600 overflow-y-auto border ${isDarkMode ? "bg-zinc-900/50 border-zinc-700 text-zinc-400" : "bg-white border-gray-200 text-gray-600"}`}>
+                           <div className={`p-3 rounded-lg text-xs font-mono max-h-[600px] overflow-y-auto border ${isDarkMode ? "bg-zinc-900/50 border-zinc-700 text-zinc-400" : "bg-white border-gray-200 text-gray-600"}`}>
                               {Object.entries(attributes.last_http_response_headers).map(([key, val], i) => (
                                 <div key={i} className="mb-1 grid grid-cols-3 gap-2 border-b border-dashed border-current/10 pb-1 last:border-0 last:mb-0">
                                    <span className="font-bold col-span-1 truncate" title={key}>{key}</span>

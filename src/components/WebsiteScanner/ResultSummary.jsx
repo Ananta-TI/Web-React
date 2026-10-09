@@ -1,7 +1,7 @@
 import React from "react";
 import { Skull, ShieldCheck, Info, Clock } from "lucide-react";
 
-const ResultSummary = ({ result, metadata, stats, input, mode, selectedFile, isDarkMode }) => {
+const ResultSummary = ({ result, metadata, stats, input, mode, displayType, selectedFile, isDarkMode }) => {
   const scanDate = result?.data?.attributes?.date || result?.data?.attributes?.last_analysis_date;
   
   return (
@@ -10,7 +10,7 @@ const ResultSummary = ({ result, metadata, stats, input, mode, selectedFile, isD
       <div className="relative z-10 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isDarkMode?"bg-zinc-700 text-zinc-300":"bg-gray-100 text-gray-600"}`}>{result.data.type || mode} Analysis</span>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isDarkMode?"bg-zinc-700 text-zinc-300":"bg-gray-100 text-gray-600"}`}>{displayType || result.data.type || mode} Analysis</span>
             <span className="text-xs opacity-50 flex items-center gap-1"><Clock className="w-3 h-3"/> {scanDate ? new Date(scanDate*1000).toLocaleString() : "Just now"}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold truncate mb-1" title={metadata?.attributes?.meaningful_name || input}>{mode==='file' && selectedFile ? selectedFile.name : (metadata?.attributes?.meaningful_name || input || "Scan Result")}</h2>
