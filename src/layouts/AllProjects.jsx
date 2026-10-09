@@ -258,6 +258,21 @@ const allProjects = [
   status: "Completed",
   featured: true,
 },
+{
+  title: "OnCard",
+  description:
+    "A digital business card web application that lets users create, share, and manage their contact identity online with a clean and responsive interface.",
+  demo: "https://oncard.qrion.id/",
+  repo: null,
+  tags: ["React", "Vite", "Tailwind", "Framer Motion"],
+  category: "Web Development",
+  location: "Indonesia",
+  image: "/img/oncard.png",
+  cover: "/img/cover/17.png",
+  year: "2026",
+  status: "Completed",
+  featured: true,
+},
 ];
 
 function getCategoryIcon(category) {
