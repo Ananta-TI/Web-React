@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { AnimatePresence } from "framer-motion";
 import { upload } from "@vercel/blob/client";
 import { ThemeContext } from "../context/ThemeContext";
-import supabase from "../supabaseClient";
+import supabase from "../lib/supabaseClient";
 
 // Import components
 import Toast from "./Shared/Toast";

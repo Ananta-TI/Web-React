@@ -27,7 +27,7 @@ const AnimatedBeamDemo = lazy(() =>
   }))
 );
 
-const ScannerChart = lazy(() => import("./scannerChart.jsx"));
+const ScannerChart = lazy(() => import("../layouts/scannerChart.jsx"));
 
 /* =========================
    HOOK: MOUNT SAAT DEKAT VIEWPORT

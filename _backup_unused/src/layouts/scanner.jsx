@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 import { ThemeContext } from "../context/ThemeContext";
-import supabase from "../supabaseClient";
+import supabase from "../lib/supabaseClient";
 
 const MAX_FILE_SIZE = 32 * 1024 * 1024;
 const MAX_HISTORY_ITEMS = 20;

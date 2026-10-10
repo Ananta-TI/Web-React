@@ -16,12 +16,12 @@ import "./assets/tailwind.css";
 const Preloader = lazy(() => import("./components/Preloader"));
 const TargetCursor = lazy(() => import("./components/Shared/TargetCursor"));
 const ScrollProgress = lazy(() => import("./components/Home/ScrollProgress"));
-const AllProjects = lazy(() => import("./layouts/AllProjects"));
-const Certificates = lazy(() => import("./layouts/Certificates"));
+const AllProjects = lazy(() => import("./pages/AllProjects"));
+const Certificates = lazy(() => import("./pages/Certificates"));
 const Scanner = lazy(() => import("./components/WebsiteSecurityScanner"));
-const Timeline = lazy(() => import("./layouts/timeline"));
-const Art = lazy(() => import("./layouts/Art"));
-const Activity = lazy(() => import("./layouts/activity"));
+const Timeline = lazy(() => import("./pages/timeline"));
+const Art = lazy(() => import("./pages/Art"));
+const Activity = lazy(() => import("./pages/activity"));
 
 const Analytics = lazy(() =>
   import("@vercel/analytics/react").then((mod) => ({

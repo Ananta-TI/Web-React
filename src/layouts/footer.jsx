@@ -18,7 +18,7 @@ import RevealButton from "../components/Shared/Button";
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
 import ProfileCard from "./ProfileCard";
-import supabase from "../supabaseClient";
+import supabase from "../lib/supabaseClient";
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");

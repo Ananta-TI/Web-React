@@ -21,7 +21,7 @@ import "../index.css";
 const GithubIsometric = lazy(() => import("../components/GithubIsometric"));
 const ScannerChart = lazy(() => import("../layouts/scannerChart.jsx"));
 
-const DiscordProfileCard = lazy(() => import("./DiscordProfileCard.jsx"));
+const DiscordProfileCard = lazy(() => import("../layouts/DiscordProfileCard.jsx"));
 const WakatimeProfileCard = lazy(() => import("../components/WakaTimeCard.jsx"));
 const Tetris = lazy(() => import("../pages/TetrioProfileCard.jsx"));
 const SteamProfileCard = lazy(() => import("../pages/SteamProfileCard.jsx"));

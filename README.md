@@ -411,7 +411,6 @@ Web-React/
 │
 ├── ⚛️ src/
 │   │
-│   ├── 📦 Data/
 │   ├── 🎨 assets/
 │   │
 │   ├── 🧩 components/
@@ -425,25 +424,18 @@ Web-React/
 │   ├── 🌗 context/
 │   ├── 🪝 hooks/
 │   │
-│   ├── 🖼️ layouts/
-│   │   ├── AllProjects.jsx
-│   │   ├── Art.jsx
-│   │   ├── Certificates.jsx
-│   │   ├── Header.jsx
-│   │   ├── about.jsx
-│   │   ├── activity.jsx
-│   │   ├── footer.jsx
-│   │   ├── project.jsx
-│   │   └── timeline.jsx
+│   ├── 🖼️ layouts/ (shared: Header, footer, ProfileCard, ...)
 │   │
-│   ├── 📚 lib/
-│   ├── 📄 pages/
+│   ├── 📄 pages/ (route screens: HomePage, about, project,
+│   │              AllProjects, Certificates, timeline, Art, activity)
+│   │
+│   ├── 📚 lib/ (utils, supabaseClient)
+│   ├── 📦 data/ (chatbot_model)
 │   ├── 🔌 services/
 │   │
 │   ├── App.jsx
 │   ├── main.jsx
-│   ├── index.css
-│   └── supabaseClient.js
+│   └── index.css
 │
 ├── 🧰 utils/
 │

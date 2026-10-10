@@ -2,8 +2,8 @@ import { lazy, Suspense } from "react";
 import Hero from "../components/Home/hero";
 
 const Hero2 = lazy(() => import("../components/Shared/TextPressure"));
-const About = lazy(() => import("../layouts/about"));
-const Project = lazy(() => import("../layouts/project"));
+const About = lazy(() => import("./about"));
+const Project = lazy(() => import("./project"));
 
 function SectionFallback({ height = "50vh" }) {
   return (
