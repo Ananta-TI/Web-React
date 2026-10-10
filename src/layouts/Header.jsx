@@ -20,7 +20,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Divide as Hamburger } from "hamburger-react";
 import GooeyNav from "../components/GooeyNav";
 import { usePageTransition } from "../components/Shared/PageTransition";
 
@@ -663,7 +662,7 @@ export default function Header() {
           }}
           whileHover={showFullNavbar && !isMobile ? {} : { scale: 1.08 }}
           whileTap={showFullNavbar && !isMobile ? {} : { scale: 0.85 }}
-          className={`pointer-events-auto p-2 cursor-none cursor-target rounded-full shadow-xl ${
+          className={`pointer-events-auto p-5 cursor-none cursor-target rounded-full shadow-xl ${
             showFullNavbar && !isMobile
               ? "absolute right-12 pointer-events-none"
               : "relative"
@@ -673,14 +672,44 @@ export default function Header() {
               : "bg-zinc-900 hover:bg-zinc-800"
           }`}
         >
-          <Hamburger
-            toggled={isOpen}
-            toggle={setIsOpen}
-            color={isDarkMode ? "#18181b" : "white"}
-            size={20}
-            duration={0.4}
-            easing="ease-out"
-          />
+          <button
+            type="button"
+            aria-pressed={isOpen}
+            aria-label="Menu"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className={`group flex h-7 w-7 items-center justify-center ${
+              isDarkMode ? "text-zinc-900" : "text-white"
+            }`}
+          >
+            <span className="sr-only">Menu</span>
+            <svg
+              className="pointer-events-none h-7 w-7 fill-current"
+              viewBox="0 0 16 16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                className="origin-center -translate-y-[5px] translate-x-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-[[aria-pressed=true]]:translate-x-0 group-[[aria-pressed=true]]:translate-y-0 group-[[aria-pressed=true]]:rotate-[315deg]"
+                y="7"
+                width="9"
+                height="2"
+                rx="1"
+              ></rect>
+              <rect
+                className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-[[aria-pressed=true]]:rotate-45"
+                y="7"
+                width="16"
+                height="2"
+                rx="1"
+              ></rect>
+              <rect
+                className="origin-center translate-y-[5px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-[[aria-pressed=true]]:translate-y-0 group-[[aria-pressed=true]]:-rotate-[225deg]"
+                y="7"
+                width="9"
+                height="2"
+                rx="1"
+              ></rect>
+            </svg>
+          </button>
         </motion.div>
       </div>
 
