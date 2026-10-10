@@ -276,7 +276,7 @@ const allProjects = [
 {
   title: "Qrion Official Website",
   description:
-    "The main company profile website showcasing digital products and services with a modern and responsive interface.",
+    "The official company profile website for Qrion, an Indonesian EdTech platform specializing in digital transformation for schools and Islamic boarding schools (pesantren). It showcases an integrated digital ecosystem—including billing, attendance, cashless e-wallet systems, and POS solutions—through a modern and responsive interface designed to streamline educational administration.",
   demo: "https://qrion.id/",
   repo: null,
   tags: ["Next.js", "Vite", "Tailwind", "Framer Motion","Gsap"],

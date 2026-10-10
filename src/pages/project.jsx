@@ -139,34 +139,38 @@ const Projects = () => {
       id: 2,
 
       title:
-        "Indonesian Culinary",
+        "Question Legal",
 
       description:
-        "A React-based culinary platform showcasing local Indonesian food products with a modern and responsive UI. It allows users to explore traditional snacks, healthy meals, and contemporary cuisines while supporting local culinary SMEs.",
+        "An AI-powered legal assistant chatbot specializing in Indonesian child protection laws. Built using a fine-tuned SBERT semantic search architecture, it delivers accurate, real-time constitutional insights and legal guidance through an elegant, responsive editorial-style interface.",
 
       demo:
-        "https://react-nta.vercel.app/guest",
+        "https://question-legal.vercel.app/",
 
       repo:
-        "https://github.com/Ananta-TI/React-Nta.git",
+        "https://github.com/Ananta-TI/chatbot-legal.git",
 
       tags: [
         "React",
+        "Vite",
         "Tailwind",
-        "UI/UX",
+        "Framer Motion",
       ],
 
       category:
         "Web Development",
 
+      location:
+        "Indonesia",
+
       image:
-        "/img/Sedap2.png",
+        "/img/Chatbot.png",
 
-      date:
-        "2023-05-20",
+      cover:
+        "/img/cover/15.png",
 
-      difficulty:
-        "Intermediate",
+      year:
+        "2026",
 
       featured:
         true,
@@ -179,40 +183,44 @@ const Projects = () => {
       id: 3,
 
       title:
-        "Asetra Inventory",
+        "Qrion Official Website",
 
       description:
-        "An inventory management system built with React and a modern interface, designed to improve business efficiency and data organization.",
+        "The official company profile website for Qrion, an Indonesian EdTech platform specializing in digital transformation for schools and Islamic boarding schools (pesantren). It showcases an integrated digital ecosystem—including billing, attendance, cashless e-wallet systems, and POS solutions—through a modern and responsive interface designed to streamline educational administration.",
 
       demo:
-        "https://asetra-inventory.vercel.app/",
+        "https://qrion.id/",
 
       repo:
-        "https://github.com/Ananta-TI/react-inventory.git",
+        null,
 
       tags: [
         "React",
-        "Inventory",
-        "Management",
+        "Vite",
+        "Tailwind",
+        "Framer Motion",
       ],
 
       category:
-        "Web Application",
+        "Web Development",
+
+      location:
+        "Indonesia",
 
       image:
-        "/img/react-inventory2.png",
+        "/img/qrion.png",
 
-      date:
-        "2023-08-10",
+      cover:
+        "/img/cover/18.png",
 
-      difficulty:
-        "Intermediate",
+      year:
+        "2026",
 
       featured:
         true,
 
       status:
-        "In Progress",
+        "Completed",
     },
   ];
 
@@ -1503,7 +1511,7 @@ const Projects = () => {
                           }
                         </span>
 
-                        <h3 className="mb-2 text-3xl font-light leading-none tracking-tight text-white sm:text-5xl">
+                        <h3 className="mb-2 font-lyrae text-4xl font-bold leading-none tracking-tight text-white sm:text-6xl">
                           {
                             selectedProject.title
                           }
@@ -1514,7 +1522,7 @@ const Projects = () => {
                     {/* Content */}
                     <div className="p-5 sm:p-8">
                       {/* Meta */}
-                      <div className="mb-6 grid grid-cols-1 gap-3 text-xs sm:flex sm:flex-wrap sm:items-center sm:gap-4 sm:text-sm">
+                      <div className="mb-6 grid grid-cols-1 gap-3 font-mono text-xs sm:flex sm:flex-wrap sm:items-center sm:gap-4 sm:text-sm">
                         <span
                           className={`flex items-center gap-2 rounded-2xl px-3 py-2 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0 ${
                             isDarkMode
@@ -1546,12 +1554,12 @@ const Projects = () => {
                       </div>
 
                       {/* Overview */}
-                      <h4 className="mb-3 text-xl font-medium">
+                      <h4 className="mb-3 text-xl font-bold">
                         Overview
                       </h4>
 
                       <p
-                        className={`mb-8 text-sm font-light leading-relaxed sm:text-base ${
+                        className={`mb-8 font-mono text-sm leading-7 sm:text-base ${
                           isDarkMode
                             ? "text-gray-300"
                             : "text-gray-600"
@@ -1572,7 +1580,7 @@ const Projects = () => {
                               key={
                                 tag
                               }
-                              className={`rounded-full border px-3 py-1.5 text-xs font-light sm:px-4 sm:text-sm ${
+                              className={`rounded-full border px-3 py-1.5 font-mono text-xs sm:px-4 sm:text-sm ${
                                 isDarkMode
                                   ? "border-white/10 bg-white/5 text-gray-300"
                                   : "border-black/10 bg-black/5 text-gray-700"
