@@ -35,27 +35,50 @@ function resolveToken() {
   return "";
 }
 
-function describeUpstreamError(reason) {
+// OAuth token pribadi selalu diawali "waka_tok_".
+// API key plugin diawali "waka_" tanpa "tok" -> hanya boleh untuk menulis heartbeat.
+function tokenKind(token) {
+  if (token.startsWith("waka_tok_")) return "oauth_token";
+  if (token.startsWith("waka_")) return "plugin_api_key";
+  return "unknown";
+}
+
+function describeUpstreamError(reason, token) {
   const status = reason?.response?.status;
   const raw = reason?.response?.data;
+  const kind = tokenKind(token);
 
   if (status === 401 || status === 403) {
-    const message =
+    const upstream =
       typeof raw === "string"
         ? raw
         : raw?.error || raw?.errors?.[0] || "Unauthorized";
 
+    if (kind === "plugin_api_key") {
+      return {
+        status: 401,
+        token_kind: kind,
+        error:
+          "Token yang dipakai masih API key plugin (waka_...), dan WakaTime " +
+          "hanya mengizinkannya untuk menulis heartbeat. Ganti dengan OAuth " +
+          "token (waka_tok_...) dari https://wakatime.com/oauth",
+        upstream,
+      };
+    }
+
     return {
       status: 401,
+      token_kind: kind,
       error:
-        "WakaTime menolak kredensial (API key bersifat write-only). " +
-        "Isi WAKATIME_OAUTH_TOKEN dengan OAuth token dari https://wakatime.com/oauth",
-      upstream: message,
+        "OAuth token ditolak atau sudah kedaluwarsa. Buat token baru di " +
+        "https://wakatime.com/oauth lalu simpan sebagai WAKATIME_OAUTH_TOKEN",
+      upstream,
     };
   }
 
   return {
     status: 502,
+    token_kind: kind,
     error:
       reason?.response?.data?.error ||
       reason?.message ||
@@ -101,11 +124,17 @@ export default async function handler(req, res) {
   if (!allTimeData && !last7Data) {
     const reason =
       allTime.status === "rejected" ? allTime.reason : last7.reason;
-    const { status, error, upstream } = describeUpstreamError(reason);
+    const { status, error, upstream, token_kind } = describeUpstreamError(
+      reason,
+      token
+    );
 
-    console.error("WakaTime API Error:", upstream || error);
+    console.error(
+      `WakaTime API Error [${token_kind || "unknown"} token]:`,
+      upstream || error
+    );
 
-    return res.status(status).json({ error, upstream });
+    return res.status(status).json({ error, token_kind, upstream });
   }
 
   // "text" = total sejak akun dibuat (human readable).
@@ -115,12 +144,25 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     data: {
+      // ── ringkasan ──────────────────────────────────────────────
       total_all_time: totalAllTime,
+      total_all_time_seconds: allTimeData?.total_seconds ?? 0,
       total_7_days: last7Data?.human_readable_total || "0 hrs",
+      total_7_days_seconds: last7Data?.total_seconds ?? 0,
       daily_average: last7Data?.human_readable_daily_average || "0 hrs",
+      daily_average_seconds: last7Data?.daily_average ?? 0,
       best_day: last7Data?.best_day || null,
+      range: last7Data?.range || allTimeData?.range || null,
+
+      // ── breakdown lengkap ──────────────────────────────────────
       languages: last7Data?.languages || [],
       editors: last7Data?.editors || [],
+      categories: last7Data?.categories || [],
+      operating_systems: last7Data?.operating_systems || [],
+      machines: last7Data?.machines || [],
+      projects: last7Data?.projects || [],
+      dependencies: last7Data?.dependencies || [],
+
       // true kalau sebagian data gagal diambil (mis. stats butuh scope read_stats)
       partial: !allTimeData || !last7Data,
     },

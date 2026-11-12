@@ -390,14 +390,6 @@ const Activity = () => {
 
           <LazyCard
             isDarkMode={isDarkMode}
-            skeletonHeight="min-h-[380px]"
-            rootMargin="900px"
-          >
-            <WakatimeProfileCard />
-          </LazyCard>
-
-          <LazyCard
-            isDarkMode={isDarkMode}
             skeletonHeight="min-h-[680px]"
             rootMargin="1000px"
           >
@@ -409,6 +401,17 @@ const Activity = () => {
                 "76561198735338945",
               ]}
             />
+          </LazyCard>
+        </div>
+
+        {/* WakaTime: data-nya banyak, jadi ditaruh full-width di bawah grid */}
+        <div className="w-full max-w-7xl mx-auto mt-4">
+          <LazyCard
+            isDarkMode={isDarkMode}
+            skeletonHeight="min-h-[420px]"
+            rootMargin="900px"
+          >
+            <WakatimeProfileCard />
           </LazyCard>
         </div>
       </div>
