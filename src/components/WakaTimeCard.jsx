@@ -70,7 +70,9 @@ const WakatimeProfileCard = () => {
     return (
       <div className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl p-6 border ${isDarkMode ? "bg-zinc-800/60 border-red-500/20 text-white" : "bg-white border-red-200 text-black"} backdrop-blur-xl`}>
         <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
-        <p className="text-sm font-medium opacity-70 mb-4">{error}</p>
+        <p className="mb-4 max-w-full break-words text-center text-xs font-medium opacity-70">
+          {error}
+        </p>
         <button onClick={fetchWakaStats} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold transition-all">
           <RefreshCw size={14} /> Coba Lagi
         </button>

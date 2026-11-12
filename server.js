@@ -49,6 +49,21 @@ app.get("/api", (req, res) => {
 });
 
 // ==========================================
+// ROUTE: GET /api/wakatime
+// Pakai handler Vercel yang sama (api/wakatime.js) supaya
+// perilaku lokal & produksi identik.
+// ==========================================
+app.get("/api/wakatime", async (req, res) => {
+  try {
+    const { default: handler } = await import("./api/wakatime.js");
+    return await handler(req, res);
+  } catch (err) {
+    console.error("[WakaTime] local handler error:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
 // ROUTE: POST /api/vt/scan  (URL scan)
 // ==========================================
 app.post("/api/vt/scan", async (req, res) => {
