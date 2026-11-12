@@ -348,7 +348,16 @@ const Activity = () => {
             </div>
           )}
         </div>
-
+{/* WakaTime: data-nya banyak, jadi ditaruh full-width di bawah grid */}
+        <div className="w-full max-w-7xl mx-auto mt-4">
+          <LazyCard
+            isDarkMode={isDarkMode}
+            skeletonHeight="min-h-[420px]"
+            rootMargin="900px"
+          >
+            <WakatimeProfileCard />
+          </LazyCard>
+        </div>
         {/* <div ref={chartRef} className="w-full max-w-7xl mx-auto mb-4">
           {mountChart ? (
             <CardErrorBoundary isDarkMode={isDarkMode}>
@@ -404,16 +413,7 @@ const Activity = () => {
           </LazyCard>
         </div>
 
-        {/* WakaTime: data-nya banyak, jadi ditaruh full-width di bawah grid */}
-        <div className="w-full max-w-7xl mx-auto mt-4">
-          <LazyCard
-            isDarkMode={isDarkMode}
-            skeletonHeight="min-h-[420px]"
-            rootMargin="900px"
-          >
-            <WakatimeProfileCard />
-          </LazyCard>
-        </div>
+        
       </div>
     </motion.div>
   );
