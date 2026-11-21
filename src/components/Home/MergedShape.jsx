@@ -4,12 +4,23 @@ import { ThemeContext } from "../../context/ThemeContext";
 
 const MergedShape = ({
   startAnimation = false,
+  fill: fillOverride,
   style: containerStyle,
   ...props
 }) => {
   const theme = useContext(ThemeContext);
   const isDarkMode = theme?.isDarkMode ?? true;
-  const fill = isDarkMode ? "#ffffff" : "#1a1a1a";
+
+  // Kalau `fill` dikirim eksplisit, pakai itu. Kalau tidak, ikut tema
+  // seperti sebelumnya (putih di dark mode, gelap di light mode).
+  const hasCustomFill =
+    typeof fillOverride === "string" && fillOverride.length > 0;
+
+  const fill = hasCustomFill
+    ? fillOverride
+    : isDarkMode
+    ? "#ffffff"
+    : "#1a1a1a";
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -167,7 +178,7 @@ const MergedShape = ({
             fontStyle: "italic",
             fontFamily: "'spirit', sans-serif", 
             letterSpacing: "2px",
-            background: isDarkMode 
+            background: isDarkMode
               ? "linear-gradient(180deg, #E9D5FF 0%, #ffffff 50%, #ffffff 100%)" 
               : "none",
             color: isDarkMode ? "transparent" : "#000000", 

@@ -1,83 +1,72 @@
-import React, {
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useContext, useEffect, useRef } from "react";
 
-import {
-  motion,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 import { ThemeContext } from "../../context/ThemeContext";
 
 import MergedShapes from "./MergedShape";
 import LocationBadge from "../LocationBadge";
-import KineticGrid from "./KineticGrid";
+import GridTrailBackground from "./GridTrailBackground";
 
-export default function Hero({
-  isAppLoading,
-}) {
-  const theme =
-    useContext(ThemeContext);
+export default function Hero({ isAppLoading }) {
+  const theme = useContext(ThemeContext);
 
-  const isDarkMode =
-    theme?.isDarkMode ?? true;
+  const isDarkMode = theme?.isDarkMode ?? true;
 
-  const parallaxRef =
-    useRef(null);
+  const parallaxRef = useRef(null);
+  const backgroundRef = useRef(null);
 
-  const shouldReduceMotion =
-    useReducedMotion();
+  const shouldReduceMotion = useReducedMotion();
 
   // ───────────────────────────────────────────────────────────────────────────
   // GSAP PARALLAX
   // ───────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (
-      isAppLoading ||
-      shouldReduceMotion ||
-      !parallaxRef.current
-    ) {
+    if (isAppLoading || shouldReduceMotion || !parallaxRef.current) {
       return;
     }
 
     let ctx;
 
     async function runParallax() {
-      const { gsap } =
-        await import("gsap");
+      const { gsap } = await import("gsap");
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
 
-      const { ScrollTrigger } =
-        await import(
-          "gsap/ScrollTrigger"
-        );
-
-      gsap.registerPlugin(
-        ScrollTrigger
-      );
+      gsap.registerPlugin(ScrollTrigger);
 
       ctx = gsap.context(() => {
         // Location Badge Parallax
-        gsap.to(
-          parallaxRef.current,
-          {
-            y: -380,
+        gsap.to(parallaxRef.current, {
+          y: -380,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#home",
+            start: "top top",
+            end: "bottom top",
+            scrub: 0.8,
+          },
+        });
 
-            ease: "none",
-
-            scrollTrigger: {
-              trigger: "#home",
-
-              start: "top top",
-
-              end: "bottom top",
-
-              scrub: 0.8,
-            },
-          }
-        );
+        // Background Parallax — dot grid bergerak lebih lambat dari konten.
+        // Wrapper-nya sengaja lebih tinggi 6% di atas & bawah supaya
+        // tidak ada celah saat bergeser.
+        if (backgroundRef.current) {
+          gsap.fromTo(
+            backgroundRef.current,
+            { yPercent: -4 },
+            {
+              yPercent: 4,
+              ease: "none",
+              scrollTrigger: {
+                trigger: "#home",
+                start: "top top",
+                end: "bottom top",
+                scrub: 0.6,
+              },
+            }
+          );
+        }
       });
     }
 
@@ -86,10 +75,7 @@ export default function Hero({
     return () => {
       ctx?.revert();
     };
-  }, [
-    isAppLoading,
-    shouldReduceMotion,
-  ]);
+  }, [isAppLoading, shouldReduceMotion]);
 
   // ───────────────────────────────────────────────────────────────────────────
   // RENDER
@@ -99,48 +85,25 @@ export default function Hero({
     <section
       id="home"
       className={`relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center transition-colors duration-500 touch-pan-y ${
-        isDarkMode
-          ? "bg-zinc-900 text-white"
-          : "bg-[#faf9f9] text-black"
+        isDarkMode ? "bg-zinc-900 text-white" : "bg-[#faf9f9] text-black"
       }`}
     >
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* KINETIC GRID BACKGROUND */}
+      {/* DOT GRID + MOUSE TRAIL (auxia.io) */}
       {/* ─────────────────────────────────────────────────────────────────── */}
 
       <motion.div
-        initial={{
-          opacity: 0,
-        }}
-        animate={
-          !isAppLoading
-            ? {
-                opacity: 1,
-              }
-            : {
-                opacity: 0,
-              }
-        }
+        ref={backgroundRef}
+        initial={{ opacity: 0 }}
+        animate={!isAppLoading ? { opacity: 1 } : { opacity: 0 }}
         transition={{
-          duration:
-            shouldReduceMotion
-              ? 0.2
-              : 1.2,
-
-          ease: [
-            0.16,
-            1,
-            0.3,
-            1,
-          ],
+          duration: shouldReduceMotion ? 0.2 : 1.2,
+          ease: [0.16, 1, 0.3, 1],
         }}
-        className="pointer-events-none absolute inset-0 z-0"
+        className="pointer-events-none absolute left-0 right-0 z-0"
+        style={{ top: "-6%", bottom: "-6%" }}
       >
-        <KineticGrid
-          isDarkMode={
-            isDarkMode
-          }
-        />
+        <GridTrailBackground isDarkMode={isDarkMode} />
       </motion.div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -160,46 +123,18 @@ export default function Hero({
       {/* ─────────────────────────────────────────────────────────────────── */}
 
       <motion.div
-        initial={{
-          opacity: 0,
-          y: 18,
-        }}
-        animate={
-          !isAppLoading
-            ? {
-                opacity: 1,
-                y: 0,
-              }
-            : {
-                opacity: 0,
-                y: 18,
-              }
-        }
+        initial={{ opacity: 0, y: 18 }}
+        animate={!isAppLoading ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
         transition={{
-          duration:
-            shouldReduceMotion
-              ? 0.2
-              : 0.8,
-
-          ease: [
-            0.16,
-            1,
-            0.3,
-            1,
-          ],
+          duration: shouldReduceMotion ? 0.2 : 0.8,
+          ease: [0.16, 1, 0.3, 1],
         }}
         className="relative z-10 flex flex-col items-center"
       >
         <div className="origin-center scale-50 transition-transform duration-500 sm:scale-75 md:scale-90 lg:scale-100">
           <MergedShapes
-            fill={
-              isDarkMode
-                ? "#ffffff"
-                : "#1a1a1a"
-            }
-            startAnimation={
-              !isAppLoading
-            }
+            fill={isDarkMode ? "#ffffff" : "#1a1a1a"}
+            startAnimation={!isAppLoading}
           />
         </div>
       </motion.div>
@@ -210,9 +145,7 @@ export default function Hero({
 
       <div
         className={`pointer-events-none absolute bottom-0 left-0 z-20 h-40 w-full bg-gradient-to-b from-transparent transition-colors duration-500 ${
-          isDarkMode
-            ? "to-zinc-900"
-            : "to-[#faf9f9]"
+          isDarkMode ? "to-zinc-900" : "to-[#faf9f9]"
         }`}
       />
 
@@ -221,47 +154,18 @@ export default function Hero({
       {/* ─────────────────────────────────────────────────────────────────── */}
 
       <motion.div
-        initial={{
-          opacity: 0,
-          x: -80,
-        }}
-        animate={
-          !isAppLoading
-            ? {
-                opacity: 1,
-                x: 0,
-              }
-            : {
-                opacity: 0,
-                x: -80,
-              }
-        }
+        initial={{ opacity: 0, x: -80 }}
+        animate={!isAppLoading ? { opacity: 1, x: 0 } : { opacity: 0, x: -80 }}
         transition={{
-          delay:
-            shouldReduceMotion
-              ? 0
-              : 0.45,
-
-          duration:
-            shouldReduceMotion
-              ? 0.2
-              : 0.9,
-
-          type:
-            shouldReduceMotion
-              ? "tween"
-              : "spring",
-
+          delay: shouldReduceMotion ? 0 : 0.45,
+          duration: shouldReduceMotion ? 0.2 : 0.9,
+          type: shouldReduceMotion ? "tween" : "spring",
           damping: 16,
         }}
         className="absolute bottom-[15%] left-0 z-50"
       >
         <div ref={parallaxRef}>
-          <LocationBadge
-            isDarkMode={
-              isDarkMode
-            }
-          />
+          <LocationBadge isDarkMode={isDarkMode} />
         </div>
       </motion.div>
     </section>
