@@ -448,7 +448,7 @@ export default function Footer() {
   variant="secondary"
   size="md"
   className={cn(
-    "mt-4 w-full sm:w-auto", // Biar responsif
+    "mt-4 w-full sm:w-auto cursor-target ", // Biar responsif
     pending ? "opacity-50 cursor-not-allowed" : ""
   )}
 >

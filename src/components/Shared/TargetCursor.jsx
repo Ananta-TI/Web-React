@@ -17,14 +17,14 @@ import {
 const TargetCursor = ({
   targetSelector = ".cursor-target",
   circleSize = 30,
-  dotSize = 11,
+  dotSize = 5,
   borderWidth = 2,
-  mixBlendMode = "normal",
-  circleStiffness = 400,
+  mixBlendMode = "exclusion",
+  circleStiffness = 500,
   circleDamping = 30,
   dotStiffness = 10000,
   dotDamping = 45,
-  targetPadding = 7,
+  targetPadding = 8,
   elasticStretch = false,
   showOnTouch = false,
   hideDefaultCursor = true,
@@ -84,11 +84,21 @@ const TargetCursor = ({
   const updateHoverFromTarget = useCallback((target) => {
     const rect = target.getBoundingClientRect();
     const computed = window.getComputedStyle(target);
+    const rawRadius = computed.borderRadius || "0px";
+    // Hanya petak tajam (radius 0) yang dibuat rounded.
+    // Yang sudah punya radius / lingkaran (50%) tetap apa adanya.
+    const minRadius = 12;
+    let radius = rawRadius;
+    if (!rawRadius.includes("%")) {
+      const m = rawRadius.match(/([\d.]+)/);
+      const val = m ? parseFloat(m[1]) : 0;
+      if (val === 0) radius = `${minRadius}px`;
+    }
     setHover({
       active: true,
       w: rect.width,
       h: rect.height,
-      r: computed.borderRadius || "0px",
+      r: radius,
     });
     mouseX.set(rect.left + rect.width / 2);
     mouseY.set(rect.top + rect.height / 2);

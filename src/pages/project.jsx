@@ -1160,7 +1160,7 @@ const Projects = () => {
           onClick={
             goToAllProjects
           }
-          className={`group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded-full border px-6 py-6 text-xs uppercase tracking-[0.15em] transition-colors duration-300 sm:text-sm md:w-auto md:max-w-none md:cursor-target md:rounded-md md:px-10 md:py-8 ${
+          className={`cursor-target group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded-full border px-6 py-6 text-xs uppercase tracking-[0.15em] transition-colors duration-300 sm:text-sm md:w-auto md:max-w-none md:cursor-target md:rounded-md md:px-10 md:py-8 ${
             isDarkMode
               ? "border-white/20 hover:bg-transparent"
               : "border-black/20 hover:bg-transparent"
